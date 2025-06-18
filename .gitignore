@@ -360,3 +360,50 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# VS Code settings
+.vscode/
+
+# Rider settings
+.idea/
+*.sln.iml
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Test results
+TestResults/
+
+# NuGet packages
+*.nupkg
+packages/
+.nuget/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Others
+*.swp
+*.tmp
+
+# Exclude local secrets
+secrets.json
+
+# Exclude publish output
+publish/
+
+# Exclude coverage reports
+coverage/
+coverage*.json
+coverage*.xml
+coverage*.info
+
+# Exclude generated files
+Generated_Code/
