@@ -1,0 +1,153 @@
+@page
+@model ManageUsersModel
+@{
+    ViewData["Title"] = "Manage Users";
+}
+
+<div class="container py-4">
+    <h2>User Management</h2>
+    <div id="user-table-section">
+        <!-- User table will be loaded here via AJAX -->
+    </div>
+    <button class="btn btn-success mt-3" onclick="showCreateUserModal()">Create New User</button>
+</div>
+
+<!-- Modal for Create/Edit User -->
+<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="userModalLabel">User</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="userForm">
+          <input type="hidden" id="userId" />
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" class="form-control" id="firstName" required />
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" class="form-control" id="lastName" required />
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" id="email" required />
+          </div>
+          <div class="form-group">
+            <label for="phoneNumber">Phone Number</label>
+            <input type="text" class="form-control" id="phoneNumber" required />
+          </div>
+          <div class="form-group">
+            <label for="dateOfBirth">Date of Birth</label>
+            <input type="date" class="form-control" id="dateOfBirth" required />
+          </div>
+          <div class="form-group">
+            <label for="role">Role</label>
+            <select class="form-control" id="role">
+              <option value="User">User</option>
+              <option value="Manager">Manager</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="saveUserBtn">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+<script>
+// Store mock users in a global variable for frontend-only editing
+let mockUsersCache = [];
+
+function loadUsers() {
+    $.get('/api/users/mock', function(users) {
+        mockUsersCache = users;
+        let html = '<table class="table table-bordered"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Actions</th></tr></thead><tbody>';
+        users.forEach(u => {
+            const fullName = u.fullName || (u.firstName + ' ' + u.lastName);
+            html += `<tr><td>${fullName}</td><td>${u.email}</td><td>${u.phoneNumber}</td><td>${u.role}</td><td>` +
+                `<button class='btn btn-sm btn-info' onclick='editUser("${u.id}")'>Edit</button> ` +
+                `<button class='btn btn-sm btn-danger' onclick='deleteUser("${u.id}")'>Delete</button></td></tr>`;
+        });
+        html += '</tbody></table>';
+        $('#user-table-section').html(html);
+    });
+}
+
+function showCreateUserModal() {
+    $('#userId').val('');
+    $('#userForm')[0].reset();
+    $('#userModal').modal('show');
+}
+
+$('#saveUserBtn').click(function() {
+    const id = $('#userId').val();
+    const roleMap = { 'Admin': 1, 'User': 2, 'Manager': 3 };
+    const user = {
+        firstName: $('#firstName').val(),
+        lastName: $('#lastName').val(),
+        email: $('#email').val(),
+        phoneNumber: $('#phoneNumber').val(),
+        dateOfBirth: $('#dateOfBirth').val(),
+        role: roleMap[$('#role').val()] // send enum int value
+    };
+    if (id) {
+        $.ajax({
+            url: '/api/users/mock/' + id,
+            type: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify(user),
+            success: function() { $('#userModal').modal('hide'); loadUsers(); }
+        });
+    } else {
+        $.ajax({
+            url: '/api/users/mock',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(user),
+            success: function() { $('#userModal').modal('hide'); loadUsers(); }
+        });
+    }
+});
+
+function editUser(id) {
+    // Use mockUsersCache for mock editing
+    const user = mockUsersCache.find(u => u.id === id);
+    if (user) {
+        $('#userId').val(user.id);
+        $('#firstName').val(user.firstName);
+        $('#lastName').val(user.lastName);
+        $('#email').val(user.email);
+        $('#phoneNumber').val(user.phoneNumber);
+        $('#dateOfBirth').val(user.dateOfBirth ? user.dateOfBirth.split('T')[0] : '');
+        $('#role').val(user.role);
+        $('#userModal').modal('show');
+    } else {
+        alert('User not found.');
+    }
+}
+
+function deleteUser(id) {
+    if (confirm('Are you sure you want to delete this user?')) {
+        $.ajax({
+            url: '/api/users/' + id,
+            type: 'DELETE',
+            success: function() { loadUsers(); }
+        });
+    }
+}
+
+$(document).ready(function() {
+    loadUsers();
+});
+</script>
+}

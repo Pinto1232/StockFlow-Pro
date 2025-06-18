@@ -4,50 +4,13 @@
     ViewData["Title"] = "Login";
 }
 
-@functions {
-    public class LoginModel : Microsoft.AspNetCore.Mvc.RazorPages.PageModel
-    {
-        [BindProperty]
-        public string Username { get; set; } = string.Empty;
-        [BindProperty]
-        public string Password { get; set; } = string.Empty;
-        public string? ErrorMessage { get; set; }
-        public bool IsLoggedIn { get; set; }
-
-        public void OnGet()
-        {
-            // Check if user is already logged in
-            IsLoggedIn = Request.Cookies["IsAdmin"] == "true";
-        }
-
-        public IActionResult OnPost()
-        {
-            if (Username == "admin" && Password == "admin")
-            {
-                // Set a cookie to track login
-                Response.Cookies.Append("IsAdmin", "true", new Microsoft.AspNetCore.Http.CookieOptions { HttpOnly = true });
-                return RedirectToPage("/AdminPanel");
-            }
-            ErrorMessage = "Invalid username or password.";
-            return Page();
-        }
-
-        public IActionResult OnPostLogout()
-        {
-            // Remove the authentication cookie
-            Response.Cookies.Delete("IsAdmin");
-            return RedirectToPage("/Index");
-        }
-    }
-}
-
 @if (Model.IsLoggedIn)
 {
     <div class="d-flex align-items-center justify-content-center min-vh-100">
         <div class="card shadow-sm p-4" style="width: 100%; max-width: 400px; border-radius: 1rem;">
             <div class="text-center mb-4">
                 <h2 class="fw-bold mb-2">You are logged in</h2>
-                <p class="text-muted mb-0">You are currently signed in as Admin</p>
+                <p class="text-muted mb-0">You are currently signed in as @(User?.Identity?.Name ?? "")</p>
             </div>
             <div class="d-grid mb-3">
                 <a href="/AdminPanel" class="btn btn-primary btn-lg">Go to Admin Panel</a>

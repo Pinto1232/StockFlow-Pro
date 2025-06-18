@@ -36,6 +36,14 @@ builder.Services.AddValidatorsFromAssembly(typeof(StockFlowPro.Application.Valid
 // Add Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+// Add Authentication (Cookie)
+builder.Services.AddAuthentication("MyCookieAuth")
+    .AddCookie("MyCookieAuth", options =>
+    {
+        options.LoginPath = "/Login";
+        options.AccessDeniedPath = "/AccessDenied";
+    });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -55,6 +63,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();

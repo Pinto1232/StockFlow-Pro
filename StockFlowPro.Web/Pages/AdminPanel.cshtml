@@ -4,24 +4,6 @@
     ViewData["Title"] = "Admin Panel";
 }
 
-@functions {
-    public class AdminPanelModel : Microsoft.AspNetCore.Mvc.RazorPages.PageModel
-    {
-        public IActionResult OnGet()
-        {
-            // Check if user is authenticated via cookie
-            var isAdmin = Request.Cookies["IsAdmin"];
-            
-            if (string.IsNullOrEmpty(isAdmin) || isAdmin != "true")
-            {
-                return RedirectToPage("/Login");
-            }
-            
-            return Page();
-        }
-    }
-}
-
 <div class="container py-5">
     <div class="row">
         <div class="col-12">
@@ -41,7 +23,7 @@
                         <div class="card-body">
                             <h5 class="card-title">User Management</h5>
                             <p class="card-text">Manage system users and their permissions.</p>
-                            <a href="#" class="btn btn-primary">Manage Users</a>
+                            <a href="/ManageUsers" class="btn btn-primary">Manage Users</a>
                         </div>
                     </div>
                 </div>
