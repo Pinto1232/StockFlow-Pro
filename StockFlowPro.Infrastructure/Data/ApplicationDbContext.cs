@@ -9,8 +9,7 @@ namespace StockFlowPro.Infrastructure.Data
             : base(options)
         {
         }
-
-        // Example DbSet, replace with your actual entities
-        // public DbSet<YourEntity> YourEntities { get; set; }
+        // public DbSet<User> Users { get; set; }
+        // public DbSet<Product> Products { get; set; }
     }
 }
