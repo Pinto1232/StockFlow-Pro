@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockFlowPro.Application", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockFlowPro.Infrastructure", "StockFlowPro.Infrastructure\StockFlowPro.Infrastructure.csproj", "{6F08C9E1-7C7E-46CB-A948-F7286933FC0F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockFlowPro.Web", "StockFlowPro.Web\StockFlowPro.Web.csproj", "{C50403E7-119B-47A4-9069-65AD6033FB70}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{6F08C9E1-7C7E-46CB-A948-F7286933FC0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F08C9E1-7C7E-46CB-A948-F7286933FC0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F08C9E1-7C7E-46CB-A948-F7286933FC0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C50403E7-119B-47A4-9069-65AD6033FB70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C50403E7-119B-47A4-9069-65AD6033FB70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C50403E7-119B-47A4-9069-65AD6033FB70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C50403E7-119B-47A4-9069-65AD6033FB70}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
