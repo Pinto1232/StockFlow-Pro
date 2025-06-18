@@ -191,6 +191,9 @@ dotnet test StockFlowPro.Domain.Tests
 3. Follow coding standards and write tests
 4. Submit a pull request
 
+## login credentials
+username: admin password: admin
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
