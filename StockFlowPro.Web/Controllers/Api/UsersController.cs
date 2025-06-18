@@ -21,9 +21,41 @@ public class UsersController : ControllerBase
         _mapper = mapper;
     }
 
- 
+    // MOCK DATA FOR TESTING PURPOSES ONLY
+    // Remove this block and restore real logic when connecting to the database
+    private static List<UserDto> _mockUsers = new List<UserDto>
+    {
+        new UserDto { Id = Guid.NewGuid(), FirstName = "Test", LastName = "User", Email = "test@example.com", PhoneNumber = "123", Role = StockFlowPro.Domain.Enums.UserRole.Admin }
+    };
+
+    // --- MOCK/TEST ENDPOINTS BELOW ---
+    // Remove or comment out the real endpoints above when using these for testing only.
+    [HttpGet("mock")]
+    public ActionResult<IEnumerable<UserDto>> GetAllUsersMock([FromQuery] bool activeOnly = false)
+    {
+        // Return mock users for testing
+        return Ok(_mockUsers);
+    }
+
+    [HttpPost("mock")]
+    public ActionResult<UserDto> CreateUserMock([FromBody] CreateUserDto createUserDto)
+    {
+        // Simulate user creation (no DB)
+        var user = new UserDto
+        {
+            Id = Guid.NewGuid(),
+            FirstName = createUserDto.FirstName,
+            LastName = createUserDto.LastName,
+            Email = createUserDto.Email,
+            PhoneNumber = createUserDto.PhoneNumber,
+            DateOfBirth = createUserDto.DateOfBirth,
+            Role = createUserDto.Role
+        };
+        _mockUsers.Add(user);
+        return CreatedAtAction(nameof(GetAllUsersMock), new { id = user.Id }, user);
+    }
+
     [HttpGet]
-    [Authorize(Roles = "User,Manager,Admin")]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers([FromQuery] bool activeOnly = false)
     {
         var query = new GetAllUsersQuery { ActiveOnly = activeOnly };
@@ -31,6 +63,21 @@ public class UsersController : ControllerBase
         return Ok(users);
     }
 
+    /*
+    /// <summary>
+    /// Create a new user
+    /// </summary>
+    [HttpPost]
+    public async Task<ActionResult<UserDto>> CreateUser([FromBody] CreateUserDto createUserDto)
+    {
+        var command = _mapper.Map<CreateUserCommand>(createUserDto);
+        var user = await _mediator.Send(command);
+        return CreatedAtAction(
+            nameof(GetUserById),
+            new { id = user.Id },
+            user);
+    }
+    */
 
     [HttpGet("{id:guid}")]
     [Authorize(Roles = "User,Manager,Admin")]
@@ -85,7 +132,6 @@ public class UsersController : ControllerBase
             new { id = user.Id }, 
             user);
     }
-
 
     [HttpPut("{id:guid}")]
     [Authorize(Roles = "User,Manager,Admin")]
@@ -163,5 +209,22 @@ public class UsersController : ControllerBase
     {
         // Reporting logic here
         return Ok("Reporting data for Manager and Admin");
+    }
+
+    [HttpPut("mock/{id}")]
+    public ActionResult<UserDto> UpdateUserMock(Guid id, [FromBody] CreateUserDto updateUserDto)
+    {
+        var user = _mockUsers.FirstOrDefault(u => u.Id == id);
+        if (user == null)
+        {
+            return NotFound();
+        }
+        user.FirstName = updateUserDto.FirstName;
+        user.LastName = updateUserDto.LastName;
+        user.Email = updateUserDto.Email;
+        user.PhoneNumber = updateUserDto.PhoneNumber;
+        user.DateOfBirth = updateUserDto.DateOfBirth;
+        user.Role = updateUserDto.Role;
+        return Ok(user);
     }
 }
