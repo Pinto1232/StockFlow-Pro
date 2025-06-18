@@ -1,0 +1,93 @@
+@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+@functions {
+    public class LoginModel : Microsoft.AspNetCore.Mvc.RazorPages.PageModel
+    {
+        [BindProperty]
+        public string Username { get; set; } = string.Empty;
+        [BindProperty]
+        public string Password { get; set; } = string.Empty;
+        public string? ErrorMessage { get; set; }
+        public bool IsLoggedIn { get; set; }
+
+        public void OnGet()
+        {
+            // Check if user is already logged in
+            IsLoggedIn = Request.Cookies["IsAdmin"] == "true";
+        }
+
+        public IActionResult OnPost()
+        {
+            if (Username == "admin" && Password == "admin")
+            {
+                // Set a cookie to track login
+                Response.Cookies.Append("IsAdmin", "true", new Microsoft.AspNetCore.Http.CookieOptions { HttpOnly = true });
+                return RedirectToPage("/AdminPanel");
+            }
+            ErrorMessage = "Invalid username or password.";
+            return Page();
+        }
+
+        public IActionResult OnPostLogout()
+        {
+            // Remove the authentication cookie
+            Response.Cookies.Delete("IsAdmin");
+            return RedirectToPage("/Index");
+        }
+    }
+}
+
+@if (Model.IsLoggedIn)
+{
+    <div class="d-flex align-items-center justify-content-center min-vh-100">
+        <div class="card shadow-sm p-4" style="width: 100%; max-width: 400px; border-radius: 1rem;">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold mb-2">You are logged in</h2>
+                <p class="text-muted mb-0">You are currently signed in as Admin</p>
+            </div>
+            <div class="d-grid mb-3">
+                <a href="/AdminPanel" class="btn btn-primary btn-lg">Go to Admin Panel</a>
+            </div>
+            <form method="post" asp-page-handler="Logout">
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-outline-danger btn-lg">Logout</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+else
+{
+    <div class="d-flex align-items-center justify-content-center min-vh-100">
+        <div class="card shadow-sm p-4" style="width: 100%; max-width: 400px; border-radius: 1rem;">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold mb-2">Sign in to your account</h2>
+                <p class="text-muted mb-0">Please enter your credentials</p>
+            </div>
+            @if (Model.ErrorMessage != null)
+            {
+                <div class="alert alert-danger text-center py-2">@Model.ErrorMessage</div>
+            }
+            <form method="post">
+                <div class="mb-3">
+                    <label for="Input_Username" class="form-label">Username</label>
+                    <input type="text" class="form-control form-control-lg" id="Input_Username" name="Username" required autofocus autocomplete="username" value="@Model.Username" />
+                </div>
+                <div class="mb-3">
+                    <label for="Input_Password" class="form-label">Password</label>
+                    <input type="password" class="form-control form-control-lg" id="Input_Password" name="Password" required autocomplete="current-password" />
+                </div>
+                <div class="d-grid mb-3">
+                    <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                </div>
+                <div class="text-center">
+                    <a href="#" class="small text-decoration-none text-muted">Forgot password?</a>
+                </div>
+            </form>
+        </div>
+    </div>
+}
