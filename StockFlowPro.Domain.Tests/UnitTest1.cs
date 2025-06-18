@@ -1,5 +1,3 @@
-using Xunit;
-
 namespace StockFlowPro.Domain.Tests;
 
 public class UnitTest1
