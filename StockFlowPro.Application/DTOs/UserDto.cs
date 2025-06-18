@@ -1,3 +1,5 @@
+using StockFlowPro.Domain.Enums;
+
 namespace StockFlowPro.Application.DTOs;
 
 public class UserDto
@@ -13,6 +15,7 @@ public class UserDto
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public UserRole Role { get; set; }
 }
 
 public class CreateUserDto
@@ -22,6 +25,7 @@ public class CreateUserDto
     public string Email { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
     public DateTime DateOfBirth { get; set; }
+    public UserRole Role { get; set; } = UserRole.User;
 }
 
 public class UpdateUserDto
@@ -30,6 +34,7 @@ public class UpdateUserDto
     public string LastName { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
     public DateTime DateOfBirth { get; set; }
+    public UserRole? Role { get; set; } // Optional for update
 }
 
 public class UpdateUserEmailDto
