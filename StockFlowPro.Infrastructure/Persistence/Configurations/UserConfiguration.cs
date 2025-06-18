@@ -45,6 +45,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.UpdatedAt)
             .IsRequired(false);
 
+        builder.Property(u => u.Role)
+            .IsRequired()
+            .HasConversion<int>();
+
         // Configure table name
         builder.ToTable("Users");
     }

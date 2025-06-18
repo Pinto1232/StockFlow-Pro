@@ -1,5 +1,6 @@
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockFlowPro.Application.Commands.Users;
 using StockFlowPro.Application.DTOs;
@@ -20,12 +21,9 @@ public class UsersController : ControllerBase
         _mapper = mapper;
     }
 
-    /// <summary>
-    /// Get all users
-    /// </summary>
-    /// <param name="activeOnly">Filter to show only active users</param>
-    /// <returns>List of users</returns>
+ 
     [HttpGet]
+    [Authorize(Roles = "User,Manager,Admin")]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers([FromQuery] bool activeOnly = false)
     {
         var query = new GetAllUsersQuery { ActiveOnly = activeOnly };
@@ -33,12 +31,9 @@ public class UsersController : ControllerBase
         return Ok(users);
     }
 
-    /// <summary>
-    /// Get user by ID
-    /// </summary>
-    /// <param name="id">User ID</param>
-    /// <returns>User details</returns>
+
     [HttpGet("{id:guid}")]
+    [Authorize(Roles = "User,Manager,Admin")]
     public async Task<ActionResult<UserDto>> GetUserById(Guid id)
     {
         var query = new GetUserByIdQuery { Id = id };
@@ -52,12 +47,9 @@ public class UsersController : ControllerBase
         return Ok(user);
     }
 
-    /// <summary>
-    /// Get user by email
-    /// </summary>
-    /// <param name="email">User email</param>
-    /// <returns>User details</returns>
+    
     [HttpGet("by-email/{email}")]
+    [Authorize(Roles = "User,Manager,Admin")]
     public async Task<ActionResult<UserDto>> GetUserByEmail(string email)
     {
         var query = new GetUserByEmailQuery { Email = email };
@@ -71,12 +63,9 @@ public class UsersController : ControllerBase
         return Ok(user);
     }
 
-    /// <summary>
-    /// Search users
-    /// </summary>
-    /// <param name="searchTerm">Search term to filter users</param>
-    /// <returns>List of matching users</returns>
+    
     [HttpGet("search")]
+    [Authorize(Roles = "User,Manager,Admin")]
     public async Task<ActionResult<IEnumerable<UserDto>>> SearchUsers([FromQuery] string searchTerm)
     {
         var query = new SearchUsersQuery { SearchTerm = searchTerm ?? string.Empty };
@@ -84,12 +73,8 @@ public class UsersController : ControllerBase
         return Ok(users);
     }
 
-    /// <summary>
-    /// Create a new user
-    /// </summary>
-    /// <param name="createUserDto">User creation data</param>
-    /// <returns>Created user</returns>
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserDto>> CreateUser([FromBody] CreateUserDto createUserDto)
     {
         var command = _mapper.Map<CreateUserCommand>(createUserDto);
@@ -101,13 +86,9 @@ public class UsersController : ControllerBase
             user);
     }
 
-    /// <summary>
-    /// Update user personal information
-    /// </summary>
-    /// <param name="id">User ID</param>
-    /// <param name="updateUserDto">User update data</param>
-    /// <returns>Updated user</returns>
+
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "User,Manager,Admin")]
     public async Task<ActionResult<UserDto>> UpdateUser(Guid id, [FromBody] UpdateUserDto updateUserDto)
     {
         var command = _mapper.Map<UpdateUserCommand>(updateUserDto);
@@ -124,13 +105,8 @@ public class UsersController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Update user email
-    /// </summary>
-    /// <param name="id">User ID</param>
-    /// <param name="updateEmailDto">Email update data</param>
-    /// <returns>Updated user</returns>
     [HttpPut("{id:guid}/email")]
+    [Authorize(Roles = "User,Manager,Admin")]
     public async Task<ActionResult<UserDto>> UpdateUserEmail(Guid id, [FromBody] UpdateUserEmailDto updateEmailDto)
     {
         var command = _mapper.Map<UpdateUserEmailCommand>(updateEmailDto);
@@ -147,13 +123,8 @@ public class UsersController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Toggle user active status
-    /// </summary>
-    /// <param name="id">User ID</param>
-    /// <param name="isActive">New active status</param>
-    /// <returns>Updated user</returns>
     [HttpPatch("{id:guid}/status")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserDto>> ToggleUserStatus(Guid id, [FromBody] bool isActive)
     {
         var command = new ToggleUserStatusCommand { Id = id, IsActive = isActive };
@@ -169,12 +140,9 @@ public class UsersController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Delete a user
-    /// </summary>
-    /// <param name="id">User ID</param>
-    /// <returns>Success status</returns>
+
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult> DeleteUser(Guid id)
     {
         var command = new DeleteUserCommand { Id = id };
@@ -186,5 +154,14 @@ public class UsersController : ControllerBase
         }
 
         return NoContent();
+    }
+
+   
+    [HttpGet("reporting")]
+    [Authorize(Roles = "Manager,Admin")]
+    public IActionResult GetReporting()
+    {
+        // Reporting logic here
+        return Ok("Reporting data for Manager and Admin");
     }
 }
