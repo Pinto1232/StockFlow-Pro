@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockFlowPro.Domain", "StockFlowPro.Domain\StockFlowPro.Domain.csproj", "{B865C2D5-ED6E-453F-82DD-EE9A72F86747}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockFlowPro.Application", "StockFlowPro.Application\StockFlowPro.Application.csproj", "{A62A4A49-C0C7-4AE9-8933-D076761F65CC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{B865C2D5-ED6E-453F-82DD-EE9A72F86747}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B865C2D5-ED6E-453F-82DD-EE9A72F86747}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B865C2D5-ED6E-453F-82DD-EE9A72F86747}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A62A4A49-C0C7-4AE9-8933-D076761F65CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A62A4A49-C0C7-4AE9-8933-D076761F65CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A62A4A49-C0C7-4AE9-8933-D076761F65CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A62A4A49-C0C7-4AE9-8933-D076761F65CC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
