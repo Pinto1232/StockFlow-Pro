@@ -7,7 +7,7 @@ builder.Services.AddRazorPages();
 
 // Add DbContext for EF Core
 builder.Services.AddDbContext<StockFlowPro.Infrastructure.Data.ApplicationDbContext>(options =>
-    options.UseSqlServer(
+    options.UseSqlite(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
