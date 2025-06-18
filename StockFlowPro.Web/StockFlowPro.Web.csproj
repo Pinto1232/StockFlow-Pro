@@ -5,9 +5,8 @@
     <ProjectReference Include="..\StockFlowPro.Infrastructure\StockFlowPro.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.11" />
+  <ItemGroup>    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" />
   </ItemGroup>
 
   <PropertyGroup>

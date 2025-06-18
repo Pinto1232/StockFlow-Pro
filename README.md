@@ -1,5 +1,19 @@
 # StockFlow Pro
 
+## 🏃‍♂️ How to Run the Web Application
+
+From the project root folder (`StockFlow-Pro`), run the following commands:
+
+```bash
+cd StockFlowPro.Web
+
+dotnet watch run
+```
+
+This will start the web application with hot reload enabled.
+
+---
+
 A comprehensive inventory management system built with .NET Core and Razor Pages, following Clean Architecture principles and SOLID design patterns.
 
 ## 🚀 Project Overview
