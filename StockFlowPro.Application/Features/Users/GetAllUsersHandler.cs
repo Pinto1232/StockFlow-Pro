@@ -19,6 +19,8 @@ public class GetAllUsersHandler : IRequestHandler<GetAllUsersQuery, IEnumerable<
 
     public async Task<IEnumerable<UserDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(request);
+
         var users = request.ActiveOnly 
             ? await _userRepository.GetActiveUsersAsync(cancellationToken)
             : await _userRepository.GetAllAsync(cancellationToken);

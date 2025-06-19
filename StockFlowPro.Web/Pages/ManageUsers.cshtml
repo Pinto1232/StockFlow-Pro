@@ -249,27 +249,45 @@ function hideConfirmationSnackbar() {
 
 function confirmDelete() {
     if (userToDelete) {
-        // Remove from mock cache
-        const index = mockUsersCache.findIndex(u => u.id === userToDelete);
-        if (index > -1) {
-            const deletedUser = mockUsersCache[index];
-            mockUsersCache.splice(index, 1);
-            
-            // Update the table
-            loadUsers();
-            
-            // Show success message
-            if (typeof showSnackbar === 'function') {
-                showSnackbar(`User "${deletedUser.fullName || deletedUser.firstName + ' ' + deletedUser.lastName}" has been deleted successfully.`, 'info');
+        // Find user for success message
+        const user = mockUsersCache.find(u => u.id === userToDelete);
+        const userName = user ? (user.fullName || `${user.firstName} ${user.lastName}`) : 'User';
+        
+        // Call the API to delete the user
+        $.ajax({
+            url: '/api/users/mock/' + userToDelete,
+            type: 'DELETE',
+            success: function() {
+                // Reload the table from the server
+                loadUsers();
+                
+                // Show success message
+                if (typeof showSnackbar === 'function') {
+                    showSnackbar(`User "${userName}" has been deleted successfully.`, 'info');
+                } else {
+                    alert(`User "${userName}" has been deleted successfully.`);
+                }
+                
+                // Hide confirmation snackbar
+                hideConfirmationSnackbar();
+            },
+            error: function(xhr) {
+                // Handle error
+                let errorMessage = 'Failed to delete user.';
+                if (xhr.status === 404) {
+                    errorMessage = 'User not found.';
+                }
+                
+                if (typeof showSnackbar === 'function') {
+                    showSnackbar(errorMessage, 'error');
+                } else {
+                    alert(errorMessage);
+                }
+                
+                // Hide confirmation snackbar
+                hideConfirmationSnackbar();
             }
-            
-            // Hide confirmation snackbar
-            hideConfirmationSnackbar();
-        } else {
-            if (typeof showSnackbar === 'function') {
-                showSnackbar('User not found.', 'error');
-            }
-        }
+        });
     }
 }
 

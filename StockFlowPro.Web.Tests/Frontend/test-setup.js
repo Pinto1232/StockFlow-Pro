@@ -1,0 +1,137 @@
+// Jest setup file for frontend tests
+
+// Mock console methods to reduce noise in tests
+global.console = {
+  ...console,
+  log: jest.fn(),
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+};
+
+// Mock window object
+Object.defineProperty(window, 'location', {
+  value: {
+    href: 'http://localhost:3000',
+    origin: 'http://localhost:3000',
+    pathname: '/',
+    search: '',
+    hash: ''
+  },
+  writable: true
+});
+
+// Mock localStorage
+const localStorageMock = {
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn(),
+};
+global.localStorage = localStorageMock;
+
+// Mock sessionStorage
+const sessionStorageMock = {
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn(),
+};
+global.sessionStorage = sessionStorageMock;
+
+// Mock jQuery if needed
+global.$ = jest.fn(() => ({
+  get: jest.fn(),
+  post: jest.fn(),
+  ajax: jest.fn(),
+  modal: jest.fn(),
+  click: jest.fn(),
+  ready: jest.fn(),
+  html: jest.fn(),
+  val: jest.fn(),
+  find: jest.fn(),
+  first: jest.fn(),
+  last: jest.fn()
+}));
+
+// Mock Bootstrap
+global.bootstrap = {
+  Modal: jest.fn().mockImplementation(() => ({
+    show: jest.fn(),
+    hide: jest.fn(),
+    toggle: jest.fn()
+  }))
+};
+
+// Mock fetch API
+global.fetch = jest.fn();
+
+// Mock DOM methods
+global.document.createDocumentFragment = jest.fn(() => ({
+  appendChild: jest.fn()
+}));
+
+// Setup default fetch mock
+beforeEach(() => {
+  fetch.mockClear();
+  console.log.mockClear();
+  console.error.mockClear();
+  console.warn.mockClear();
+});
+
+// Helper function to create mock DOM elements
+global.createMockElement = (tagName, attributes = {}) => {
+  const element = {
+    tagName: tagName.toUpperCase(),
+    innerHTML: '',
+    textContent: '',
+    value: '',
+    className: '',
+    classList: {
+      add: jest.fn(),
+      remove: jest.fn(),
+      contains: jest.fn(),
+      toggle: jest.fn()
+    },
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    appendChild: jest.fn(),
+    removeChild: jest.fn(),
+    querySelector: jest.fn(),
+    querySelectorAll: jest.fn(),
+    getAttribute: jest.fn(),
+    setAttribute: jest.fn(),
+    removeAttribute: jest.fn(),
+    ...attributes
+  };
+  
+  return element;
+};
+
+// Helper function to create mock HTTP responses
+global.createMockResponse = (data, status = 200, ok = true) => ({
+  ok,
+  status,
+  statusText: ok ? 'OK' : 'Error',
+  json: jest.fn().mockResolvedValue(data),
+  text: jest.fn().mockResolvedValue(JSON.stringify(data)),
+  headers: new Map()
+});
+
+// Helper function to create mock users
+global.createMockUser = (overrides = {}) => ({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+  firstName: 'John',
+  lastName: 'Doe',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phoneNumber: '123-456-7890',
+  dateOfBirth: '1990-01-01T00:00:00',
+  age: 33,
+  role: 2, // User role
+  isActive: true,
+  createdAt: '2023-01-01T00:00:00',
+  updatedAt: null,
+  ...overrides
+});

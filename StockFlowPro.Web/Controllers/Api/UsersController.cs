@@ -227,4 +227,17 @@ public class UsersController : ControllerBase
         user.Role = updateUserDto.Role;
         return Ok(user);
     }
+
+    [HttpDelete("mock/{id}")]
+    public ActionResult DeleteUserMock(Guid id)
+    {
+        var user = _mockUsers.FirstOrDefault(u => u.Id == id);
+        if (user == null)
+        {
+            return NotFound();
+        }
+        
+        _mockUsers.Remove(user);
+        return NoContent();
+    }
 }

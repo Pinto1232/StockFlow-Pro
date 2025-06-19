@@ -19,6 +19,8 @@ public class UpdateUserHandler : IRequestHandler<UpdateUserCommand, UserDto>
 
     public async Task<UserDto> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(request);
+
         var user = await _userRepository.GetByIdAsync(request.Id, cancellationToken);
         
         if (user == null)
@@ -32,6 +34,11 @@ public class UpdateUserHandler : IRequestHandler<UpdateUserCommand, UserDto>
             request.PhoneNumber,
             request.DateOfBirth
         );
+
+        if (request.Role.HasValue)
+        {
+            user.SetRole(request.Role.Value);
+        }
 
         await _userRepository.UpdateAsync(user, cancellationToken);
 
