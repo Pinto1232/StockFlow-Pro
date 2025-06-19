@@ -1,12 +1,11 @@
 # StockFlow Pro
 
-## 🏃‍♂️ How to Run the Web Application
+## 🚀 Quick Start
 
 From the project root folder (`StockFlow-Pro`), run the following commands:
 
 ```bash
 cd StockFlowPro.Web
-
 dotnet watch run
 ```
 
@@ -183,6 +182,105 @@ dotnet test StockFlowPro.Domain.Tests
 - Client-side calculations for real-time updates
 - Optimized data transfer with DTOs
 - Lazy loading where appropriate
+
+## 🐙 GitHub Configuration for StockFlow Pro
+
+### Repository Setup
+1. **Initialize Git repository** (if not already done)
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit"
+   ```
+
+2. **Connect to GitHub repository**
+   ```bash
+   git remote add origin https://github.com/yourusername/StockFlow-Pro.git
+   git branch -M main
+   git push -u origin main
+   ```
+
+### Branch Strategy
+- **main**: Production-ready code
+- **develop**: Integration branch for features
+- **feature/***: Individual feature branches
+- **hotfix/***: Critical bug fixes
+
+### Recommended Git Workflow
+```bash
+# Create and switch to feature branch
+git checkout -b feature/your-feature-name
+
+# Make changes and commit
+git add .
+git commit -m "Add: your feature description"
+
+# Push feature branch
+git push origin feature/your-feature-name
+
+# Create pull request on GitHub
+# After review and merge, clean up
+git checkout main
+git pull origin main
+git branch -d feature/your-feature-name
+```
+
+### GitHub Actions (CI/CD)
+Create `.github/workflows/dotnet.yml` for automated testing:
+```yaml
+name: .NET Core CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+```
+
+### Issue Templates
+Create issue templates in `.github/ISSUE_TEMPLATE/`:
+- Bug reports
+- Feature requests
+- Documentation improvements
+
+### Pull Request Template
+Create `.github/pull_request_template.md`:
+```markdown
+## Description
+Brief description of changes
+
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation update
+
+## Testing
+- [ ] Tests pass locally
+- [ ] New tests added for new functionality
+
+## Checklist
+- [ ] Code follows project style guidelines
+- [ ] Self-review completed
+- [ ] Documentation updated
+```
 
 ## 🤝 Contributing
 
