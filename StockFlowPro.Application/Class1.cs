@@ -1,6 +1,15 @@
-﻿namespace StockFlowPro.Application;
+using System.Reflection;
 
-public class Class1
+namespace StockFlowPro.Application;
+
+/// <summary>
+/// Assembly marker class for StockFlowPro.Application
+/// Used for assembly scanning and dependency injection registration
+/// </summary>
+public static class ApplicationAssemblyMarker
 {
-   // Todo: Implement application logic here
+    /// <summary>
+    /// Gets the assembly containing the application layer
+    /// </summary>
+    public static Assembly Assembly => typeof(ApplicationAssemblyMarker).Assembly;
 }

@@ -49,7 +49,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasConversion<int>();
 
-        // Configure table name
         builder.ToTable("Users");
     }
 }
