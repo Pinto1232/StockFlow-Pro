@@ -5,22 +5,41 @@
 }
 
 <div class="container py-4">
-    <h2>User Management</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">User Management</h2>
+        <a href="/AdminPanel" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Admin Panel
+        </a>
+    </div>
+    <div class="mb-3">
+        <button class="btn btn-success" onclick="showCreateUserModal()">Create New User</button>
+    </div>
     <div id="user-table-section">
         <!-- User table will be loaded here via AJAX -->
     </div>
-    <button class="btn btn-success mt-3" onclick="showCreateUserModal()">Create New User</button>
+</div>
+
+<!-- Confirmation Snackbar -->
+<div id="confirmationSnackbar" class="confirmation-snackbar">
+    <div class="confirmation-content">
+        <div class="confirmation-message">
+            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+            <span id="confirmationText">Are you sure you want to delete this user?</span>
+        </div>
+        <div class="confirmation-actions">
+            <button type="button" class="btn btn-sm btn-secondary me-2" onclick="hideConfirmationSnackbar()">Cancel</button>
+            <button type="button" class="btn btn-sm btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">Delete</button>
+        </div>
+    </div>
 </div>
 
 <!-- Modal for Create/Edit User -->
-<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+<div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="userModalLabel">User</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <form id="userForm">
@@ -55,18 +74,68 @@
           </div>
         </form>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary" id="saveUserBtn">Save</button>
       </div>
     </div>
   </div>
 </div>
 
+<style>
+/* Confirmation Snackbar Styles */
+.confirmation-snackbar {
+    position: fixed;
+    bottom: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    border: 1px solid #e0e0e0;
+    z-index: 1060;
+    min-width: 400px;
+    max-width: 500px;
+    transition: bottom 0.3s ease-out;
+}
+
+.confirmation-snackbar.show {
+    bottom: 30px;
+}
+
+.confirmation-content {
+    padding: 20px;
+}
+
+.confirmation-message {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: #333;
+}
+
+.confirmation-actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.confirmation-snackbar .btn {
+    min-width: 80px;
+}
+</style>
+
 @section Scripts {
 <script>
 // Store mock users in a global variable for frontend-only editing
 let mockUsersCache = [];
+// Global variable to store the user ID to delete
+let userToDelete = null;
+
+// Role mapping for display and conversion
+const roleNames = { 1: 'Admin', 2: 'User', 3: 'Manager' };
+const roleNumbers = { 'Admin': 1, 'User': 2, 'Manager': 3 };
 
 function loadUsers() {
     $.get('/api/users/mock', function(users) {
@@ -74,7 +143,10 @@ function loadUsers() {
         let html = '<table class="table table-bordered"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Actions</th></tr></thead><tbody>';
         users.forEach(u => {
             const fullName = u.fullName || (u.firstName + ' ' + u.lastName);
-            html += `<tr><td>${fullName}</td><td>${u.email}</td><td>${u.phoneNumber}</td><td>${u.role}</td><td>` +
+            // Convert numeric role to role name for display
+            const roleName = roleNames[u.role] || u.role; // Fallback to original value if not found
+            
+            html += `<tr><td>${fullName}</td><td>${u.email}</td><td>${u.phoneNumber}</td><td>${roleName}</td><td>` +
                 `<button class='btn btn-sm btn-info' onclick='editUser("${u.id}")'>Edit</button> ` +
                 `<button class='btn btn-sm btn-danger' onclick='deleteUser("${u.id}")'>Delete</button></td></tr>`;
         });
@@ -91,14 +163,13 @@ function showCreateUserModal() {
 
 $('#saveUserBtn').click(function() {
     const id = $('#userId').val();
-    const roleMap = { 'Admin': 1, 'User': 2, 'Manager': 3 };
     const user = {
         firstName: $('#firstName').val(),
         lastName: $('#lastName').val(),
         email: $('#email').val(),
         phoneNumber: $('#phoneNumber').val(),
         dateOfBirth: $('#dateOfBirth').val(),
-        role: roleMap[$('#role').val()] // send enum int value
+        role: roleNumbers[$('#role').val()] // Convert role name to number for API
     };
     if (id) {
         $.ajax({
@@ -106,7 +177,13 @@ $('#saveUserBtn').click(function() {
             type: 'PUT',
             contentType: 'application/json',
             data: JSON.stringify(user),
-            success: function() { $('#userModal').modal('hide'); loadUsers(); }
+            success: function() { 
+                $('#userModal').modal('hide'); 
+                loadUsers(); 
+                if (typeof showSnackbar === 'function') {
+                    showSnackbar('User updated successfully!', 'info');
+                }
+            }
         });
     } else {
         $.ajax({
@@ -114,7 +191,13 @@ $('#saveUserBtn').click(function() {
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(user),
-            success: function() { $('#userModal').modal('hide'); loadUsers(); }
+            success: function() { 
+                $('#userModal').modal('hide'); 
+                loadUsers(); 
+                if (typeof showSnackbar === 'function') {
+                    showSnackbar('User created successfully!', 'info');
+                }
+            }
         });
     }
 });
@@ -129,20 +212,64 @@ function editUser(id) {
         $('#email').val(user.email);
         $('#phoneNumber').val(user.phoneNumber);
         $('#dateOfBirth').val(user.dateOfBirth ? user.dateOfBirth.split('T')[0] : '');
-        $('#role').val(user.role);
+        // Convert numeric role back to role name for the dropdown
+        const roleName = roleNames[user.role] || 'User';
+        $('#role').val(roleName);
         $('#userModal').modal('show');
     } else {
-        alert('User not found.');
+        if (typeof showSnackbar === 'function') {
+            showSnackbar('User not found.', 'error');
+        } else {
+            alert('User not found.');
+        }
     }
 }
 
 function deleteUser(id) {
-    if (confirm('Are you sure you want to delete this user?')) {
-        $.ajax({
-            url: '/api/users/' + id,
-            type: 'DELETE',
-            success: function() { loadUsers(); }
-        });
+    // Find user name for confirmation message
+    const user = mockUsersCache.find(u => u.id === id);
+    const userName = user ? (user.fullName || `${user.firstName} ${user.lastName}`) : 'this user';
+    
+    // Store the ID and show confirmation snackbar
+    userToDelete = id;
+    document.getElementById('confirmationText').textContent = `Are you sure you want to delete "${userName}"?`;
+    showConfirmationSnackbar();
+}
+
+function showConfirmationSnackbar() {
+    const snackbar = document.getElementById('confirmationSnackbar');
+    snackbar.classList.add('show');
+}
+
+function hideConfirmationSnackbar() {
+    const snackbar = document.getElementById('confirmationSnackbar');
+    snackbar.classList.remove('show');
+    userToDelete = null;
+}
+
+function confirmDelete() {
+    if (userToDelete) {
+        // Remove from mock cache
+        const index = mockUsersCache.findIndex(u => u.id === userToDelete);
+        if (index > -1) {
+            const deletedUser = mockUsersCache[index];
+            mockUsersCache.splice(index, 1);
+            
+            // Update the table
+            loadUsers();
+            
+            // Show success message
+            if (typeof showSnackbar === 'function') {
+                showSnackbar(`User "${deletedUser.fullName || deletedUser.firstName + ' ' + deletedUser.lastName}" has been deleted successfully.`, 'info');
+            }
+            
+            // Hide confirmation snackbar
+            hideConfirmationSnackbar();
+        } else {
+            if (typeof showSnackbar === 'function') {
+                showSnackbar('User not found.', 'error');
+            }
+        }
     }
 }
 
