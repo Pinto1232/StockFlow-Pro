@@ -9,34 +9,20 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddRazorPages();
-
-// Add API Controllers
 builder.Services.AddControllers();
-
-// Add API Explorer for Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add DbContext for EF Core
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add MediatR
 builder.Services.AddMediatR(typeof(StockFlowPro.Application.Commands.Users.CreateUserCommand).Assembly);
-
-// Add AutoMapper
 builder.Services.AddAutoMapper(typeof(UserMappingProfile));
-
-// Add FluentValidation
 builder.Services.AddValidatorsFromAssembly(typeof(StockFlowPro.Application.Validators.CreateUserCommandValidator).Assembly);
-
-// Add Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-// Add Authentication (Cookie)
 builder.Services.AddAuthentication("MyCookieAuth")
     .AddCookie("MyCookieAuth", options =>
     {
@@ -46,7 +32,6 @@ builder.Services.AddAuthentication("MyCookieAuth")
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -71,7 +56,6 @@ app.MapControllers();
 
 await app.RunAsync();
 
-// Make Program class accessible for integration tests
 public partial class Program 
 { 
     protected Program() { }

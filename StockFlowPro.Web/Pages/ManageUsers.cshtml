@@ -11,11 +11,56 @@
             <i class="fas fa-arrow-left me-2"></i>Back to Admin Panel
         </a>
     </div>
-    <div class="mb-3">
-        <button class="btn btn-success" onclick="showCreateUserModal()">Create New User</button>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <button class="btn btn-success" onclick="showCreateUserModal()">
+                <i class="fas fa-plus me-2"></i>Create New User
+            </button>
+        </div>
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" id="userSearch" class="form-control" placeholder="Search users by name, email, phone, or role...">
+                <button class="btn btn-outline-secondary" type="button" id="clearSearch">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
     </div>
-    <div id="user-table-section">
-        <!-- User table will be loaded here via AJAX -->
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Users</h5>
+            <div class="d-flex align-items-center">
+                <span id="userCount" class="badge bg-primary me-3">0 users</span>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <span id="pageSize">10</span> per page
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item page-size-option" href="#" data-size="5">5 per page</a></li>
+                        <li><a class="dropdown-item page-size-option" href="#" data-size="10">10 per page</a></li>
+                        <li><a class="dropdown-item page-size-option" href="#" data-size="25">25 per page</a></li>
+                        <li><a class="dropdown-item page-size-option" href="#" data-size="50">50 per page</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div id="user-table-section">
+                <!-- User table will be loaded here -->
+            </div>
+        </div>
+        <div class="card-footer">
+            <nav aria-label="User pagination">
+                <ul class="pagination pagination-sm justify-content-center mb-0" id="pagination">
+                    <!-- Pagination will be generated here -->
+                </ul>
+            </nav>
+        </div>
     </div>
 </div>
 
@@ -83,6 +128,106 @@
 </div>
 
 <style>
+/* Loading Spinner Styles */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    min-height: 200px;
+}
+
+.loading-spinner {
+    width: 3rem;
+    height: 3rem;
+    border: 0.3em solid rgba(13, 110, 253, 0.25);
+    border-radius: 50%;
+    border-top-color: #0d6efd;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    margin-top: 1rem;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Search Input Enhancements */
+#userSearch {
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+#userSearch:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Table Enhancements */
+.table-responsive-wrapper {
+    overflow-x: auto;
+}
+
+.user-table {
+    margin-bottom: 0;
+}
+
+.user-table th {
+    background-color: #f8f9fa;
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+    white-space: nowrap;
+}
+
+.user-table td {
+    vertical-align: middle;
+}
+
+.user-table .btn {
+    margin-right: 0.25rem;
+}
+
+.user-table .btn:last-child {
+    margin-right: 0;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Pagination Enhancements */
+.pagination .page-link {
+    color: #0d6efd;
+    border-color: #dee2e6;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #6c757d;
+}
+
+/* User Count Badge */
+#userCount {
+    font-size: 0.75rem;
+}
+
 /* Confirmation Snackbar Styles */
 .confirmation-snackbar {
     position: fixed;
@@ -124,116 +269,451 @@
 .confirmation-snackbar .btn {
     min-width: 80px;
 }
+
+/* Responsive Design */
+@@media (max-width: 768px) {
+    .card-header {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+    
+    .card-header > div {
+        margin-top: 0.5rem;
+        justify-content: space-between;
+    }
+    
+    .user-table .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
 </style>
 
 @section Scripts {
 <script>
-// Store mock users in a global variable for frontend-only editing
-let mockUsersCache = [];
-// Global variable to store the user ID to delete
-let userToDelete = null;
+class UserManagement {
+    constructor() {
+        this.allUsers = [];
+        this.filteredUsers = [];
+        this.currentPage = 1;
+        this.pageSize = 10;
+        this.searchTerm = '';
+        this.userToDelete = null;
+        this.isLoading = false;
+        
+        this.roleNames = { 1: 'Admin', 2: 'User', 3: 'Manager' };
+        this.roleNumbers = { 'Admin': 1, 'User': 2, 'Manager': 3 };
+        
+        this.init();
+    }
 
-// Role mapping for display and conversion
-const roleNames = { 1: 'Admin', 2: 'User', 3: 'Manager' };
-const roleNumbers = { 'Admin': 1, 'User': 2, 'Manager': 3 };
+    init() {
+        this.bindEvents();
+        this.loadUsers();
+    }
 
-function loadUsers() {
-    $.get('/api/users/mock', function(users) {
-        mockUsersCache = users;
-        let html = '<table class="table table-bordered"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Actions</th></tr></thead><tbody>';
-        users.forEach(u => {
-            const fullName = u.fullName || (u.firstName + ' ' + u.lastName);
-            // Convert numeric role to role name for display
-            const roleName = roleNames[u.role] || u.role; // Fallback to original value if not found
-            
-            html += `<tr><td>${fullName}</td><td>${u.email}</td><td>${u.phoneNumber}</td><td>${roleName}</td><td>` +
-                `<button class='btn btn-sm btn-info' onclick='editUser("${u.id}")'>Edit</button> ` +
-                `<button class='btn btn-sm btn-danger' onclick='deleteUser("${u.id}")'>Delete</button></td></tr>`;
-        });
-        html += '</tbody></table>';
-        $('#user-table-section').html(html);
-    });
-}
-
-function showCreateUserModal() {
-    $('#userId').val('');
-    $('#userForm')[0].reset();
-    $('#userModal').modal('show');
-}
-
-$('#saveUserBtn').click(function() {
-    const id = $('#userId').val();
-    const user = {
-        firstName: $('#firstName').val(),
-        lastName: $('#lastName').val(),
-        email: $('#email').val(),
-        phoneNumber: $('#phoneNumber').val(),
-        dateOfBirth: $('#dateOfBirth').val(),
-        role: roleNumbers[$('#role').val()] // Convert role name to number for API
-    };
-    if (id) {
-        $.ajax({
-            url: '/api/users/mock/' + id,
-            type: 'PUT',
-            contentType: 'application/json',
-            data: JSON.stringify(user),
-            success: function() { 
-                $('#userModal').modal('hide'); 
-                loadUsers(); 
-                if (typeof showSnackbar === 'function') {
-                    showSnackbar('User updated successfully!', 'info');
-                }
-            }
-        });
-    } else {
-        $.ajax({
-            url: '/api/users/mock',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(user),
-            success: function() { 
-                $('#userModal').modal('hide'); 
-                loadUsers(); 
-                if (typeof showSnackbar === 'function') {
-                    showSnackbar('User created successfully!', 'info');
-                }
-            }
+    bindEvents() {
+        const searchInput = document.getElementById('userSearch');
+        const clearSearchBtn = document.getElementById('clearSearch');
+        const saveUserBtn = document.getElementById('saveUserBtn');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', this.debounce((e) => {
+                this.searchTerm = e.target.value.toLowerCase();
+                this.currentPage = 1;
+                this.filterAndRenderUsers();
+            }, 300));
+        }
+        
+        if (clearSearchBtn) {
+            clearSearchBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                this.searchTerm = '';
+                this.currentPage = 1;
+                this.filterAndRenderUsers();
+            });
+        }
+        
+        if (saveUserBtn) {
+            saveUserBtn.addEventListener('click', () => this.handleSaveUser());
+        }
+        
+        document.querySelectorAll('.page-size-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.pageSize = parseInt(e.target.dataset.size);
+                this.currentPage = 1;
+                document.getElementById('pageSize').textContent = this.pageSize;
+                this.filterAndRenderUsers();
+            });
         });
     }
-});
 
-function editUser(id) {
-    // Use mockUsersCache for mock editing
-    const user = mockUsersCache.find(u => u.id === id);
-    if (user) {
-        $('#userId').val(user.id);
-        $('#firstName').val(user.firstName);
-        $('#lastName').val(user.lastName);
-        $('#email').val(user.email);
-        $('#phoneNumber').val(user.phoneNumber);
-        $('#dateOfBirth').val(user.dateOfBirth ? user.dateOfBirth.split('T')[0] : '');
-        // Convert numeric role back to role name for the dropdown
-        const roleName = roleNames[user.role] || 'User';
-        $('#role').val(roleName);
-        $('#userModal').modal('show');
-    } else {
-        if (typeof showSnackbar === 'function') {
-            showSnackbar('User not found.', 'error');
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    async loadUsers() {
+        if (this.isLoading) return;
+        
+        this.isLoading = true;
+        this.showLoadingState();
+
+        try {
+            const response = await fetch('/api/users/mock');
+            if (!response.ok) {
+                throw new Error(`Failed to load users: ${response.status}`);
+            }
+            
+            this.allUsers = await response.json();
+            this.filterAndRenderUsers();
+        } catch (error) {
+            console.error('Error loading users:', error);
+            this.showErrorState(error.message);
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    filterAndRenderUsers() {
+        this.filteredUsers = this.allUsers.filter(user => {
+            if (!this.searchTerm) return true;
+            
+            const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+            const email = user.email.toLowerCase();
+            const phone = user.phoneNumber.toLowerCase();
+            const role = this.roleNames[user.role]?.toLowerCase() || '';
+            
+            return fullName.includes(this.searchTerm) || 
+                   email.includes(this.searchTerm) || 
+                   phone.includes(this.searchTerm) || 
+                   role.includes(this.searchTerm);
+        });
+
+        this.updateUserCount();
+        this.renderTable();
+        this.renderPagination();
+    }
+
+    updateUserCount() {
+        const countElement = document.getElementById('userCount');
+        if (countElement) {
+            const total = this.filteredUsers.length;
+            countElement.textContent = `${total} user${total !== 1 ? 's' : ''}`;
+        }
+    }
+
+    renderTable() {
+        const container = document.getElementById('user-table-section');
+        if (!container) return;
+
+        if (this.filteredUsers.length === 0) {
+            container.innerHTML = this.getEmptyStateHTML();
+            return;
+        }
+
+        const startIndex = (this.currentPage - 1) * this.pageSize;
+        const endIndex = startIndex + this.pageSize;
+        const pageUsers = this.filteredUsers.slice(startIndex, endIndex);
+
+        const tableHTML = `
+            <div class="table-responsive-wrapper">
+                <table class="table table-hover user-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${pageUsers.map(user => this.createUserRowHTML(user)).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        container.innerHTML = tableHTML;
+        this.bindTableEvents();
+    }
+
+    createUserRowHTML(user) {
+        const fullName = user.fullName || `${user.firstName} ${user.lastName}`;
+        const roleName = this.roleNames[user.role] || user.role;
+        const statusBadge = user.isActive ? 
+            '<span class="badge bg-success">Active</span>' : 
+            '<span class="badge bg-secondary">Inactive</span>';
+
+        return `
+            <tr>
+                <td>${this.escapeHtml(fullName)}</td>
+                <td>${this.escapeHtml(user.email)}</td>
+                <td>${this.escapeHtml(user.phoneNumber)}</td>
+                <td>${this.escapeHtml(roleName)}</td>
+                <td>${statusBadge}</td>
+                <td>
+                    <button class="btn btn-sm btn-info edit-user-btn" data-user-id="${user.id}">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-sm btn-danger delete-user-btn" data-user-id="${user.id}">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </td>
+            </tr>
+        `;
+    }
+
+    bindTableEvents() {
+        document.querySelectorAll('.edit-user-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const userId = e.currentTarget.dataset.userId;
+                this.editUser(userId);
+            });
+        });
+
+        document.querySelectorAll('.delete-user-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const userId = e.currentTarget.dataset.userId;
+                this.deleteUser(userId);
+            });
+        });
+    }
+
+    renderPagination() {
+        const paginationContainer = document.getElementById('pagination');
+        if (!paginationContainer) return;
+
+        const totalPages = Math.ceil(this.filteredUsers.length / this.pageSize);
+        
+        if (totalPages <= 1) {
+            paginationContainer.innerHTML = '';
+            return;
+        }
+
+        let paginationHTML = '';
+        
+        paginationHTML += `
+            <li class="page-item ${this.currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${this.currentPage - 1}">Previous</a>
+            </li>
+        `;
+
+        const startPage = Math.max(1, this.currentPage - 2);
+        const endPage = Math.min(totalPages, this.currentPage + 2);
+
+        if (startPage > 1) {
+            paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`;
+            if (startPage > 2) {
+                paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            paginationHTML += `
+                <li class="page-item ${i === this.currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>
+            `;
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            }
+            paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>`;
+        }
+
+        paginationHTML += `
+            <li class="page-item ${this.currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${this.currentPage + 1}">Next</a>
+            </li>
+        `;
+
+        paginationContainer.innerHTML = paginationHTML;
+
+        paginationContainer.querySelectorAll('.page-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = parseInt(e.target.dataset.page);
+                if (page && page !== this.currentPage && page >= 1 && page <= totalPages) {
+                    this.currentPage = page;
+                    this.renderTable();
+                    this.renderPagination();
+                }
+            });
+        });
+    }
+
+    showLoadingState() {
+        const container = document.getElementById('user-table-section');
+        if (container) {
+            container.innerHTML = `
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Loading users...</div>
+                </div>
+            `;
+        }
+    }
+
+    showErrorState(message) {
+        const container = document.getElementById('user-table-section');
+        if (container) {
+            container.innerHTML = `
+                <div class="alert alert-danger m-3" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ${this.escapeHtml(message)}
+                </div>
+            `;
+        }
+    }
+
+    getEmptyStateHTML() {
+        const message = this.searchTerm ? 
+            'No users found matching your search criteria.' : 
+            'No users found.';
+        
+        return `
+            <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <h5>${message}</h5>
+                ${this.searchTerm ? '<p>Try adjusting your search terms.</p>' : '<p>Create your first user to get started.</p>'}
+            </div>
+        `;
+    }
+
+    escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    editUser(id) {
+        const user = this.allUsers.find(u => u.id === id);
+        if (!user) {
+            this.showSnackbar('User not found.', 'error');
+            return;
+        }
+
+        document.getElementById('userId').value = user.id;
+        document.getElementById('firstName').value = user.firstName || '';
+        document.getElementById('lastName').value = user.lastName || '';
+        document.getElementById('email').value = user.email || '';
+        document.getElementById('phoneNumber').value = user.phoneNumber || '';
+        document.getElementById('dateOfBirth').value = user.dateOfBirth ? user.dateOfBirth.split('T')[0] : '';
+        
+        const roleName = this.roleNames[user.role] || 'User';
+        document.getElementById('role').value = roleName;
+        
+        const modal = new bootstrap.Modal(document.getElementById('userModal'));
+        modal.show();
+    }
+
+    deleteUser(id) {
+        const user = this.allUsers.find(u => u.id === id);
+        const userName = user ? (user.fullName || `${user.firstName} ${user.lastName}`) : 'this user';
+        
+        this.userToDelete = id;
+        document.getElementById('confirmationText').textContent = `Are you sure you want to delete "${userName}"?`;
+        showConfirmationSnackbar();
+    }
+
+    async handleSaveUser() {
+        const id = document.getElementById('userId').value;
+        const userData = {
+            firstName: document.getElementById('firstName').value.trim(),
+            lastName: document.getElementById('lastName').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            phoneNumber: document.getElementById('phoneNumber').value.trim(),
+            dateOfBirth: document.getElementById('dateOfBirth').value,
+            role: this.roleNumbers[document.getElementById('role').value]
+        };
+
+        if (!userData.firstName || !userData.lastName || !userData.email) {
+            this.showSnackbar('Please fill in all required fields', 'error');
+            return;
+        }
+
+        try {
+            const url = id ? `/api/users/mock/${id}` : '/api/users/mock';
+            const method = id ? 'PUT' : 'POST';
+            
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save user');
+            }
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('userModal'));
+            modal?.hide();
+            
+            await this.loadUsers();
+            this.showSnackbar(id ? 'User updated successfully!' : 'User created successfully!', 'info');
+        } catch (error) {
+            console.error('Error saving user:', error);
+            this.showSnackbar('Failed to save user', 'error');
+        }
+    }
+
+    async confirmDelete() {
+        if (!this.userToDelete) return;
+
+        try {
+            const response = await fetch(`/api/users/mock/${this.userToDelete}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete user');
+            }
+
+            await this.loadUsers();
+            this.showSnackbar('User deleted successfully!', 'info');
+            this.userToDelete = null;
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            this.showSnackbar('Failed to delete user', 'error');
+            this.userToDelete = null;
+        }
+    }
+
+    showSnackbar(message, type = 'info') {
+        if (typeof window.showSnackbar === 'function') {
+            window.showSnackbar(message, type);
         } else {
-            alert('User not found.');
+            console.log(`${type.toUpperCase()}: ${message}`);
         }
     }
 }
 
-function deleteUser(id) {
-    // Find user name for confirmation message
-    const user = mockUsersCache.find(u => u.id === id);
-    const userName = user ? (user.fullName || `${user.firstName} ${user.lastName}`) : 'this user';
-    
-    // Store the ID and show confirmation snackbar
-    userToDelete = id;
-    document.getElementById('confirmationText').textContent = `Are you sure you want to delete "${userName}"?`;
-    showConfirmationSnackbar();
+let userToDelete = null;
+let userManagement;
+
+function showCreateUserModal() {
+    document.getElementById('userId').value = '';
+    document.getElementById('userForm').reset();
+    const modal = new bootstrap.Modal(document.getElementById('userModal'));
+    modal.show();
 }
 
 function showConfirmationSnackbar() {
@@ -248,51 +728,14 @@ function hideConfirmationSnackbar() {
 }
 
 function confirmDelete() {
-    if (userToDelete) {
-        // Find user for success message
-        const user = mockUsersCache.find(u => u.id === userToDelete);
-        const userName = user ? (user.fullName || `${user.firstName} ${user.lastName}`) : 'User';
-        
-        // Call the API to delete the user
-        $.ajax({
-            url: '/api/users/mock/' + userToDelete,
-            type: 'DELETE',
-            success: function() {
-                // Reload the table from the server
-                loadUsers();
-                
-                // Show success message
-                if (typeof showSnackbar === 'function') {
-                    showSnackbar(`User "${userName}" has been deleted successfully.`, 'info');
-                } else {
-                    alert(`User "${userName}" has been deleted successfully.`);
-                }
-                
-                // Hide confirmation snackbar
-                hideConfirmationSnackbar();
-            },
-            error: function(xhr) {
-                // Handle error
-                let errorMessage = 'Failed to delete user.';
-                if (xhr.status === 404) {
-                    errorMessage = 'User not found.';
-                }
-                
-                if (typeof showSnackbar === 'function') {
-                    showSnackbar(errorMessage, 'error');
-                } else {
-                    alert(errorMessage);
-                }
-                
-                // Hide confirmation snackbar
-                hideConfirmationSnackbar();
-            }
-        });
+    if (userManagement) {
+        userManagement.confirmDelete();
     }
+    hideConfirmationSnackbar();
 }
 
-$(document).ready(function() {
-    loadUsers();
+document.addEventListener('DOMContentLoaded', () => {
+    userManagement = new UserManagement();
 });
 </script>
 }

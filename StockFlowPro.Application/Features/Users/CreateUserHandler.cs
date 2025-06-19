@@ -22,7 +22,6 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, UserDto>
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        // Validate required fields
         if (string.IsNullOrWhiteSpace(request.FirstName))
             throw new ArgumentException("First name is required.", nameof(request));
         

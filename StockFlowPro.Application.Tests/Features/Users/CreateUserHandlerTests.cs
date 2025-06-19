@@ -26,7 +26,7 @@ public class CreateUserHandlerTests
     [Fact]
     public async Task Handle_ValidCommand_ShouldCreateUserAndReturnDto()
     {
-        // Arrange
+
         var command = new CreateUserCommand
         {
             FirstName = "John",
@@ -52,10 +52,10 @@ public class CreateUserHandlerTests
         _mockMapper.Setup(m => m.Map<UserDto>(It.IsAny<User>())).Returns(userDto);
         _mockUserRepository.Setup(r => r.AddAsync(It.IsAny<User>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
-        // Act
+
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
+
         result.Should().NotBeNull();
         result.FirstName.Should().Be("John");
         result.LastName.Should().Be("Doe");
@@ -71,7 +71,7 @@ public class CreateUserHandlerTests
     [Fact]
     public async Task Handle_NullCommand_ShouldThrowArgumentNullException()
     {
-        // Act & Assert
+
         await Assert.ThrowsAsync<ArgumentNullException>(() => _handler.Handle(null!, CancellationToken.None));
     }
 
@@ -82,7 +82,7 @@ public class CreateUserHandlerTests
     [InlineData("John", "Doe", "john.doe@example.com", "")]
     public async Task Handle_InvalidCommand_ShouldThrowException(string firstName, string lastName, string email, string phoneNumber)
     {
-        // Arrange
+
         var command = new CreateUserCommand
         {
             FirstName = firstName,
@@ -93,14 +93,14 @@ public class CreateUserHandlerTests
             Role = UserRole.User
         };
 
-        // Act & Assert
+
         await Assert.ThrowsAsync<ArgumentException>(() => _handler.Handle(command, CancellationToken.None));
     }
 
     [Fact]
     public async Task Handle_RepositoryThrowsException_ShouldPropagateException()
     {
-        // Arrange
+
         var command = new CreateUserCommand
         {
             FirstName = "John",
@@ -114,7 +114,7 @@ public class CreateUserHandlerTests
         _mockUserRepository.Setup(r => r.AddAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Database error"));
 
-        // Act & Assert
+
         await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(command, CancellationToken.None));
     }
 }

@@ -13,7 +13,6 @@ public class DataInitializationService : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        // Run initialization in background to not block startup
         _ = Task.Run(async () =>
         {
             try
@@ -21,7 +20,6 @@ public class DataInitializationService : IHostedService
                 using var scope = _serviceProvider.CreateScope();
                 var mockDataStorage = scope.ServiceProvider.GetRequiredService<IMockDataStorageService>();
                 
-                // This will initialize default data if the file doesn't exist
                 await mockDataStorage.GetUsersAsync();
                 _logger.LogInformation("Mock data storage initialized successfully");
             }
@@ -31,7 +29,6 @@ public class DataInitializationService : IHostedService
             }
         }, cancellationToken);
         
-        // Return immediately to not block startup
         return Task.CompletedTask;
     }
 

@@ -6,6 +6,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
+namespace StockFlowPro.Web.Pages;
+
 public class LoginModel : PageModel
 {
     [BindProperty]
@@ -18,12 +20,10 @@ public class LoginModel : PageModel
 
     public void OnGet()
     {
-        // Show login page
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
-        // Hardcoded user for demo
         if (Username == "admin" && Password == "admin")
         {
             var claims = new List<Claim>
