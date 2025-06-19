@@ -19,6 +19,8 @@ public class SearchUsersHandler : IRequestHandler<SearchUsersQuery, IEnumerable<
 
     public async Task<IEnumerable<UserDto>> Handle(SearchUsersQuery request, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(request);
+
         var users = await _userRepository.SearchUsersAsync(request.SearchTerm, cancellationToken);
         
         return _mapper.Map<IEnumerable<UserDto>>(users);

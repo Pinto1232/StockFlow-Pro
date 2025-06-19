@@ -69,4 +69,10 @@ app.UseAuthorization();
 app.MapRazorPages();
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();
+
+// Make Program class accessible for integration tests
+public partial class Program 
+{ 
+    protected Program() { }
+}

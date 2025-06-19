@@ -20,12 +20,28 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, UserDto>
 
     public async Task<UserDto> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(request);
+
+        // Validate required fields
+        if (string.IsNullOrWhiteSpace(request.FirstName))
+            throw new ArgumentException("First name is required.", nameof(request));
+        
+        if (string.IsNullOrWhiteSpace(request.LastName))
+            throw new ArgumentException("Last name is required.", nameof(request));
+        
+        if (string.IsNullOrWhiteSpace(request.Email))
+            throw new ArgumentException("Email is required.", nameof(request));
+        
+        if (string.IsNullOrWhiteSpace(request.PhoneNumber))
+            throw new ArgumentException("Phone number is required.", nameof(request));
+
         var user = new User(
             request.FirstName,
             request.LastName,
             request.Email,
             request.PhoneNumber,
-            request.DateOfBirth
+            request.DateOfBirth,
+            request.Role
         );
 
         await _userRepository.AddAsync(user, cancellationToken);

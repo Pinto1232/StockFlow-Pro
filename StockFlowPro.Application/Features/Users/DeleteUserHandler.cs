@@ -15,11 +15,13 @@ public class DeleteUserHandler : IRequestHandler<DeleteUserCommand, bool>
 
     public async Task<bool> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(request);
+
         var user = await _userRepository.GetByIdAsync(request.Id, cancellationToken);
         
         if (user == null)
         {
-            return false;
+            throw new KeyNotFoundException($"User with ID {request.Id} not found");
         }
 
         await _userRepository.DeleteAsync(user, cancellationToken);

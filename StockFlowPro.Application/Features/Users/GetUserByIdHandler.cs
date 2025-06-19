@@ -19,6 +19,8 @@ public class GetUserByIdHandler : IRequestHandler<GetUserByIdQuery, UserDto?>
 
     public async Task<UserDto?> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(request);
+
         var user = await _userRepository.GetByIdAsync(request.Id, cancellationToken);
         
         return user == null ? null : _mapper.Map<UserDto>(user);
