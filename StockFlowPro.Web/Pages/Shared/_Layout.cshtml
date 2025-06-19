@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -12,28 +12,35 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">StockFlowPro </a>
+                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    <span class="navbar-brand">StockFlowPro</span>
+                }
+                else
+                {
+                    <a class="navbar-brand" asp-area="" asp-page="/Index">StockFlowPro </a>
+                }
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav ms-auto">
-                        @{
-                            var isAuthenticated = Context.Request.Cookies["IsAdmin"] == "true";
-                        }
-                        @if (isAuthenticated)
+                        @if (User.Identity == null || !User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/AdminPanel"></a>
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
+                            </li>
+                        }
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <span class="nav-link text-muted">Welcome, @User.Identity.Name</span>
                             </li>
                             <li class="nav-item">
                                 <form method="post" asp-page="/Login" asp-page-handler="Logout" class="d-inline">
@@ -52,6 +59,10 @@
             </div>
         </nav>
     </header>
+    
+    <!-- Snackbar for notifications -->
+    <div id="snackbar" class="snackbar"></div>
+    
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
@@ -63,7 +74,10 @@
                 &copy; 2025 <span class="fw-semibold">StockFlowPro.Web</span>
             </div>
             <div>
-                <a asp-area="" asp-page="/Privacy" class="text-decoration-none text-primary fw-semibold">Privacy Policy</a>
+                @if (User.Identity == null || !User.Identity.IsAuthenticated)
+                {
+                    <a asp-area="" asp-page="/Privacy" class="text-decoration-none text-primary fw-semibold">Privacy Policy</a>
+                }
             </div>
         </div>
     </footer>
@@ -84,10 +98,139 @@
             color: #0d6efd;
             text-decoration: underline;
         }
+        .navbar-brand {
+            cursor: default;
+        }
+        
+        /* Snackbar Styles */
+        .snackbar {
+            visibility: hidden;
+            min-width: 300px;
+            margin-left: -150px;
+            background-color: #ff9800;
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px 20px;
+            position: fixed;
+            z-index: 1050;
+            left: 50%;
+            bottom: 30px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border-left: 4px solid #f57c00;
+        }
+        
+        .snackbar.show {
+            visibility: visible;
+            animation: slideInUp 0.4s ease-out, slideOutDown 0.4s ease-in 2.6s;
+        }
+        
+        .snackbar.warning {
+            background-color: #ff9800;
+            border-left-color: #f57c00;
+        }
+        
+        .snackbar.error {
+            background-color: #f44336;
+            border-left-color: #d32f2f;
+        }
+        
+        .snackbar.info {
+            background-color: #2196f3;
+            border-left-color: #1976d2;
+        }
+        
+        @@keyframes slideInUp {
+            from {
+                bottom: -50px;
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                bottom: 30px;
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @@keyframes slideOutDown {
+            from {
+                bottom: 30px;
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                bottom: -50px;
+                opacity: 0;
+                transform: translateY(50px);
+            }
+        }
     </style>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <script>
+        // Snackbar function
+        function showSnackbar(message, type = 'warning') {
+            const snackbar = document.getElementById('snackbar');
+            snackbar.textContent = message;
+            snackbar.className = `snackbar ${type} show`;
+            
+            // Remove the show class after animation completes
+            setTimeout(function() {
+                snackbar.className = snackbar.className.replace('show', '');
+            }, 3000);
+        }
+    </script>
+    
+    @if (User.Identity != null && User.Identity.IsAuthenticated)
+    {
+        <script>
+            // Prevent navigation when authenticated
+            $(document).ready(function() {
+                let hasUnsavedChanges = false;
+                
+                // Track if user has made changes (you can customize this logic)
+                $('input, textarea, select').on('change input', function() {
+                    hasUnsavedChanges = true;
+                });
+                
+                // Show snackbar instead of browser dialog
+                window.addEventListener('beforeunload', function(e) {
+                    if (hasUnsavedChanges) {
+                        // Show snackbar notification
+                        showSnackbar('You are currently logged in. Please logout first before navigating away.', 'warning');
+                        
+                        // Still prevent the navigation with browser dialog as fallback
+                        var confirmationMessage = 'You are currently logged in. Please logout first before navigating away.';
+                        e.returnValue = confirmationMessage;
+                        return confirmationMessage;
+                    }
+                });
+                
+                // Override any direct navigation attempts with snackbar
+                $('a[href*="/Index"], a[href*="/Privacy"], a[href*="/Home"]').click(function(e) {
+                    e.preventDefault();
+                    showSnackbar('Please logout first before navigating to other pages.', 'warning');
+                    return false;
+                });
+                
+                // Reset unsaved changes flag when form is submitted successfully
+                $('form').on('submit', function() {
+                    hasUnsavedChanges = false;
+                });
+                
+                // Reset flag when logout is clicked
+                $('button[type="submit"]:contains("Logout")').click(function() {
+                    hasUnsavedChanges = false;
+                });
+            });
+        </script>
+    }
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
