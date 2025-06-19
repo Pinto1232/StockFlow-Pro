@@ -230,6 +230,14 @@ CDF_UpgradeLog*.xml
 *.ldf
 *.ndf
 
+# SQLite database files
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.db-shm
+*.db-wal
+
 # Business Intelligence projects
 *.rdl.data
 *.bim.layout
