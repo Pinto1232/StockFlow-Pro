@@ -1,0 +1,530 @@
+{
+  "info": {
+    "name": "StockFlow Pro API",
+    "description": "Comprehensive API collection for StockFlow Pro inventory management system",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login with username and password to get JWT token"
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication endpoints"
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users?activeOnly=false&page=1&pageSize=50",
+              "host": ["{{base_url}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "activeOnly",
+                  "value": "false",
+                  "description": "Filter active users only"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "50",
+                  "description": "Items per page"
+                }
+              ]
+            },
+            "description": "Get all users with pagination and filtering"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}"]
+            },
+            "description": "Get a specific user by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by Email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/by-email/admin@stockflowpro.com",
+              "host": ["{{base_url}}"],
+              "path": ["users", "by-email", "admin@stockflowpro.com"]
+            },
+            "description": "Get a user by email address"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/search?searchTerm=admin&maxResults=20",
+              "host": ["{{base_url}}"],
+              "path": ["users", "search"],
+              "query": [
+                {
+                  "key": "searchTerm",
+                  "value": "admin",
+                  "description": "Search term (minimum 2 characters)"
+                },
+                {
+                  "key": "maxResults",
+                  "value": "20",
+                  "description": "Maximum results"
+                }
+              ]
+            },
+            "description": "Search users by name or email"
+          },
+          "response": []
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phoneNumber\": \"+1-555-0123\",\n  \"dateOfBirth\": \"1990-01-01T00:00:00Z\",\n  \"role\": \"User\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            },
+            "description": "Create a new user (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Smith\",\n  \"phoneNumber\": \"+1-555-0124\",\n  \"dateOfBirth\": \"1990-01-01T00:00:00Z\",\n  \"role\": \"Manager\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}"]
+            },
+            "description": "Update an existing user"
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Email",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newemail@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}/email",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}", "email"]
+            },
+            "description": "Update a user's email address"
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle User Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "false"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}", "status"]
+            },
+            "description": "Activate or deactivate a user (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}"]
+            },
+            "description": "Delete a user (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/optimizedusers/statistics",
+              "host": ["{{base_url}}"],
+              "path": ["optimizedusers", "statistics"]
+            },
+            "description": "Get comprehensive user statistics (Manager/Admin only)"
+          },
+          "response": []
+        }
+      ],
+      "description": "User management endpoints"
+    },
+    {
+      "name": "Mock Endpoints (Testing)",
+      "item": [
+        {
+          "name": "Get Mock Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/mock?activeOnly=false",
+              "host": ["{{base_url}}"],
+              "path": ["users", "mock"],
+              "query": [
+                {
+                  "key": "activeOnly",
+                  "value": "false"
+                }
+              ]
+            },
+            "description": "Get mock users for testing (no auth required)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Mock User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"test.user@example.com\",\n  \"phoneNumber\": \"+1-555-0999\",\n  \"dateOfBirth\": \"1995-05-15T00:00:00Z\",\n  \"role\": \"User\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/mock",
+              "host": ["{{base_url}}"],
+              "path": ["users", "mock"]
+            },
+            "description": "Create a mock user for testing (no auth required)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Mock User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Updated\",\n  \"lastName\": \"User\",\n  \"email\": \"updated.user@example.com\",\n  \"phoneNumber\": \"+1-555-0888\",\n  \"dateOfBirth\": \"1995-05-15T00:00:00Z\",\n  \"role\": \"Manager\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/mock/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "mock", "{{user_id}}"]
+            },
+            "description": "Update a mock user for testing (no auth required)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Mock User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/mock/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "mock", "{{user_id}}"]
+            },
+            "description": "Delete a mock user for testing (no auth required)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Mock endpoints for testing without authentication"
+    },
+    {
+      "name": "Products (Planned)",
+      "item": [
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products?page=1&pageSize=50",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Get all products (planned endpoint)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sample Product\",\n  \"description\": \"Product description\",\n  \"sku\": \"SKU-001\",\n  \"category\": \"Electronics\",\n  \"costPerItem\": 29.99,\n  \"sellingPrice\": 49.99,\n  \"stockLevel\": 100,\n  \"minimumStockLevel\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["products"]
+            },
+            "description": "Create a new product (planned endpoint)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Product management endpoints (planned)"
+    },
+    {
+      "name": "Invoices (Planned)",
+      "item": [
+        {
+          "name": "Get All Invoices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/invoices?page=1&pageSize=50",
+              "host": ["{{base_url}}"],
+              "path": ["invoices"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Get all invoices (planned endpoint)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Invoice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"550e8400-e29b-41d4-a716-446655440001\",\n  \"customerName\": \"Customer Name\",\n  \"invoiceDate\": \"2024-01-01T00:00:00Z\",\n  \"dueDate\": \"2024-01-31T00:00:00Z\",\n  \"items\": [\n    {\n      \"productId\": \"550e8400-e29b-41d4-a716-446655440003\",\n      \"quantity\": 2,\n      \"unitPrice\": 50.00\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/invoices",
+              "host": ["{{base_url}}"],
+              "path": ["invoices"]
+            },
+            "description": "Create a new invoice (planned endpoint)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Invoice management endpoints (planned)"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-set base URL based on environment",
+          "if (pm.environment.get('environment') === 'production') {",
+          "    pm.variables.set('base_url', 'https://api.stockflowpro.com/api');",
+          "} else if (pm.environment.get('environment') === 'staging') {",
+          "    pm.variables.set('base_url', 'https://staging-api.stockflowpro.com/api');",
+          "} else {",
+          "    pm.variables.set('base_url', 'http://localhost:5000/api');",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-extract JWT token from login response",
+          "if (pm.request.url.toString().includes('/auth/login') && pm.response.code === 200) {",
+          "    const responseJson = pm.response.json();",
+          "    if (responseJson.token) {",
+          "        pm.variables.set('jwt_token', responseJson.token);",
+          "        console.log('JWT token extracted and set');",
+          "    }",
+          "}",
+          "",
+          "// Auto-extract user ID from user creation/retrieval responses",
+          "if (pm.response.code === 200 || pm.response.code === 201) {",
+          "    try {",
+          "        const responseJson = pm.response.json();",
+          "        if (responseJson.id) {",
+          "            pm.variables.set('user_id', responseJson.id);",
+          "            console.log('User ID extracted and set: ' + responseJson.id);",
+          "        } else if (Array.isArray(responseJson) && responseJson.length > 0 && responseJson[0].id) {",
+          "            pm.variables.set('user_id', responseJson[0].id);",
+          "            console.log('User ID extracted from array and set: ' + responseJson[0].id);",
+          "        }",
+          "    } catch (e) {",
+          "        // Ignore JSON parsing errors",
+          "    }",
+          "}",
+          "",
+          "// Common response tests",
+          "pm.test('Response time is less than 2000ms', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+          "});",
+          "",
+          "pm.test('Response has correct content type', function () {",
+          "    if (pm.response.code !== 204) {",
+          "        pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+          "    }",
+          "});"
+        ]
+      }
+    }
+  ]
+}

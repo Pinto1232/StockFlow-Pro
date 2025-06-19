@@ -1,0 +1,78 @@
+# Code Owners for StockFlow Pro
+# This file defines who should review specific parts of the codebase
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global owners - these users will be requested for review on all PRs
+* @your-username
+
+# Documentation
+*.md @your-username
+docs/ @your-username
+README.md @your-username
+
+# GitHub configuration
+.github/ @your-username
+
+# Infrastructure and Configuration
+*.yml @your-username
+*.yaml @your-username
+*.json @your-username
+*.config @your-username
+*.props @your-username
+Dockerfile* @your-username
+docker-compose* @your-username
+
+# Solution and Project Files
+*.sln @your-username
+*.csproj @your-username
+Directory.Build.props @your-username
+Directory.Packages.props @your-username
+global.json @your-username
+nuget.config @your-username
+
+# Application Layer
+StockFlowPro.Application/ @your-username
+StockFlowPro.Application.Tests/ @your-username
+
+# Domain Layer (Critical - requires careful review)
+StockFlowPro.Domain/ @your-username
+StockFlowPro.Domain.Tests/ @your-username
+
+# Infrastructure Layer
+StockFlowPro.Infrastructure/ @your-username
+StockFlowPro.Infrastructure.Tests/ @your-username
+
+# Web Layer (API and Controllers)
+StockFlowPro.Web/ @your-username
+StockFlowPro.Web.Tests/ @your-username
+
+# Shared Components
+StockFlowPro.Shared/ @your-username
+
+# Database Migrations (Critical - requires DBA review)
+**/Migrations/ @your-username
+
+# Security-related files (Critical - requires security review)
+**/Authentication/ @your-username
+**/Authorization/ @your-username
+**/Security/ @your-username
+
+# API Documentation
+docs/API_DOCUMENTATION.md @your-username
+docs/openapi.yaml @your-username
+docs/StockFlowPro-API.postman_collection.json @your-username
+
+# Test Files
+**/*Test*.cs @your-username
+**/*Tests*.cs @your-username
+**/test*.* @your-username
+TESTING.md @your-username
+
+# Scripts and Automation
+*.ps1 @your-username
+*.sh @your-username
+*.bat @your-username
+
+# VS Code Configuration
+.vscode/ @your-username
+*.code-workspace @your-username
