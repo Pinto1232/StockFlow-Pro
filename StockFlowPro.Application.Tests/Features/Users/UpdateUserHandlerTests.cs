@@ -26,7 +26,7 @@ public class UpdateUserHandlerTests
     [Fact]
     public async Task Handle_ValidCommand_ShouldUpdateUserAndReturnDto()
     {
-        // Arrange
+
         var userId = Guid.NewGuid();
         var command = new UpdateUserCommand
         {
@@ -56,10 +56,10 @@ public class UpdateUserHandlerTests
             .Returns(Task.CompletedTask);
         _mockMapper.Setup(m => m.Map<UserDto>(existingUser)).Returns(updatedUserDto);
 
-        // Act
+
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
+
         result.Should().NotBeNull();
         result.FirstName.Should().Be("Jane");
         result.LastName.Should().Be("Smith");
@@ -75,7 +75,7 @@ public class UpdateUserHandlerTests
     [Fact]
     public async Task Handle_NonExistingUser_ShouldThrowKeyNotFoundException()
     {
-        // Arrange
+
         var userId = Guid.NewGuid();
         var command = new UpdateUserCommand
         {
@@ -89,7 +89,7 @@ public class UpdateUserHandlerTests
         _mockUserRepository.Setup(r => r.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
 
-        // Act & Assert
+
         await Assert.ThrowsAsync<KeyNotFoundException>(() => _handler.Handle(command, CancellationToken.None));
 
         _mockUserRepository.Verify(r => r.GetByIdAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
@@ -99,14 +99,14 @@ public class UpdateUserHandlerTests
     [Fact]
     public async Task Handle_NullCommand_ShouldThrowArgumentNullException()
     {
-        // Act & Assert
+
         await Assert.ThrowsAsync<ArgumentNullException>(() => _handler.Handle(null!, CancellationToken.None));
     }
 
     [Fact]
     public async Task Handle_EmptyGuidId_ShouldThrowKeyNotFoundException()
     {
-        // Arrange
+
         var command = new UpdateUserCommand
         {
             Id = Guid.Empty,
@@ -119,14 +119,14 @@ public class UpdateUserHandlerTests
         _mockUserRepository.Setup(r => r.GetByIdAsync(Guid.Empty, It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
 
-        // Act & Assert
+
         await Assert.ThrowsAsync<KeyNotFoundException>(() => _handler.Handle(command, CancellationToken.None));
     }
 
     [Fact]
     public async Task Handle_RepositoryUpdateThrowsException_ShouldPropagateException()
     {
-        // Arrange
+
         var userId = Guid.NewGuid();
         var command = new UpdateUserCommand
         {
@@ -144,7 +144,7 @@ public class UpdateUserHandlerTests
         _mockUserRepository.Setup(r => r.UpdateAsync(existingUser, It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Database error"));
 
-        // Act & Assert
+
         await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(command, CancellationToken.None));
     }
 
@@ -154,7 +154,7 @@ public class UpdateUserHandlerTests
     [InlineData("Jane", "Smith", "")]
     public async Task Handle_InvalidCommandData_ShouldStillProcessUpdate(string firstName, string lastName, string phoneNumber)
     {
-        // Arrange
+
         var userId = Guid.NewGuid();
         var command = new UpdateUserCommand
         {
@@ -182,10 +182,10 @@ public class UpdateUserHandlerTests
             .Returns(Task.CompletedTask);
         _mockMapper.Setup(m => m.Map<UserDto>(existingUser)).Returns(updatedUserDto);
 
-        // Act
+
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
+
         result.Should().NotBeNull();
         result.FirstName.Should().Be(firstName);
         result.LastName.Should().Be(lastName);

@@ -27,7 +27,6 @@ public class UsersControllerTests
     [Fact]
     public async Task GetAllUsers_ShouldReturnOkWithUsers()
     {
-        // Arrange
         var users = new List<UserDto>
         {
             new UserDto
@@ -44,10 +43,8 @@ public class UsersControllerTests
         _mockMediator.Setup(m => m.Send(It.IsAny<GetAllUsersQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(users);
 
-        // Act
         var result = await _controller.GetAllUsers();
 
-        // Assert
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
         var returnedUsers = okResult.Value.Should().BeAssignableTo<IEnumerable<UserDto>>().Subject;
         returnedUsers.Should().HaveCount(1);
@@ -59,22 +56,19 @@ public class UsersControllerTests
     [Fact]
     public async Task GetAllUsers_WithActiveOnlyTrue_ShouldPassActiveOnlyParameter()
     {
-        // Arrange
         var users = new List<UserDto>();
         _mockMediator.Setup(m => m.Send(It.IsAny<GetAllUsersQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(users);
 
-        // Act
         await _controller.GetAllUsers(activeOnly: true);
 
-        // Assert
         _mockMediator.Verify(m => m.Send(It.Is<GetAllUsersQuery>(q => q.ActiveOnly), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task GetUserById_ExistingUser_ShouldReturnOkWithUser()
     {
-        // Arrange
+
         var userId = Guid.NewGuid();
         var user = new UserDto
         {
@@ -89,10 +83,10 @@ public class UsersControllerTests
         _mockMediator.Setup(m => m.Send(It.IsAny<GetUserByIdQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
-        // Act
+
         var result = await _controller.GetUserById(userId);
 
-        // Assert
+
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
         var returnedUser = okResult.Value.Should().BeOfType<UserDto>().Subject;
         returnedUser.Id.Should().Be(userId);
@@ -104,15 +98,15 @@ public class UsersControllerTests
     [Fact]
     public async Task GetUserById_NonExistingUser_ShouldReturnNotFound()
     {
-        // Arrange
+
         var userId = Guid.NewGuid();
         _mockMediator.Setup(m => m.Send(It.IsAny<GetUserByIdQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((UserDto?)null);
 
-        // Act
+
         var result = await _controller.GetUserById(userId);
 
-        // Assert
+
         var notFoundResult = result.Result.Should().BeOfType<NotFoundObjectResult>().Subject;
         notFoundResult.Value.Should().Be($"User with ID {userId} not found");
     }
@@ -120,7 +114,7 @@ public class UsersControllerTests
     [Fact]
     public async Task CreateUser_ValidUser_ShouldReturnCreatedAtAction()
     {
-        // Arrange
+
         var createUserDto = new CreateUserDto
         {
             FirstName = "John",
@@ -157,10 +151,10 @@ public class UsersControllerTests
         _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
             .ReturnsAsync(createdUser);
 
-        // Act
+
         var result = await _controller.CreateUser(createUserDto);
 
-        // Assert
+
         var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
         createdResult.ActionName.Should().Be(nameof(UsersController.GetUserById));
         createdResult.RouteValues!["id"].Should().Be(createdUser.Id);
@@ -175,7 +169,7 @@ public class UsersControllerTests
     [Fact]
     public async Task UpdateUser_ExistingUser_ShouldReturnOkWithUpdatedUser()
     {
-        // Arrange
+
         var userId = Guid.NewGuid();
         var updateUserDto = new UpdateUserDto
         {
@@ -211,10 +205,10 @@ public class UsersControllerTests
         _mockMediator.Setup(m => m.Send(It.IsAny<UpdateUserCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(updatedUser);
 
-        // Act
+
         var result = await _controller.UpdateUser(userId, updateUserDto);
 
-        // Assert
+
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
         var returnedUser = okResult.Value.Should().BeOfType<UserDto>().Subject;
         returnedUser.Id.Should().Be(userId);
@@ -227,7 +221,7 @@ public class UsersControllerTests
     [Fact]
     public async Task UpdateUser_NonExistingUser_ShouldReturnNotFound()
     {
-        // Arrange
+
         var userId = Guid.NewGuid();
         var updateUserDto = new UpdateUserDto
         {
@@ -242,10 +236,10 @@ public class UsersControllerTests
         _mockMediator.Setup(m => m.Send(It.IsAny<UpdateUserCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new KeyNotFoundException());
 
-        // Act
+
         var result = await _controller.UpdateUser(userId, updateUserDto);
 
-        // Assert
+
         var notFoundResult = result.Result.Should().BeOfType<NotFoundObjectResult>().Subject;
         notFoundResult.Value.Should().Be($"User with ID {userId} not found");
     }
@@ -253,15 +247,15 @@ public class UsersControllerTests
     [Fact]
     public async Task DeleteUser_ExistingUser_ShouldReturnNoContent()
     {
-        // Arrange
+
         var userId = Guid.NewGuid();
         _mockMediator.Setup(m => m.Send(It.IsAny<DeleteUserCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        // Act
+
         var result = await _controller.DeleteUser(userId);
 
-        // Assert
+
         result.Should().BeOfType<NoContentResult>();
 
         _mockMediator.Verify(m => m.Send(It.Is<DeleteUserCommand>(c => c.Id == userId), It.IsAny<CancellationToken>()), Times.Once);
@@ -270,15 +264,15 @@ public class UsersControllerTests
     [Fact]
     public async Task DeleteUser_NonExistingUser_ShouldReturnNotFound()
     {
-        // Arrange
+
         var userId = Guid.NewGuid();
         _mockMediator.Setup(m => m.Send(It.IsAny<DeleteUserCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
-        // Act
+
         var result = await _controller.DeleteUser(userId);
 
-        // Assert
+
         var notFoundResult = result.Should().BeOfType<NotFoundObjectResult>().Subject;
         notFoundResult.Value.Should().Be($"User with ID {userId} not found");
     }
@@ -286,7 +280,7 @@ public class UsersControllerTests
     [Fact]
     public async Task SearchUsers_WithSearchTerm_ShouldReturnMatchingUsers()
     {
-        // Arrange
+
         var searchTerm = "john";
         var users = new List<UserDto>
         {
@@ -304,10 +298,10 @@ public class UsersControllerTests
         _mockMediator.Setup(m => m.Send(It.IsAny<SearchUsersQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(users);
 
-        // Act
+
         var result = await _controller.SearchUsers(searchTerm);
 
-        // Assert
+
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
         var returnedUsers = okResult.Value.Should().BeAssignableTo<IEnumerable<UserDto>>().Subject;
         returnedUsers.Should().HaveCount(1);
@@ -318,22 +312,22 @@ public class UsersControllerTests
     [Fact]
     public async Task SearchUsers_WithNullSearchTerm_ShouldUseEmptyString()
     {
-        // Arrange
+
         var users = new List<UserDto>();
         _mockMediator.Setup(m => m.Send(It.IsAny<SearchUsersQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(users);
 
-        // Act
+
         await _controller.SearchUsers(null!);
 
-        // Assert
+
         _mockMediator.Verify(m => m.Send(It.Is<SearchUsersQuery>(q => q.SearchTerm == string.Empty), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task ToggleUserStatus_ExistingUser_ShouldReturnOkWithUpdatedUser()
     {
-        // Arrange
+
         var userId = Guid.NewGuid();
         var isActive = false;
         var updatedUser = new UserDto
@@ -348,10 +342,10 @@ public class UsersControllerTests
         _mockMediator.Setup(m => m.Send(It.IsAny<ToggleUserStatusCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(updatedUser);
 
-        // Act
+
         var result = await _controller.ToggleUserStatus(userId, isActive);
 
-        // Assert
+
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
         var returnedUser = okResult.Value.Should().BeOfType<UserDto>().Subject;
         returnedUser.IsActive.Should().Be(isActive);
@@ -362,17 +356,17 @@ public class UsersControllerTests
     [Fact]
     public async Task ToggleUserStatus_NonExistingUser_ShouldReturnNotFound()
     {
-        // Arrange
+
         var userId = Guid.NewGuid();
         var isActive = false;
 
         _mockMediator.Setup(m => m.Send(It.IsAny<ToggleUserStatusCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new KeyNotFoundException());
 
-        // Act
+
         var result = await _controller.ToggleUserStatus(userId, isActive);
 
-        // Assert
+
         var notFoundResult = result.Result.Should().BeOfType<NotFoundObjectResult>().Subject;
         notFoundResult.Value.Should().Be($"User with ID {userId} not found");
     }

@@ -26,7 +26,7 @@ public class GetUserByIdHandlerTests
     [Fact]
     public async Task Handle_ExistingUserId_ShouldReturnUserDto()
     {
-        // Arrange
+
         var userId = Guid.NewGuid();
         var query = new GetUserByIdQuery { Id = userId };
         
@@ -47,10 +47,10 @@ public class GetUserByIdHandlerTests
             .ReturnsAsync(user);
         _mockMapper.Setup(m => m.Map<UserDto>(user)).Returns(userDto);
 
-        // Act
+
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        // Assert
+
         result.Should().NotBeNull();
         result!.Id.Should().Be(userId);
         result.FirstName.Should().Be("John");
@@ -64,17 +64,17 @@ public class GetUserByIdHandlerTests
     [Fact]
     public async Task Handle_NonExistingUserId_ShouldReturnNull()
     {
-        // Arrange
+
         var userId = Guid.NewGuid();
         var query = new GetUserByIdQuery { Id = userId };
 
         _mockUserRepository.Setup(r => r.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
 
-        // Act
+
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        // Assert
+
         result.Should().BeNull();
 
         _mockUserRepository.Verify(r => r.GetByIdAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
@@ -84,16 +84,16 @@ public class GetUserByIdHandlerTests
     [Fact]
     public async Task Handle_EmptyGuid_ShouldReturnNull()
     {
-        // Arrange
+
         var query = new GetUserByIdQuery { Id = Guid.Empty };
 
         _mockUserRepository.Setup(r => r.GetByIdAsync(Guid.Empty, It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
 
-        // Act
+
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        // Assert
+
         result.Should().BeNull();
 
         _mockUserRepository.Verify(r => r.GetByIdAsync(Guid.Empty, It.IsAny<CancellationToken>()), Times.Once);
@@ -102,21 +102,21 @@ public class GetUserByIdHandlerTests
     [Fact]
     public async Task Handle_RepositoryThrowsException_ShouldPropagateException()
     {
-        // Arrange
+
         var userId = Guid.NewGuid();
         var query = new GetUserByIdQuery { Id = userId };
 
         _mockUserRepository.Setup(r => r.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Database error"));
 
-        // Act & Assert
+
         await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(query, CancellationToken.None));
     }
 
     [Fact]
     public async Task Handle_NullQuery_ShouldThrowArgumentNullException()
     {
-        // Act & Assert
+
         await Assert.ThrowsAsync<ArgumentNullException>(() => _handler.Handle(null!, CancellationToken.None));
     }
 }

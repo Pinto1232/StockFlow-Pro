@@ -1,4 +1,4 @@
-﻿namespace StockFlowPro.Infrastructure;
+namespace StockFlowPro.Infrastructure;
 
 public class Class1
 {

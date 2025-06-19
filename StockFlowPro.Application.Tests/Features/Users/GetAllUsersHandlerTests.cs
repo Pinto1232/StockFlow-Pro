@@ -26,7 +26,7 @@ public class GetAllUsersHandlerTests
     [Fact]
     public async Task Handle_GetAllUsers_ShouldReturnAllUsers()
     {
-        // Arrange
+
         var query = new GetAllUsersQuery { ActiveOnly = false };
         
         var users = new List<User>
@@ -64,10 +64,10 @@ public class GetAllUsersHandlerTests
         _mockMapper.Setup(m => m.Map<IEnumerable<UserDto>>(users))
             .Returns(userDtos);
 
-        // Act
+
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        // Assert
+
         result.Should().NotBeNull();
         result.Should().HaveCount(2);
         result.First().FirstName.Should().Be("John");
@@ -81,7 +81,7 @@ public class GetAllUsersHandlerTests
     [Fact]
     public async Task Handle_GetActiveUsersOnly_ShouldReturnActiveUsers()
     {
-        // Arrange
+
         var query = new GetAllUsersQuery { ActiveOnly = true };
         
         var activeUsers = new List<User>
@@ -108,10 +108,10 @@ public class GetAllUsersHandlerTests
         _mockMapper.Setup(m => m.Map<IEnumerable<UserDto>>(activeUsers))
             .Returns(userDtos);
 
-        // Act
+
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        // Assert
+
         result.Should().NotBeNull();
         result.Should().HaveCount(1);
         result.First().FirstName.Should().Be("John");
@@ -125,7 +125,7 @@ public class GetAllUsersHandlerTests
     [Fact]
     public async Task Handle_EmptyUserList_ShouldReturnEmptyCollection()
     {
-        // Arrange
+
         var query = new GetAllUsersQuery { ActiveOnly = false };
         var emptyUsers = new List<User>();
         var emptyUserDtos = new List<UserDto>();
@@ -135,10 +135,10 @@ public class GetAllUsersHandlerTests
         _mockMapper.Setup(m => m.Map<IEnumerable<UserDto>>(emptyUsers))
             .Returns(emptyUserDtos);
 
-        // Act
+
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        // Assert
+
         result.Should().NotBeNull();
         result.Should().BeEmpty();
 
@@ -149,27 +149,27 @@ public class GetAllUsersHandlerTests
     [Fact]
     public async Task Handle_NullQuery_ShouldThrowArgumentNullException()
     {
-        // Act & Assert
+
         await Assert.ThrowsAsync<ArgumentNullException>(() => _handler.Handle(null!, CancellationToken.None));
     }
 
     [Fact]
     public async Task Handle_RepositoryThrowsException_ShouldPropagateException()
     {
-        // Arrange
+
         var query = new GetAllUsersQuery { ActiveOnly = false };
 
         _mockUserRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Database error"));
 
-        // Act & Assert
+
         await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(query, CancellationToken.None));
     }
 
     [Fact]
     public async Task Handle_MapperThrowsException_ShouldPropagateException()
     {
-        // Arrange
+
         var query = new GetAllUsersQuery { ActiveOnly = false };
         var users = new List<User>
         {
@@ -181,7 +181,7 @@ public class GetAllUsersHandlerTests
         _mockMapper.Setup(m => m.Map<IEnumerable<UserDto>>(users))
             .Throws(new InvalidOperationException("Mapping error"));
 
-        // Act & Assert
+
         await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(query, CancellationToken.None));
     }
 }

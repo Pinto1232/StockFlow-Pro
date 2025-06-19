@@ -14,7 +14,6 @@ public class PersistentMockDataService : IPersistentMockDataService
         _logger = logger;
         _dataFilePath = Path.Combine(environment.ContentRootPath, "App_Data", "mock-users.json");
         
-        // Ensure directory exists
         var directory = Path.GetDirectoryName(_dataFilePath);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
         {

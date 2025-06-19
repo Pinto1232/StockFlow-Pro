@@ -31,7 +31,6 @@ public class JsonMockDataStorageService : IMockDataStorageService
 
     public async Task<List<UserDto>> GetUsersAsync()
     {
-        // Check cache first
         if (_cachedUsers != null && DateTime.UtcNow - _lastCacheUpdate < _cacheExpiry)
         {
             return new List<UserDto>(_cachedUsers);
@@ -40,7 +39,6 @@ public class JsonMockDataStorageService : IMockDataStorageService
         await _fileLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            // Double-check cache after acquiring lock
             if (_cachedUsers != null && DateTime.UtcNow - _lastCacheUpdate < _cacheExpiry)
             {
                 return new List<UserDto>(_cachedUsers);
@@ -54,7 +52,6 @@ public class JsonMockDataStorageService : IMockDataStorageService
 
             var users = await GetUsersFromFileAsync().ConfigureAwait(false);
             
-            // Update cache
             _cachedUsers = users;
             _lastCacheUpdate = DateTime.UtcNow;
             
@@ -152,7 +149,6 @@ public class JsonMockDataStorageService : IMockDataStorageService
             using var fileStream = new FileStream(_dataFilePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true);
             await JsonSerializer.SerializeAsync(fileStream, users, _jsonOptions).ConfigureAwait(false);
             
-            // Update cache
             _cachedUsers = new List<UserDto>(users);
             _lastCacheUpdate = DateTime.UtcNow;
             
@@ -175,13 +171,11 @@ public class JsonMockDataStorageService : IMockDataStorageService
     {
         var users = await GetUsersAsync().ConfigureAwait(false);
         
-        // Ensure unique ID
         if (user.Id == Guid.Empty)
         {
             user.Id = Guid.NewGuid();
         }
         
-        // Check for duplicate email
         if (users.Any(u => u.Email.Equals(user.Email, StringComparison.OrdinalIgnoreCase)))
         {
             throw new InvalidOperationException($"User with email {user.Email} already exists");
@@ -204,13 +198,11 @@ public class JsonMockDataStorageService : IMockDataStorageService
             return null;
         }
 
-        // Check for duplicate email (excluding current user)
         if (users.Any(u => u.Id != id && u.Email.Equals(updatedUser.Email, StringComparison.OrdinalIgnoreCase)))
         {
             throw new InvalidOperationException($"User with email {updatedUser.Email} already exists");
         }
 
-        // Update properties
         existingUser.FirstName = updatedUser.FirstName;
         existingUser.LastName = updatedUser.LastName;
         existingUser.Email = updatedUser.Email;
