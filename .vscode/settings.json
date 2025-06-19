@@ -1,3 +1,15 @@
 {
-    "zencoder.enableRepoIndexing": true
+  "yaml.schemas": {},
+  "yaml.schemaStore.enable": false,
+  "yaml.validate": false,
+  "files.associations": {
+    ".github/ISSUE_TEMPLATE/config.yml": "plaintext",
+    ".github/workflows/project-automation.yml": "plaintext",
+    ".github/workflows/*.yml": "plaintext",
+    ".github/workflows/*.yaml": "plaintext"
+  },
+  "redhat.telemetry.enabled": false,
+  "[yaml]": {
+    "editor.defaultFormatter": "vscode.json"
+  }
 }

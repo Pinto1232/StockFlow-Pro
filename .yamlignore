@@ -1,0 +1,2 @@
+# YAML files to ignore from schema validation
+.github/ISSUE_TEMPLATE/config.yml
