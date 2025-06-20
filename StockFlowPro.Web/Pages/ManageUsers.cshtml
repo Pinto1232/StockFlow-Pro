@@ -33,8 +33,14 @@
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Users</h5>
+            <h5 class="mb-0">Users (Database + Mock Data)</h5>
             <div class="d-flex align-items-center">
+                <button class="btn btn-sm btn-info me-2" onclick="showSyncStatus()">
+                    <i class="fas fa-sync"></i> Sync Status
+                </button>
+                <button class="btn btn-sm btn-warning me-2" onclick="syncDataSources()">
+                    <i class="fas fa-database"></i> Sync Now
+                </button>
                 <span id="userCount" class="badge bg-primary me-3">0 users</span>
                 <div class="dropdown">
                     <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -122,6 +128,32 @@
       <div class="modal-footer justify-content-between">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary" id="saveUserBtn">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sync Status Modal -->
+<div class="modal fade" id="syncStatusModal" tabindex="-1" aria-labelledby="syncStatusModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="syncStatusModalLabel">Data Source Sync Status</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="syncStatusContent">
+          <div class="text-center">
+            <output class="spinner-border">
+              <span class="visually-hidden">Loading...</span>
+            </output>
+            <p class="mt-2">Checking sync status...</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="syncDataSources()">Sync Now</button>
       </div>
     </div>
   </div>
@@ -368,7 +400,7 @@ class UserManagement {
         this.showLoadingState();
 
         try {
-            const response = await fetch('/api/users/mock');
+            const response = await fetch('/api/user-management/users');
             if (!response.ok) {
                 throw new Error(`Failed to load users: ${response.status}`);
             }
@@ -651,7 +683,7 @@ class UserManagement {
         }
 
         try {
-            const url = id ? `/api/users/mock/${id}` : '/api/users/mock';
+            const url = id ? `/api/user-management/users/${id}` : '/api/user-management/users';
             const method = id ? 'PUT' : 'POST';
             
             const response = await fetch(url, {
@@ -668,7 +700,7 @@ class UserManagement {
             modal?.hide();
             
             await this.loadUsers();
-            this.showSnackbar(id ? 'User updated successfully!' : 'User created successfully!', 'info');
+            this.showSnackbar(id ? 'User updated successfully in both database and mock data!' : 'User created successfully in both database and mock data!', 'info');
         } catch (error) {
             console.error('Error saving user:', error);
             this.showSnackbar('Failed to save user', 'error');
@@ -679,7 +711,7 @@ class UserManagement {
         if (!this.userToDelete) return;
 
         try {
-            const response = await fetch(`/api/users/mock/${this.userToDelete}`, {
+            const response = await fetch(`/api/user-management/users/${this.userToDelete}`, {
                 method: 'DELETE'
             });
 
@@ -688,7 +720,7 @@ class UserManagement {
             }
 
             await this.loadUsers();
-            this.showSnackbar('User deleted successfully!', 'info');
+            this.showSnackbar('User deleted successfully from both database and mock data!', 'info');
             this.userToDelete = null;
         } catch (error) {
             console.error('Error deleting user:', error);
@@ -737,5 +769,117 @@ function confirmDelete() {
 document.addEventListener('DOMContentLoaded', () => {
     userManagement = new UserManagement();
 });
+
+async function showSyncStatus() {
+    const modal = new bootstrap.Modal(document.getElementById('syncStatusModal'));
+    modal.show();
+    
+    try {
+        const response = await fetch('/api/user-management/sync-status');
+        if (!response.ok) {
+            throw new Error('Failed to get sync status');
+        }
+        
+        const status = await response.json();
+        const syncStatusContent = document.getElementById('syncStatusContent');
+        
+        const syncIcon = status.inSync ? 
+            '<i class="fas fa-check-circle text-success"></i>' : 
+            '<i class="fas fa-exclamation-triangle text-warning"></i>';
+        
+        const syncText = status.inSync ? 'In Sync' : 'Out of Sync';
+        const syncClass = status.inSync ? 'text-success' : 'text-warning';
+        
+        let issuesHtml = '';
+        if (status.syncIssues && status.syncIssues.length > 0) {
+            issuesHtml = `
+                <div class="alert alert-warning mt-3">
+                    <h6>Issues:</h6>
+                    <ul class="mb-0">
+                        ${status.syncIssues.map(issue => `<li>${issue}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+        
+        syncStatusContent.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-database fa-2x text-primary mb-2"></i>
+                            <h5>Database</h5>
+                            <p class="h4">${status.databaseUserCount}</p>
+                            <small class="text-muted">Users</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-file-alt fa-2x text-info mb-2"></i>
+                            <h5>Mock Data</h5>
+                            <p class="h4">${status.mockDataUserCount}</p>
+                            <small class="text-muted">Users</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <h5 class="${syncClass}">
+                    ${syncIcon} ${syncText}
+                </h5>
+                <p class="text-muted">
+                    Last sync: ${status.lastSyncTime ? new Date(status.lastSyncTime).toLocaleString() : 'Never'}
+                </p>
+            </div>
+            ${issuesHtml}
+        `;
+    } catch (error) {
+        console.error('Error getting sync status:', error);
+        document.getElementById('syncStatusContent').innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Failed to get sync status: ${error.message}
+            </div>
+        `;
+    }
+}
+
+async function syncDataSources() {
+    try {
+        const response = await fetch('/api/user-management/sync', {
+            method: 'POST'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to sync data sources');
+        }
+        
+        const result = await response.json();
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('syncStatusModal'));
+        if (modal) {
+            modal.hide();
+        }
+        
+        if (userManagement) {
+            await userManagement.loadUsers();
+        }
+        
+        if (typeof userManagement?.showSnackbar === 'function') {
+            userManagement.showSnackbar('Data sources synchronized successfully!', 'info');
+        } else {
+            alert('Data sources synchronized successfully!');
+        }
+    } catch (error) {
+        console.error('Error syncing data sources:', error);
+        if (typeof userManagement?.showSnackbar === 'function') {
+            userManagement.showSnackbar('Failed to sync data sources: ' + error.message, 'error');
+        } else {
+            alert('Failed to sync data sources: ' + error.message);
+        }
+    }
+}
 </script>
 }

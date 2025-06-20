@@ -3,6 +3,7 @@ using StockFlowPro.Application.Mappings;
 using StockFlowPro.Domain.Repositories;
 using StockFlowPro.Infrastructure.Data;
 using StockFlowPro.Infrastructure.Repositories;
+using StockFlowPro.Web.Services;
 using FluentValidation;
 using MediatR;
 using System.Reflection;
@@ -22,6 +23,10 @@ builder.Services.AddMediatR(typeof(StockFlowPro.Application.Commands.Users.Creat
 builder.Services.AddAutoMapper(typeof(UserMappingProfile));
 builder.Services.AddValidatorsFromAssembly(typeof(StockFlowPro.Application.Validators.CreateUserCommandValidator).Assembly);
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IMockDataStorageService, JsonMockDataStorageService>();
+builder.Services.AddScoped<IDataSourceService, HybridDataSourceService>();
+builder.Services.AddScoped<IDualDataService, DualDataService>();
+builder.Services.AddHostedService<DatabaseInitializationService>();
 
 builder.Services.AddAuthentication("MyCookieAuth")
     .AddCookie("MyCookieAuth", options =>

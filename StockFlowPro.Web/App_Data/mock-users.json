@@ -30,11 +30,11 @@
   {
     "id": "550e8400-e29b-41d4-a716-446655440003",
     "firstName": "Bob",
-    "lastName": "Marley",
+    "lastName": "User",
     "fullName": "",
-    "email": "bob@stockflowpro.com",
+    "email": "user@stockflowpro.com",
     "phoneNumber": "\u002B1-555-0103",
-    "dateOfBirth": "1992-12-10T00:00:00",
+    "dateOfBirth": "1992-12-10T00:00:00Z",
     "age": 0,
     "isActive": true,
     "createdAt": "0001-01-01T00:00:00",
@@ -54,33 +54,5 @@
     "createdAt": "0001-01-01T00:00:00",
     "updatedAt": null,
     "role": "User"
-  },
-  {
-    "id": "fedbd507-833c-4098-8a01-7eb3e1556cf4",
-    "firstName": "Pinto",
-    "lastName": "Manuel",
-    "fullName": "",
-    "email": "pintotnet@gmail.com",
-    "phoneNumber": "0835270710",
-    "dateOfBirth": "2025-06-27T00:00:00",
-    "age": 0,
-    "isActive": true,
-    "createdAt": "0001-01-01T00:00:00",
-    "updatedAt": null,
-    "role": "Admin"
-  },
-  {
-    "id": "183d49b0-dfa9-41b3-b685-3b28b200ca66",
-    "firstName": "Fortunato",
-    "lastName": "Raul",
-    "fullName": "",
-    "email": "raul@gmail.com",
-    "phoneNumber": "0743401906",
-    "dateOfBirth": "2025-06-25T00:00:00",
-    "age": 0,
-    "isActive": true,
-    "createdAt": "0001-01-01T00:00:00",
-    "updatedAt": null,
-    "role": "Manager"
   }
 ]
