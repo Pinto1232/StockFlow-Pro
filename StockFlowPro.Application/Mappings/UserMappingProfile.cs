@@ -15,10 +15,10 @@ public class UserMappingProfile : Profile
             .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role));
 
         CreateMap<CreateUserCommand, User>()
-            .ConstructUsing(src => new User(src.FirstName, src.LastName, src.Email, src.PhoneNumber, src.DateOfBirth, src.Role));
+            .ConstructUsing(src => new User(src.FirstName, src.LastName, src.Email, src.PhoneNumber, src.DateOfBirth, src.Role, src.PasswordHash));
         CreateMap<CreateUserDto, CreateUserCommand>();
         CreateMap<CreateUserDto, User>()
-            .ConstructUsing(src => new User(src.FirstName, src.LastName, src.Email, src.PhoneNumber, src.DateOfBirth, src.Role));
+            .ConstructUsing(src => new User(src.FirstName, src.LastName, src.Email, src.PhoneNumber, src.DateOfBirth, src.Role, src.PasswordHash));
 
         CreateMap<UpdateUserDto, UpdateUserCommand>();
         CreateMap<UpdateUserDto, User>()

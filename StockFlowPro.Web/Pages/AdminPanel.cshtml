@@ -1,51 +1,180 @@
 @page
 @model AdminPanelModel
+@using StockFlowPro.Web.Authorization
+@using StockFlowPro.Web.Extensions
 @{
     ViewData["Title"] = "Admin Panel";
 }
 
-<div class="container py-5">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="display-4 mb-0">Admin Panel</h1>  
-            </div>
-            <div class="alert alert-success" role="alert">
-                <h4 class="alert-heading">Welcome, Admin!</h4>
-                <p>You have successfully logged in and have access to the admin panel.</p>
-                <hr>
-                <p class="mb-0">From here you can manage your inventory system.</p>
-            </div>
-            
-            <div class="row mt-4">
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">User Management</h5>
-                            <p class="card-text">Manage system users and their permissions.</p>
-                            <a href="/ManageUsers" class="btn btn-primary">Manage Users</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Product Management</h5>
-                            <p class="card-text">Add, edit, and manage your product inventory.</p>
-                            <a href="#" class="btn btn-primary">Manage Products</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Reports</h5>
-                            <p class="card-text">View comprehensive reports and analytics.</p>
-                            <a href="#" class="btn btn-primary">View Reports</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="admin-panel-container">
+    <!-- Header -->
+    <div class="admin-header">
+        <h1 class="admin-title">Admin Panel</h1>
+        <p class="admin-subtitle">Central hub for managing your application</p>
+    </div>
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+        <div class="banner-icon">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="banner-content">
+            <h4 class="banner-title">Welcome, Admin!</h4>
+            <p class="banner-text">You have full access to the system. Use these tools to manage your inventory, users, and reports.</p>
         </div>
     </div>
+
+    <!-- Admin Cards -->
+    <div class="row mt-5">
+        @if (User.HasPermission(StockFlowPro.Web.Authorization.Permissions.Users.ViewAll))
+        {
+            <!-- User Management Card -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="admin-card">
+                    <div class="card-icon-wrapper">
+                        <i class="fas fa-users-cog card-icon"></i>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">User Management</h5>
+                        <p class="card-text">Manage system users, roles, and permissions to ensure security and proper access control.</p>
+                        <a href="/ManageUsers" class="btn btn-primary">Go to Users</a>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (User.HasPermission(StockFlowPro.Web.Authorization.Permissions.System.ViewAdminPanel))
+        {
+            <!-- Product Management Card -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="admin-card">
+                    <div class="card-icon-wrapper">
+                        <i class="fas fa-box-open card-icon"></i>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Product Management</h5>
+                        <p class="card-text">Add, edit, and organize your product inventory, including stock levels and pricing.</p>
+                        <a href="#" class="btn btn-success">Manage Products</a>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (User.HasPermission(StockFlowPro.Web.Authorization.Permissions.Reports.ViewBasic))
+        {
+            <!-- Reports Card -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="admin-card">
+                    <div class="card-icon-wrapper">
+                        <i class="fas fa-chart-pie card-icon"></i>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Reports & Analytics</h5>
+                        <p class="card-text">View detailed reports and analytics to gain insights into your business performance.</p>
+                        <a href="#" class="btn btn-info">View Reports</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 </div>
+
+<style>
+    .admin-panel-container {
+        padding: 3rem 1.5rem;
+        background-color: #f9fafb;
+        min-height: 100vh;
+    }
+
+    .admin-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .admin-title {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .admin-subtitle {
+        font-size: 1.2rem;
+        color: #7f8c8d;
+    }
+
+    .welcome-banner {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .banner-icon {
+        font-size: 3rem;
+        margin-right: 1.5rem;
+    }
+
+    .banner-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .banner-text {
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .admin-card {
+        background-color: white;
+        border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .admin-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    }
+
+    .card-icon-wrapper {
+        background-color: #e8ecf1;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .card-icon {
+        font-size: 3.5rem;
+        color: #667eea;
+    }
+
+    .card-body {
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .card-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+    }
+
+    .card-text {
+        color: #7f8c8d;
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn {
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+    }
+</style>

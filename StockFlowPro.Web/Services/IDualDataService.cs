@@ -10,6 +10,7 @@ public interface IDualDataService
     Task<UserDto> CreateUserAsync(CreateUserDto createUserDto);
     Task<UserDto?> UpdateUserAsync(Guid id, UpdateUserDto updateUserDto);
     Task<bool> DeleteUserAsync(Guid id);
+    Task<bool> UpdateUserPasswordAsync(string email, string newPasswordHash);
     Task<IEnumerable<UserDto>> SearchUsersAsync(string searchTerm);
     Task SyncDataSourcesAsync();
     Task<DataSourceSyncStatus> GetSyncStatusAsync();

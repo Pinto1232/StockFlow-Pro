@@ -1,6 +1,8 @@
 using System.Text.Json;
 using StockFlowPro.Application.DTOs;
 using StockFlowPro.Domain.Enums;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace StockFlowPro.Web.Services;
 
@@ -75,6 +77,15 @@ public class JsonMockDataStorageService : IMockDataStorageService
         return await JsonSerializer.DeserializeAsync<List<UserDto>>(fileStream, _jsonOptions).ConfigureAwait(false) ?? new List<UserDto>();
     }
 
+    private static string HashPasswordForDefaultUser(string password, string salt)
+    {
+        using var sha256 = SHA256.Create();
+        var saltedPassword = password + salt;
+        var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(saltedPassword));
+        var hashedPassword = Convert.ToBase64String(hashedBytes);
+        return $"{hashedPassword}:{salt}";
+    }
+
     private async Task InitializeDefaultDataInternalAsync()
     {
         var defaultUsers = new List<UserDto>
@@ -84,44 +95,60 @@ public class JsonMockDataStorageService : IMockDataStorageService
                 Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440001"), 
                 FirstName = "John", 
                 LastName = "Admin", 
+                FullName = "John Admin",
                 Email = "admin@stockflowpro.com", 
                 PhoneNumber = "+1-555-0101", 
                 Role = UserRole.Admin,
                 IsActive = true,
-                DateOfBirth = new DateTime(1985, 5, 15, 0, 0, 0, DateTimeKind.Utc)
+                DateOfBirth = new DateTime(1985, 5, 15, 0, 0, 0, DateTimeKind.Utc),
+                Age = DateTime.UtcNow.Year - 1985,
+                CreatedAt = DateTime.UtcNow,
+                PasswordHash = HashPasswordForDefaultUser("admin123", "550e8400-e29b-41d4-a716-446655440001")
             },
             new UserDto 
             { 
                 Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440002"), 
                 FirstName = "Jane", 
                 LastName = "Manager", 
+                FullName = "Jane Manager",
                 Email = "manager@stockflowpro.com", 
                 PhoneNumber = "+1-555-0102", 
                 Role = UserRole.Manager,
                 IsActive = true,
-                DateOfBirth = new DateTime(1990, 8, 22, 0, 0, 0, DateTimeKind.Utc)
+                DateOfBirth = new DateTime(1990, 8, 22, 0, 0, 0, DateTimeKind.Utc),
+                Age = DateTime.UtcNow.Year - 1990,
+                CreatedAt = DateTime.UtcNow,
+                PasswordHash = HashPasswordForDefaultUser("manager123", "550e8400-e29b-41d4-a716-446655440002")
             },
             new UserDto 
             { 
                 Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440003"), 
                 FirstName = "Bob", 
                 LastName = "User", 
+                FullName = "Bob User",
                 Email = "user@stockflowpro.com", 
                 PhoneNumber = "+1-555-0103", 
                 Role = UserRole.User,
                 IsActive = true,
-                DateOfBirth = new DateTime(1992, 12, 10, 0, 0, 0, DateTimeKind.Utc)
+                DateOfBirth = new DateTime(1992, 12, 10, 0, 0, 0, DateTimeKind.Utc),
+                Age = DateTime.UtcNow.Year - 1992,
+                CreatedAt = DateTime.UtcNow,
+                PasswordHash = HashPasswordForDefaultUser("user123", "550e8400-e29b-41d4-a716-446655440003")
             },
             new UserDto 
             { 
                 Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440004"), 
                 FirstName = "Alice", 
                 LastName = "Smith", 
+                FullName = "Alice Smith",
                 Email = "alice.smith@stockflowpro.com", 
                 PhoneNumber = "+1-555-0104", 
                 Role = UserRole.User,
                 IsActive = false,
-                DateOfBirth = new DateTime(1988, 3, 7, 0, 0, 0, DateTimeKind.Utc)
+                DateOfBirth = new DateTime(1988, 3, 7, 0, 0, 0, DateTimeKind.Utc),
+                Age = DateTime.UtcNow.Year - 1988,
+                CreatedAt = DateTime.UtcNow,
+                PasswordHash = HashPasswordForDefaultUser("alice123", "550e8400-e29b-41d4-a716-446655440004")
             }
         };
 

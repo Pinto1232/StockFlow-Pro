@@ -28,20 +28,43 @@ public class DualDataService : IDualDataService
 
     public async Task<IEnumerable<UserDto>> GetAllUsersAsync(bool activeOnly = false)
     {
-        _logger.LogInformation("Getting all users from database (primary source)");
+        _logger.LogInformation("Getting all users from both database and mock data sources");
         
+        var allUsers = new List<UserDto>();
+        var userIds = new HashSet<Guid>();
+
         try
         {
             var query = new GetAllUsersQuery { ActiveOnly = activeOnly };
-            var users = await _mediator.Send(query);
-            return users;
+            var databaseUsers = await _mediator.Send(query);
+            
+            allUsers.AddRange(databaseUsers.Where(user => userIds.Add(user.Id)));
+            
+            _logger.LogInformation("Retrieved {Count} users from database", databaseUsers.Count());
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to get users from database, falling back to mock data");
-            var mockUsers = await _mockDataService.GetUsersAsync();
-            return activeOnly ? mockUsers.Where(u => u.IsActive) : mockUsers;
+            _logger.LogWarning(ex, "Failed to get users from database");
         }
+
+        try
+        {
+            var mockUsers = await _mockDataService.GetUsersAsync();
+            var filteredMockUsers = activeOnly ? mockUsers.Where(u => u.IsActive) : mockUsers;
+            var initialUserCount = allUsers.Count;
+            
+            allUsers.AddRange(filteredMockUsers.Where(user => userIds.Add(user.Id)));
+            
+            var additionalUsersFromMock = allUsers.Count - initialUserCount;
+            _logger.LogInformation("Retrieved {Count} additional users from mock data", additionalUsersFromMock);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to get users from mock data");
+        }
+
+        _logger.LogInformation("Total users retrieved: {Count}", allUsers.Count);
+        return allUsers;
     }
 
     public async Task<UserDto?> GetUserByIdAsync(Guid id)
@@ -62,24 +85,63 @@ public class DualDataService : IDualDataService
 
     public async Task<UserDto?> GetUserByEmailAsync(string email)
     {
-        _logger.LogInformation("Getting user by email {Email} from database", email);
+        _logger.LogInformation("Getting user by email {Email} from both database and mock data", email);
         
         try
         {
+            _logger.LogInformation("Searching for user by email {Email} in database", email);
             var query = new GetUserByEmailQuery { Email = email };
-            return await _mediator.Send(query);
+            var databaseUser = await _mediator.Send(query);
+            if (databaseUser != null)
+            {
+                _logger.LogInformation("Found user by email {Email} in database with ID {UserId}", email, databaseUser.Id);
+                return databaseUser;
+            }
+            else
+            {
+                _logger.LogInformation("User with email {Email} not found in database", email);
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to get user by email from database, falling back to mock data");
-            var users = await _mockDataService.GetUsersAsync();
-            return users.FirstOrDefault(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+            _logger.LogWarning(ex, "Failed to get user by email {Email} from database", email);
         }
+
+        try
+        {
+            _logger.LogInformation("Searching for user by email {Email} in mock data", email);
+            var users = await _mockDataService.GetUsersAsync();
+            _logger.LogInformation("Retrieved {Count} users from mock data for email search", users.Count);
+            
+            foreach (var user in users)
+            {
+                _logger.LogDebug("Mock user: Email={Email}, ID={UserId}, IsActive={IsActive}", 
+                    user.Email, user.Id, user.IsActive);
+            }
+            
+            var mockUser = users.FirstOrDefault(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+            if (mockUser != null)
+            {
+                _logger.LogInformation("Found user by email {Email} in mock data with ID {UserId}", email, mockUser.Id);
+                return mockUser;
+            }
+            else
+            {
+                _logger.LogInformation("User with email {Email} not found in mock data", email);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to get user by email {Email} from mock data", email);
+        }
+
+        _logger.LogWarning("User with email {Email} not found in any data source", email);
+        return null;
     }
 
     public async Task<UserDto> CreateUserAsync(CreateUserDto createUserDto)
     {
-        _logger.LogInformation("Creating user in both database and mock data");
+        _logger.LogInformation("Creating user in both database and mock data with email: {Email}", createUserDto.Email);
         
         UserDto? createdUser = null;
         bool databaseSuccess = false;
@@ -87,53 +149,63 @@ public class DualDataService : IDualDataService
 
         try
         {
+            _logger.LogInformation("Attempting to create user in database with email: {Email}", createUserDto.Email);
             var command = _mapper.Map<CreateUserCommand>(createUserDto);
             createdUser = await _mediator.Send(command);
             databaseSuccess = true;
-            _logger.LogInformation("Successfully created user {UserId} in database", createdUser.Id);
+            _logger.LogInformation("Successfully created user {UserId} in database with email: {Email}", createdUser.Id, createdUser.Email);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to create user in database");
+            _logger.LogError(ex, "Failed to create user in database with email: {Email}", createUserDto.Email);
         }
 
         try
         {
+            _logger.LogDebug("Attempting to create user in mock data with email: {Email}", createUserDto.Email);
             var userDto = new UserDto
             {
                 Id = createdUser?.Id ?? Guid.NewGuid(),
                 FirstName = createUserDto.FirstName,
                 LastName = createUserDto.LastName,
+                FullName = $"{createUserDto.FirstName} {createUserDto.LastName}",
                 Email = createUserDto.Email,
                 PhoneNumber = createUserDto.PhoneNumber,
                 DateOfBirth = createUserDto.DateOfBirth,
+                Age = DateTime.UtcNow.Year - createUserDto.DateOfBirth.Year,
                 Role = createUserDto.Role,
                 IsActive = true,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                PasswordHash = createUserDto.PasswordHash
             };
+
+            _logger.LogDebug("Mock user data prepared: ID={UserId}, Email={Email}, IsActive={IsActive}, HasPasswordHash={HasPassword}",
+            userDto.Id, userDto.Email, userDto.IsActive, !string.IsNullOrEmpty(userDto.PasswordHash));
 
             await _mockDataService.AddUserAsync(userDto);
             mockDataSuccess = true;
-            _logger.LogInformation("Successfully created user {UserId} in mock data", userDto.Id);
+            _logger.LogInformation("Successfully created user {UserId} in mock data with email: {Email}", userDto.Id, userDto.Email);
             
             createdUser ??= userDto;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to create user in mock data");
+            _logger.LogError(ex, "Failed to create user in mock data with email: {Email}", createUserDto.Email);
         }
 
         if (!databaseSuccess && !mockDataSuccess)
         {
+            _logger.LogError("Failed to create user in both database and mock data with email: {Email}", createUserDto.Email);
             throw new InvalidOperationException("Failed to create user in both database and mock data");
         }
 
         if (databaseSuccess != mockDataSuccess)
         {
-            _logger.LogWarning("User creation partially failed - Database: {DatabaseSuccess}, Mock: {MockSuccess}", 
-                databaseSuccess, mockDataSuccess);
+            _logger.LogWarning("User creation partially failed - Database: {DatabaseSuccess}, Mock: {MockSuccess} for email: {Email}", 
+                databaseSuccess, mockDataSuccess, createUserDto.Email);
         }
 
+        _logger.LogInformation("User creation completed. Final user: ID={UserId}, Email={Email}", createdUser!.Id, createdUser.Email);
         return createdUser!;
     }
 
@@ -243,6 +315,79 @@ public class DualDataService : IDualDataService
         }
 
         return databaseSuccess || mockDataSuccess;
+    }
+
+    public async Task<bool> UpdateUserPasswordAsync(string email, string newPasswordHash)
+    {
+        _logger.LogInformation("Updating password for user with email: {Email}", email);
+        
+        bool success = false;
+
+        var user = await GetUserByEmailAsync(email);
+        if (user == null)
+        {
+            _logger.LogWarning("User not found with email: {Email}", email);
+            return false;
+        }
+
+        try
+        {
+            var mockUsers = await _mockDataService.GetUsersAsync();
+            var mockUser = mockUsers.FirstOrDefault(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+            
+            if (mockUser != null)
+            {
+                mockUser.PasswordHash = newPasswordHash;
+                mockUser.UpdatedAt = DateTime.UtcNow;
+                
+                var updatedMockUser = await _mockDataService.UpdateUserAsync(mockUser.Id, mockUser);
+                if (updatedMockUser != null)
+                {
+                    success = true;
+                    _logger.LogInformation("Successfully updated password in mock data for user with email: {Email}", email);
+                }
+            }
+            else
+            {
+                _logger.LogInformation("User not found in mock data, creating mock entry for password update: {Email}", email);
+                
+                var newMockUser = new UserDto
+                {
+                    Id = user.Id,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    FullName = user.FullName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    DateOfBirth = user.DateOfBirth,
+                    Age = user.Age,
+                    Role = user.Role,
+                    IsActive = user.IsActive,
+                    CreatedAt = user.CreatedAt,
+                    UpdatedAt = DateTime.UtcNow,
+                    PasswordHash = newPasswordHash
+                };
+                
+                await _mockDataService.AddUserAsync(newMockUser);
+                success = true;
+                _logger.LogInformation("Successfully created mock entry with updated password for user: {Email}", email);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating password in mock data for user with email: {Email}", email);
+        }
+
+        if (success)
+        {
+            _logger.LogInformation("Password update completed successfully for user: {Email}", email);
+        }
+        else
+        {
+            _logger.LogWarning("Failed to update password for user: {Email}", email);
+        }
+
+        return success;
     }
 
     public async Task<IEnumerable<UserDto>> SearchUsersAsync(string searchTerm)

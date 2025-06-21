@@ -49,6 +49,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasConversion<int>();
 
+        builder.Property(u => u.PasswordHash)
+            .IsRequired(false)
+            .HasMaxLength(500);
+
         builder.ToTable("Users");
     }
 }

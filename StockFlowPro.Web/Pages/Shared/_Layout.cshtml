@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using StockFlowPro.Web.Extensions
+@using StockFlowPro.Web.Authorization
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -7,11 +9,12 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/StockFlowPro.Web.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3 sticky-top @(ViewData["Title"] as string == "Dashboard" ? "dashboard-nav" : "")">
+            <div class="container-fluid">
                 @if (User.Identity != null && User.Identity.IsAuthenticated)
                 {
                     <span class="navbar-brand">StockFlowPro</span>
@@ -29,29 +32,74 @@
                         @if (User.Identity == null || !User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Index">
+                                    Home
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">
+                                    Privacy
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <!-- Role-based navigation for authenticated users -->
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Index">
+                                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                                </a>
                             </li>
                         }
                     </ul>
                     <ul class="navbar-nav ms-auto">
                         @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
-                            <li class="nav-item">
-                                <span class="nav-link text-muted">Welcome, @User.Identity.Name</span>
-                            </li>
-                            <li class="nav-item">
-                                <form method="post" asp-page="/Login" asp-page-handler="Logout" class="d-inline">
-                                    <button type="submit" class="btn nav-link text-dark border-0 bg-transparent">Logout</button>
-                                </form>
+                            <li class="nav-item dropdown">
+                                <button class="nav-link dropdown-toggle text-dark btn btn-link border-0 bg-transparent" id="userDropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
+                                    <i class="fas fa-user-circle me-1"></i>
+                                    @User.GetFullName()
+                                    <span class="badge bg-secondary ms-1">@User.GetUserRole()</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li>
+                                        <h6 class="dropdown-header">
+                                            <i class="fas fa-info-circle me-1"></i>Account Info
+                                        </h6>
+                                    </li>
+                                    <li><span class="dropdown-item-text"><strong>Email:</strong> @User.GetEmail()</span></li>
+                                    <li><span class="dropdown-item-text"><strong>Role:</strong> @User.GetUserRole()</span></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="fas fa-user-edit me-2"></i>Edit Profile
+                                        </a>
+                                    </li>
+                                    @if (User.HasPermission(Permissions.System.ViewAdminPanel))
+                                    {
+                                        <li>
+                                            <a class="dropdown-item" href="/AdminPanel">
+                                                <i class="fas fa-tools me-2"></i>Admin Settings
+                                            </a>
+                                        </li>
+                                    }
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="post" asp-page="/Login" asp-page-handler="Logout" class="d-inline w-100">
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Login">Login</a>
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Login">
+                                    <i class="fas fa-sign-in-alt me-1"></i>Login
+                                </a>
                             </li>
                         }
                     </ul>
@@ -63,43 +111,38 @@
     <!-- Snackbar for notifications -->
     <div id="snackbar" class="snackbar"></div>
     
-    <div class="container">
-        <main role="main" class="pb-3">
+    <div class="@(ViewData["Title"] as string == "Dashboard" ? "container-fluid" : "container")" style="overflow-x: hidden;">
+        <main role="main" class="pb-3" style="overflow-x: hidden;">
             @RenderBody()
         </main>
     </div>
-    <footer class="footer mt-auto py-3 bg-white border-top shadow-sm">
-        <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between">
-            <div class="text-muted small mb-2 mb-md-0">
-                &copy; 2025 <span class="fw-semibold">StockFlowPro.Web</span>
-            </div>
-            <div>
-                @if (User.Identity == null || !User.Identity.IsAuthenticated)
-                {
-                    <a asp-area="" asp-page="/Privacy" class="text-decoration-none text-primary fw-semibold">Privacy Policy</a>
-                }
-            </div>
-        </div>
-    </footer>
-    <style>
-        .footer {
-            background: #fff;
-            border-top: 1px solid #e5e5e5;
-            box-shadow: 0 -2px 8px rgba(0,0,0,0.03);
+        <style>
+        /* Sticky navbar styles */
+        .sticky-top {
+            z-index: 1020;
         }
-        .footer .container {
-            padding-top: 0.75rem;
-            padding-bottom: 0.75rem;
+        
+        /* Ensure proper spacing when navbar is sticky */
+        body {
+            padding-top: 0;
         }
-        .footer a {
-            transition: color 0.2s;
-        }
-        .footer a:hover, .footer a:focus {
-            color: #0d6efd;
-            text-decoration: underline;
-        }
+        
         .navbar-brand {
             cursor: default;
+        }
+        
+        /* Fix button styling to look like nav-link */
+        .nav-link.btn.btn-link {
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        
+        .nav-link.btn.btn-link:hover,
+        .nav-link.btn.btn-link:focus {
+            text-decoration: none;
+            box-shadow: none !important;
         }
         
         /* Snackbar Styles */

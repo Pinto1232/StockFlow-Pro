@@ -1,5 +1,7 @@
 using StockFlowPro.Application.DTOs;
 using System.Text.Json;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace StockFlowPro.Web.Services;
 
@@ -72,7 +74,8 @@ public class PersistentMockDataService : IPersistentMockDataService
                 Role = createUserDto.Role,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                PasswordHash = createUserDto.PasswordHash
             };
 
             users.Add(newUser);
@@ -142,7 +145,7 @@ public class PersistentMockDataService : IPersistentMockDataService
         {
             new UserDto
             {
-                Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440000"), // Fixed GUID for consistency
+                Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440000"),
                 FirstName = "Admin",
                 LastName = "User",
                 FullName = "Admin User",
@@ -153,11 +156,12 @@ public class PersistentMockDataService : IPersistentMockDataService
                 Role = StockFlowPro.Domain.Enums.UserRole.Admin,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                PasswordHash = CreateDefaultPasswordHash("admin123")
             },
             new UserDto
             {
-                Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440001"), // Fixed GUID for consistency
+                Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440001"),
                 FirstName = "John",
                 LastName = "Manager",
                 FullName = "John Manager",
@@ -168,11 +172,12 @@ public class PersistentMockDataService : IPersistentMockDataService
                 Role = StockFlowPro.Domain.Enums.UserRole.Manager,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                PasswordHash = CreateDefaultPasswordHash("manager123")
             },
             new UserDto
             {
-                Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440002"), // Fixed GUID for consistency
+                Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440002"),
                 FirstName = "Jane",
                 LastName = "Smith",
                 FullName = "Jane Smith",
@@ -183,7 +188,8 @@ public class PersistentMockDataService : IPersistentMockDataService
                 Role = StockFlowPro.Domain.Enums.UserRole.User,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                PasswordHash = CreateDefaultPasswordHash("user123")
             }
         };
 
@@ -221,5 +227,15 @@ public class PersistentMockDataService : IPersistentMockDataService
         if (dateOfBirth.Date > today.AddYears(-age))
             age--;
         return age;
+    }
+
+    private static string CreateDefaultPasswordHash(string password)
+    {
+        using var sha256 = SHA256.Create();
+        var salt = Guid.NewGuid().ToString();
+        var saltedPassword = password + salt;
+        var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(saltedPassword));
+        var hashedPassword = Convert.ToBase64String(hashedBytes);
+        return $"{hashedPassword}:{salt}";
     }
 }

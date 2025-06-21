@@ -40,7 +40,7 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
         return !await _userRepository.EmailExistsAsync(email, cancellationToken: cancellationToken);
     }
 
-    private bool BeValidAge(DateTime dateOfBirth)
+    private static bool BeValidAge(DateTime dateOfBirth)
     {
         var age = DateTime.UtcNow.Year - dateOfBirth.Year;
         if (DateTime.UtcNow.DayOfYear < dateOfBirth.DayOfYear)

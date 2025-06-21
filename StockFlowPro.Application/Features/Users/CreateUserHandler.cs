@@ -40,7 +40,8 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, UserDto>
             request.Email,
             request.PhoneNumber,
             request.DateOfBirth,
-            request.Role
+            request.Role,
+            request.PasswordHash
         );
 
         await _userRepository.AddAsync(user, cancellationToken);

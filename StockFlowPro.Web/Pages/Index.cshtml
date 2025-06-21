@@ -1,7 +1,693 @@
-﻿@page
+@page
 @model IndexModel
+@using StockFlowPro.Web.Authorization
+@using StockFlowPro.Web.Extensions
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = User.Identity != null && User.Identity.IsAuthenticated ? "Dashboard" : "Home";
 }
 
-@await Html.PartialAsync("~/Pages/Shared/StockFlowJumbotron.cshtml")
+@if (User.Identity != null && User.Identity.IsAuthenticated)
+{
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <nav class="sidebar-drawer" id="sidebarDrawer" aria-label="Main navigation">
+            <div class="sidebar-header">
+                <h5 class="sidebar-title"><i class="fas fa-cogs me-2"></i>Admin</h5>
+                <button type="button" class="btn-close btn-close-white d-lg-none" onclick="toggleSidebar()" aria-label="Close"></button>
+            </div>
+            <div class="sidebar-content">
+                <ul class="sidebar-menu">
+                    <li class="sidebar-menu-item active">
+                        <a href="/Index" class="sidebar-menu-link">
+                            <i class="fas fa-home me-2"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    @if (User.HasPermission(Permissions.System.ViewAdminPanel))
+                    {
+                        <li class="sidebar-menu-item">
+                            <a href="/AdminPanel" class="sidebar-menu-link">
+                                <i class="fas fa-cogs me-2"></i>
+                                <span>Admin Panel</span>
+                            </a>
+                        </li>
+                    }
+                    @if (User.HasPermission(Permissions.Users.ViewAll))
+                    {
+                        <li class="sidebar-menu-item">
+                            <a href="/ManageUsers" class="sidebar-menu-link">
+                                <i class="fas fa-users me-2"></i>
+                                <span>Users</span>
+                            </a>
+                        </li>
+                    }
+                    @if (User.HasPermission(Permissions.Reports.ViewBasic))
+                    {
+                        <li class="sidebar-menu-item has-submenu">
+                            <button type="button" class="sidebar-menu-link btn btn-link text-start w-100" onclick="toggleSubmenu(this)">
+                                <i class="fas fa-chart-bar me-2"></i>
+                                <span>Reports</span>
+                                <i class="fas fa-chevron-down submenu-arrow"></i>
+                            </button>
+                            <ul class="sidebar-submenu">
+                                @if (User.HasPermission(Permissions.Reports.ViewBasic))
+                                {
+                                    <li><a href="#" class="sidebar-submenu-link">Basic Reports</a></li>
+                                }
+                                @if (User.HasPermission(Permissions.Reports.ViewAdvanced))
+                                {
+                                    <li><a href="#" class="sidebar-submenu-link">Advanced Reports</a></li>
+                                }
+                                @if (User.HasPermission(Permissions.System.ViewStatistics))
+                                {
+                                    <li><a href="#" class="sidebar-submenu-link">Statistics</a></li>
+                                }
+                            </ul>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content-area">
+            <!-- Mobile Header -->
+            <div class="d-lg-none mobile-header">
+                <button class="btn btn-primary" type="button" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                    <span class="ms-2">Menu</span>
+                </button>
+            </div>
+
+            <div class="dashboard-content">
+                <div class="content-wrapper">
+                    <!-- Header -->
+                    <section class="dashboard-header">
+                        <div class="header-content">
+                            <h1 class="dashboard-title">
+                                <i class="fas fa-tachometer-alt me-3"></i>
+                                Dashboard
+                            </h1>
+                            <p class="dashboard-subtitle">Welcome back, @User.GetFullName() (@User.GetUserRole())</p>
+                        </div>
+                    </section>
+
+                    <!-- Admin Section -->
+                    @if (User.HasPermission(Permissions.System.ViewAdminPanel) || User.HasPermission(Permissions.Users.ViewAll) || User.HasPermission(Permissions.Reports.ViewBasic))
+                    {
+                        <section class="admin-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-tools me-2"></i>
+                                Admin Tools
+                            </h2>
+                            <div class="cards-grid">
+                                @if (User.HasPermission(Permissions.System.ViewAdminPanel))
+                                {
+                                    <div class="card-item">
+                                        <div class="dashboard-card">
+                                            <div class="card-content">
+                                                <div class="card-icon"><i class="fas fa-cogs"></i></div>
+                                                <h3 class="card-title">Admin Panel</h3>
+                                                <p class="card-description">Access system settings and advanced configuration.</p>
+                                                <a href="/AdminPanel" class="card-button btn btn-primary">Go to Admin Panel</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                @if (User.HasPermission(Permissions.Users.ViewAll))
+                                {
+                                    <div class="card-item">
+                                        <div class="dashboard-card">
+                                            <div class="card-content">
+                                                <div class="card-icon"><i class="fas fa-users"></i></div>
+                                                <h3 class="card-title">Manage Users</h3>
+                                                <p class="card-description">Manage user accounts, roles, and permissions.</p>
+                                                <a href="/ManageUsers" class="card-button btn btn-success">Go to Users</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                @if (User.HasPermission(Permissions.Reports.ViewBasic))
+                                {
+                                    <div class="card-item">
+                                        <div class="dashboard-card">
+                                            <div class="card-content">
+                                                <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+                                                <h3 class="card-title">View Reports</h3>
+                                                <p class="card-description">Access sales, inventory, and performance reports.</p>
+                                                <a href="#" class="card-button btn btn-info">Go to Reports</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </section>
+                    }
+                    else
+                    {
+                        <div class="no-access-message">
+                            <div class="alert alert-warning text-center">
+                                You do not have access to any administrative features.
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </main>
+    </div>
+    <style>
+        /* Prevent horizontal scrolling */
+        html, body {
+            overflow-x: hidden;
+            max-width: 100%;
+        }
+        
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        
+        /* Dashboard Layout - Full Width Fluid */
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+            width: 100vw;
+            margin-left: calc(-50vw + 50%);
+            position: relative;
+            background: #f8f9fa;
+            overflow-x: hidden;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar-drawer {
+            width: 320px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: fixed;
+            top: 0;
+            left: -320px;
+            height: 100vh;
+            z-index: 1040;
+            transition: left 0.3s ease-in-out;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        .sidebar-drawer.show {
+            left: 0;
+        }
+        
+        /* Main Content Area */
+        .main-content-area {
+        flex: 1;
+        min-height: 100vh;
+        transition: margin-left 0.3s ease-in-out;
+        background: #f8f9fa;
+        overflow-x: hidden;
+        overflow-y: auto;
+        }
+        
+        /* Mobile Header */
+        .mobile-header {
+        padding: 1rem;
+        background: white;
+        border-bottom: 1px solid #e9ecef;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        @@media (min-width: 992px) {
+        .main-content-area {
+        margin-left: 320px;
+        }
+        }
+        
+        /* Dashboard Content */
+        .dashboard-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .content-wrapper {
+            flex: 1;
+            padding: 1.5rem;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* Header Section */
+        .dashboard-header {
+            margin-bottom: 2rem;
+        }
+        
+        .header-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #e9ecef;
+        }
+        
+        .dashboard-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .dashboard-subtitle {
+            font-size: 1.1rem;
+            color: #6c757d;
+            margin: 0;
+            line-height: 1.5;
+        }
+        
+        /* Admin Section */
+        .admin-section {
+            margin-bottom: 3rem;
+        }
+        
+        .section-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #34495e;
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            border-image: linear-gradient(to right, #667eea, #764ba2) 1;
+            border-bottom: 3px solid;
+            padding-bottom: 1rem;
+        }
+        
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            margin-bottom: 2rem;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .card-item {
+            display: flex;
+        }
+        
+        .dashboard-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.09);
+            border: 1px solid #e9ecef;
+            transition: all 0.4s ease;
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+        }
+        
+        .card-content {
+            padding: 2.5rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+        
+        .card-icon i {
+            color: #667eea;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.75rem;
+        }
+        
+        .card-description {
+            color: #6c757d;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+        }
+        
+        .card-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+            color: white;
+        }
+        
+        .card-button:hover {
+            transform: translateY(-1px);
+            text-decoration: none;
+            color: white;
+        }
+        
+        /* No Access Message */
+        .no-access-message {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .no-access-message .alert {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        /* Responsive Design */
+        @@media (min-width: 992px) {
+            .sidebar-drawer {
+                left: 0;
+            }
+            
+            .main-content-area {
+                margin-left: 280px;
+            }
+            
+            .content-wrapper {
+                padding: 2rem 3rem;
+            }
+            
+            .cards-grid {
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                gap: 2rem;
+            }
+        }
+        
+        @@media (min-width: 1200px) {
+            .content-wrapper {
+                padding: 2rem 4rem;
+            }
+            
+            .dashboard-title {
+                font-size: 3rem;
+            }
+            
+            .cards-grid {
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            }
+        }
+        
+        @@media (max-width: 991.98px) {
+            .dashboard-layout {
+                margin-left: calc(-50vw + 50%);
+            }
+            
+            .main-content-area {
+                margin-left: 0;
+            }
+            
+            .dashboard-title {
+                font-size: 2rem;
+            }
+            
+            .header-content {
+                padding: 1.5rem;
+            }
+            
+            .card-content {
+                padding: 1.5rem;
+            }
+        }
+        
+        @@media (max-width: 576px) {
+            .content-wrapper {
+                padding: 1rem;
+            }
+            
+            .dashboard-title {
+                font-size: 1.75rem;
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .dashboard-title i {
+                margin-bottom: 0.5rem;
+                margin-right: 0;
+            }
+            
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            .header-content {
+                padding: 1rem;
+                text-align: center;
+            }
+            
+            .dashboard-layout {
+                width: 100%;
+                margin-left: 0;
+            }
+        }
+        
+        /* Sidebar Component Styles */
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .sidebar-title {
+            margin: 0;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .sidebar-toggle {
+            color: white;
+            padding: 0.25rem;
+        }
+        
+        .sidebar-toggle:hover {
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .sidebar-content {
+            padding: 1rem 0;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-menu-item {
+            margin: 0;
+        }
+        
+        .sidebar-menu-item.active .sidebar-menu-link {
+            background: rgba(255,255,255,0.2);
+            border-right: 3px solid white;
+        }
+        
+        .sidebar-menu-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            transition: all 0.2s ease-in-out;
+            border-right: 3px solid transparent;
+        }
+        
+        .sidebar-menu-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .sidebar-menu-link i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Fix button styling to look like sidebar menu link */
+        .sidebar-menu-link.btn.btn-link {
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border: none !important;
+            box-shadow: none !important;
+            color: rgba(255,255,255,0.9);
+            border-right: 3px solid transparent;
+        }
+        
+        .sidebar-menu-link.btn.btn-link:hover,
+        .sidebar-menu-link.btn.btn-link:focus {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            text-decoration: none;
+            box-shadow: none !important;
+        }
+        
+        .sidebar-menu-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+            margin: 1rem 1.5rem;
+        }
+        
+        /* Submenu Styles */
+        .has-submenu .submenu-arrow {
+            margin-left: auto;
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        .has-submenu.open .submenu-arrow {
+            transform: rotate(180deg);
+        }
+        
+        .sidebar-submenu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .sidebar-submenu.show {
+            max-height: 200px;
+        }
+        
+        .sidebar-submenu-link {
+            display: block;
+            padding: 0.5rem 1.5rem 0.5rem 3rem;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .sidebar-submenu-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            text-decoration: none;
+        }
+        
+        /* Overlay for mobile */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1039;
+            display: none;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+        
+        .sidebar-overlay.show {
+            display: block;
+        }
+        
+        .sidebar-overlay:hover,
+        .sidebar-overlay:focus {
+            background: rgba(0,0,0,0.5);
+            box-shadow: none !important;
+        }
+    </style>
+    
+    <!-- Sidebar Overlay for Mobile -->
+    <button type="button" class="sidebar-overlay btn btn-link border-0 p-0" id="sidebarOverlay" onclick="toggleSidebar()" onkeydown="if(event.key==='Enter'||event.key===' '||event.key==='Escape'){event.preventDefault();toggleSidebar();}" aria-label="Close sidebar"></button>
+    
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebarDrawer');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+        
+        function toggleSubmenu(element) {
+            const menuItem = element.parentElement;
+            const submenu = menuItem.querySelector('.sidebar-submenu');
+            
+            menuItem.classList.toggle('open');
+            submenu.classList.toggle('show');
+        }
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebarDrawer');
+            const overlay = document.getElementById('sidebarOverlay');
+            const toggleButtons = document.querySelectorAll('.sidebar-toggle');
+            
+            let isToggleButton = false;
+            toggleButtons.forEach(button => {
+                if (button.contains(event.target)) {
+                    isToggleButton = true;
+                }
+            });
+            
+            if (!sidebar.contains(event.target) && !isToggleButton && window.innerWidth < 992) {
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+            }
+        });
+    </script>
+}
+else
+{
+    @await Html.PartialAsync("~/Pages/Shared/StockFlowJumbotron.cshtml")
+    
+    @await Html.PartialAsync("~/Pages/Shared/_ServicesSection.cshtml")
+    
+    @await Html.PartialAsync("~/Pages/Shared/_FeaturesSection.cshtml")
+    
+    @await Html.PartialAsync("~/Pages/Shared/_BenefitsSection.cshtml")
+    
+    @await Html.PartialAsync("~/Pages/Shared/_CTASection.cshtml")
+    
+    @await Html.PartialAsync("~/Pages/Shared/_HomeSectionStyles.cshtml")
+}

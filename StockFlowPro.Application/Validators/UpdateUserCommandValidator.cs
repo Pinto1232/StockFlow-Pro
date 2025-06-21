@@ -27,7 +27,7 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
             .Must(BeValidAge).WithMessage("User must be at least 13 years old and not more than 120 years old");
     }
 
-    private bool BeValidAge(DateTime dateOfBirth)
+    private static bool BeValidAge(DateTime dateOfBirth)
     {
         var age = DateTime.UtcNow.Year - dateOfBirth.Year;
         if (DateTime.UtcNow.DayOfYear < dateOfBirth.DayOfYear)

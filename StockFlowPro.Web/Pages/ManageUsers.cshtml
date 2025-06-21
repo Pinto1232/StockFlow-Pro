@@ -4,65 +4,61 @@
     ViewData["Title"] = "Manage Users";
 }
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">User Management</h2>
-        <a href="/AdminPanel" class="btn btn-outline-primary">
-            <i class="fas fa-arrow-left me-2"></i>Back to Admin Panel
-        </a>
-    </div>
-    
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <button class="btn btn-success" onclick="showCreateUserModal()">
+<div class="manage-users-container container-fluid">
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title">User Management</h1>
+        <div class="header-actions">
+            <a href="/AdminPanel" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Admin Panel
+            </a>
+            <button class="btn btn-primary" onclick="showCreateUserModal()">
                 <i class="fas fa-plus me-2"></i>Create New User
             </button>
         </div>
-        <div class="col-md-6">
-            <div class="input-group">
-                <span class="input-group-text">
-                    <i class="fas fa-search"></i>
-                </span>
-                <input type="text" id="userSearch" class="form-control" placeholder="Search users by name, email, phone, or role...">
-                <button class="btn btn-outline-secondary" type="button" id="clearSearch">
-                    <i class="fas fa-times"></i>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="search-filters-bar">
+        <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="userSearch" class="form-control" placeholder="Search by name, email, or role...">
+            <button class="btn btn-clear-search" type="button" id="clearSearch">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="filter-options">
+            <button class="btn btn-sm btn-info me-2" onclick="showSyncStatus()">
+                <i class="fas fa-sync"></i> Sync Status
+            </button>
+            <button class="btn btn-sm btn-warning me-2" onclick="syncDataSources()">
+                <i class="fas fa-database"></i> Sync Now
+            </button>
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <span id="pageSize">10</span> per page
                 </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item page-size-option" href="#" data-size="5">5</a></li>
+                    <li><a class="dropdown-item page-size-option" href="#" data-size="10">10</a></li>
+                    <li><a class="dropdown-item page-size-option" href="#" data-size="25">25</a></li>
+                    <li><a class="dropdown-item page-size-option" href="#" data-size="50">50</a></li>
+                </ul>
             </div>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Users (Database + Mock Data)</h5>
-            <div class="d-flex align-items-center">
-                <button class="btn btn-sm btn-info me-2" onclick="showSyncStatus()">
-                    <i class="fas fa-sync"></i> Sync Status
-                </button>
-                <button class="btn btn-sm btn-warning me-2" onclick="syncDataSources()">
-                    <i class="fas fa-database"></i> Sync Now
-                </button>
-                <span id="userCount" class="badge bg-primary me-3">0 users</span>
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <span id="pageSize">10</span> per page
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item page-size-option" href="#" data-size="5">5 per page</a></li>
-                        <li><a class="dropdown-item page-size-option" href="#" data-size="10">10 per page</a></li>
-                        <li><a class="dropdown-item page-size-option" href="#" data-size="25">25 per page</a></li>
-                        <li><a class="dropdown-item page-size-option" href="#" data-size="50">50 per page</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+    <!-- User Table Card -->
+    <div class="card user-table-card">
         <div class="card-body p-0">
             <div id="user-table-section">
                 <!-- User table will be loaded here -->
             </div>
         </div>
-        <div class="card-footer">
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <span id="userCount" class="user-count-badge">0 users</span>
             <nav aria-label="User pagination">
-                <ul class="pagination pagination-sm justify-content-center mb-0" id="pagination">
+                <ul class="pagination pagination-sm justify-content-end mb-0" id="pagination">
                     <!-- Pagination will be generated here -->
                 </ul>
             </nav>
@@ -86,38 +82,38 @@
 
 <!-- Modal for Create/Edit User -->
 <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="userModalLabel">User</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form id="userForm">
+        <form id="userForm" class="row g-3">
           <input type="hidden" id="userId" />
-          <div class="form-group">
-            <label for="firstName">First Name</label>
+          <div class="col-md-6">
+            <label for="firstName" class="form-label">First Name</label>
             <input type="text" class="form-control" id="firstName" required />
           </div>
-          <div class="form-group">
-            <label for="lastName">Last Name</label>
+          <div class="col-md-6">
+            <label for="lastName" class="form-label">Last Name</label>
             <input type="text" class="form-control" id="lastName" required />
           </div>
-          <div class="form-group">
-            <label for="email">Email</label>
+          <div class="col-md-6">
+            <label for="email" class="form-label">Email</label>
             <input type="email" class="form-control" id="email" required />
           </div>
-          <div class="form-group">
-            <label for="phoneNumber">Phone Number</label>
+          <div class="col-md-6">
+            <label for="phoneNumber" class="form-label">Phone Number</label>
             <input type="text" class="form-control" id="phoneNumber" required />
           </div>
-          <div class="form-group">
-            <label for="dateOfBirth">Date of Birth</label>
+          <div class="col-md-6">
+            <label for="dateOfBirth" class="form-label">Date of Birth</label>
             <input type="date" class="form-control" id="dateOfBirth" required />
           </div>
-          <div class="form-group">
-            <label for="role">Role</label>
-            <select class="form-control" id="role">
+          <div class="col-md-6">
+            <label for="role" class="form-label">Role</label>
+            <select class="form-select" id="role">
               <option value="User">User</option>
               <option value="Manager">Manager</option>
               <option value="Admin">Admin</option>
@@ -125,9 +121,9 @@
           </div>
         </form>
       </div>
-      <div class="modal-footer justify-content-between">
+      <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" id="saveUserBtn">Save</button>
+        <button type="button" class="btn btn-primary" id="saveUserBtn">Save Changes</button>
       </div>
     </div>
   </div>
@@ -160,165 +156,149 @@
 </div>
 
 <style>
-/* Loading Spinner Styles */
-.loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem 1rem;
-    min-height: 200px;
-}
-
-.loading-spinner {
-    width: 3rem;
-    height: 3rem;
-    border: 0.3em solid rgba(13, 110, 253, 0.25);
-    border-radius: 50%;
-    border-top-color: #0d6efd;
-    animation: spin 1s ease-in-out infinite;
-}
-
-@@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.loading-text {
-    margin-top: 1rem;
-    color: #6c757d;
-    font-size: 0.9rem;
-}
-
-/* Search Input Enhancements */
-#userSearch {
-    transition: box-shadow 0.15s ease-in-out;
-}
-
-#userSearch:focus {
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-}
-
-/* Table Enhancements */
-.table-responsive-wrapper {
-    overflow-x: auto;
-}
-
-.user-table {
-    margin-bottom: 0;
-}
-
-.user-table th {
-    background-color: #f8f9fa;
-    border-top: none;
-    font-weight: 600;
-    color: #495057;
-    white-space: nowrap;
-}
-
-.user-table td {
-    vertical-align: middle;
-}
-
-.user-table .btn {
-    margin-right: 0.25rem;
-}
-
-.user-table .btn:last-child {
-    margin-right: 0;
-}
-
-/* Empty State */
-.empty-state {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: #6c757d;
-}
-
-.empty-state i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
-}
-
-/* Pagination Enhancements */
-.pagination .page-link {
-    color: #0d6efd;
-    border-color: #dee2e6;
-}
-
-.pagination .page-item.active .page-link {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-}
-
-.pagination .page-item.disabled .page-link {
-    color: #6c757d;
-}
-
-/* User Count Badge */
-#userCount {
-    font-size: 0.75rem;
-}
-
-/* Confirmation Snackbar Styles */
-.confirmation-snackbar {
-    position: fixed;
-    bottom: -200px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    border: 1px solid #e0e0e0;
-    z-index: 1060;
-    min-width: 400px;
-    max-width: 500px;
-    transition: bottom 0.3s ease-out;
-}
-
-.confirmation-snackbar.show {
-    bottom: 30px;
-}
-
-.confirmation-content {
-    padding: 20px;
-}
-
-.confirmation-message {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-    font-size: 16px;
-    color: #333;
-}
-
-.confirmation-actions {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-}
-
-.confirmation-snackbar .btn {
-    min-width: 80px;
-}
-
-/* Responsive Design */
-@@media (max-width: 768px) {
-    .card-header {
-        flex-direction: column;
-        align-items: stretch !important;
+    .manage-users-container {
+        padding: 2.5rem 2rem;
+        background-color: #f8f9fa;
     }
-    
-    .card-header > div {
-        margin-top: 0.5rem;
+
+    .page-header {
+        display: flex;
         justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 1.5rem;
     }
-    
-    .user-table .btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #343a40;
     }
-}
+
+    .header-actions .btn {
+        margin-left: 1rem;
+        border-radius: 8px;
+    }
+
+    .search-filters-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .search-box {
+        position: relative;
+        flex-grow: 1;
+        max-width: 450px;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #adb5bd;
+    }
+
+    #userSearch {
+        padding-left: 40px;
+        border-radius: 8px;
+        height: 44px;
+    }
+
+    .btn-clear-search {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #adb5bd;
+        background: transparent;
+        border: none;
+        display: none; /* Initially hidden */
+    }
+
+    #userSearch:not(:placeholder-shown) + .btn-clear-search {
+        display: block;
+    }
+
+    .user-table-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+
+    .user-table th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .user-table td {
+        vertical-align: middle;
+        font-size: 0.95rem;
+    }
+
+    .user-count-badge {
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .modal-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .modal-footer {
+        background-color: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .confirmation-snackbar {
+        display: none; /* Hidden by default */
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        border: 1px solid #e0e0e0;
+        z-index: 1060;
+        min-width: 400px;
+        max-width: 500px;
+    }
+
+    .confirmation-snackbar.show {
+        display: block; /* Show when needed */
+    }
+
+    .confirmation-content {
+        padding: 20px;
+    }
+
+    .confirmation-message {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        font-size: 16px;
+        color: #333;
+    }
+
+    .confirmation-actions {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .confirmation-snackbar .btn {
+        min-width: 80px;
+    }
 </style>
 
 @section Scripts {

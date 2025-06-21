@@ -1,10 +1,21 @@
 @* StockFlowJumbotron.cshtml *@
-<div class="jumbotron bg-primary text-white p-5 mb-4  rounded-0 w-100" style="position:absolute;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;width:100vw;max-width:100vw;">
-    <div class="container py-3">
-        <h1 class="display-4">Welcome to StockFlow Pro</h1>
-        <p class="lead">Your all-in-one solution for stock management and business flow optimization.</p>
-        <hr class="my-4">
-        <p>Get started by exploring our features and managing your inventory with ease.</p>
-        <a class="btn btn-light btn-lg" href="/Features" role="button">Learn more</a>
+</div>
+<div class="jumbotron bg-primary text-white rounded-0 responsive-jumbotron animate-on-scroll fade-up">
+    <div class="container-fluid px-0">
+        <div class="jumbotron-content">
+            <h1 class="jumbotron-title animate-on-scroll fade-up">Welcome to StockFlow Pro</h1>
+            <p class="jumbotron-subtitle animate-on-scroll fade-up">Your all-in-one solution for stock management and business flow optimization.</p>
+            <hr class="jumbotron-divider animate-on-scroll scale-in">
+            <p class="jumbotron-description animate-on-scroll fade-up">Get started by exploring our features and managing your inventory with ease.</p>
+            <div class="jumbotron-actions animate-on-scroll scale-in">
+                <button class="btn btn-light btn-lg jumbotron-btn" onclick="window.location.href='/Features'" onkeydown="if(event.key==='Enter'||event.key===' ') window.location.href='/Features'">
+                    <i class="fas fa-rocket me-2"></i>Learn more
+                </button>
+                <button class="btn btn-outline-light btn-lg jumbotron-btn ms-3" onclick="window.location.href='/Login'" onkeydown="if(event.key==='Enter'||event.key===' ') window.location.href='/Login'">
+                    <i class="fas fa-sign-in-alt me-2"></i>Get Started
+                </button>
+            </div>
+        </div>
     </div>
 </div>
+<div class="container">

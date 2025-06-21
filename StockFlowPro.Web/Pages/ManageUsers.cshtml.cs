@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
-
-using Microsoft.AspNetCore.Authorization;
+using StockFlowPro.Web.Attributes;
+using StockFlowPro.Domain.Enums;
 
 namespace StockFlowPro.Web.Pages;
 
-[Authorize(Roles = "Admin")]
+[RoleAuthorize(UserRole.Admin)]
 public class ManageUsersModel : PageModel
 {
     public void OnGet()
     {
+        // Initialize the page - no additional logic needed for GET request
     }
 }
