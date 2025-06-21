@@ -1,6 +1,3 @@
-// Jest setup file for frontend tests
-
-// Mock console methods to reduce noise in tests
 global.console = {
   ...console,
   log: jest.fn(),
@@ -10,7 +7,6 @@ global.console = {
   error: jest.fn(),
 };
 
-// Mock window object
 Object.defineProperty(window, 'location', {
   value: {
     href: 'http://localhost:3000',
@@ -22,7 +18,6 @@ Object.defineProperty(window, 'location', {
   writable: true
 });
 
-// Mock localStorage
 const localStorageMock = {
   getItem: jest.fn(),
   setItem: jest.fn(),
@@ -31,7 +26,6 @@ const localStorageMock = {
 };
 global.localStorage = localStorageMock;
 
-// Mock sessionStorage
 const sessionStorageMock = {
   getItem: jest.fn(),
   setItem: jest.fn(),
@@ -40,7 +34,6 @@ const sessionStorageMock = {
 };
 global.sessionStorage = sessionStorageMock;
 
-// Mock jQuery if needed
 global.$ = jest.fn(() => ({
   get: jest.fn(),
   post: jest.fn(),
@@ -55,7 +48,6 @@ global.$ = jest.fn(() => ({
   last: jest.fn()
 }));
 
-// Mock Bootstrap
 global.bootstrap = {
   Modal: jest.fn().mockImplementation(() => ({
     show: jest.fn(),
@@ -64,15 +56,12 @@ global.bootstrap = {
   }))
 };
 
-// Mock fetch API
 global.fetch = jest.fn();
 
-// Mock DOM methods
 global.document.createDocumentFragment = jest.fn(() => ({
   appendChild: jest.fn()
 }));
 
-// Setup default fetch mock
 beforeEach(() => {
   fetch.mockClear();
   console.log.mockClear();
@@ -80,7 +69,6 @@ beforeEach(() => {
   console.warn.mockClear();
 });
 
-// Helper function to create mock DOM elements
 global.createMockElement = (tagName, attributes = {}) => {
   const element = {
     tagName: tagName.toUpperCase(),
@@ -109,7 +97,6 @@ global.createMockElement = (tagName, attributes = {}) => {
   return element;
 };
 
-// Helper function to create mock HTTP responses
 global.createMockResponse = (data, status = 200, ok = true) => ({
   ok,
   status,
@@ -119,7 +106,6 @@ global.createMockResponse = (data, status = 200, ok = true) => ({
   headers: new Map()
 });
 
-// Helper function to create mock users
 global.createMockUser = (overrides = {}) => ({
   id: '123e4567-e89b-12d3-a456-426614174000',
   firstName: 'John',

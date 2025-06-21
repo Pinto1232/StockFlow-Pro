@@ -32,19 +32,16 @@ builder.Services.AddScoped<IUserAuthenticationService, UserAuthenticationService
 builder.Services.AddScoped<StockFlowPro.Web.Services.IAuthorizationService, StockFlowPro.Web.Services.AuthorizationService>();
 builder.Services.AddHostedService<DatabaseInitializationService>();
 
-// Add authorization services
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 builder.Services.AddAuthorization(options =>
 {
-    // Add permission-based policies
     foreach (var permission in RolePermissions.GetAllPermissions())
     {
         options.AddPolicy(permission, policy =>
             policy.Requirements.Add(new PermissionRequirement(permission)));
     }
     
-    // Add role-based policies for backward compatibility
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
     options.AddPolicy("ManagerOrAdmin", policy => policy.RequireRole("Manager", "Admin"));
     options.AddPolicy("AllRoles", policy => policy.RequireRole("User", "Manager", "Admin"));

@@ -9,6 +9,5 @@ public class ManageUsersModel : PageModel
 {
     public void OnGet()
     {
-        // Initialize the page - no additional logic needed for GET request
     }
 }

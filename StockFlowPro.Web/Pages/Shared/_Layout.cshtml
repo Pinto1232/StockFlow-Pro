@@ -111,7 +111,7 @@
     <!-- Snackbar for notifications -->
     <div id="snackbar" class="snackbar"></div>
     
-    <div class="@(ViewData["Title"] as string == "Dashboard" ? "container-fluid" : "container")" style="overflow-x: hidden;">
+    <div class="@(ViewData["Title"] as string == "Dashboard" || ViewData["Title"] as string == "Admin Panel" ? "container-fluid" : "container")" style="overflow-x: hidden;">
         <main role="main" class="pb-3" style="overflow-x: hidden;">
             @RenderBody()
         </main>
@@ -216,13 +216,11 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     
     <script>
-        // Snackbar function
         function showSnackbar(message, type = 'warning') {
             const snackbar = document.getElementById('snackbar');
             snackbar.textContent = message;
             snackbar.className = `snackbar ${type} show`;
             
-            // Remove the show class after animation completes
             setTimeout(function() {
                 snackbar.className = snackbar.className.replace('show', '');
             }, 3000);
@@ -232,41 +230,33 @@
     @if (User.Identity != null && User.Identity.IsAuthenticated)
     {
         <script>
-            // Prevent navigation when authenticated
             $(document).ready(function() {
                 let hasUnsavedChanges = false;
                 
-                // Track if user has made changes (you can customize this logic)
                 $('input, textarea, select').on('change input', function() {
                     hasUnsavedChanges = true;
                 });
                 
-                // Show snackbar instead of browser dialog
                 window.addEventListener('beforeunload', function(e) {
                     if (hasUnsavedChanges) {
-                        // Show snackbar notification
                         showSnackbar('You are currently logged in. Please logout first before navigating away.', 'warning');
                         
-                        // Still prevent the navigation with browser dialog as fallback
                         var confirmationMessage = 'You are currently logged in. Please logout first before navigating away.';
                         e.returnValue = confirmationMessage;
                         return confirmationMessage;
                     }
                 });
                 
-                // Override any direct navigation attempts with snackbar
                 $('a[href*="/Index"], a[href*="/Privacy"], a[href*="/Home"]').click(function(e) {
                     e.preventDefault();
                     showSnackbar('Please logout first before navigating to other pages.', 'warning');
                     return false;
                 });
                 
-                // Reset unsaved changes flag when form is submitted successfully
                 $('form').on('submit', function() {
                     hasUnsavedChanges = false;
                 });
                 
-                // Reset flag when logout is clicked
                 $('button[type="submit"]:contains("Logout")').click(function() {
                     hasUnsavedChanges = false;
                 });

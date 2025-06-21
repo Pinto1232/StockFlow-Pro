@@ -35,7 +35,6 @@ public class LoginModel : PageModel
 
     public void OnGet()
     {
-        // Initialize the page - no additional logic needed for GET request
     }
 
     public async Task<IActionResult> OnPostLoginAsync()
@@ -71,17 +70,14 @@ public class LoginModel : PageModel
             };
         }
 
-        // Authentication failed - check if user exists to offer password reset
         var existingUser = await _authenticationService.FindUserByIdentifierAsync(Username);
         if (existingUser != null)
         {
-            // User exists but password is wrong - offer password reset
             ErrorMessage = $"Invalid password for user '{existingUser.FirstName} {existingUser.LastName}' ({existingUser.Email}). " +
                           "If you forgot your password, please contact an administrator for password reset assistance.";
         }
         else
         {
-            // User doesn't exist
             ErrorMessage = "Invalid credentials. Please check your email/name and password.";
         }
         
@@ -107,7 +103,6 @@ public class LoginModel : PageModel
         catch (ArgumentException ex)
         {
             RegisterErrorMessage = ex.Message;
-            // Keep the form data so user doesn't have to re-enter everything
             return Page();
         }
         catch (InvalidOperationException ex)
@@ -118,7 +113,6 @@ public class LoginModel : PageModel
         catch (Exception ex)
         {
             RegisterErrorMessage = "An error occurred during registration. Please try again.";
-            // Log the actual exception for debugging
             Console.WriteLine($"Registration error: {ex.Message}");
             return Page();
         }

@@ -129,13 +129,11 @@ else
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if there's a registration error or success and switch to register tab
     var hasRegisterError = @Html.Raw(Model.RegisterErrorMessage != null ? "true" : "false");
     var hasRegisterSuccess = @Html.Raw(Model.RegisterSuccessMessage != null ? "true" : "false");
     
-    // Only auto-switch to register tab if there's an error or success message
+
     if (hasRegisterError || hasRegisterSuccess) {
-        // Use Bootstrap's Tab API to properly switch tabs
         var registerTabEl = document.getElementById('register-tab');
         if (registerTabEl) {
             var registerTab = new bootstrap.Tab(registerTabEl);
@@ -143,12 +141,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Password validation functionality
     var passwordField = document.getElementById('Register_Password');
     var confirmPasswordField = document.getElementById('Register_ConfirmPassword');
     var registerForm = document.querySelector('form[asp-page-handler="Register"]');
     
-    // Only proceed if all elements exist
     if (passwordField && confirmPasswordField && registerForm) {
         
         function validatePasswordMatch() {
@@ -194,13 +190,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Clear form validation states when switching tabs
     var loginTab = document.getElementById('login-tab');
     var registerTab = document.getElementById('register-tab');
     
     if (loginTab) {
         loginTab.addEventListener('click', function() {
-            // Clear any validation states on login form
             var loginForm = document.querySelector('form[asp-page-handler="Login"]');
             if (loginForm) {
                 var inputs = loginForm.querySelectorAll('input');
@@ -214,7 +208,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (registerTab) {
         registerTab.addEventListener('click', function() {
-            // Clear any validation states on register form
             if (registerForm) {
                 var inputs = registerForm.querySelectorAll('input');
                 inputs.forEach(function(input) {

@@ -53,21 +53,15 @@ public class ForgotPasswordModel : PageModel
         {
             _logger.LogInformation("Password reset requested for email: {Email}", Email);
 
-            // Check if user exists
             var user = await _authenticationService.FindUserByIdentifierAsync(Email);
             if (user == null)
             {
-                // For security, don't reveal if email exists or not
                 SuccessMessage = "If an account with that email exists, you will receive password reset instructions.";
                 _logger.LogWarning("Password reset requested for non-existent email: {Email}", Email);
                 return Page();
             }
 
-            // Generate reset token
             var token = await _authenticationService.GeneratePasswordResetTokenAsync(user.Email);
-            
-            // In a real application, you would send this via email
-            // For demo purposes, we'll show the reset link directly
             var resetUrl = Url.Page("/ForgotPassword", pageHandler: null, values: new { token = token, email = user.Email }, protocol: Request.Scheme);
             
             SuccessMessage = $"Password reset link generated! In a real application, this would be sent to your email. " +
@@ -122,7 +116,6 @@ public class ForgotPasswordModel : PageModel
                 SuccessMessage = "Your password has been reset successfully! You can now sign in with your new password.";
                 _logger.LogInformation("Password reset successful for email: {Email}", Email);
                 
-                // Clear the form
                 Token = string.Empty;
                 NewPassword = string.Empty;
                 ConfirmPassword = string.Empty;

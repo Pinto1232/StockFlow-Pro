@@ -1,6 +1,3 @@
-// Frontend tests for User Management functionality
-// These tests can be run with Jest or similar JavaScript testing framework
-
 describe('UserManager', () => {
     let userManager;
     let mockFetch;
@@ -8,7 +5,6 @@ describe('UserManager', () => {
     let mockDocument;
 
     beforeEach(() => {
-        // Mock DOM elements
         mockDocument = {
             getElementById: jest.fn(),
             createElement: jest.fn(),
@@ -16,11 +12,9 @@ describe('UserManager', () => {
             addEventListener: jest.fn()
         };
 
-        // Mock fetch API
         mockFetch = jest.fn();
         global.fetch = mockFetch;
 
-        // Mock Bootstrap
         mockBootstrap = {
             Modal: jest.fn().mockImplementation(() => ({
                 show: jest.fn(),
@@ -29,7 +23,6 @@ describe('UserManager', () => {
         };
         global.bootstrap = mockBootstrap;
 
-        // Mock DOM elements
         const mockTableContainer = {
             innerHTML: '',
             appendChild: jest.fn(),
@@ -67,8 +60,6 @@ describe('UserManager', () => {
 
         global.document = mockDocument;
 
-        // Import UserManager class (assuming it's modularized)
-        // For this example, we'll mock the class structure
         userManager = {
             mockUsersCache: [],
             roleNames: { 1: 'Admin', 2: 'User', 3: 'Manager' },
@@ -92,7 +83,6 @@ describe('UserManager', () => {
 
     describe('loadUsers', () => {
         it('should fetch users successfully', async () => {
-            // Arrange
             const mockUsers = [
                 {
                     id: '123e4567-e89b-12d3-a456-426614174000',
@@ -111,7 +101,6 @@ describe('UserManager', () => {
                 json: jest.fn().mockResolvedValueOnce(mockUsers)
             });
 
-            // Act
             const loadUsers = async function() {
                 const response = await fetch('/api/users/mock');
                 if (!response.ok) {
@@ -124,14 +113,12 @@ describe('UserManager', () => {
 
             const result = await loadUsers();
 
-            // Assert
             expect(mockFetch).toHaveBeenCalledWith('/api/users/mock');
             expect(result).toEqual(mockUsers);
             expect(userManager.mockUsersCache).toEqual(mockUsers);
         });
 
         it('should handle fetch error gracefully', async () => {
-            // Arrange
             mockFetch.mockResolvedValueOnce({
                 ok: false,
                 status: 500,
