@@ -65,9 +65,9 @@ public class LoginModel : PageModel
 
             return user.Role switch
             {
-                UserRole.Admin => RedirectToPage("/AdminPanel"),
-                UserRole.Manager => RedirectToPage("/AdminPanel"),
-                _ => RedirectToPage("/Index")
+                UserRole.Admin => RedirectToPage("/Dashboard"),
+                UserRole.Manager => RedirectToPage("/Dashboard"),
+                _ => RedirectToPage("/Dashboard")
             };
         }
 

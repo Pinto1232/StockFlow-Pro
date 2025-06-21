@@ -12,8 +12,15 @@ public class IndexModel : PageModel
         _logger = logger;
     }
 
-    public void OnGet()
+    public IActionResult OnGet()
     {
+        // If user is authenticated, redirect to dashboard
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            return RedirectToPage("/Dashboard");
+        }
 
+        // Otherwise, show the home page
+        return Page();
     }
 }
