@@ -27,17 +27,13 @@ else
 {
     <div class="d-flex align-items-center justify-content-center min-vh-100">
         <div class="card shadow-sm p-4" style="width: 100%; max-width: 450px; border-radius: 1rem;">
-            <ul class="nav nav-tabs mb-4" id="authTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab" aria-controls="login" aria-selected="true">Sign In</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab" aria-controls="register" aria-selected="false">Register</button>
-                </li>
-            </ul>
+            <div class="nav nav-tabs mb-4" id="authTabs">
+                <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" aria-controls="login">Sign In</button>
+                <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" aria-controls="register">Register</button>
+            </div>
             
             <div class="tab-content" id="authTabsContent">
-                <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab" tabindex="0">
+                <div class="tab-pane fade show active" id="login" aria-labelledby="login-tab">
                     <div class="text-center mb-4">
                         <h2 class="fw-bold mb-2">Sign in to your account</h2>
                         <p class="text-muted mb-0">Please enter your credentials</p>
@@ -64,7 +60,7 @@ else
                     </form>
                 </div>
                 
-                <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab" tabindex="0">
+                <div class="tab-pane fade" id="register" aria-labelledby="register-tab">
                     <div class="text-center mb-4">
                         <h2 class="fw-bold mb-2">Create your account</h2>
                         <p class="text-muted mb-0">Please fill in your information</p>
