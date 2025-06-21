@@ -166,7 +166,7 @@ public class UserAuthenticationService : IUserAuthenticationService
         catch (ArgumentException ex)
         {
             _logger.LogError(ex, "Argument validation error during registration for user: {Email}", registerUserDto.Email);
-            throw new ArgumentException($"Registration validation failed for user {registerUserDto.Email}: {ex.Message}", ex);
+            throw new ArgumentException(ex.Message, ex);
         }
         catch (InvalidOperationException ex)
         {

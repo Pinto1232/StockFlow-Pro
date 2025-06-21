@@ -107,6 +107,7 @@ public class LoginModel : PageModel
         catch (ArgumentException ex)
         {
             RegisterErrorMessage = ex.Message;
+            // Keep the form data so user doesn't have to re-enter everything
             return Page();
         }
         catch (InvalidOperationException ex)
@@ -114,9 +115,11 @@ public class LoginModel : PageModel
             RegisterErrorMessage = ex.Message;
             return Page();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             RegisterErrorMessage = "An error occurred during registration. Please try again.";
+            // Log the actual exception for debugging
+            Console.WriteLine($"Registration error: {ex.Message}");
             return Page();
         }
     }

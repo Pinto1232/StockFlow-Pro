@@ -27,17 +27,17 @@ else
 {
     <div class="d-flex align-items-center justify-content-center min-vh-100">
         <div class="card shadow-sm p-4" style="width: 100%; max-width: 450px; border-radius: 1rem;">
-            <div class="nav nav-tabs mb-4" id="authTabs" role="tablist">
-                <div class="nav-item">
+            <ul class="nav nav-tabs mb-4" id="authTabs" role="tablist">
+                <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab" aria-controls="login" aria-selected="true">Sign In</button>
-                </div>
-                <div class="nav-item">
+                </li>
+                <li class="nav-item" role="presentation">
                     <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab" aria-controls="register" aria-selected="false">Register</button>
-                </div>
-            </div>
+                </li>
+            </ul>
             
             <div class="tab-content" id="authTabsContent">
-                <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
+                <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab" tabindex="0">
                     <div class="text-center mb-4">
                         <h2 class="fw-bold mb-2">Sign in to your account</h2>
                         <p class="text-muted mb-0">Please enter your credentials</p>
@@ -64,15 +64,16 @@ else
                     </form>
                 </div>
                 
-                <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
+                <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab" tabindex="0">
                     <div class="text-center mb-4">
                         <h2 class="fw-bold mb-2">Create your account</h2>
                         <p class="text-muted mb-0">Please fill in your information</p>
                     </div>
                     @if (Model.RegisterErrorMessage != null)
                     {
-                        <div class="alert alert-danger text-center py-2">
-                            <i class="fas fa-exclamation-triangle me-2"></i>@Model.RegisterErrorMessage
+                        <div class="alert alert-danger text-center py-3 mb-4" style="border: 2px solid #dc3545; background-color: #f8d7da;">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>@Model.RegisterErrorMessage</strong>
                         </div>
                     }
                     @if (Model.RegisterSuccessMessage != null)
@@ -132,59 +133,100 @@ else
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const passwordField = document.getElementById('Register_Password');
-    const confirmPasswordField = document.getElementById('Register_ConfirmPassword');
-    const registerForm = document.querySelector('form[asp-page-handler="Register"]');
+    // Check if there's a registration error or success and switch to register tab
+    var hasRegisterError = @Html.Raw(Model.RegisterErrorMessage != null ? "true" : "false");
+    var hasRegisterSuccess = @Html.Raw(Model.RegisterSuccessMessage != null ? "true" : "false");
+    
+    // Only auto-switch to register tab if there's an error or success message
+    if (hasRegisterError || hasRegisterSuccess) {
+        // Use Bootstrap's Tab API to properly switch tabs
+        var registerTabEl = document.getElementById('register-tab');
+        if (registerTabEl) {
+            var registerTab = new bootstrap.Tab(registerTabEl);
+            registerTab.show();
+        }
+    }
+
+    // Password validation functionality
+    var passwordField = document.getElementById('Register_Password');
+    var confirmPasswordField = document.getElementById('Register_ConfirmPassword');
+    var registerForm = document.querySelector('form[asp-page-handler="Register"]');
     
     // Only proceed if all elements exist
-    if (!passwordField || !confirmPasswordField || !registerForm) {
-        return;
+    if (passwordField && confirmPasswordField && registerForm) {
+        
+        function validatePasswordMatch() {
+            var password = passwordField.value;
+            var confirmPassword = confirmPasswordField.value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                confirmPasswordField.setCustomValidity('Passwords do not match');
+                confirmPasswordField.classList.add('is-invalid');
+            } else {
+                confirmPasswordField.setCustomValidity('');
+                confirmPasswordField.classList.remove('is-invalid');
+            }
+        }
+        
+        function validatePasswordLength() {
+            var password = passwordField.value;
+            
+            if (password && password.length < 6) {
+                passwordField.setCustomValidity('Password must be at least 6 characters long');
+                passwordField.classList.add('is-invalid');
+            } else {
+                passwordField.setCustomValidity('');
+                passwordField.classList.remove('is-invalid');
+            }
+        }
+        
+        passwordField.addEventListener('input', function() {
+            validatePasswordLength();
+            validatePasswordMatch();
+        });
+        
+        confirmPasswordField.addEventListener('input', validatePasswordMatch);
+        
+        registerForm.addEventListener('submit', function(e) {
+            validatePasswordLength();
+            validatePasswordMatch();
+            
+            if (!registerForm.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
     }
     
-    function validatePasswordMatch() {
-        if (!passwordField || !confirmPasswordField) return;
-        
-        const password = passwordField.value;
-        const confirmPassword = confirmPasswordField.value;
-        
-        if (confirmPassword && password !== confirmPassword) {
-            confirmPasswordField.setCustomValidity('Passwords do not match');
-            confirmPasswordField.classList.add('is-invalid');
-        } else {
-            confirmPasswordField.setCustomValidity('');
-            confirmPasswordField.classList.remove('is-invalid');
-        }
+    // Clear form validation states when switching tabs
+    var loginTab = document.getElementById('login-tab');
+    var registerTab = document.getElementById('register-tab');
+    
+    if (loginTab) {
+        loginTab.addEventListener('click', function() {
+            // Clear any validation states on login form
+            var loginForm = document.querySelector('form[asp-page-handler="Login"]');
+            if (loginForm) {
+                var inputs = loginForm.querySelectorAll('input');
+                inputs.forEach(function(input) {
+                    input.classList.remove('is-invalid');
+                    input.setCustomValidity('');
+                });
+            }
+        });
     }
     
-    function validatePasswordLength() {
-        if (!passwordField) return;
-        
-        const password = passwordField.value;
-        
-        if (password && password.length < 6) {
-            passwordField.setCustomValidity('Password must be at least 6 characters long');
-            passwordField.classList.add('is-invalid');
-        } else {
-            passwordField.setCustomValidity('');
-            passwordField.classList.remove('is-invalid');
-        }
+    if (registerTab) {
+        registerTab.addEventListener('click', function() {
+            // Clear any validation states on register form
+            if (registerForm) {
+                var inputs = registerForm.querySelectorAll('input');
+                inputs.forEach(function(input) {
+                    input.classList.remove('is-invalid');
+                    input.setCustomValidity('');
+                });
+            }
+        });
     }
-    
-    passwordField.addEventListener('input', function() {
-        validatePasswordLength();
-        validatePasswordMatch();
-    });
-    
-    confirmPasswordField.addEventListener('input', validatePasswordMatch);
-    
-    registerForm.addEventListener('submit', function(e) {
-        validatePasswordLength();
-        validatePasswordMatch();
-        
-        if (!registerForm.checkValidity()) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-    });
 });
 </script>
