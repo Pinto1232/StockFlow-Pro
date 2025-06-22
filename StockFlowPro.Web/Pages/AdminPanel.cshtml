@@ -105,8 +105,7 @@
             <h3 class="section-title">
                 <i class="fas fa-tools"></i>
                 Administration Tools
-            </h3>
-            <div class="admin-cards-grid">
+            </h3><div class="admin-cards-grid">
                 @if (User.HasPermission(StockFlowPro.Web.Authorization.Permissions.Users.ViewAll))
                 {
                     <!-- Enhanced User Management Card -->
@@ -124,11 +123,11 @@
                             <p class="card-text">Manage system users, roles, and permissions to ensure security and proper access control.</p>
                             <div class="card-stats">
                                 <div class="stat">
-                                    <span class="stat-number">24</span>
+                                    <span class="stat-number" id="active-users">@Model.ActiveUsers</span>
                                     <span class="stat-label">Active Users</span>
                                 </div>
                                 <div class="stat">
-                                    <span class="stat-number">3</span>
+                                    <span class="stat-number" id="total-roles">@Model.TotalRoles</span>
                                     <span class="stat-label">Roles</span>
                                 </div>
                             </div>
@@ -163,11 +162,11 @@
                             <p class="card-text">Add, edit, and organize your product inventory, including stock levels and pricing.</p>
                             <div class="card-stats">
                                 <div class="stat">
-                                    <span class="stat-number">1,247</span>
+                                    <span class="stat-number" id="product-count">@Model.TotalProducts.ToString("N0")</span>
                                     <span class="stat-label">Products</span>
                                 </div>
                                 <div class="stat">
-                                    <span class="stat-number">89%</span>
+                                    <span class="stat-number" id="in-stock">@Model.InStockPercentage.ToString("F1")%</span>
                                     <span class="stat-label">In Stock</span>
                                 </div>
                             </div>
@@ -929,301 +928,286 @@
 </style>
 
 <script>
-    // Enhanced Admin Panel JavaScript functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize tooltips and animations
-        initializeAnimations();
-        updateSystemStats();
-        
-        // Auto-refresh system stats every 30 seconds
-        setInterval(updateSystemStats, 30000);
-    });
+// Enhanced Admin Panel JavaScript functionality
 
-    // Refresh dashboard data
-    function refreshDashboard() {
-        const refreshBtn = document.querySelector('.refresh-btn');
-        const icon = refreshBtn.querySelector('i');
-        
-        // Add loading state
-        refreshBtn.disabled = true;
-        icon.classList.add('fa-spin');
-        
-        // Simulate data refresh
+document.addEventListener('DOMContentLoaded', function() {
+    initializeAnimations();
+    updateSystemStats();
+    setInterval(updateSystemStats, 30000);
+});
+
+function refreshDashboard() {
+    const refreshBtn = document.querySelector('.refresh-btn');
+    const icon = refreshBtn.querySelector('i');
+    refreshBtn.disabled = true;
+    icon.classList.add('fa-spin');
+    setTimeout(() => {
+        updateSystemStats();
+        refreshBtn.disabled = false;
+        icon.classList.remove('fa-spin');
+        showNotification('Dashboard refreshed successfully!', 'success');
+    }, 1500);
+}
+
+function openSettings() {
+    showNotification('System settings panel coming soon!', 'info');
+}
+
+function createUser() {
+    showNotification('Redirecting to user creation...', 'info');
+    setTimeout(() => {
+        window.location.href = '/ManageUsers';
+    }, 1000);
+}
+
+function backupSystem() {
+    const confirmed = confirm('Are you sure you want to start a system backup?');
+    if (confirmed) {
+        showNotification('System backup initiated...', 'success');
         setTimeout(() => {
+            showNotification('Backup completed successfully!', 'success');
             updateSystemStats();
-            refreshBtn.disabled = false;
-            icon.classList.remove('fa-spin');
-            showNotification('Dashboard refreshed successfully!', 'success');
+        }, 3000);
+    }
+}
+
+function viewLogs() {
+    showNotification('Opening system logs...', 'info');
+    setTimeout(() => {
+        alert('System Logs:\n\n[INFO] System started successfully\n[INFO] User authentication enabled\n[INFO] Database connection established\n[INFO] All services running normally');
+    }, 500);
+}
+
+function systemHealth() {
+    showNotification('Running system health check...', 'info');
+    setTimeout(() => {
+        const healthReport = {
+            cpu: Math.floor(Math.random() * 30) + 10,
+            memory: Math.floor(Math.random() * 40) + 30,
+            disk: Math.floor(Math.random() * 20) + 15,
+            network: 'Optimal'
+        };
+        alert(`System Health Report:\n\nCPU Usage: ${healthReport.cpu}%\nMemory Usage: ${healthReport.memory}%\nDisk Usage: ${healthReport.disk}%\nNetwork Status: ${healthReport.network}\n\nAll systems operating normally.`);
+    }, 2000);
+}
+
+function quickAddUser() {
+    const userName = prompt('Enter new user name:');
+    if (userName) {
+        showNotification(`Creating user: ${userName}...`, 'info');
+        setTimeout(() => {
+            showNotification(`User ${userName} created successfully!`, 'success');
         }, 1500);
     }
+}
 
-    // Open system settings
-    function openSettings() {
-        showNotification('System settings panel coming soon!', 'info');
-    }
+function quickAddProduct() {
+    showNotification('Redirecting to product management...', 'info');
+    setTimeout(() => {
+        window.location.href = '/Products';
+    }, 1000);
+}
 
-    // Quick Actions
-    function createUser() {
-        showNotification('Redirecting to user creation...', 'info');
-        setTimeout(() => {
-            window.location.href = '/ManageUsers';
-        }, 1000);
-    }
-
-    function backupSystem() {
-        const confirmed = confirm('Are you sure you want to start a system backup?');
-        if (confirmed) {
-            showNotification('System backup initiated...', 'success');
-            // Simulate backup process
-            setTimeout(() => {
-                showNotification('Backup completed successfully!', 'success');
-                updateSystemStats();
-            }, 3000);
-        }
-    }
-
-    function viewLogs() {
-        showNotification('Opening system logs...', 'info');
-        // Simulate opening logs
-        setTimeout(() => {
-            alert('System Logs:\n\n[INFO] System started successfully\n[INFO] User authentication enabled\n[INFO] Database connection established\n[INFO] All services running normally');
-        }, 500);
-    }
-
-    function systemHealth() {
-        showNotification('Running system health check...', 'info');
-        setTimeout(() => {
-            const healthReport = {
-                cpu: Math.floor(Math.random() * 30) + 10,
-                memory: Math.floor(Math.random() * 40) + 30,
-                disk: Math.floor(Math.random() * 20) + 15,
-                network: 'Optimal'
-            };
-            
-            alert(`System Health Report:\n\nCPU Usage: ${healthReport.cpu}%\nMemory Usage: ${healthReport.memory}%\nDisk Usage: ${healthReport.disk}%\nNetwork Status: ${healthReport.network}\n\nAll systems operating normally.`);
-        }, 2000);
-    }
-
-    // Card Actions
-    function quickAddUser() {
-        const userName = prompt('Enter new user name:');
-        if (userName) {
-            showNotification(`Creating user: ${userName}...`, 'info');
-            setTimeout(() => {
-                showNotification(`User ${userName} created successfully!`, 'success');
-            }, 1500);
-        }
-    }
-
-    function quickAddProduct() {
-        showNotification('Redirecting to product management...', 'info');
-        setTimeout(() => {
-            window.location.href = '/Products';
-        }, 1000);
-    }
-
-    function generateReport() {
-        showNotification('Generating custom report...', 'info');
-        setTimeout(() => {
-            const reportData = {
-                totalSales: ' + (Math.floor(Math.random() * 50000) + 10000).toLocaleString(),
-                activeUsers: Math.floor(Math.random() * 50) + 20,
-                products: Math.floor(Math.random() * 500) + 1000,
-                orders: Math.floor(Math.random() * 200) + 100
-            };
-            
-            alert(`Generated Report:\n\nTotal Sales: ${reportData.totalSales}\nActive Users: ${reportData.activeUsers}\nTotal Products: ${reportData.products}\nOrders This Month: ${reportData.orders}`);
-        }, 2000);
-    }
-
-    function openSystemSettings() {
-        showNotification('Opening system configuration...', 'info');
-    }
-
-    function securitySettings() {
-        showNotification('Opening security settings...', 'info');
-    }
-
-    function viewMonitoring() {
-        showNotification('Loading monitoring dashboard...', 'info');
-    }
-
-    function downloadLogs() {
-        showNotification('Preparing log files for download...', 'info');
-        setTimeout(() => {
-            showNotification('Log files ready for download!', 'success');
-        }, 2000);
-    }
-
-    function performBackup() {
-        const confirmed = confirm('This will create a full system backup. Continue?');
-        if (confirmed) {
-            showNotification('Starting full system backup...', 'info');
-            setTimeout(() => {
-                showNotification('Backup completed successfully!', 'success');
-                updateSystemStats();
-            }, 4000);
-        }
-    }
-
-    function maintenanceMode() {
-        const confirmed = confirm('This will put the system in maintenance mode. Continue?');
-        if (confirmed) {
-            showNotification('Entering maintenance mode...', 'warning');
-        }
-    }
-
-    // Update system statistics
-    function updateSystemStats() {
-        // Simulate real-time data updates
-        const stats = {
-            uptime: (99.8 + Math.random() * 0.2).toFixed(1) + '%',
-            activeUsers: Math.floor(Math.random() * 10) + 20,
-            lastBackup: Math.floor(Math.random() * 5) + 1 + 'h ago'
+function generateReport() {
+    showNotification('Generating custom report...', 'info');
+    setTimeout(() => {
+        const reportData = {
+            totalSales: '$' + (Math.floor(Math.random() * 50000) + 10000).toLocaleString(),
+            activeUsers: Math.floor(Math.random() * 50) + 20,
+            products: Math.floor(Math.random() * 500) + 1000,
+            orders: Math.floor(Math.random() * 200) + 100
         };
+        alert(`Generated Report:\n\nTotal Sales: ${reportData.totalSales}\nActive Users: ${reportData.activeUsers}\nTotal Products: ${reportData.products}\nOrders This Month: ${reportData.orders}`);
+    }, 2000);
+}
 
-        // Update status banner if it exists
-        const uptimeElement = document.querySelector('.stat-value');
-        const activeUsersElement = document.querySelectorAll('.stat-value')[1];
-        const backupElement = document.querySelectorAll('.stat-value')[2];
+function openSystemSettings() {
+    showNotification('Opening system configuration...', 'info');
+}
 
-        if (uptimeElement) uptimeElement.textContent = stats.uptime;
-        if (activeUsersElement) activeUsersElement.textContent = stats.activeUsers;
-        if (backupElement) backupElement.textContent = stats.lastBackup;
-    }
+function securitySettings() {
+    showNotification('Opening security settings...', 'info');
+}
 
-    // Initialize animations and interactions
-    function initializeAnimations() {
-        // Add stagger animation to cards
-        const cards = document.querySelectorAll('.admin-card');
-        cards.forEach((card, index) => {
-            card.style.animationDelay = `${index * 0.1}s`;
-            card.classList.add('fade-in-up');
-        });
+function viewMonitoring() {
+    showNotification('Loading monitoring dashboard...', 'info');
+}
 
-        // Add hover effects to quick action buttons
-        const quickActions = document.querySelectorAll('.quick-action-btn');
-        quickActions.forEach(btn => {
-            btn.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-4px) scale(1.05)';
-            });
-            
-            btn.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0) scale(1)';
-            });
-        });
-    }
+function downloadLogs() {
+    showNotification('Preparing log files for download...', 'info');
+    setTimeout(() => {
+        showNotification('Log files ready for download!', 'success');
+    }, 2000);
+}
 
-    // Notification system
-    function showNotification(message, type = 'info') {
-        // Remove existing notifications
-        const existingNotification = document.querySelector('.admin-notification');
-        if (existingNotification) {
-            existingNotification.remove();
-        }
-
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `admin-notification notification-${type}`;
-        notification.innerHTML = `
-            <div class="notification-content">
-                <i class="fas fa-${getNotificationIcon(type)}"></i>
-                <span>${message}</span>
-            </div>
-            <button class="notification-close" onclick="this.parentElement.remove()">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-
-        // Add styles
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${getNotificationColor(type)};
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            min-width: 300px;
-            animation: slideInRight 0.3s ease;
-        `;
-
-        document.body.appendChild(notification);
-
-        // Auto-remove after 5 seconds
+function performBackup() {
+    const confirmed = confirm('This will create a full system backup. Continue?');
+    if (confirmed) {
+        showNotification('Starting full system backup...', 'info');
         setTimeout(() => {
-            if (notification.parentElement) {
-                notification.style.animation = 'slideOutRight 0.3s ease';
-                setTimeout(() => notification.remove(), 300);
+            showNotification('Backup completed successfully!', 'success');
+            updateSystemStats();
+        }, 4000);
+    }
+}
+
+function maintenanceMode() {
+    const confirmed = confirm('This will put the system in maintenance mode. Continue?');
+    if (confirmed) {
+        showNotification('Entering maintenance mode...', 'warning');
+    }
+}
+
+function updateSystemStats() {
+    const stats = {
+        uptime: (99.8 + Math.random() * 0.2).toFixed(1) + '%',
+        activeUsers: Math.floor(Math.random() * 10) + 20,
+        lastBackup: Math.floor(Math.random() * 5) + 1 + 'h ago'
+    };
+    const uptimeElement = document.querySelector('.stat-value');
+    const activeUsersElement = document.querySelectorAll('.stat-value')[1];
+    const backupElement = document.querySelectorAll('.stat-value')[2];
+    if (uptimeElement) uptimeElement.textContent = stats.uptime;
+    if (activeUsersElement) activeUsersElement.textContent = stats.activeUsers;
+    if (backupElement) backupElement.textContent = stats.lastBackup;
+
+    // Update Product Management card with real data from API
+    updateProductStats();
+}
+
+async function updateProductStats() {
+    try {
+        const response = await fetch('/api/admin/product-stats');
+        if (response.ok) {
+            const data = await response.json();
+            const productCount = document.getElementById('product-count');
+            const inStock = document.getElementById('in-stock');
+            
+            if (productCount) {
+                productCount.textContent = data.totalProducts.toLocaleString();
+                console.log('Updated product count to:', data.totalProducts);
             }
-        }, 5000);
+            if (inStock) {
+                inStock.textContent = data.inStockPercentage.toFixed(1) + '%';
+                console.log('Updated in-stock to:', data.inStockPercentage.toFixed(1) + '%');
+            }
+        }
+    } catch (error) {
+        console.error('Failed to update product stats:', error);
     }
+}
 
-    function getNotificationIcon(type) {
-        switch(type) {
-            case 'success': return 'check-circle';
-            case 'warning': return 'exclamation-triangle';
-            case 'error': return 'times-circle';
-            default: return 'info-circle';
-        }
+function initializeAnimations() {
+    const cards = document.querySelectorAll('.admin-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('fade-in-up');
+    });
+    const quickActions = document.querySelectorAll('.quick-action-btn');
+    quickActions.forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-4px) scale(1.05)';
+        });
+        btn.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+}
+
+function showNotification(message, type = 'info') {
+    const existingNotification = document.querySelector('.admin-notification');
+    if (existingNotification) {
+        existingNotification.remove();
     }
-
-    function getNotificationColor(type) {
-        switch(type) {
-            case 'success': return 'linear-gradient(135deg, #28a745, #20c997)';
-            case 'warning': return 'linear-gradient(135deg, #ffc107, #fd7e14)';
-            case 'error': return 'linear-gradient(135deg, #dc3545, #c82333)';
-            default: return 'linear-gradient(135deg, #5a5cdb, #7f53ac)';
-        }
-    }
-
-    // Add CSS animations
-    const style = document.createElement('style');
-    style.textContent = `
-        @@keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        @@keyframes slideOutRight {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-        
-        @@keyframes fadeInUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .fade-in-up {
-            animation: fadeInUp 0.6s ease forwards;
-        }
-        
-        .notification-content {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex: 1;
-        }
-        
-        .notification-close {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            padding: 0.25rem;
-            border-radius: 4px;
-            transition: background 0.2s ease;
-        }
-        
-        .notification-close:hover {
-            background: rgba(255,255,255,0.2);
-        }
+    const notification = document.createElement('div');
+    notification.className = `admin-notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-${getNotificationIcon(type)}"></i>
+            <span>${message}</span>
+        </div>
+        <button class="notification-close" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+        </button>
     `;
-    document.head.appendChild(style);
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${getNotificationColor(type)};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        min-width: 300px;
+        animation: slideInRight 0.3s ease;
+    `;
+    document.body.appendChild(notification);
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }
+    }, 5000);
+}
+
+function getNotificationIcon(type) {
+    switch(type) {
+        case 'success': return 'check-circle';
+        case 'warning': return 'exclamation-triangle';
+        case 'error': return 'times-circle';
+        default: return 'info-circle';
+    }
+}
+
+function getNotificationColor(type) {
+    switch(type) {
+        case 'success': return 'linear-gradient(135deg, #28a745, #20c997)';
+        case 'warning': return 'linear-gradient(135deg, #ffc107, #fd7e14)';
+        case 'error': return 'linear-gradient(135deg, #dc3545, #c82333)';
+        default: return 'linear-gradient(135deg, #5a5cdb, #7f53ac)';
+    }
+}
+
+const style = document.createElement('style');
+style.textContent = `
+    @@keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @@keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+    @@keyframes fadeInUp {
+        from { transform: translateY(30px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease forwards;
+    }
+    .notification-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1;
+    }
+    .notification-close {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 4px;
+        transition: background 0.2s ease;
+    }
+    .notification-close:hover {
+        background: rgba(255,255,255,0.2);
+    }
+`;
+document.head.appendChild(style);
 </script>
