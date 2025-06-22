@@ -56,38 +56,97 @@
                         @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item dropdown">
-                                <button class="nav-link dropdown-toggle text-dark btn btn-link border-0 bg-transparent" id="userDropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
-                                    <i class="fas fa-user-circle me-1"></i>
-                                    @User.GetFullName()
-                                    <span class="badge bg-secondary ms-1">@User.GetUserRole()</span>
+                                <button class="nav-link dropdown-toggle text-dark btn btn-link border-0 bg-transparent modern-user-toggle" 
+                                        id="userDropdown" 
+                                        type="button" 
+                                        data-bs-toggle="dropdown" 
+                                        aria-expanded="false" 
+                                        aria-haspopup="true"
+                                        aria-label="User account menu for @User.GetFullName()"
+                                        title="Click to open account menu">
+                                    <div class="user-avatar-wrapper">
+                                        <i class="fas fa-user-circle user-avatar-icon"></i>
+                                        <div class="online-indicator" title="Online"></div>
+                                    </div>
+                                    <div class="user-info-wrapper">
+                                        <span class="user-name">@User.GetFullName()</span>
+                                        <span class="user-role-badge">@User.GetUserRole()</span>
+                                    </div>
+                                    <i class="fas fa-chevron-down dropdown-arrow"></i>
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                    <li>
-                                        <h6 class="dropdown-header">
-                                            <i class="fas fa-info-circle me-1"></i>Account Info
-                                        </h6>
+                                <ul class="dropdown-menu dropdown-menu-end modern-account-dropdown" aria-labelledby="userDropdown">
+                                    <li class="account-header">
+                                        <div class="account-avatar">
+                                            <i class="fas fa-user-circle"></i>
+                                        </div>
+                                        <div class="account-details">
+                                            <h6 class="account-name">@User.GetFullName()</h6>
+                                            <p class="account-email">@User.GetEmail()</p>
+                                            <span class="account-role-tag">@User.GetUserRole()</span>
+                                        </div>
                                     </li>
-                                    <li><span class="dropdown-item-text"><strong>Email:</strong> @User.GetEmail()</span></li>
-                                    <li><span class="dropdown-item-text"><strong>Role:</strong> @User.GetUserRole()</span></li>
-                                    <li><hr class="dropdown-divider"></li>
+                                    <li class="dropdown-divider modern-divider"></li>
                                     <li>
-                                        <a class="dropdown-item" href="#">
-                                            <i class="fas fa-user-edit me-2"></i>Edit Profile
+                                        <a class="dropdown-item modern-dropdown-item" 
+                                           href="#" 
+                                           role="menuitem"
+                                           tabindex="0"
+                                           aria-label="Edit your profile information"
+                                           data-action="edit-profile">
+                                            <div class="item-icon">
+                                                <i class="fas fa-user-edit"></i>
+                                            </div>
+                                            <div class="item-content">
+                                                <span class="item-title">Edit Profile</span>
+                                                <span class="item-subtitle">Update your personal information</span>
+                                            </div>
+                                            <div class="item-shortcut">
+                                                <kbd>Ctrl+P</kbd>
+                                            </div>
                                         </a>
                                     </li>
                                     @if (User.HasPermission(Permissions.System.ViewAdminPanel))
                                     {
                                         <li>
-                                            <a class="dropdown-item" href="/AdminPanel">
-                                                <i class="fas fa-tools me-2"></i>Admin Settings
+                                            <a class="dropdown-item modern-dropdown-item" 
+                                               href="/AdminPanel"
+                                               role="menuitem"
+                                               tabindex="0"
+                                               aria-label="Access admin settings and system configuration"
+                                               data-action="admin-settings">
+                                                <div class="item-icon admin-icon">
+                                                    <i class="fas fa-tools"></i>
+                                                </div>
+                                                <div class="item-content">
+                                                    <span class="item-title">Admin Settings</span>
+                                                    <span class="item-subtitle">Manage system configuration</span>
+                                                </div>
+                                                <div class="item-shortcut">
+                                                    <kbd>Ctrl+A</kbd>
+                                                </div>
                                             </a>
                                         </li>
                                     }
-                                    <li><hr class="dropdown-divider"></li>
+                                    <li class="dropdown-divider modern-divider"></li>
                                     <li>
-                                        <form method="post" asp-page="/Login" asp-page-handler="Logout" class="d-inline w-100">
-                                            <button type="submit" class="dropdown-item text-danger">
-                                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                        <form method="post" asp-page="/Login" asp-page-handler="Logout" class="d-inline w-100" id="logoutForm">
+                                            <button type="button" 
+                                                    class="dropdown-item modern-dropdown-item logout-item"
+                                                    role="menuitem"
+                                                    tabindex="0"
+                                                    aria-label="Sign out of your account"
+                                                    data-action="logout"
+                                                    onclick="confirmLogout(event)">
+                                                <div class="item-icon logout-icon">
+                                                    <i class="fas fa-sign-out-alt"></i>
+                                                </div>
+                                                <div class="item-content">
+                                                    <span class="item-title">Logout</span>
+                                                    <span class="item-subtitle">Sign out of your account</span>
+                                                </div>
+                                                <div class="item-shortcut">
+                                                    <kbd>Ctrl+L</kbd>
+                                                </div>
                                             </button>
                                         </form>
                                     </li>
@@ -210,6 +269,334 @@
                 transform: translateY(50px);
             }
         }
+        
+        /* Modern Account Dropdown Styles */
+        .modern-user-toggle {
+            display: flex !important;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem !important;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .modern-user-toggle:hover {
+            background-color: #f8f9fa !important;
+            transform: translateY(-1px);
+        }
+        
+        .user-avatar-wrapper {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        
+        .user-avatar-icon {
+            font-size: 1.8rem;
+            color: #5a5cdb;
+        }
+        
+        .online-indicator {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            background: #28a745;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .dropdown-arrow {
+            font-size: 0.8rem;
+            color: #6c7a89;
+            transition: transform 0.2s ease;
+            margin-left: 0.5rem;
+        }
+        
+        .modern-user-toggle[aria-expanded="true"] .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+        
+        .user-info-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.1rem;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #232946;
+            line-height: 1.2;
+        }
+        
+        .user-role-badge {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #6c7a89;
+            background: #f4f6fb;
+            padding: 0.15rem 0.5rem;
+            border-radius: 6px;
+            line-height: 1;
+        }
+        
+        .modern-account-dropdown {
+            min-width: 320px;
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(90,92,219,0.12);
+            padding: 0;
+            margin-top: 0.5rem;
+            background: #fff;
+            overflow: hidden;
+        }
+        
+        .account-header {
+            padding: 1.5rem 1.25rem 1rem 1.25rem;
+            background: linear-gradient(135deg, #f4f6fb 0%, #e5e7ef 100%);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .account-avatar {
+            flex-shrink: 0;
+        }
+        
+        .account-avatar i {
+            font-size: 2.5rem;
+            color: #5a5cdb;
+        }
+        
+        .account-details {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .account-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #232946;
+            margin: 0 0 0.25rem 0;
+            line-height: 1.3;
+        }
+        
+        .account-email {
+            font-size: 0.9rem;
+            color: #6c7a89;
+            margin: 0 0 0.5rem 0;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+        
+        .account-role-tag {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #5a5cdb;
+            background: #fff;
+            padding: 0.25rem 0.75rem;
+            border-radius: 8px;
+        }
+        
+        .modern-divider {
+            margin: 0;
+            border: none;
+            opacity: 1;
+        }
+        
+        .modern-dropdown-item {
+            display: flex !important;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .modern-dropdown-item:hover,
+        .modern-dropdown-item:focus {
+            background: #f8f9fa;
+            color: inherit;
+            text-decoration: none;
+            transform: translateX(4px);
+        }
+        
+        .item-icon {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: #f4f6fb;
+            transition: all 0.2s ease;
+        }
+        
+        .item-icon i {
+            font-size: 1.1rem;
+            color: #5a5cdb;
+        }
+        
+        .admin-icon {
+            background: #fff3cd;
+        }
+        
+        .admin-icon i {
+            color: #856404;
+        }
+        
+        .logout-icon {
+            background: #f8d7da;
+        }
+        
+        .logout-icon i {
+            color: #721c24;
+        }
+        
+        .item-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .item-title {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #232946;
+            line-height: 1.3;
+            margin-bottom: 0.1rem;
+        }
+        
+        .item-subtitle {
+            display: block;
+            font-size: 0.8rem;
+            color: #6c7a89;
+            line-height: 1.3;
+        }
+        
+        .item-shortcut {
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+        
+        .item-shortcut kbd {
+            background: #f8f9fa;
+            border: none;
+            border-radius: 4px;
+            padding: 0.2rem 0.4rem;
+            font-size: 0.7rem;
+            color: #6c7a89;
+            font-family: monospace;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .logout-item .item-title {
+            color: #721c24;
+        }
+        
+        .logout-item .item-subtitle {
+            color: #a94442;
+        }
+        
+        .modern-dropdown-item:hover .item-icon {
+            transform: scale(1.05);
+        }
+        
+        .modern-dropdown-item:hover .admin-icon {
+            background: #ffeaa7;
+        }
+        
+        .modern-dropdown-item:hover .logout-icon {
+            background: #f5c6cb;
+        }
+        
+        @@media (max-width: 768px) {
+            .modern-account-dropdown {
+                min-width: 280px;
+            }
+            
+            .user-info-wrapper {
+                display: none;
+            }
+            
+            .modern-user-toggle {
+                gap: 0;
+                padding: 0.5rem !important;
+            }
+            
+            .account-header {
+                padding: 1rem;
+            }
+            
+            .modern-dropdown-item {
+                padding: 0.75rem 1rem;
+            }
+        }
+        
+        @@keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 6px rgba(40, 167, 69, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+            }
+        }
+        
+        /* Loading state */
+        .modern-dropdown-item.loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .modern-dropdown-item.loading .item-icon {
+            animation: spin 1s linear infinite;
+        }
+        
+        @@keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Focus states for better accessibility */
+        .modern-dropdown-item:focus {
+            outline: none;
+            background: #f8f9fa;
+        }
+        
+        .modern-user-toggle:focus {
+            outline: none;
+            background-color: #f8f9fa !important;
+        }
+        
+        /* Override any default Bootstrap link colors */
+        .modern-account-dropdown a,
+        .modern-account-dropdown a:hover,
+        .modern-account-dropdown a:focus,
+        .modern-account-dropdown a:active,
+        .modern-account-dropdown a:visited {
+            color: inherit !important;
+            text-decoration: none !important;
+        }
+        
+        .modern-account-dropdown .dropdown-item,
+        .modern-account-dropdown .dropdown-item:hover,
+        .modern-account-dropdown .dropdown-item:focus,
+        .modern-account-dropdown .dropdown-item:active {
+            color: inherit !important;
+        }
     </style>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -225,6 +612,120 @@
                 snackbar.className = snackbar.className.replace('show', '');
             }, 3000);
         }
+        
+        // Enhanced UX functionality for account dropdown
+        function confirmLogout(event) {
+            event.preventDefault();
+            
+            const button = event.currentTarget;
+            const originalIcon = button.querySelector('.item-icon i');
+            const originalText = button.querySelector('.item-title').textContent;
+            
+            // Add loading state
+            button.classList.add('loading');
+            originalIcon.className = 'fas fa-spinner';
+            button.querySelector('.item-title').textContent = 'Signing out...';
+            
+            // Show confirmation dialog
+            if (confirm('Are you sure you want to logout?')) {
+                // Submit the form
+                document.getElementById('logoutForm').submit();
+            } else {
+                // Reset button state
+                setTimeout(() => {
+                    button.classList.remove('loading');
+                    originalIcon.className = 'fas fa-sign-out-alt';
+                    button.querySelector('.item-title').textContent = originalText;
+                }, 300);
+            }
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey) {
+                switch(e.key.toLowerCase()) {
+                    case 'p':
+                        e.preventDefault();
+                        const profileLink = document.querySelector('[data-action="edit-profile"]');
+                        if (profileLink) {
+                            profileLink.click();
+                            showSnackbar('Profile editing feature coming soon!', 'info');
+                        }
+                        break;
+                    case 'a':
+                        e.preventDefault();
+                        const adminLink = document.querySelector('[data-action="admin-settings"]');
+                        if (adminLink) {
+                            adminLink.click();
+                        }
+                        break;
+                    case 'l':
+                        e.preventDefault();
+                        const logoutBtn = document.querySelector('[data-action="logout"]');
+                        if (logoutBtn) {
+                            logoutBtn.click();
+                        }
+                        break;
+                }
+            }
+        });
+        
+        // Enhanced dropdown behavior
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdown = document.getElementById('userDropdown');
+            const dropdownMenu = document.querySelector('.modern-account-dropdown');
+            
+            if (dropdown && dropdownMenu) {
+                // Add click outside to close
+                document.addEventListener('click', function(e) {
+                    if (!dropdown.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                        const bsDropdown = bootstrap.Dropdown.getInstance(dropdown);
+                        if (bsDropdown) {
+                            bsDropdown.hide();
+                        }
+                    }
+                });
+                
+                // Keyboard navigation
+                dropdownMenu.addEventListener('keydown', function(e) {
+                    const items = dropdownMenu.querySelectorAll('.modern-dropdown-item');
+                    const currentIndex = Array.from(items).indexOf(document.activeElement);
+                    
+                    switch(e.key) {
+                        case 'ArrowDown':
+                            e.preventDefault();
+                            const nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+                            items[nextIndex].focus();
+                            break;
+                        case 'ArrowUp':
+                            e.preventDefault();
+                            const prevIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+                            items[prevIndex].focus();
+                            break;
+                        case 'Escape':
+                            e.preventDefault();
+                            dropdown.click();
+                            dropdown.focus();
+                            break;
+                        case 'Enter':
+                        case ' ':
+                            e.preventDefault();
+                            if (document.activeElement) {
+                                document.activeElement.click();
+                            }
+                            break;
+                    }
+                });
+                
+                // Auto-focus first item when dropdown opens
+                dropdown.addEventListener('shown.bs.dropdown', function() {
+                    const firstItem = dropdownMenu.querySelector('.modern-dropdown-item');
+                    if (firstItem) {
+                        setTimeout(() => firstItem.focus(), 100);
+                    }
+                });
+            }
+        });
     </script>
     
     @if (User.Identity != null && User.Identity.IsAuthenticated)
