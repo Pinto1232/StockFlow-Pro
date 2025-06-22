@@ -1,0 +1,28 @@
+using AutoMapper;
+using MediatR;
+using StockFlowPro.Application.DTOs;
+using StockFlowPro.Application.Queries.Products;
+using StockFlowPro.Domain.Repositories;
+
+namespace StockFlowPro.Application.Features.Products;
+
+public class SearchProductsHandler : IRequestHandler<SearchProductsQuery, IEnumerable<ProductDto>>
+{
+    private readonly IProductRepository _productRepository;
+    private readonly IMapper _mapper;
+
+    public SearchProductsHandler(IProductRepository productRepository, IMapper mapper)
+    {
+        _productRepository = productRepository;
+        _mapper = mapper;
+    }
+
+    public async Task<IEnumerable<ProductDto>> Handle(SearchProductsQuery request, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var products = await _productRepository.SearchProductsAsync(request.SearchTerm, cancellationToken);
+        
+        return _mapper.Map<IEnumerable<ProductDto>>(products);
+    }
+}

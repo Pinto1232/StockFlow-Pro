@@ -60,8 +60,11 @@ public class DatabaseSeeder
                 }
                 else
                 {
-                    _logger.LogInformation("Database already contains users with password hashes. Skipping seed.");
+                    _logger.LogInformation("Database already contains users with password hashes. Skipping user seed.");
                 }
+                
+                // Check and seed products separately
+                await SeedProductsAsync();
                 return;
             }
 
@@ -113,11 +116,60 @@ public class DatabaseSeeder
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Successfully seeded database with {Count} users", seedUsers.Count);
+
+            // Seed Products
+            await SeedProductsAsync();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred while seeding the database");
             throw new InvalidOperationException("Failed to seed database with initial data", ex);
+        }
+    }
+
+    private async Task SeedProductsAsync()
+    {
+        try
+        {
+            // Seed Products if none exist
+            if (!await _context.Products.AnyAsync())
+            {
+                _logger.LogInformation("Seeding database with initial products...");
+
+                var seedProducts = new List<Product>
+                {
+                    new Product("Laptop Computer", 999.99m, 25),
+                    new Product("Wireless Mouse", 29.99m, 150),
+                    new Product("Mechanical Keyboard", 89.99m, 75),
+                    new Product("USB-C Cable", 19.99m, 200),
+                    new Product("Monitor Stand", 49.99m, 50),
+                    new Product("Webcam HD", 79.99m, 30),
+                    new Product("Desk Lamp", 39.99m, 40),
+                    new Product("Office Chair", 299.99m, 15),
+                    new Product("Smartphone", 699.99m, 60),
+                    new Product("Tablet", 399.99m, 35)
+                };
+
+                // Set one product as low stock for testing
+                seedProducts[5].UpdateStock(5); 
+                
+                // Set one product as out of stock for testing
+                seedProducts[7].UpdateStock(0); 
+
+                await _context.Products.AddRangeAsync(seedProducts);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Successfully seeded database with {Count} products", seedProducts.Count);
+            }
+            else
+            {
+                _logger.LogInformation("Products already exist in database. Skipping product seed.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while seeding products: {ErrorMessage}", ex.Message);
+            throw new InvalidOperationException("Failed to seed products data", ex);
         }
     }
 }
