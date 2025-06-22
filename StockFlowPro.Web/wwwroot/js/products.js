@@ -106,17 +106,17 @@ function renderProductsTable() {
         // Stock status badge
         let stockBadge;
         if (!product.isInStock) {
-            stockBadge = '<span class="badge badge-danger">Out of Stock</span>';
+            stockBadge = '<span class="badge bg-danger text-white">Out of Stock</span>';
         } else if (product.isLowStock) {
-            stockBadge = '<span class="badge badge-warning">Low Stock</span>';
+            stockBadge = '<span class="badge bg-warning text-dark">Low Stock</span>';
         } else {
-            stockBadge = '<span class="badge badge-success">In Stock</span>';
+            stockBadge = '<span class="badge bg-success text-white">In Stock</span>';
         }
         
         // Active status badge
         const activeBadge = product.isActive 
-            ? '<span class="badge badge-success">Active</span>'
-            : '<span class="badge badge-secondary">Inactive</span>';
+            ? '<span class="badge bg-success text-white">Active</span>'
+            : '<span class="badge bg-secondary text-white">Inactive</span>';
         
         row.innerHTML = `
             <td>${product.name}</td>
