@@ -8,5 +8,7 @@ public class ProductsModel : PageModel
 {
     public void OnGet()
     {
+        // Page initialization - no specific logic required for this view
+        // Product data is loaded via JavaScript and API calls
     }
 }

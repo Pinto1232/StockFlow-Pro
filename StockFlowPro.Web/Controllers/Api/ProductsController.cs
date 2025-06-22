@@ -147,7 +147,6 @@ public class ProductsController : ControllerBase
     {
         var allProductsQuery = new GetAllProductsQuery { ActiveOnly = true };
         var lowStockQuery = new GetAllProductsQuery { ActiveOnly = true, LowStockOnly = true };
-        var outOfStockQuery = new GetAllProductsQuery { ActiveOnly = true, InStockOnly = false };
 
         var allProducts = await _mediator.Send(allProductsQuery);
         var lowStockProducts = await _mediator.Send(lowStockQuery);

@@ -70,27 +70,10 @@ function filterProducts() {
     const lowStockOnly = document.getElementById('lowStockOnlyFilter').checked;
     
     filteredProducts = products.filter(product => {
-        // Search filter
-        if (searchTerm && !product.name.toLowerCase().includes(searchTerm)) {
-            return false;
-        }
-        
-        // Active only filter
-        if (activeOnly && !product.isActive) {
-            return false;
-        }
-        
-        // In stock only filter
-        if (inStockOnly && !product.isInStock) {
-            return false;
-        }
-        
-        // Low stock only filter
-        if (lowStockOnly && !product.isLowStock) {
-            return false;
-        }
-        
-        return true;
+        return (!searchTerm || product.name.toLowerCase().includes(searchTerm)) &&
+               (!activeOnly || product.isActive) &&
+               (!inStockOnly || product.isInStock) &&
+               (!lowStockOnly || product.isLowStock);
     });
     
     renderProductsTable();
@@ -121,7 +104,7 @@ function renderProductsTable() {
         const row = document.createElement('tr');
         
         // Stock status badge
-        let stockBadge = '';
+        let stockBadge;
         if (!product.isInStock) {
             stockBadge = '<span class="badge badge-danger">Out of Stock</span>';
         } else if (product.isLowStock) {
