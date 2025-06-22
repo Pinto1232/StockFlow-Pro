@@ -1,7 +1,8 @@
-// Products Management JavaScript
 
 let products = [];
 let filteredProducts = [];
+let currentPage = 1;
+let itemsPerPage = 25;
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
@@ -13,6 +14,15 @@ document.addEventListener('DOMContentLoaded', function() {
 function setupEventListeners() {
     // Search input
     document.getElementById('searchInput').addEventListener('input', debounce(filterProducts, 300));
+    
+    // Clear search button
+    const clearSearchBtn = document.getElementById('clearSearch');
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', () => {
+            document.getElementById('searchInput').value = '';
+            filterProducts();
+        });
+    }
     
     // Filter checkboxes
     document.getElementById('activeOnlyFilter').addEventListener('change', filterProducts);
@@ -27,6 +37,18 @@ function setupEventListeners() {
     
     // Edit product form
     document.getElementById('editProductForm').addEventListener('submit', handleEditProduct);
+    
+    // Page size selector
+    document.querySelectorAll('.page-size-option').forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.preventDefault();
+            itemsPerPage = parseInt(e.target.dataset.size);
+            currentPage = 1;
+            document.getElementById('pageSize').textContent = itemsPerPage;
+            renderProductsTable();
+            renderPagination();
+        });
+    });
 }
 
 // Load all products
@@ -36,7 +58,9 @@ async function loadProducts() {
         if (response.ok) {
             products = await response.json();
             filteredProducts = [...products];
+            currentPage = 1;
             renderProductsTable();
+            renderPagination();
         } else {
             showAlert('Error loading products', 'danger');
         }
@@ -53,7 +77,7 @@ async function loadDashboardStats() {
         if (response.ok) {
             const stats = await response.json();
             document.getElementById('totalProducts').textContent = stats.totalProducts;
-            document.getElementById('totalValue').textContent = '$' + stats.totalValue.toFixed(2);
+            document.getElementById('totalValue').textContent = 'R' + stats.totalValue.toFixed(2);
             document.getElementById('lowStockCount').textContent = stats.lowStockCount;
             document.getElementById('outOfStockCount').textContent = stats.outOfStockCount;
         }
@@ -76,7 +100,9 @@ function filterProducts() {
                (!lowStockOnly || product.isLowStock);
     });
     
+    currentPage = 1; // Reset to first page when filtering
     renderProductsTable();
+    renderPagination();
 }
 
 // Clear all filters
@@ -87,59 +113,216 @@ function clearFilters() {
     document.getElementById('lowStockOnlyFilter').checked = false;
     
     filteredProducts = [...products];
+    currentPage = 1;
     renderProductsTable();
+    renderPagination();
+}
+
+// Get paginated products for current page
+function getPaginatedProducts() {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredProducts.slice(startIndex, endIndex);
 }
 
 // Render products table
 function renderProductsTable() {
-    const tbody = document.getElementById('productsTableBody');
-    tbody.innerHTML = '';
-    
+    const container = document.getElementById('product-table-section');
+    if (!container) return;
+
     if (filteredProducts.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No products found</td></tr>';
+        container.innerHTML = getEmptyStateHTML();
+        updateProductCount();
         return;
     }
+
+    const paginatedProducts = getPaginatedProducts();
     
-    filteredProducts.forEach(product => {
-        const row = document.createElement('tr');
-        
-        // Stock status badge
-        let stockBadge;
-        if (!product.isInStock) {
-            stockBadge = '<span class="badge bg-danger text-white">Out of Stock</span>';
-        } else if (product.isLowStock) {
-            stockBadge = '<span class="badge bg-warning text-dark">Low Stock</span>';
-        } else {
-            stockBadge = '<span class="badge bg-success text-white">In Stock</span>';
-        }
-        
-        // Active status badge
-        const activeBadge = product.isActive 
-            ? '<span class="badge bg-success text-white">Active</span>'
-            : '<span class="badge bg-secondary text-white">Inactive</span>';
-        
-        row.innerHTML = `
-            <td>${product.name}</td>
-            <td>$${product.costPerItem.toFixed(2)}</td>
+    const tableHTML = `
+        <div class="table-responsive-wrapper">
+            <table class="table table-hover product-table" id="productsTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Cost per Item</th>
+                        <th>Stock</th>
+                        <th>Total Value</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${paginatedProducts.map(product => createProductRowHTML(product)).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    container.innerHTML = tableHTML;
+    updateProductCount();
+}
+
+function createProductRowHTML(product) {
+    // Stock status badge
+    let stockBadge;
+    if (!product.isInStock) {
+        stockBadge = '<span class="badge bg-danger">Out of Stock</span>';
+    } else if (product.isLowStock) {
+        stockBadge = '<span class="badge bg-warning">Low Stock</span>';
+    } else {
+        stockBadge = '<span class="badge bg-success">In Stock</span>';
+    }
+    
+    // Active status badge
+    const activeBadge = product.isActive 
+        ? '<span class="badge bg-success">Active</span>'
+        : '<span class="badge bg-secondary">Inactive</span>';
+    
+    return `
+        <tr>
+            <td><strong>${escapeHtml(product.name)}</strong></td>
+            <td>${product.costPerItem.toFixed(2)}</td>
             <td>${product.numberInStock} ${stockBadge}</td>
-            <td>$${product.totalValue.toFixed(2)}</td>
+            <td>${product.totalValue.toFixed(2)}</td>
             <td>${activeBadge}</td>
             <td>${new Date(product.createdAt).toLocaleDateString()}</td>
-            <td>
-                <button class="btn btn-sm btn-primary" onclick="editProduct('${product.id}')">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-warning" onclick="updateStock('${product.id}', ${product.numberInStock})">
-                    <i class="fas fa-boxes"></i>
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteProduct('${product.id}', '${product.name}')">
-                    <i class="fas fa-trash"></i>
-                </button>
+            <td style="text-align: right;">
+                <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                    <button class="btn btn-sm btn-primary" onclick="editProduct('${product.id}')" title="Edit Product">
+                        <i class="fas fa-edit"></i> <span>Edit</span>
+                    </button>
+                    <button class="btn btn-sm btn-warning" onclick="updateStock('${product.id}', ${product.numberInStock})" title="Update Stock">
+                        <i class="fas fa-boxes"></i> <span>Stock</span>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteProduct('${product.id}', '${escapeHtml(product.name)}')" title="Delete Product">
+                        <i class="fas fa-trash"></i> <span>Delete</span>
+                    </button>
+                </div>
             </td>
+        </tr>
+    `;
+}
+
+function getEmptyStateHTML() {
+    const searchTerm = document.getElementById('searchInput').value;
+    const message = searchTerm ? 
+        'No products found matching your search criteria.' : 
+        'No products found.';
+    
+    return `
+        <div class="empty-state">
+            <i class="fas fa-boxes"></i>
+            <h5>${message}</h5>
+            ${searchTerm ? '<p>Try adjusting your search terms or filters.</p>' : '<p>Create your first product to get started.</p>'}
+        </div>
+    `;
+}
+
+function updateProductCount() {
+    const countElement = document.getElementById('productCount');
+    if (countElement) {
+        const total = filteredProducts.length;
+        countElement.textContent = `${total} product${total !== 1 ? 's' : ''}`;
+    }
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+// Render pagination controls
+function renderPagination() {
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    const paginationContainer = document.getElementById('paginationNav');
+    
+    if (!paginationContainer) return;
+    
+    if (totalPages <= 1) {
+        paginationContainer.innerHTML = '';
+        return;
+    }
+
+    let paginationHTML = '';
+    
+    // Previous button
+    paginationHTML += `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
+        </li>
+    `;
+
+    // Calculate page range to show
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, currentPage + 2);
+
+    // First page and ellipsis
+    if (startPage > 1) {
+        paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`;
+        if (startPage > 2) {
+            paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+    }
+
+    // Page numbers
+    for (let i = startPage; i <= endPage; i++) {
+        paginationHTML += `
+            <li class="page-item ${i === currentPage ? 'active' : ''}">
+                <a class="page-link" href="#" data-page="${i}">${i}</a>
+            </li>
         `;
-        
-        tbody.appendChild(row);
+    }
+
+    // Last page and ellipsis
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+        paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>`;
+    }
+
+    // Next button
+    paginationHTML += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
+        </li>
+    `;
+
+    paginationContainer.innerHTML = paginationHTML;
+
+    // Add event listeners to pagination links
+    paginationContainer.querySelectorAll('.page-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const page = parseInt(e.target.dataset.page);
+            if (page && page !== currentPage && page >= 1 && page <= totalPages) {
+                changePage(page);
+            }
+        });
     });
+}
+
+// Change page
+function changePage(page) {
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    if (page < 1 || page > totalPages) return;
+    
+    currentPage = page;
+    renderProductsTable();
+    renderPagination();
+    
+    // Scroll to top of table
+    const tableElement = document.getElementById('productsTable');
+    if (tableElement) {
+        tableElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 // Handle create product form submission

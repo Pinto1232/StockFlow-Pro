@@ -626,23 +626,18 @@
             const originalIcon = button.querySelector('.item-icon i');
             const originalText = button.querySelector('.item-title').textContent;
             
+            // Show toast notification and proceed with logout
+            showSnackbar('Signing out...', 'info');
+            
             // Add loading state
             button.classList.add('loading');
             originalIcon.className = 'fas fa-spinner';
             button.querySelector('.item-title').textContent = 'Signing out...';
             
-            // Show confirmation dialog
-            if (confirm('Are you sure you want to logout?')) {
-                // Submit the form
+            // Submit the form after a brief delay to show the toast
+            setTimeout(() => {
                 document.getElementById('logoutForm').submit();
-            } else {
-                // Reset button state
-                setTimeout(() => {
-                    button.classList.remove('loading');
-                    originalIcon.className = 'fas fa-sign-out-alt';
-                    button.querySelector('.item-title').textContent = originalText;
-                }, 300);
-            }
+            }, 500);
         }
         
         // Keyboard shortcuts
