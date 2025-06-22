@@ -42,8 +42,14 @@ public class OptimizedUsersController : ControllerBase
     {
         try
         {
-            if (page < 1) page = 1;
-            if (pageSize < 1 || pageSize > 100) pageSize = 50;
+            if (page < 1) 
+            {
+                page = 1;
+            }
+            if (pageSize < 1 || pageSize > 100) 
+            {
+                pageSize = 50;
+            }
 
             var cacheKey = $"users_active_{activeOnly}_page_{page}_size_{pageSize}";
             
@@ -130,7 +136,10 @@ public class OptimizedUsersController : ControllerBase
                 return BadRequest("Search term must be at least 2 characters long");
             }
 
-            if (maxResults < 1 || maxResults > 50) maxResults = 20;
+            if (maxResults < 1 || maxResults > 50) 
+            {
+                maxResults = 20;
+            }
 
             var cacheKey = $"search_{searchTerm.ToLowerInvariant()}_{maxResults}";
             

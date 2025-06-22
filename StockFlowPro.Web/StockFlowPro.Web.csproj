@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
+    <Compile Remove="Middleware\AdminAccessMiddleware.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\StockFlowPro.Application\StockFlowPro.Application.csproj" />
     <ProjectReference Include="..\StockFlowPro.Infrastructure\StockFlowPro.Infrastructure.csproj" />
   </ItemGroup>
@@ -16,6 +20,10 @@
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="FluentValidation.AspNetCore" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Middleware\" />
   </ItemGroup>
 
   <PropertyGroup>
