@@ -5,7 +5,10 @@
 }
 
 @await Html.PartialAsync("_AuthFormStyles")
-<link rel="stylesheet" href="~/css/auth.css" />
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+}
 
 @if (Model.IsLoggedIn)
 {

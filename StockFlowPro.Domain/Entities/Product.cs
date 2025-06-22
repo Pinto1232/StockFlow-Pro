@@ -32,9 +32,10 @@ public class Product : IEntity
 
     public void UpdateCostPerItem(decimal costPerItem)
     {
-        if (costPerItem < 0)
+        if (costPerItem < 0) {
             throw new ArgumentException("Cost per item cannot be negative", nameof(costPerItem));
-        
+        }
+
         CostPerItem = costPerItem;
         UpdatedAt = DateTime.UtcNow;
     }
@@ -42,7 +43,9 @@ public class Product : IEntity
     public void UpdateStock(int numberInStock)
     {
         if (numberInStock < 0)
+        {
             throw new ArgumentException("Stock cannot be negative", nameof(numberInStock));
+        }
         
         NumberInStock = numberInStock;
         UpdatedAt = DateTime.UtcNow;
@@ -51,7 +54,9 @@ public class Product : IEntity
     public void AddStock(int quantity)
     {
         if (quantity <= 0)
+        {
             throw new ArgumentException("Quantity to add must be positive", nameof(quantity));
+        }
         
         NumberInStock += quantity;
         UpdatedAt = DateTime.UtcNow;
@@ -60,10 +65,14 @@ public class Product : IEntity
     public void RemoveStock(int quantity)
     {
         if (quantity <= 0)
+        {
             throw new ArgumentException("Quantity to remove must be positive", nameof(quantity));
+        }
         
         if (NumberInStock < quantity)
+        {
             throw new InvalidOperationException("Insufficient stock available");
+        }
         
         NumberInStock -= quantity;
         UpdatedAt = DateTime.UtcNow;
