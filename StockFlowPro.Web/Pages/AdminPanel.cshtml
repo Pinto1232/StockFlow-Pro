@@ -172,7 +172,7 @@
                                 </div>
                             </div>
                             <div class="card-actions">
-                                <a href="#" class="btn btn-success">
+                                <a href="/Products" class="btn btn-success">
                                     <i class="fas fa-boxes"></i>
                                     <span>Manage Products</span>
                                 </a>
@@ -1016,13 +1016,10 @@
     }
 
     function quickAddProduct() {
-        const productName = prompt('Enter new product name:');
-        if (productName) {
-            showNotification(`Adding product: ${productName}...`, 'info');
-            setTimeout(() => {
-                showNotification(`Product ${productName} added successfully!`, 'success');
-            }, 1500);
-        }
+        showNotification('Redirecting to product management...', 'info');
+        setTimeout(() => {
+            window.location.href = '/Products';
+        }, 1000);
     }
 
     function generateReport() {
