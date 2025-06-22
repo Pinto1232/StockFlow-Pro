@@ -8,6 +8,7 @@
     <title>@ViewData["Title"] - StockFlowPro.Web</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/StockFlowPro.Web.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 </head>
@@ -175,8 +176,8 @@
     <!-- Snackbar for notifications -->
     <div id="snackbar" class="snackbar"></div>
     
-    <div class="@(ViewData["Title"] as string == "Dashboard" || ViewData["Title"] as string == "Admin Panel" ? "container-fluid" : "container")" style="overflow-x: hidden;">
-        <main role="main" class="pb-3" style="overflow-x: hidden;">
+    <div class="@(ViewData["Title"] as string == "Dashboard" || ViewData["Title"] as string == "Admin Panel" ? "container-fluid" : "container") overflow-x-hidden">
+        <main role="main" class="pb-3 overflow-x-hidden">
             @RenderBody()
         </main>
     </div>

@@ -1,0 +1,72 @@
+/* Layout and Container Styles */
+
+/* Container Utilities */
+.container-fluid-overflow-hidden {
+    overflow-x: hidden !important;
+}
+
+.main-overflow-hidden {
+    overflow-x: hidden !important;
+}
+
+/* Responsive Container */
+.responsive-container {
+    overflow-x: hidden;
+}
+
+.responsive-container.container-fluid {
+    overflow-x: hidden;
+}
+
+.responsive-container.container {
+    overflow-x: hidden;
+}
+
+/* Main Content Area */
+main.pb-3 {
+    overflow-x: hidden;
+}
+
+/* Dashboard Layout Adjustments */
+.dashboard-layout .container-fluid {
+    overflow-x: hidden;
+}
+
+.admin-panel-layout .container-fluid {
+    overflow-x: hidden;
+}
+
+/* General Layout Utilities */
+.overflow-hidden {
+    overflow: hidden !important;
+}
+
+.overflow-x-hidden {
+    overflow-x: hidden !important;
+}
+
+.overflow-y-hidden {
+    overflow-y: hidden !important;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+@media (min-width: 992px) {
+    .container-fluid {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
