@@ -90,6 +90,22 @@ public class JsonMockDataStorageService : IMockDataStorageService
     {
         var defaultUsers = new List<UserDto>
         {
+            // Test admin user with simple credentials
+            new UserDto 
+            { 
+                Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440000"), 
+                FirstName = "Admin", 
+                LastName = "User", 
+                FullName = "Admin User",
+                Email = "admin", 
+                PhoneNumber = "+1-555-0100", 
+                Role = UserRole.Admin,
+                IsActive = true,
+                DateOfBirth = new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                Age = DateTime.UtcNow.Year - 1980,
+                CreatedAt = DateTime.UtcNow,
+                PasswordHash = HashPasswordForDefaultUser("admin", "550e8400-e29b-41d4-a716-446655440000")
+            },
             new UserDto 
             { 
                 Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440001"), 

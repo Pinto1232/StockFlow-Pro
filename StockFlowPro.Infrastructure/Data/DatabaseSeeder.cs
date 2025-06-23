@@ -45,11 +45,15 @@ public class DatabaseSeeder
                     
                     foreach (var user in usersWithoutPasswords)
                     {
-                        string defaultPassword = user.Role switch
+                        string defaultPassword = user.Email switch
                         {
-                            UserRole.Admin => "admin123",
-                            UserRole.Manager => "manager123",
-                            _ => "user123"
+                            "admin" => "admin",
+                            _ => user.Role switch
+                            {
+                                UserRole.Admin => "admin123",
+                                UserRole.Manager => "manager123",
+                                _ => "user123"
+                            }
                         };
                         
                         user.UpdatePasswordHash(HashPassword(defaultPassword, user.Id.ToString()));
@@ -72,6 +76,16 @@ public class DatabaseSeeder
 
             var seedUsers = new List<User>
             {
+                // Test admin user with simple credentials
+                new User(
+                    firstName: "Admin",
+                    lastName: "User",
+                    email: "admin",
+                    phoneNumber: "+1-555-0100",
+                    dateOfBirth: new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                    role: UserRole.Admin,
+                    passwordHash: HashPassword("admin", "550e8400-e29b-41d4-a716-446655440000")
+                ),
                 new User(
                     firstName: "John",
                     lastName: "Admin",
