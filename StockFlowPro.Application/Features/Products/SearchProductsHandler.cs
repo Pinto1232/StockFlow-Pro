@@ -21,7 +21,11 @@ public class SearchProductsHandler : IRequestHandler<SearchProductsQuery, IEnume
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        Console.WriteLine($"[PRODUCT MANAGEMENT - DATABASE] Executing database search query with term: '{request.SearchTerm}'");
+
         var products = await _productRepository.SearchProductsAsync(request.SearchTerm, cancellationToken);
+        
+        Console.WriteLine($"[PRODUCT MANAGEMENT - DATABASE] Database search completed - Found {products.Count()} products matching '{request.SearchTerm}'");
         
         return _mapper.Map<IEnumerable<ProductDto>>(products);
     }

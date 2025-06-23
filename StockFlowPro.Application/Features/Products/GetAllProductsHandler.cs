@@ -21,6 +21,8 @@ public class GetAllProductsHandler : IRequestHandler<GetAllProductsQuery, IEnume
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        Console.WriteLine($"[PRODUCT MANAGEMENT - DATABASE] Executing database query - ActiveOnly: {request.ActiveOnly}, InStockOnly: {request.InStockOnly}, LowStockOnly: {request.LowStockOnly}, LowStockThreshold: {request.LowStockThreshold}");
+
         var products = request switch
         {
             { LowStockOnly: true } => await _productRepository.GetLowStockProductsAsync(request.LowStockThreshold, cancellationToken),
@@ -28,6 +30,8 @@ public class GetAllProductsHandler : IRequestHandler<GetAllProductsQuery, IEnume
             { ActiveOnly: true } => await _productRepository.GetActiveProductsAsync(cancellationToken),
             _ => await _productRepository.GetAllAsync(cancellationToken)
         };
+
+        Console.WriteLine($"[PRODUCT MANAGEMENT - DATABASE] Database query completed - Retrieved {products.Count()} products from database");
 
         return _mapper.Map<IEnumerable<ProductDto>>(products);
     }

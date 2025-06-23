@@ -44,7 +44,11 @@ public class UserManagementController : ControllerBase
     [HttpGet("users")]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers([FromQuery] bool activeOnly = false)
     {
+        Console.WriteLine($"[USER MANAGEMENT] Getting all users from database - ActiveOnly: {activeOnly}");
+        
         var users = await _dualDataService.GetAllUsersAsync(activeOnly);
+        
+        Console.WriteLine($"[USER MANAGEMENT] Retrieved {users.Count()} users from database");
         return Ok(users);
     }
 
@@ -52,13 +56,17 @@ public class UserManagementController : ControllerBase
     [Authorize(Roles = "User,Manager,Admin")]
     public async Task<ActionResult<UserDto>> GetUserById(Guid id)
     {
+        Console.WriteLine($"[USER MANAGEMENT] Getting user by ID from database: {id}");
+        
         var user = await _dualDataService.GetUserByIdAsync(id);
         
         if (user == null)
         {
+            Console.WriteLine($"[USER MANAGEMENT] User with ID {id} not found in database");
             return NotFound($"User with ID {id} not found");
         }
 
+        Console.WriteLine($"[USER MANAGEMENT] Retrieved user from database: {user.Email} (ID: {user.Id})");
         return Ok(user);
     }
 
@@ -66,13 +74,17 @@ public class UserManagementController : ControllerBase
     [Authorize(Roles = "User,Manager,Admin")]
     public async Task<ActionResult<UserDto>> GetUserByEmail(string email)
     {
+        Console.WriteLine($"[USER MANAGEMENT] Getting user by email from database: {email}");
+        
         var user = await _dualDataService.GetUserByEmailAsync(email);
         
         if (user == null)
         {
+            Console.WriteLine($"[USER MANAGEMENT] User with email {email} not found in database");
             return NotFound($"User with email {email} not found");
         }
 
+        Console.WriteLine($"[USER MANAGEMENT] Retrieved user from database: {user.Email} (ID: {user.Id})");
         return Ok(user);
     }
 
@@ -80,7 +92,11 @@ public class UserManagementController : ControllerBase
     [Authorize(Roles = "User,Manager,Admin")]
     public async Task<ActionResult<IEnumerable<UserDto>>> SearchUsers([FromQuery] string searchTerm)
     {
+        Console.WriteLine($"[USER MANAGEMENT] Searching users in database with term: '{searchTerm ?? string.Empty}'");
+        
         var users = await _dualDataService.SearchUsersAsync(searchTerm ?? string.Empty);
+        
+        Console.WriteLine($"[USER MANAGEMENT] Found {users.Count()} users matching search term '{searchTerm ?? string.Empty}'");
         return Ok(users);
     }
 
@@ -90,7 +106,11 @@ public class UserManagementController : ControllerBase
     {
         try
         {
+            Console.WriteLine($"[USER MANAGEMENT] Creating new user in database: {createUserDto.Email}");
+            
             var user = await _dualDataService.CreateUserAsync(createUserDto);
+            
+            Console.WriteLine($"[USER MANAGEMENT] Successfully created user in database: {user.Email} (ID: {user.Id})");
             
             return CreatedAtAction(
                 nameof(GetUserById), 
@@ -99,10 +119,12 @@ public class UserManagementController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
+            Console.WriteLine($"[USER MANAGEMENT] Failed to create user in database: {ex.Message}");
             return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[USER MANAGEMENT] Error creating user in database: {ex.Message}");
             _logger.LogError(ex, "Failed to create user");
             return StatusCode(500, new { message = "Failed to create user", error = ex.Message });
         }
@@ -158,6 +180,8 @@ public class UserManagementController : ControllerBase
     {
         try
         {
+            Console.WriteLine("[USER MANAGEMENT] Getting user statistics from database");
+            
             var allUsers = await _dualDataService.GetAllUsersAsync(false);
             var activeUsers = await _dualDataService.GetAllUsersAsync(true);
             var syncStatus = await _dualDataService.GetSyncStatusAsync();
@@ -172,10 +196,13 @@ public class UserManagementController : ControllerBase
                 LastUpdated = DateTime.UtcNow
             };
 
+            Console.WriteLine($"[USER MANAGEMENT] User statistics retrieved - Total: {statistics.TotalUsers}, Active: {statistics.ActiveUsers}, Inactive: {statistics.InactiveUsers}");
+
             return Ok(statistics);
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[USER MANAGEMENT] Error getting user statistics from database: {ex.Message}");
             _logger.LogError(ex, "Failed to get user statistics");
             return StatusCode(500, new { message = "Failed to get user statistics", error = ex.Message });
         }

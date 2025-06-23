@@ -1,15 +1,92 @@
-
 let products = [];
 let filteredProducts = [];
 let currentPage = 1;
 let itemsPerPage = 25;
 
+// Console log functionality
+let consoleLogContainer;
+let isConsoleVisible = true;
+
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
+    initializeConsole();
     loadProducts();
     loadDashboardStats();
     setupEventListeners();
 });
+
+// Initialize console log functionality
+function initializeConsole() {
+    consoleLogContainer = document.getElementById('consoleLogContainer');
+    
+    // Setup console toggle button
+    const toggleBtn = document.getElementById('toggleConsoleBtn');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', toggleConsole);
+    }
+    
+    // Setup clear console button
+    const clearBtn = document.getElementById('clearConsoleBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', clearConsole);
+    }
+    
+    // Log initial message
+    addConsoleLog('system', 'Product Management Console initialized - Ready to log database operations');
+}
+
+// Add log entry to console
+function addConsoleLog(type, message) {
+    if (!consoleLogContainer) return;
+    
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = document.createElement('div');
+    logEntry.className = `console-log-entry ${type}`;
+    
+    logEntry.innerHTML = `
+        <span class="timestamp">[${timestamp}]</span>
+        <span class="message">${message}</span>
+    `;
+    
+    consoleLogContainer.appendChild(logEntry);
+    
+    // Auto-scroll to bottom
+    consoleLogContainer.scrollTop = consoleLogContainer.scrollHeight;
+    
+    // Keep only last 100 entries to prevent memory issues
+    const entries = consoleLogContainer.querySelectorAll('.console-log-entry');
+    if (entries.length > 100) {
+        entries[0].remove();
+    }
+}
+
+// Toggle console visibility
+function toggleConsole() {
+    const consoleCard = document.getElementById('consoleLogCard');
+    const toggleBtn = document.getElementById('toggleConsoleBtn');
+    
+    if (isConsoleVisible) {
+        consoleCard.classList.add('collapsed');
+        toggleBtn.innerHTML = '<i class="fas fa-eye-slash me-1"></i>Show';
+        isConsoleVisible = false;
+    } else {
+        consoleCard.classList.remove('collapsed');
+        toggleBtn.innerHTML = '<i class="fas fa-eye me-1"></i>Hide';
+        isConsoleVisible = true;
+    }
+}
+
+// Clear console log
+function clearConsole() {
+    if (consoleLogContainer) {
+        consoleLogContainer.innerHTML = `
+            <div class="console-log-entry system">
+                <span class="timestamp">[System]</span>
+                <span class="message">Console cleared - Ready to log database operations</span>
+            </div>
+        `;
+    }
+}
 
 function setupEventListeners() {
     // Search input
@@ -54,18 +131,26 @@ function setupEventListeners() {
 // Load all products
 async function loadProducts() {
     try {
+        addConsoleLog('api', 'Making API call to /api/products - Loading all products');
+        
         const response = await fetch('/api/products');
         if (response.ok) {
             products = await response.json();
             filteredProducts = [...products];
             currentPage = 1;
+            
+            addConsoleLog('api', `Successfully loaded ${products.length} products from API`);
+            addConsoleLog('database', `Database returned ${products.length} product records`);
+            
             renderProductsTable();
             renderPagination();
         } else {
+            addConsoleLog('error', `Failed to load products - HTTP ${response.status}`);
             showAlert('Error loading products', 'danger');
         }
     } catch (error) {
         console.error('Error loading products:', error);
+        addConsoleLog('error', `Error loading products: ${error.message}`);
         showAlert('Error loading products', 'danger');
     }
 }
@@ -73,6 +158,8 @@ async function loadProducts() {
 // Load dashboard statistics
 async function loadDashboardStats() {
     try {
+        addConsoleLog('api', 'Making API call to /api/products/dashboard-stats - Loading dashboard statistics');
+        
         const response = await fetch('/api/products/dashboard-stats');
         if (response.ok) {
             const stats = await response.json();
@@ -80,9 +167,15 @@ async function loadDashboardStats() {
             document.getElementById('totalValue').textContent = 'R' + stats.totalValue.toFixed(2);
             document.getElementById('lowStockCount').textContent = stats.lowStockCount;
             document.getElementById('outOfStockCount').textContent = stats.outOfStockCount;
+            
+            addConsoleLog('api', `Dashboard stats loaded - Total: ${stats.totalProducts}, Low Stock: ${stats.lowStockCount}, Out of Stock: ${stats.outOfStockCount}`);
+            addConsoleLog('database', `Dashboard statistics retrieved from database successfully`);
+        } else {
+            addConsoleLog('error', `Failed to load dashboard stats - HTTP ${response.status}`);
         }
     } catch (error) {
         console.error('Error loading dashboard stats:', error);
+        addConsoleLog('error', `Error loading dashboard stats: ${error.message}`);
     }
 }
 
@@ -93,12 +186,16 @@ function filterProducts() {
     const inStockOnly = document.getElementById('inStockOnlyFilter').checked;
     const lowStockOnly = document.getElementById('lowStockOnlyFilter').checked;
     
+    addConsoleLog('system', `Filtering products - Search: "${searchTerm}", Active: ${activeOnly}, InStock: ${inStockOnly}, LowStock: ${lowStockOnly}`);
+    
     filteredProducts = products.filter(product => {
         return (!searchTerm || product.name.toLowerCase().includes(searchTerm)) &&
                (!activeOnly || product.isActive) &&
                (!inStockOnly || product.isInStock) &&
                (!lowStockOnly || product.isLowStock);
     });
+    
+    addConsoleLog('system', `Filter applied - ${filteredProducts.length} products match criteria`);
     
     currentPage = 1; // Reset to first page when filtering
     renderProductsTable();
@@ -114,6 +211,9 @@ function clearFilters() {
     
     filteredProducts = [...products];
     currentPage = 1;
+    
+    addConsoleLog('system', 'All filters cleared - Showing all products');
+    
     renderProductsTable();
     renderPagination();
 }
@@ -315,6 +415,8 @@ function changePage(page) {
     if (page < 1 || page > totalPages) return;
     
     currentPage = page;
+    addConsoleLog('system', `Changed to page ${page} of ${totalPages}`);
+    
     renderProductsTable();
     renderPagination();
     
@@ -336,6 +438,8 @@ async function handleCreateProduct(event) {
     };
     
     try {
+        addConsoleLog('api', `Creating new product: ${productData.name} - Cost: ${productData.costPerItem}, Stock: ${productData.numberInStock}`);
+        
         const response = await fetch('/api/products', {
             method: 'POST',
             headers: {
@@ -345,6 +449,10 @@ async function handleCreateProduct(event) {
         });
         
         if (response.ok) {
+            const newProduct = await response.json();
+            addConsoleLog('api', `Product created successfully: ${newProduct.name} (ID: ${newProduct.id})`);
+            addConsoleLog('database', `New product record inserted into database`);
+            
             showAlert('Product created successfully', 'success');
             document.getElementById('createProductForm').reset();
             bootstrap.Modal.getInstance(document.getElementById('createProductModal')).hide();
@@ -352,10 +460,12 @@ async function handleCreateProduct(event) {
             loadDashboardStats();
         } else {
             const error = await response.text();
+            addConsoleLog('error', `Failed to create product: ${error}`);
             showAlert('Error creating product: ' + error, 'danger');
         }
     } catch (error) {
         console.error('Error creating product:', error);
+        addConsoleLog('error', `Error creating product: ${error.message}`);
         showAlert('Error creating product', 'danger');
     }
 }
@@ -364,6 +474,8 @@ async function handleCreateProduct(event) {
 function editProduct(productId) {
     const product = products.find(p => p.id === productId);
     if (!product) return;
+    
+    addConsoleLog('system', `Opening edit form for product: ${product.name} (ID: ${productId})`);
     
     document.getElementById('editProductId').value = product.id;
     document.getElementById('editProductName').value = product.name;
@@ -385,6 +497,8 @@ async function handleEditProduct(event) {
     };
     
     try {
+        addConsoleLog('api', `Updating product ID: ${productId} - Name: ${productData.name}, Cost: ${productData.costPerItem}, Stock: ${productData.numberInStock}`);
+        
         const response = await fetch(`/api/products/${productId}`, {
             method: 'PUT',
             headers: {
@@ -394,27 +508,39 @@ async function handleEditProduct(event) {
         });
         
         if (response.ok) {
+            const updatedProduct = await response.json();
+            addConsoleLog('api', `Product updated successfully: ${updatedProduct.name} (ID: ${productId})`);
+            addConsoleLog('database', `Product record updated in database`);
+            
             showAlert('Product updated successfully', 'success');
             bootstrap.Modal.getInstance(document.getElementById('editProductModal')).hide();
             loadProducts();
             loadDashboardStats();
         } else {
             const error = await response.text();
+            addConsoleLog('error', `Failed to update product: ${error}`);
             showAlert('Error updating product: ' + error, 'danger');
         }
     } catch (error) {
         console.error('Error updating product:', error);
+        addConsoleLog('error', `Error updating product: ${error.message}`);
         showAlert('Error updating product', 'danger');
     }
 }
 
 // Update stock (quick update)
 function updateStock(productId, currentStock) {
+    const product = products.find(p => p.id === productId);
+    const productName = product ? product.name : 'Unknown';
+    
+    addConsoleLog('system', `Opening stock update for product: ${productName} (Current: ${currentStock})`);
+    
     const newStock = prompt(`Update stock for this product (current: ${currentStock}):`);
     if (newStock === null || newStock === '') return;
     
     const stockNumber = parseInt(newStock);
     if (isNaN(stockNumber) || stockNumber < 0) {
+        addConsoleLog('error', `Invalid stock number entered: ${newStock}`);
         showAlert('Please enter a valid stock number', 'danger');
         return;
     }
@@ -425,6 +551,8 @@ function updateStock(productId, currentStock) {
 // Update product stock via API
 async function updateProductStock(productId, newStock) {
     try {
+        addConsoleLog('api', `Updating stock for product ID: ${productId} - New stock: ${newStock}`);
+        
         const response = await fetch(`/api/products/${productId}/stock`, {
             method: 'PATCH',
             headers: {
@@ -434,22 +562,31 @@ async function updateProductStock(productId, newStock) {
         });
         
         if (response.ok) {
+            const updatedProduct = await response.json();
+            addConsoleLog('api', `Stock updated successfully for product: ${updatedProduct.name} - New stock: ${newStock}`);
+            addConsoleLog('database', `Product stock updated in database`);
+            
             showAlert('Stock updated successfully', 'success');
             loadProducts();
             loadDashboardStats();
         } else {
             const error = await response.text();
+            addConsoleLog('error', `Failed to update stock: ${error}`);
             showAlert('Error updating stock: ' + error, 'danger');
         }
     } catch (error) {
         console.error('Error updating stock:', error);
+        addConsoleLog('error', `Error updating stock: ${error.message}`);
         showAlert('Error updating stock', 'danger');
     }
 }
 
 // Delete product
 function deleteProduct(productId, productName) {
+    addConsoleLog('system', `Delete confirmation requested for product: ${productName} (ID: ${productId})`);
+    
     if (!confirm(`Are you sure you want to delete "${productName}"? This action cannot be undone.`)) {
+        addConsoleLog('system', `Delete cancelled for product: ${productName}`);
         return;
     }
     
@@ -459,19 +596,26 @@ function deleteProduct(productId, productName) {
 // Delete product confirmed
 async function deleteProductConfirmed(productId) {
     try {
+        addConsoleLog('api', `Deleting product ID: ${productId}`);
+        
         const response = await fetch(`/api/products/${productId}`, {
             method: 'DELETE'
         });
         
         if (response.ok) {
+            addConsoleLog('api', `Product deleted successfully (ID: ${productId})`);
+            addConsoleLog('database', `Product record removed from database`);
+            
             showAlert('Product deleted successfully', 'success');
             loadProducts();
             loadDashboardStats();
         } else {
+            addConsoleLog('error', `Failed to delete product - HTTP ${response.status}`);
             showAlert('Error deleting product', 'danger');
         }
     } catch (error) {
         console.error('Error deleting product:', error);
+        addConsoleLog('error', `Error deleting product: ${error.message}`);
         showAlert('Error deleting product', 'danger');
     }
 }

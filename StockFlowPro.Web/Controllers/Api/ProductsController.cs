@@ -29,6 +29,8 @@ public class ProductsController : ControllerBase
         [FromQuery] bool lowStockOnly = false,
         [FromQuery] int lowStockThreshold = 10)
     {
+        Console.WriteLine($"[PRODUCT MANAGEMENT] Getting all products from database - ActiveOnly: {activeOnly}, InStockOnly: {inStockOnly}, LowStockOnly: {lowStockOnly}, LowStockThreshold: {lowStockThreshold}");
+        
         var query = new GetAllProductsQuery 
         { 
             ActiveOnly = activeOnly,
@@ -37,28 +39,38 @@ public class ProductsController : ControllerBase
             LowStockThreshold = lowStockThreshold
         };
         var products = await _mediator.Send(query);
+        
+        Console.WriteLine($"[PRODUCT MANAGEMENT] Retrieved {products.Count()} products from database");
         return Ok(products);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ProductDto>> GetProductById(Guid id)
     {
+        Console.WriteLine($"[PRODUCT MANAGEMENT] Getting product by ID from database: {id}");
+        
         var query = new GetProductByIdQuery { Id = id };
         var product = await _mediator.Send(query);
         
         if (product == null)
         {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Product with ID {id} not found in database");
             return NotFound($"Product with ID {id} not found");
         }
 
+        Console.WriteLine($"[PRODUCT MANAGEMENT] Retrieved product from database: {product.Name} (ID: {product.Id})");
         return Ok(product);
     }
 
     [HttpGet("search")]
     public async Task<ActionResult<IEnumerable<ProductDto>>> SearchProducts([FromQuery] string searchTerm)
     {
+        Console.WriteLine($"[PRODUCT MANAGEMENT] Searching products in database with term: '{searchTerm ?? string.Empty}'");
+        
         var query = new SearchProductsQuery { SearchTerm = searchTerm ?? string.Empty };
         var products = await _mediator.Send(query);
+        
+        Console.WriteLine($"[PRODUCT MANAGEMENT] Found {products.Count()} products matching search term '{searchTerm ?? string.Empty}'");
         return Ok(products);
     }
 
@@ -68,8 +80,12 @@ public class ProductsController : ControllerBase
     {
         try
         {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Creating new product in database: {createProductDto.Name}");
+            
             var command = _mapper.Map<CreateProductCommand>(createProductDto);
             var product = await _mediator.Send(command);
+            
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Successfully created product in database: {product.Name} (ID: {product.Id})");
             
             return CreatedAtAction(
                 nameof(GetProductById), 
@@ -78,6 +94,7 @@ public class ProductsController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Failed to create product in database: {ex.Message}");
             return BadRequest(ex.Message);
         }
     }
@@ -145,6 +162,8 @@ public class ProductsController : ControllerBase
     [Authorize(Roles = "Manager,Admin")]
     public async Task<ActionResult<object>> GetDashboardStats()
     {
+        Console.WriteLine("[PRODUCT MANAGEMENT] Getting dashboard statistics from database");
+        
         var allProductsQuery = new GetAllProductsQuery { ActiveOnly = true };
         var lowStockQuery = new GetAllProductsQuery { ActiveOnly = true, LowStockOnly = true };
 
@@ -161,6 +180,8 @@ public class ProductsController : ControllerBase
             InStockCount = allProducts.Count(p => p.IsInStock)
         };
 
+        Console.WriteLine($"[PRODUCT MANAGEMENT] Dashboard stats retrieved - Total: {stats.TotalProducts}, In Stock: {stats.InStockCount}, Low Stock: {stats.LowStockCount}, Out of Stock: {stats.OutOfStockCount}");
+        
         return Ok(stats);
     }
 }

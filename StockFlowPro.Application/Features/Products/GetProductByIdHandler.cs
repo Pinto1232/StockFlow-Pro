@@ -21,7 +21,18 @@ public class GetProductByIdHandler : IRequestHandler<GetProductByIdQuery, Produc
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        Console.WriteLine($"[PRODUCT MANAGEMENT - DATABASE] Executing database query to get product by ID: {request.Id}");
+
         var product = await _productRepository.GetByIdAsync(request.Id, cancellationToken);
+        
+        if (product == null)
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT - DATABASE] Product with ID {request.Id} not found in database");
+        }
+        else
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT - DATABASE] Product found in database: {product.Name} (ID: {product.Id})");
+        }
         
         return product == null ? null : _mapper.Map<ProductDto>(product);
     }

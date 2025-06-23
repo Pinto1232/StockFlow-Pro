@@ -22,15 +22,22 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        Console.WriteLine($"[PRODUCT MANAGEMENT - DATABASE] Checking if product name exists in database: '{request.Name}'");
+
         // Check if product name already exists
         if (await _productRepository.ProductNameExistsAsync(request.Name, cancellationToken: cancellationToken))
         {
+            Console.WriteLine($"[PRODUCT MANAGEMENT - DATABASE] Product name '{request.Name}' already exists in database");
             throw new InvalidOperationException($"A product with the name '{request.Name}' already exists.");
         }
+
+        Console.WriteLine($"[PRODUCT MANAGEMENT - DATABASE] Creating new product in database: '{request.Name}' - Cost: {request.CostPerItem}, Stock: {request.NumberInStock}");
 
         var product = new Product(request.Name, request.CostPerItem, request.NumberInStock);
         
         await _productRepository.AddAsync(product, cancellationToken);
+        
+        Console.WriteLine($"[PRODUCT MANAGEMENT - DATABASE] Successfully created product in database: '{product.Name}' (ID: {product.Id})");
         
         return _mapper.Map<ProductDto>(product);
     }
