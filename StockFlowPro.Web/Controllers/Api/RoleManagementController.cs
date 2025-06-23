@@ -15,39 +15,30 @@ public class RoleManagementController : ControllerBase
     // In-memory storage for demonstration - in production, this would use a database service
     private static readonly List<Role> _roles = new()
     {
-        new Role
-        {
-            Id = Guid.NewGuid(),
-            Name = "Admin",
-            DisplayName = "Administrator",
-            Description = "Full system access and user management capabilities",
-            Permissions = new List<string> { "Users.ViewAll", "Users.Create", "Users.Update", "Users.Delete", "System.ViewAdminPanel", "Reports.ViewAll" },
-            IsSystemRole = true,
-            Priority = 100,
-            CreatedAt = DateTime.UtcNow.AddDays(-30)
-        },
-        new Role
-        {
-            Id = Guid.NewGuid(),
-            Name = "Manager",
-            DisplayName = "Manager",
-            Description = "Elevated privileges including reporting access and team management",
-            Permissions = new List<string> { "Users.ViewTeam", "Products.Manage", "Reports.ViewAdvanced", "Inventory.Manage" },
-            IsSystemRole = true,
-            Priority = 50,
-            CreatedAt = DateTime.UtcNow.AddDays(-30)
-        },
-        new Role
-        {
-            Id = Guid.NewGuid(),
-            Name = "User",
-            DisplayName = "User",
-            Description = "Standard user role with basic system access and product viewing",
-            Permissions = new List<string> { "Products.View", "Reports.ViewBasic", "Profile.Update" },
-            IsSystemRole = true,
-            Priority = 10,
-            CreatedAt = DateTime.UtcNow.AddDays(-30)
-        }
+        new Role(
+            "Admin",
+            "Administrator",
+            "Full system access and user management capabilities",
+            new List<string> { "Users.ViewAll", "Users.Create", "Users.Update", "Users.Delete", "System.ViewAdminPanel", "Reports.ViewAll" },
+            100,
+            true
+        ),
+        new Role(
+            "Manager",
+            "Manager",
+            "Elevated privileges including reporting access and team management",
+            new List<string> { "Users.ViewTeam", "Products.Manage", "Reports.ViewAdvanced", "Inventory.Manage" },
+            50,
+            true
+        ),
+        new Role(
+            "User",
+            "User",
+            "Standard user role with basic system access and product viewing",
+            new List<string> { "Products.View", "Reports.ViewBasic", "Profile.Update" },
+            10,
+            true
+        )
     };
 
     public RoleManagementController(ILogger<RoleManagementController> logger)
@@ -141,21 +132,16 @@ public class RoleManagementController : ControllerBase
                 return BadRequest(new { message = "A role with this name already exists" });
             }
 
-            var newRole = new Role
-            {
-                Id = Guid.NewGuid(),
-                Name = createRoleDto.Name.Trim(),
-                DisplayName = string.IsNullOrWhiteSpace(createRoleDto.DisplayName) 
+            var newRole = new Role(
+                createRoleDto.Name.Trim(),
+                string.IsNullOrWhiteSpace(createRoleDto.DisplayName) 
                     ? createRoleDto.Name.Trim() 
                     : createRoleDto.DisplayName.Trim(),
-                Description = createRoleDto.Description?.Trim() ?? string.Empty,
-                Permissions = createRoleDto.Permissions ?? new List<string>(),
-                Priority = createRoleDto.Priority,
-                IsActive = true,
-                IsSystemRole = false,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+                createRoleDto.Description?.Trim() ?? string.Empty,
+                createRoleDto.Permissions ?? new List<string>(),
+                createRoleDto.Priority,
+                false
+            );
 
             _roles.Add(newRole);
 
@@ -194,14 +180,22 @@ public class RoleManagementController : ControllerBase
             }
 
             // Update role properties
-            role.DisplayName = string.IsNullOrWhiteSpace(updateRoleDto.DisplayName) 
+            role.UpdateDisplayName(string.IsNullOrWhiteSpace(updateRoleDto.DisplayName) 
                 ? role.Name 
-                : updateRoleDto.DisplayName.Trim();
-            role.Description = updateRoleDto.Description?.Trim() ?? string.Empty;
-            role.Permissions = updateRoleDto.Permissions ?? new List<string>();
-            role.Priority = updateRoleDto.Priority;
-            role.IsActive = updateRoleDto.IsActive;
-            role.UpdatedAt = DateTime.UtcNow;
+                : updateRoleDto.DisplayName.Trim());
+            role.UpdateDescription(updateRoleDto.Description?.Trim() ?? string.Empty);
+            role.UpdatePermissions(updateRoleDto.Permissions ?? new List<string>());
+            role.UpdatePriority(updateRoleDto.Priority);
+
+            if (updateRoleDto.IsActive)
+            {
+                role.Activate();
+            }
+
+            else
+            {
+                role.Deactivate();
+            }
 
             _logger.LogInformation("Updated role: {RoleName} with ID: {RoleId}", role.Name, role.Id);
 
