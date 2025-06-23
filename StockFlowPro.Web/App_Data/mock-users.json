@@ -73,5 +73,20 @@
     "updatedAt": null,
     "role": "User",
     "passwordHash": "8\u002BupOWwjzjPmhLwLcvIQqlO3FlqJed0q0pOkYyYU7sA=:550e8400-e29b-41d4-a716-446655440004"
+  },
+  {
+    "id": "ab1c24f9-bd58-45ca-9e72-f9022e7c2859",
+    "firstName": "Antonio",
+    "lastName": "Marcos",
+    "fullName": "Antonio Marcos",
+    "email": "admin2@gmail.com",
+    "phoneNumber": "\u002B27835270710",
+    "dateOfBirth": "2002-01-11T00:00:00",
+    "age": 23,
+    "isActive": true,
+    "createdAt": "2025-06-23T02:58:18.8269332Z",
+    "updatedAt": null,
+    "role": "Admin",
+    "passwordHash": "1L877XLoP7nTt7WtcZLEPuMJVCKekI0xZZrWH9Ry768=:ec19dd5c-9d89-4ecd-a80d-71229a652bd6"
   }
 ]
