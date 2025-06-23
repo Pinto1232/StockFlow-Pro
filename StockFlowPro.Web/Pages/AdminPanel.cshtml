@@ -136,9 +136,9 @@
                                     <i class="fas fa-users"></i>
                                     <span>Manage Users</span>
                                 </a>
-                                <button class="btn btn-outline" onclick="quickAddUser()">
-                                    <i class="fas fa-plus"></i>
-                                    <span>Quick Add</span>
+                                <button class="btn btn-outline" onclick="quickAddUser()" title="Quickly add a new user with role selection">
+                                    <i class="fas fa-user-plus"></i>
+                                    <span>Quick Add User</span>
                                 </button>
                             </div>
                         </div>
@@ -884,26 +884,26 @@
         .admin-content-wrapper {
             padding: 1rem;
         }
-        
+
         .admin-title {
             flex-direction: column;
             text-align: center;
             gap: 1rem;
         }
-        
+
         .title-main {
             font-size: 1.8rem;
         }
-        
+
         .admin-cards-grid {
             grid-template-columns: 1fr;
             gap: 1rem;
         }
-        
+
         .header-main {
             padding: 1.5rem;
         }
-        
+
         .admin-panel-layout {
             width: 100%;
             margin-left: 0;
@@ -923,6 +923,364 @@
 
         .status-stats {
             gap: 1rem;
+        }
+    }
+
+    /* Enhanced Quick Add User Modal Styles */
+    .quick-add-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .quick-add-modal .modal-content {
+        background: #fff;
+        border-radius: 24px;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
+        width: 90%;
+        max-width: 520px;
+        max-height: 90vh;
+        overflow: hidden;
+        position: relative;
+        animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .quick-add-modal .modal-header {
+        background: linear-gradient(135deg, #5a5cdb 0%, #7f53ac 100%);
+        color: #fff;
+        padding: 2rem 2.5rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+    }
+
+    .quick-add-modal .modal-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .quick-add-modal .modal-header h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .quick-add-modal .modal-header h3 i {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.5rem;
+        border-radius: 12px;
+        font-size: 1.2rem;
+    }
+
+    .quick-add-modal .modal-close {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: #fff;
+        font-size: 1.5rem;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .quick-add-modal .modal-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+    }
+
+    .quick-add-modal .modal-body {
+        padding: 2.5rem;
+        background: #fff;
+    }
+
+    .quick-add-modal .form-group {
+        margin-bottom: 2rem;
+    }
+
+    .quick-add-modal .form-group label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: #232946;
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+        letter-spacing: 0.3px;
+    }
+
+    .quick-add-modal .form-group label i {
+        color: #5a5cdb;
+        font-size: 0.9rem;
+    }
+
+    .quick-add-modal .input-hint {
+        font-size: 0.8rem;
+        color: #6c7a89;
+        margin-top: 0.5rem;
+        font-style: italic;
+    }
+
+    .quick-add-modal .form-input {
+        width: 100%;
+        padding: 1rem 1.25rem;
+        border: 2px solid #e5e7ef;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #fff;
+        color: #232946;
+        box-sizing: border-box;
+    }
+
+    .quick-add-modal .form-input:focus {
+        outline: none;
+        border-color: #5a5cdb;
+        box-shadow: 0 0 0 4px rgba(90, 92, 219, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .quick-add-modal .form-input::placeholder {
+        color: #9ca3af;
+        font-weight: 400;
+    }
+
+    .quick-add-modal .role-options {
+        display: grid;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .quick-add-modal .role-option {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.25rem;
+        border: 2px solid #e5e7ef;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: #fff;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .quick-add-modal .role-option::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(90, 92, 219, 0.05), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .quick-add-modal .role-option:hover::before {
+        left: 100%;
+    }
+
+    .quick-add-modal .role-option:hover {
+        border-color: #5a5cdb;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(90, 92, 219, 0.15);
+    }
+
+    .quick-add-modal .role-option.selected {
+        border-color: #5a5cdb;
+        background: linear-gradient(135deg, rgba(90, 92, 219, 0.05) 0%, rgba(127, 83, 172, 0.05) 100%);
+        box-shadow: 0 4px 16px rgba(90, 92, 219, 0.2);
+    }
+
+    .quick-add-modal .role-option.selected::after {
+        content: '✓';
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        background: #5a5cdb;
+        color: #fff;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+
+    .quick-add-modal .role-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #f8f9fb 0%, #e8ecf4 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #5a5cdb;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .quick-add-modal .role-option:hover .role-icon,
+    .quick-add-modal .role-option.selected .role-icon {
+        background: linear-gradient(135deg, #5a5cdb 0%, #7f53ac 100%);
+        color: #fff;
+        transform: scale(1.1);
+    }
+
+    .quick-add-modal .role-info {
+        flex: 1;
+    }
+
+    .quick-add-modal .role-info h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #232946;
+    }
+
+    .quick-add-modal .role-info p {
+        margin: 0 0 0.75rem 0;
+        color: #6c7a89;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    .quick-add-modal .role-permissions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .quick-add-modal .permission-tag {
+        background: rgba(90, 92, 219, 0.1);
+        color: #5a5cdb;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        transition: all 0.3s ease;
+    }
+
+    .quick-add-modal .role-option.selected .permission-tag {
+        background: rgba(90, 92, 219, 0.2);
+        color: #4a4cb8;
+    }
+
+    .quick-add-modal .modal-footer {
+        padding: 1.5rem 2.5rem 2.5rem;
+        background: #f8f9fb;
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+    }
+
+    .quick-add-modal .modal-footer .btn {
+        min-width: 120px;
+        font-weight: 600;
+        padding: 0.875rem 1.5rem;
+    }
+
+    /* Modal Animations */
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @@keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+
+    @@keyframes modalSlideIn {
+        from {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0;
+        }
+        to {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes shake {
+        0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translate(-50%, -50%) translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translate(-50%, -50%) translateX(5px); }
+    }
+
+    /* Responsive Design for Modal */
+    @@media (max-width: 576px) {
+        .quick-add-modal .modal-content {
+            width: 95%;
+            margin: 1rem;
+        }
+
+        .quick-add-modal .modal-header,
+        .quick-add-modal .modal-body,
+        .quick-add-modal .modal-footer {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+
+        .quick-add-modal .modal-header {
+            padding-top: 1.5rem;
+            padding-bottom: 1rem;
+        }
+
+        .quick-add-modal .modal-body {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+
+        .quick-add-modal .modal-footer {
+            flex-direction: column;
+            padding-top: 1rem;
+            padding-bottom: 2rem;
+        }
+
+        .quick-add-modal .modal-footer .btn {
+            width: 100%;
+        }
+
+        .quick-add-modal .role-option {
+            padding: 1rem;
+        }
+
+        .quick-add-modal .role-icon {
+            width: 40px;
+            height: 40px;
         }
     }
 </style>
@@ -992,13 +1350,248 @@ function systemHealth() {
 }
 
 function quickAddUser() {
-    const userName = prompt('Enter new user name:');
-    if (userName) {
-        showNotification(`Creating user: ${userName}...`, 'info');
-        setTimeout(() => {
-            showNotification(`User ${userName} created successfully!`, 'success');
-        }, 1500);
+    // Create a custom modal for better user experience
+    createUserRoleModal();
+}
+
+function createUserRoleModal() {
+    // Remove existing modal if any
+    const existingModal = document.getElementById('quick-add-modal');
+    if (existingModal) {
+        existingModal.remove();
     }
+
+    // Create modal HTML
+    const modalHTML = `
+        <div id="quick-add-modal" class="quick-add-modal" onclick="closeQuickAddModal()">
+            <div class="modal-content" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h3><i class="fas fa-user-plus"></i> Quick Add User</h3>
+                    <button class="modal-close" onclick="closeQuickAddModal()" title="Close modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="quick-user-name">
+                            <i class="fas fa-user"></i> User Name <span style="color: #e74c3c;">*</span>
+                        </label>
+                        <input type="text" id="quick-user-name" placeholder="Enter full name" class="form-input" required>
+                        <div class="input-hint">This will be displayed as the user's display name</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="quick-user-email">
+                            <i class="fas fa-envelope"></i> Email Address <span style="color: #e74c3c;">*</span>
+                        </label>
+                        <input type="email" id="quick-user-email" placeholder="user@company.com" class="form-input" required>
+                        <div class="input-hint">Used for login and system notifications</div>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-shield-alt"></i> Select Role <span style="color: #e74c3c;">*</span>
+                        </label>
+                        <div class="role-options">
+                            <div class="role-option" data-role="User" data-permissions="Basic access">
+                                <div class="role-icon"><i class="fas fa-user"></i></div>
+                                <div class="role-info">
+                                    <h4>User</h4>
+                                    <p>Standard user role with basic system access and product viewing</p>
+                                    <div class="role-permissions">
+                                        <span class="permission-tag">View Products</span>
+                                        <span class="permission-tag">Basic Reports</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="role-option" data-role="Manager" data-permissions="Extended access">
+                                <div class="role-icon"><i class="fas fa-user-tie"></i></div>
+                                <div class="role-info">
+                                    <h4>Manager</h4>
+                                    <p>Elevated privileges including reporting access and team management</p>
+                                    <div class="role-permissions">
+                                        <span class="permission-tag">Manage Products</span>
+                                        <span class="permission-tag">Advanced Reports</span>
+                                        <span class="permission-tag">Team View</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="role-option" data-role="Admin" data-permissions="Full access">
+                                <div class="role-icon"><i class="fas fa-user-shield"></i></div>
+                                <div class="role-info">
+                                    <h4>Administrator</h4>
+                                    <p>Full system access and user management capabilities</p>
+                                    <div class="role-permissions">
+                                        <span class="permission-tag">User Management</span>
+                                        <span class="permission-tag">System Settings</span>
+                                        <span class="permission-tag">All Reports</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" onclick="closeQuickAddModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button class="btn btn-primary" onclick="submitQuickAddUser()">
+                        <i class="fas fa-plus"></i> Create User
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Add event listeners for role selection
+    const roleOptions = document.querySelectorAll('.role-option');
+    roleOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            roleOptions.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+
+            // Add subtle animation feedback
+            this.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+
+    // Add input validation and real-time feedback
+    const nameInput = document.getElementById('quick-user-name');
+    const emailInput = document.getElementById('quick-user-email');
+
+    nameInput.addEventListener('input', function() {
+        validateInput(this, this.value.trim().length >= 2, 'Name must be at least 2 characters');
+    });
+
+    emailInput.addEventListener('input', function() {
+        const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+        validateInput(this, emailRegex.test(this.value), 'Please enter a valid email address');
+    });
+
+    // Add keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeQuickAddModal();
+        }
+        if (e.key === 'Enter' && (e.target.id === 'quick-user-name' || e.target.id === 'quick-user-email')) {
+            e.preventDefault();
+            if (e.target.id === 'quick-user-name') {
+                emailInput.focus();
+            } else {
+                submitQuickAddUser();
+            }
+        }
+    });
+
+    // Focus on the first input with a slight delay for better UX
+    setTimeout(() => {
+        nameInput.focus();
+        nameInput.select();
+    }, 300);
+}
+
+function validateInput(input, isValid, errorMessage) {
+    const existingError = input.parentNode.querySelector('.input-error');
+    if (existingError) {
+        existingError.remove();
+    }
+
+    if (!isValid && input.value.trim() !== '') {
+        input.style.borderColor = '#e74c3c';
+        input.style.boxShadow = '0 0 0 4px rgba(231, 76, 60, 0.1)';
+
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'input-error';
+        errorDiv.textContent = errorMessage;
+        errorDiv.style.cssText = `
+            color: #e74c3c;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        `;
+        errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorMessage}`;
+        input.parentNode.appendChild(errorDiv);
+    } else if (isValid) {
+        input.style.borderColor = '#28a745';
+        input.style.boxShadow = '0 0 0 4px rgba(40, 167, 69, 0.1)';
+    } else {
+        input.style.borderColor = '#e5e7ef';
+        input.style.boxShadow = '';
+    }
+}
+
+function closeQuickAddModal() {
+    const modal = document.getElementById('quick-add-modal');
+    if (modal) {
+        modal.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => modal.remove(), 300);
+    }
+}
+
+function submitQuickAddUser() {
+    const nameInput = document.getElementById('quick-user-name');
+    const emailInput = document.getElementById('quick-user-email');
+    const userName = nameInput.value.trim();
+    const userEmail = emailInput.value.trim();
+    const selectedRole = document.querySelector('.role-option.selected');
+    const submitBtn = document.querySelector('.modal-footer .btn-primary');
+
+    // Clear any existing errors
+    document.querySelectorAll('.input-error').forEach(error => error.remove());
+
+    let hasErrors = false;
+
+    // Validate name
+    if (!userName || userName.length < 2) {
+        validateInput(nameInput, false, 'Name must be at least 2 characters');
+        hasErrors = true;
+    }
+
+    // Validate email
+    const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+    if (!userEmail || !emailRegex.test(userEmail)) {
+        validateInput(emailInput, false, 'Please enter a valid email address');
+        hasErrors = true;
+    }
+
+    // Validate role selection
+    if (!selectedRole) {
+        showNotification('Please select a role for the user.', 'error');
+        hasErrors = true;
+    }
+
+    if (hasErrors) {
+        // Shake animation for the modal
+        const modalContent = document.querySelector('.modal-content');
+        modalContent.style.animation = 'shake 0.5s ease-in-out';
+        setTimeout(() => {
+            modalContent.style.animation = '';
+        }, 500);
+        return;
+    }
+
+    const roleValue = selectedRole.getAttribute('data-role');
+
+    // Disable submit button and show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+    submitBtn.style.opacity = '0.7';
+
+    // Simulate API call to create user with selected role
+    setTimeout(() => {
+        closeQuickAddModal();
+        showNotification(`Creating user: ${userName} with ${roleValue} role...`, 'info');
+
+        setTimeout(() => {
+            showNotification(`User ${userName} created successfully with ${roleValue} role!`, 'success');
+            // Update the active users count
+            updateSystemStats();
+        }, 1000);
+    }, 1500);
 }
 
 function quickAddProduct() {
@@ -1186,6 +1779,29 @@ style.textContent = `
     @@keyframes fadeInUp {
         from { transform: translateY(30px); opacity: 0; }
         to { transform: translateY(0); opacity: 1; }
+    }
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @@keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+    @@keyframes modalSlideIn {
+        from {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0;
+        }
+        to {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+    }
+    @@keyframes shake {
+        0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translate(-50%, -50%) translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translate(-50%, -50%) translateX(5px); }
     }
     .fade-in-up {
         animation: fadeInUp 0.6s ease forwards;
