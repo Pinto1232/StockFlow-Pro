@@ -12,6 +12,9 @@
             <a href="/AdminPanel" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left me-2"></i>Back to Admin Panel
             </a>
+            <button class="btn btn-success me-2" onclick="refreshRolesManually()">
+                <i class="fas fa-sync me-2"></i>Refresh Roles
+            </button>
             <button class="btn btn-primary" onclick="showCreateUserModal()">
                 <i class="fas fa-plus me-2"></i>Create New User
             </button>
@@ -116,9 +119,7 @@
           <div class="col-md-6">
             <label for="role" class="form-label">Role</label>
             <select class="form-select" id="role">
-              <option value="User">User</option>
-              <option value="Manager">Manager</option>
-              <option value="Admin">Admin</option>
+              <!-- Roles will be loaded dynamically -->
             </select>
           </div>
         </form>
@@ -172,16 +173,85 @@ class UserManagement {
         this.searchTerm = '';
         this.userToDelete = null;
         this.isLoading = false;
+        this.availableRoles = [];
         
+        // Legacy role mappings for backward compatibility
         this.roleNames = { 1: 'Admin', 2: 'User', 3: 'Manager' };
         this.roleNumbers = { 'Admin': 1, 'User': 2, 'Manager': 3 };
         
         this.init();
     }
 
-    init() {
+    async init() {
         this.bindEvents();
-        this.loadUsers();
+        await this.loadRoles();
+        await this.loadUsers();
+    }
+
+    async loadRoles() {
+        try {
+            const response = await fetch('/api/role-management/roles/options');
+            if (response.ok) {
+                this.availableRoles = await response.json();
+                this.populateRoleDropdown();
+                
+                // Update role mappings for dynamic roles
+                this.roleNames = {};
+                this.roleNumbers = {};
+                this.availableRoles.forEach(role => {
+                    this.roleNames[role.id] = role.displayName;
+                    this.roleNumbers[role.name] = role.id;
+                });
+            } else {
+                console.warn('Failed to load roles, using default roles');
+                this.availableRoles = [
+                    { id: '1', name: 'Admin', displayName: 'Administrator' },
+                    { id: '2', name: 'User', displayName: 'User' },
+                    { id: '3', name: 'Manager', displayName: 'Manager' }
+                ];
+                this.populateRoleDropdown();
+            }
+        } catch (error) {
+            console.error('Error loading roles:', error);
+            // Use default roles as fallback
+            this.availableRoles = [
+                { id: '1', name: 'Admin', displayName: 'Administrator' },
+                { id: '2', name: 'User', displayName: 'User' },
+                { id: '3', name: 'Manager', displayName: 'Manager' }
+            ];
+            this.populateRoleDropdown();
+        }
+    }
+
+    populateRoleDropdown() {
+        const roleSelect = document.getElementById('role');
+        if (roleSelect) {
+            console.log('Populating role dropdown with roles:', this.availableRoles);
+            roleSelect.innerHTML = '';
+            
+            // Sort roles by priority (descending) then by display name
+            const sortedRoles = [...this.availableRoles].sort((a, b) => {
+                if (a.priority !== b.priority) {
+                    return (b.priority || 0) - (a.priority || 0);
+                }
+                return a.displayName.localeCompare(b.displayName);
+            });
+
+            console.log('Sorted roles:', sortedRoles);
+
+            sortedRoles.forEach(role => {
+                const option = document.createElement('option');
+                option.value = role.name;
+                option.textContent = role.displayName;
+                option.dataset.roleId = role.id;
+                roleSelect.appendChild(option);
+                console.log(`Added role option: ${role.displayName} (${role.name})`);
+            });
+            
+            console.log('Role dropdown populated. Total options:', roleSelect.options.length);
+        } else {
+            console.error('Role select element not found!');
+        }
     }
 
     bindEvents() {
@@ -245,34 +315,73 @@ class UserManagement {
                 throw new Error(`Failed to load users: ${response.status}`);
             }
             
-            this.allUsers = await response.json();
+            const userData = await response.json();
+            
+            // Validate and sanitize user data
+            this.allUsers = Array.isArray(userData) ? userData.map(user => {
+                return {
+                    id: user.id || '',
+                    firstName: user.firstName || '',
+                    lastName: user.lastName || '',
+                    fullName: user.fullName || '',
+                    email: user.email || '',
+                    phoneNumber: user.phoneNumber || '',
+                    dateOfBirth: user.dateOfBirth || '',
+                    role: user.role || '',
+                    isActive: user.isActive !== false // Default to true if not specified
+                };
+            }) : [];
+            
+            console.log('Loaded users:', this.allUsers);
             this.filterAndRenderUsers();
         } catch (error) {
             console.error('Error loading users:', error);
             this.showErrorState(error.message);
+            // Set empty array as fallback
+            this.allUsers = [];
         } finally {
             this.isLoading = false;
         }
     }
 
     filterAndRenderUsers() {
-        this.filteredUsers = this.allUsers.filter(user => {
-            if (!this.searchTerm) return true;
-            
-            const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
-            const email = user.email.toLowerCase();
-            const phone = user.phoneNumber.toLowerCase();
-            const role = this.roleNames[user.role]?.toLowerCase() || '';
-            
-            return fullName.includes(this.searchTerm) || 
-                   email.includes(this.searchTerm) || 
-                   phone.includes(this.searchTerm) || 
-                   role.includes(this.searchTerm);
-        });
+        try {
+            this.filteredUsers = this.allUsers.filter(user => {
+                if (!this.searchTerm) return true;
+                
+                // Safely handle user properties
+                const firstName = (user.firstName || '').toLowerCase();
+                const lastName = (user.lastName || '').toLowerCase();
+                const fullName = `${firstName} ${lastName}`.trim();
+                const email = (user.email || '').toLowerCase();
+                const phone = (user.phoneNumber || '').toLowerCase();
+                
+                // Handle role name safely
+                let role = '';
+                if (user.role) {
+                    const roleById = this.availableRoles.find(r => r.id === user.role || r.id === user.role.toString());
+                    if (roleById) {
+                        role = (roleById.displayName || roleById.name || '').toLowerCase();
+                    } else {
+                        role = (this.roleNames[user.role] || user.role.toString() || '').toLowerCase();
+                    }
+                }
+                
+                return fullName.includes(this.searchTerm) || 
+                       email.includes(this.searchTerm) || 
+                       phone.includes(this.searchTerm) || 
+                       role.includes(this.searchTerm);
+            });
 
-        this.updateUserCount();
-        this.renderTable();
-        this.renderPagination();
+            this.updateUserCount();
+            this.renderTable();
+            this.renderPagination();
+        } catch (error) {
+            console.error('Error filtering users:', error);
+            this.filteredUsers = [];
+            this.updateUserCount();
+            this.showErrorState('Error displaying users');
+        }
     }
 
     updateUserCount() {
@@ -321,8 +430,26 @@ class UserManagement {
     }
 
     createUserRowHTML(user) {
-        const fullName = user.fullName || `${user.firstName} ${user.lastName}`;
-        const roleName = this.roleNames[user.role] || user.role;
+        // Safely handle user data with fallbacks
+        const firstName = user.firstName || '';
+        const lastName = user.lastName || '';
+        const fullName = user.fullName || `${firstName} ${lastName}`.trim() || 'Unknown User';
+        const email = user.email || '';
+        const phoneNumber = user.phoneNumber || '';
+        
+        // Handle role name with better fallback logic
+        let roleName = 'Unknown Role';
+        if (user.role) {
+            // Try to find role by ID first (for new dynamic roles)
+            const roleById = this.availableRoles.find(r => r.id === user.role || r.id === user.role.toString());
+            if (roleById) {
+                roleName = roleById.displayName || roleById.name;
+            } else {
+                // Fallback to legacy role mapping
+                roleName = this.roleNames[user.role] || user.role.toString();
+            }
+        }
+        
         const statusBadge = user.isActive ? 
             '<span class="badge bg-success">Active</span>' : 
             '<span class="badge bg-secondary">Inactive</span>';
@@ -330,16 +457,16 @@ class UserManagement {
         return `
             <tr>
                 <td><strong>${this.escapeHtml(fullName)}</strong></td>
-                <td>${this.escapeHtml(user.email)}</td>
-                <td>${this.escapeHtml(user.phoneNumber)}</td>
+                <td>${this.escapeHtml(email)}</td>
+                <td>${this.escapeHtml(phoneNumber)}</td>
                 <td>${this.escapeHtml(roleName)}</td>
                 <td>${statusBadge}</td>
                 <td class="text-right">
                     <div class="flex-end">
-                        <button class="btn btn-sm btn-info edit-user-btn" data-user-id="${user.id}">
+                        <button class="btn btn-sm btn-info edit-user-btn" data-user-id="${user.id || ''}">
                             <i class="fas fa-edit"></i> <span>Edit</span>
                         </button>
-                        <button class="btn btn-sm btn-danger delete-user-btn" data-user-id="${user.id}">
+                        <button class="btn btn-sm btn-danger delete-user-btn" data-user-id="${user.id || ''}">
                             <i class="fas fa-trash"></i> <span>Delete</span>
                         </button>
                     </div>
@@ -468,6 +595,14 @@ class UserManagement {
     }
 
     escapeHtml(text) {
+        // Handle null, undefined, or non-string values
+        if (text == null || text === undefined) {
+            return '';
+        }
+        
+        // Convert to string if it's not already a string
+        const textStr = String(text);
+        
         const map = {
             '&': '&amp;',
             '<': '&lt;',
@@ -475,15 +610,18 @@ class UserManagement {
             '"': '&quot;',
             "'": '&#039;'
         };
-        return text.replace(/[&<>"']/g, m => map[m]);
+        return textStr.replace(/[&<>"']/g, m => map[m]);
     }
 
-    editUser(id) {
+    async editUser(id) {
         const user = this.allUsers.find(u => u.id === id);
         if (!user) {
             this.showSnackbar('User not found.', 'error');
             return;
         }
+
+        // Refresh roles before showing the modal to ensure we have the latest roles
+        await this.loadRoles();
 
         document.getElementById('userId').value = user.id;
         document.getElementById('firstName').value = user.firstName || '';
@@ -492,8 +630,20 @@ class UserManagement {
         document.getElementById('phoneNumber').value = user.phoneNumber || '';
         document.getElementById('dateOfBirth').value = user.dateOfBirth ? user.dateOfBirth.split('T')[0] : '';
         
-        const roleName = this.roleNames[user.role] || 'User';
-        document.getElementById('role').value = roleName;
+        // Find the role by ID first, then by name as fallback
+        let roleToSelect = null;
+        
+        // Try to find role by ID first (for new dynamic roles)
+        const roleById = this.availableRoles.find(r => r.id === user.role || r.id === user.role.toString());
+        if (roleById) {
+            roleToSelect = roleById.name;
+        } else {
+            // Fallback to legacy role mapping
+            const roleName = this.roleNames[user.role] || 'User';
+            roleToSelect = roleName;
+        }
+        
+        document.getElementById('role').value = roleToSelect;
         
         const modal = new bootstrap.Modal(document.getElementById('userModal'));
         modal.show();
@@ -510,17 +660,28 @@ class UserManagement {
 
     async handleSaveUser() {
         const id = document.getElementById('userId').value;
+        const selectedRoleName = document.getElementById('role').value;
+        
+        // Find the selected role to get its ID
+        const selectedRole = this.availableRoles.find(r => r.name === selectedRoleName);
+        const roleId = selectedRole ? selectedRole.id : this.roleNumbers[selectedRoleName];
+        
         const userData = {
             firstName: document.getElementById('firstName').value.trim(),
             lastName: document.getElementById('lastName').value.trim(),
             email: document.getElementById('email').value.trim(),
             phoneNumber: document.getElementById('phoneNumber').value.trim(),
             dateOfBirth: document.getElementById('dateOfBirth').value,
-            role: this.roleNumbers[document.getElementById('role').value]
+            role: roleId
         };
 
         if (!userData.firstName || !userData.lastName || !userData.email) {
             this.showSnackbar('Please fill in all required fields', 'error');
+            return;
+        }
+
+        if (!userData.role) {
+            this.showSnackbar('Please select a valid role', 'error');
             return;
         }
 
@@ -578,12 +739,32 @@ class UserManagement {
             console.log(`${type.toUpperCase()}: ${message}`);
         }
     }
+
+    // Method to refresh roles when new roles are created
+    async refreshRoles() {
+        console.log('Refreshing roles in User Management...');
+        await this.loadRoles();
+        console.log('Roles refreshed. Available roles:', this.availableRoles);
+        this.showSnackbar('Roles refreshed successfully!', 'info');
+    }
 }
+
+// Global function to refresh roles from external sources
+window.refreshUserManagementRoles = function() {
+    if (userManagement) {
+        userManagement.refreshRoles();
+    }
+};
 
 let userToDelete = null;
 let userManagement;
 
-function showCreateUserModal() {
+async function showCreateUserModal() {
+    // Refresh roles before showing the modal to ensure we have the latest roles
+    if (userManagement) {
+        await userManagement.loadRoles();
+    }
+    
     document.getElementById('userId').value = '';
     document.getElementById('userForm').reset();
     const modal = new bootstrap.Modal(document.getElementById('userModal'));
@@ -606,6 +787,35 @@ function confirmDelete() {
         userManagement.confirmDelete();
     }
     hideConfirmationSnackbar();
+}
+
+async function refreshRolesManually() {
+    console.log('Manual role refresh triggered');
+    
+    // Test API call directly
+    try {
+        console.log('Testing direct API call to /api/role-management/roles/options');
+        const response = await fetch('/api/role-management/roles/options');
+        console.log('API Response status:', response.status);
+        console.log('API Response headers:', response.headers);
+        
+        if (response.ok) {
+            const roles = await response.json();
+            console.log('API returned roles:', roles);
+        } else {
+            console.error('API call failed:', response.statusText);
+            const errorText = await response.text();
+            console.error('Error details:', errorText);
+        }
+    } catch (error) {
+        console.error('API call error:', error);
+    }
+    
+    if (userManagement) {
+        userManagement.refreshRoles();
+    } else {
+        console.error('UserManagement instance not found');
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
