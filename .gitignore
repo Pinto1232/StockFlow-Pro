@@ -411,10 +411,17 @@ secrets.json
 .env.staging
 .env.production
 .env.test
+.env.github
 *.env
 appsettings.*.json
 !appsettings.json
 !appsettings.Development.json
+
+# GitHub credentials and tokens
+setup-github-credentials.ps1
+setup-github-credentials.bat
+github-token.txt
+*.token
 
 # Exclude publish output
 publish/

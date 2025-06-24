@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    
+    <!-- Package Information -->
+    <PackageId>StockFlowPro.Shared</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Authors>Pinto1232</Authors>
+    <Company>StockFlow Pro</Company>
+    <Description>Shared utilities, constants, extensions, and helpers for StockFlow Pro applications</Description>
+    <PackageTags>stockflow;utilities;shared;business;constants;extensions;helpers</PackageTags>
+    <RepositoryUrl>https://github.com/Pinto1232/StockFlow-Pro</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    
+    <!-- Generate package on build -->
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    
+    <!-- Assembly Information -->
+    <AssemblyTitle>StockFlow Pro Shared Library</AssemblyTitle>
+    <AssemblyDescription>Shared utilities and common functionality for StockFlow Pro</AssemblyDescription>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <!-- Dependencies that consumers will also need -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+</Project>

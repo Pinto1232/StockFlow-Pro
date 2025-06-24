@@ -864,3 +864,124 @@
         text-align: left;
     }
 }
+
+/* Enhanced Features Info Card */
+.card.border-info {
+    border: 2px solid #3b82f6 !important;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
+    margin: 0 1.5rem 2rem 1.5rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.card.border-info:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.15);
+}
+
+.card.border-info .card-header.bg-info {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+    border-bottom: none;
+    padding: 1.5rem;
+}
+
+.card.border-info .card-header h6 {
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card.border-info .card-body {
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.card.border-info .card-body h6 {
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card.border-info .card-body .list-unstyled {
+    margin: 0;
+}
+
+.card.border-info .card-body .list-unstyled li {
+    color: #64748b;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card.border-info .card-body .list-unstyled li:last-child {
+    margin-bottom: 0;
+}
+
+.card.border-info .card-body .list-unstyled li::before {
+    content: '✓';
+    color: #10b981;
+    font-weight: bold;
+    font-size: 0.75rem;
+    width: 16px;
+    height: 16px;
+    background: #dcfce7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Enhanced Features Responsive */
+@media (max-width: 768px) {
+    .card.border-info {
+        margin: 0 1rem 1.5rem 1rem;
+    }
+
+    .card.border-info .card-body {
+        padding: 1.5rem;
+    }
+
+    .card.border-info .card-body .row {
+        gap: 1.5rem;
+    }
+
+    .card.border-info .card-body .col-md-4 {
+        margin-bottom: 1.5rem;
+    }
+
+    .card.border-info .card-body .col-md-4:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Enhanced Stats Card Small Text */
+.stats-card-content small.text-muted {
+    font-size: 0.75rem;
+    color: #94a3b8 !important;
+    font-weight: 500;
+    margin-top: 0.5rem;
+    display: block;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+@media (max-width: 768px) {
+    .stats-card-content small.text-muted {
+        font-size: 0.7rem;
+    }
+}

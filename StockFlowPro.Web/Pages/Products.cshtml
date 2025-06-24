@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    <!-- Dashboard Stats Cards -->
+    <!-- Enhanced Dashboard Stats Cards with Shared Utilities -->
     <div class="stats-cards-container mb-4">
         <div class="stats-card stats-card-primary">
             <div class="stats-card-icon">
@@ -32,6 +32,7 @@
             <div class="stats-card-content">
                 <div class="stats-card-label">Total Products</div>
                 <div class="stats-card-value" id="totalProducts" title="-">-</div>
+                <small class="text-muted">Enhanced formatting</small>
             </div>
             <div class="stats-card-accent"></div>
         </div>
@@ -43,6 +44,7 @@
             <div class="stats-card-content">
                 <div class="stats-card-label">Total Value</div>
                 <div class="stats-card-value" id="totalValue" title="-">-</div>
+                <small class="text-muted">Currency & short format</small>
             </div>
             <div class="stats-card-accent"></div>
         </div>
@@ -54,6 +56,7 @@
             <div class="stats-card-content">
                 <div class="stats-card-label">Low Stock</div>
                 <div class="stats-card-value" id="lowStockCount" title="-">-</div>
+                <small class="text-muted">Count & percentage</small>
             </div>
             <div class="stats-card-accent"></div>
         </div>
@@ -65,8 +68,46 @@
             <div class="stats-card-content">
                 <div class="stats-card-label">Out of Stock</div>
                 <div class="stats-card-value" id="outOfStockCount" title="-">-</div>
+                <small class="text-muted">Count & percentage</small>
             </div>
             <div class="stats-card-accent"></div>
+        </div>
+    </div>
+
+    <!-- Enhanced Features Info Card -->
+    <div class="card mb-4 border-info">
+        <div class="card-header bg-info text-white">
+            <h6 class="mb-0">
+                <i class="fas fa-magic me-2"></i>Enhanced Product Management with Shared Utilities
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <h6><i class="fas fa-text-width text-primary me-2"></i>String Formatting</h6>
+                    <ul class="list-unstyled small">
+                        <li>• Title case product names</li>
+                        <li>• Truncated descriptions</li>
+                        <li>�� URL-friendly slugs</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6><i class="fas fa-dollar-sign text-success me-2"></i>Currency & Numbers</h6>
+                    <ul class="list-unstyled small">
+                        <li>• Formatted currency display</li>
+                        <li>• Percentage calculations</li>
+                        <li>• Short format (K, M, B)</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6><i class="fas fa-clock text-warning me-2"></i>Date & Time</h6>
+                    <ul class="list-unstyled small">
+                        <li>• Friendly time display</li>
+                        <li>• Consistent date formatting</li>
+                        <li>• Relative time descriptions</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 
