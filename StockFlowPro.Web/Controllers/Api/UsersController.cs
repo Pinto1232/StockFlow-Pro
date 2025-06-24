@@ -28,12 +28,14 @@ public class UsersController : ControllerBase
         new UserDto { Id = Guid.NewGuid(), FirstName = "Test", LastName = "User", Email = "test@example.com", PhoneNumber = "123", Role = StockFlowPro.Domain.Enums.UserRole.Admin }
     };
     [HttpGet("mock")]
+    [Authorize(Roles = "Admin")] // SECURITY FIX: Only admins can access mock data endpoints
     public ActionResult<IEnumerable<UserDto>> GetAllUsersMock([FromQuery] bool activeOnly = false)
     {
         return Ok(_mockUsers);
     }
 
     [HttpPost("mock")]
+    [Authorize(Roles = "Admin")] // SECURITY FIX: Only admins can create mock users
     public ActionResult<UserDto> CreateUserMock([FromBody] CreateUserDto createUserDto)
     {
         var user = new UserDto
@@ -198,6 +200,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPut("mock/{id}")]
+    [Authorize(Roles = "Admin")] // SECURITY FIX: Only admins can update mock users
     public ActionResult<UserDto> UpdateUserMock(Guid id, [FromBody] CreateUserDto updateUserDto)
     {
         var user = _mockUsers.FirstOrDefault(u => u.Id == id);
@@ -215,6 +218,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpDelete("mock/{id}")]
+    [Authorize(Roles = "Admin")] // SECURITY FIX: Only admins can delete mock users
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public ActionResult DeleteUserMock(Guid id)

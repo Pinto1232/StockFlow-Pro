@@ -319,3 +319,16 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 **Built with ‚ù§Ô∏è using Clean Architecture and SOLID principles**
+## Ì¥ß Environment Configuration
+
+This project now supports environment-based configuration using `.env` files for better security and flexibility.
+
+**Quick Setup:**
+```bash
+# Copy the environment template
+cp .env.example .env
+
+# Edit .env with your configuration values
+```
+
+Ì≥ñ **For detailed setup instructions, see [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md)**

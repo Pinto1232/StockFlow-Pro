@@ -404,6 +404,18 @@ Thumbs.db
 # Exclude local secrets
 secrets.json
 
+# Environment variables and configuration files
+.env
+.env.local
+.env.development
+.env.staging
+.env.production
+.env.test
+*.env
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
+
 # Exclude publish output
 publish/
 

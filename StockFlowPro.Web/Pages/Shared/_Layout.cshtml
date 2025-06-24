@@ -122,6 +122,25 @@
                                             </div>
                                         </a>
                                     </li>
+                                    <li>
+                                        <a class="dropdown-item modern-dropdown-item" 
+                                           href="/UserSync"
+                                           role="menuitem"
+                                           tabindex="0"
+                                           aria-label="Synchronize your account with the database"
+                                           data-action="user-sync">
+                                            <div class="item-icon">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </div>
+                                            <div class="item-content">
+                                                <span class="item-title">Account Sync</span>
+                                                <span class="item-subtitle">Synchronize account data</span>
+                                            </div>
+                                            <div class="item-shortcut">
+                                                <kbd>Ctrl+S</kbd>
+                                            </div>
+                                        </a>
+                                    </li>
                                     @if (User.HasPermission(Permissions.System.ViewAdminPanel))
                                     {
                                         <li>
@@ -669,6 +688,13 @@
                         const adminLink = document.querySelector('[data-action="admin-settings"]');
                         if (adminLink) {
                             adminLink.click();
+                        }
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        const syncLink = document.querySelector('[data-action="user-sync"]');
+                        if (syncLink) {
+                            syncLink.click();
                         }
                         break;
                     case 'l':

@@ -14,11 +14,19 @@ public class InvoicesController : ControllerBase
 {
     private readonly IInvoiceService _invoiceService;
     private readonly IDualDataService _dualDataService;
+    private readonly IUserSynchronizationService _userSyncService;
+    private readonly ILogger<InvoicesController> _logger;
 
-    public InvoicesController(IInvoiceService invoiceService, IDualDataService dualDataService)
+    public InvoicesController(
+        IInvoiceService invoiceService, 
+        IDualDataService dualDataService,
+        IUserSynchronizationService userSyncService,
+        ILogger<InvoicesController> logger)
     {
         _invoiceService = invoiceService;
         _dualDataService = dualDataService;
+        _userSyncService = userSyncService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -118,70 +126,60 @@ public class InvoicesController : ControllerBase
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdClaim))
             {
+                _logger.LogWarning("Invoice creation attempted without authentication");
                 return BadRequest("User authentication required. Please log in.");
             }
             
             if (!Guid.TryParse(userIdClaim, out var userId))
             {
+                _logger.LogWarning("Invoice creation attempted with invalid user ID: {UserIdClaim}", userIdClaim);
                 return BadRequest("Invalid user authentication data.");
             }
             
             // Always use current authenticated user for security
             createInvoiceDto.CreatedByUserId = userId;
 
-            // Ensure the user exists in the system before creating the invoice
-            var user = await _dualDataService.GetUserByIdAsync(userId);
-            if (user == null)
+            // Check user existence status
+            var userExistence = await _userSyncService.CheckUserExistenceAsync(userId);
+            
+            if (!userExistence.ExistsInMockData)
             {
+                _logger.LogWarning("Invoice creation attempted by non-existent user: {UserId}", userId);
                 return BadRequest("User not found in the system. Please contact an administrator.");
             }
 
-            // Try to create the invoice
-            try
+            // If user exists in mock data but not in database, require explicit sync
+            if (userExistence.RequiresSync)
             {
-                var invoice = await _invoiceService.CreateAsync(createInvoiceDto);
-                return CreatedAtAction(
-                    nameof(GetInvoiceById),
-                    new { id = invoice.Id },
-                    invoice);
-            }
-            catch (ArgumentException ex) when (ex.Message.Contains("not found in database"))
-            {
-                // User exists in mock data but not in database - sync them
-                try
+                _logger.LogWarning("Invoice creation attempted by user {UserId} who requires database synchronization", userId);
+                return BadRequest(new
                 {
-                    var createUserDto = new CreateUserDto
-                    {
-                        FirstName = user.FirstName,
-                        LastName = user.LastName,
-                        Email = user.Email,
-                        PhoneNumber = user.PhoneNumber,
-                        DateOfBirth = user.DateOfBirth,
-                        Role = user.Role,
-                        PasswordHash = user.PasswordHash
-                    };
+                    error = "User account requires synchronization",
+                    message = "Your account needs to be synchronized with the database before you can create invoices. Please contact an administrator or use the account synchronization feature.",
+                    requiresSync = true,
+                    userId = userId
+                });
+            }
 
-                    await _dualDataService.CreateUserAsync(createUserDto);
-                    
-                    // Now try creating the invoice again
-                    var invoice = await _invoiceService.CreateAsync(createInvoiceDto);
-                    return CreatedAtAction(
-                        nameof(GetInvoiceById),
-                        new { id = invoice.Id },
-                        invoice);
-                }
-                catch (Exception syncEx)
-                {
-                    return BadRequest($"Unable to create invoice. Failed to sync user to database: {syncEx.Message}");
-                }
-            }
+            // Try to create the invoice
+            var invoice = await _invoiceService.CreateAsync(createInvoiceDto);
+            
+            _logger.LogInformation("Invoice {InvoiceId} created successfully by user {UserId}", invoice.Id, userId);
+            
+            return CreatedAtAction(
+                nameof(GetInvoiceById),
+                new { id = invoice.Id },
+                invoice);
         }
         catch (ArgumentException ex)
         {
+            _logger.LogWarning("Invoice creation failed with argument error: {Error}", ex.Message);
             return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Internal error during invoice creation for user {UserId}", 
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }

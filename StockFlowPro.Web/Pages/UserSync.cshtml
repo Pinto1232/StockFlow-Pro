@@ -1,0 +1,345 @@
+@page
+@model UserSyncModel
+@{
+    ViewData["Title"] = "User Synchronization";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+    <style>
+        .sync-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+        
+        .sync-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .sync-status.requires-sync {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        
+        .sync-status.synced {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .sync-status.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .sync-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .sync-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .sync-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .audit-log {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        
+        .audit-entry {
+            padding: 0.5rem;
+            border-bottom: 1px solid #f8f9fa;
+            font-size: 0.9rem;
+        }
+        
+        .audit-entry:last-child {
+            border-bottom: none;
+        }
+        
+        .audit-entry.success {
+            border-left: 4px solid #28a745;
+        }
+        
+        .audit-entry.failed {
+            border-left: 4px solid #dc3545;
+        }
+    </style>
+}
+
+<div class="sync-container">
+    <div class="sync-card">
+        <h2><i class="fas fa-sync-alt"></i> User Account Synchronization</h2>
+        <p class="text-muted">Manage your account synchronization between data sources.</p>
+        
+        <div id="sync-status" class="sync-status">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>Checking synchronization status...</span>
+        </div>
+        
+        <div id="sync-actions" style="display: none;">
+            <div class="form-group">
+                <label for="sync-reason">Reason for synchronization (optional):</label>
+                <input type="text" id="sync-reason" class="form-control" placeholder="e.g., Account setup, Data migration, etc." />
+            </div>
+            
+            <button id="sync-self-btn" class="sync-button">
+                <i class="fas fa-sync-alt"></i> Synchronize My Account
+            </button>
+        </div>
+        
+        <div id="sync-result" style="display: none; margin-top: 1rem;"></div>
+    </div>
+    
+    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+    {
+        <div class="sync-card">
+            <h3><i class="fas fa-users-cog"></i> Administrative Synchronization</h3>
+            <p class="text-muted">Synchronize other users (Admin/Manager only).</p>
+            
+            <div class="form-group">
+                <label for="admin-user-id">User ID to synchronize:</label>
+                <input type="text" id="admin-user-id" class="form-control" placeholder="Enter user GUID" />
+            </div>
+            
+            <div class="form-group">
+                <label for="admin-sync-reason">Reason for synchronization:</label>
+                <input type="text" id="admin-sync-reason" class="form-control" placeholder="Required for administrative sync" required />
+            </div>
+            
+            <button id="admin-sync-btn" class="sync-button">
+                <i class="fas fa-user-cog"></i> Synchronize User
+            </button>
+            
+            <div id="admin-sync-result" style="display: none; margin-top: 1rem;"></div>
+        </div>
+    }
+    
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="sync-card">
+            <h3><i class="fas fa-history"></i> Synchronization Audit Log</h3>
+            <p class="text-muted">View synchronization history and audit trail.</p>
+            
+            <div class="form-group">
+                <label for="audit-user-id">User ID for audit log:</label>
+                <input type="text" id="audit-user-id" class="form-control" placeholder="Enter user GUID" />
+            </div>
+            
+            <button id="load-audit-btn" class="sync-button">
+                <i class="fas fa-search"></i> Load Audit Log
+            </button>
+            
+            <div id="audit-log" class="audit-log" style="display: none; margin-top: 1rem;"></div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSyncStatus();
+            
+            document.getElementById('sync-self-btn').addEventListener('click', syncSelf);
+            
+            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+            {
+                <text>
+                document.getElementById('admin-sync-btn').addEventListener('click', adminSync);
+                </text>
+            }
+            
+            @if (User.IsInRole("Admin"))
+            {
+                <text>
+                document.getElementById('load-audit-btn').addEventListener('click', loadAuditLog);
+                </text>
+            }
+        });
+        
+        async function checkSyncStatus() {
+            try {
+                const response = await fetch('/api/UserSynchronization/check/@(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)');
+                const status = await response.json();
+                
+                const statusDiv = document.getElementById('sync-status');
+                const actionsDiv = document.getElementById('sync-actions');
+                
+                if (status.requiresSync) {
+                    statusDiv.className = 'sync-status requires-sync';
+                    statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Your account requires synchronization with the database.</span>';
+                    actionsDiv.style.display = 'block';
+                } else if (status.existsInDatabase) {
+                    statusDiv.className = 'sync-status synced';
+                    statusDiv.innerHTML = '<i class="fas fa-check-circle"></i><span>Your account is synchronized and up to date.</span>';
+                } else {
+                    statusDiv.className = 'sync-status error';
+                    statusDiv.innerHTML = '<i class="fas fa-times-circle"></i><span>Account not found in system. Please contact an administrator.</span>';
+                }
+            } catch (error) {
+                const statusDiv = document.getElementById('sync-status');
+                statusDiv.className = 'sync-status error';
+                statusDiv.innerHTML = '<i class="fas fa-times-circle"></i><span>Error checking synchronization status.</span>';
+            }
+        }
+        
+        async function syncSelf() {
+            const button = document.getElementById('sync-self-btn');
+            const reason = document.getElementById('sync-reason').value;
+            const resultDiv = document.getElementById('sync-result');
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Synchronizing...';
+            
+            try {
+                const response = await fetch('/api/UserSynchronization/sync-self', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ reason: reason || 'Self-service synchronization' })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'alert alert-success';
+                    resultDiv.innerHTML = '<i class="fas fa-check-circle"></i> ' + result.message;
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    resultDiv.className = 'alert alert-danger';
+                    resultDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + (result.message || 'Synchronization failed');
+                }
+                
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                resultDiv.className = 'alert alert-danger';
+                resultDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error during synchronization';
+                resultDiv.style.display = 'block';
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-sync-alt"></i> Synchronize My Account';
+            }
+        }
+        
+        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+        {
+            <text>
+            async function adminSync() {
+                const button = document.getElementById('admin-sync-btn');
+                const userId = document.getElementById('admin-user-id').value;
+                const reason = document.getElementById('admin-sync-reason').value;
+                const resultDiv = document.getElementById('admin-sync-result');
+                
+                if (!userId || !reason) {
+                    resultDiv.className = 'alert alert-warning';
+                    resultDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Please provide both User ID and reason';
+                    resultDiv.style.display = 'block';
+                    return;
+                }
+                
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Synchronizing...';
+                
+                try {
+                    const response = await fetch(`/api/UserSynchronization/sync/${userId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ reason: reason })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        resultDiv.className = 'alert alert-success';
+                        resultDiv.innerHTML = '<i class="fas fa-check-circle"></i> ' + result.message;
+                    } else {
+                        resultDiv.className = 'alert alert-danger';
+                        resultDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + (result.message || result.error || 'Synchronization failed');
+                    }
+                    
+                    resultDiv.style.display = 'block';
+                } catch (error) {
+                    resultDiv.className = 'alert alert-danger';
+                    resultDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error during synchronization';
+                    resultDiv.style.display = 'block';
+                } finally {
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-user-cog"></i> Synchronize User';
+                }
+            }
+            </text>
+        }
+        
+        @if (User.IsInRole("Admin"))
+        {
+            <text>
+            async function loadAuditLog() {
+                const userId = document.getElementById('audit-user-id').value;
+                const auditDiv = document.getElementById('audit-log');
+                
+                if (!userId) {
+                    alert('Please provide a User ID');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/api/UserSynchronization/audit/${userId}`);
+                    const logs = await response.json();
+                    
+                    if (response.ok && logs.length > 0) {
+                        auditDiv.innerHTML = logs.map(log => `
+                            <div class="audit-entry ${log.success ? 'success' : 'failed'}">
+                                <strong>${new Date(log.timestamp).toLocaleString()}</strong> - ${log.operation}<br>
+                                <small>By: ${log.requestingUserEmail} | Reason: ${log.reason}</small>
+                                ${log.errorMessage ? `<br><span class="text-danger">Error: ${log.errorMessage}</span>` : ''}
+                            </div>
+                        `).join('');
+                        auditDiv.style.display = 'block';
+                    } else {
+                        auditDiv.innerHTML = '<p class="text-muted">No audit logs found for this user.</p>';
+                        auditDiv.style.display = 'block';
+                    }
+                } catch (error) {
+                    auditDiv.innerHTML = '<p class="text-danger">Error loading audit logs.</p>';
+                    auditDiv.style.display = 'block';
+                }
+            }
+            </text>
+        }
+    </script>
+}

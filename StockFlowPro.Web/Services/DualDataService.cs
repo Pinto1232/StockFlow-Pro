@@ -349,28 +349,10 @@ public class DualDataService : IDualDataService
             }
             else
             {
-                _logger.LogInformation("User not found in mock data, creating mock entry for password update: {Email}", email);
-                
-                var newMockUser = new UserDto
-                {
-                    Id = user.Id,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    FullName = user.FullName,
-                    Email = user.Email,
-                    PhoneNumber = user.PhoneNumber,
-                    DateOfBirth = user.DateOfBirth,
-                    Age = user.Age,
-                    Role = user.Role,
-                    IsActive = user.IsActive,
-                    CreatedAt = user.CreatedAt,
-                    UpdatedAt = DateTime.UtcNow,
-                    PasswordHash = newPasswordHash
-                };
-                
-                await _mockDataService.AddUserAsync(newMockUser);
-                success = true;
-                _logger.LogInformation("Successfully created mock entry with updated password for user: {Email}", email);
+                // SECURITY FIX: Do not automatically create users during password updates
+                // This prevents unauthorized user creation through password reset functionality
+                _logger.LogWarning("User not found in mock data for password update: {Email}. User must be explicitly synchronized first.", email);
+                success = false;
             }
         }
         catch (Exception ex)
@@ -384,7 +366,7 @@ public class DualDataService : IDualDataService
         }
         else
         {
-            _logger.LogWarning("Failed to update password for user: {Email}", email);
+            _logger.LogWarning("Failed to update password for user: {Email}. User may need to be synchronized first.", email);
         }
 
         return success;
