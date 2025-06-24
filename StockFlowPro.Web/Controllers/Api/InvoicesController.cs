@@ -9,7 +9,7 @@ namespace StockFlowPro.Web.Controllers.Api;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Roles = "Manager,Admin")]
 public class InvoicesController : ControllerBase
 {
     private readonly IInvoiceService _invoiceService;
