@@ -9,6 +9,14 @@ using FluentValidation;
 using MediatR;
 using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
+using DotNetEnv;
+using StockFlowPro.Web.Configuration;
+
+// Load environment variables from .env file
+Env.Load();
+
+// Validate configuration
+EnvironmentConfig.ValidateConfiguration();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,10 +24,11 @@ builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
 
+// Configure database connection using environment variables
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(EnvironmentConfig.DatabaseConnectionString));
 
 builder.Services.AddMediatR(typeof(StockFlowPro.Application.Commands.Users.CreateUserCommand).Assembly);
 builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(StockFlowPro.Application.Mappings.ProductMappingProfile));
@@ -32,6 +41,8 @@ builder.Services.AddScoped<IMockDataStorageService, JsonMockDataStorageService>(
 builder.Services.AddScoped<IDataSourceService, HybridDataSourceService>();
 builder.Services.AddScoped<IDualDataService, DualDataService>();
 builder.Services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
+builder.Services.AddScoped<IUserSynchronizationService, UserSynchronizationService>();
+builder.Services.AddScoped<IUserSecurityService, UserSecurityService>();
 builder.Services.AddScoped<StockFlowPro.Web.Services.IAuthorizationService, StockFlowPro.Web.Services.AuthorizationService>();
 builder.Services.AddHostedService<DatabaseInitializationService>();
 
@@ -50,13 +61,16 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AllRoles", policy => policy.RequireRole("User", "Manager", "Admin"));
 });
 
-builder.Services.AddAuthentication("MyCookieAuth")
-    .AddCookie("MyCookieAuth", options =>
+// Configure authentication using environment variables
+builder.Services.AddAuthentication(EnvironmentConfig.CookieAuthName)
+    .AddCookie(EnvironmentConfig.CookieAuthName, options =>
     {
         options.LoginPath = "/Login";
         options.AccessDeniedPath = "/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
+        options.Cookie.SecurePolicy = EnvironmentConfig.CookieSecure ? CookieSecurePolicy.Always : CookieSecurePolicy.SameAsRequest;
+        options.Cookie.SameSite = EnvironmentConfig.CookieSameSite;
     });
 
 var app = builder.Build();

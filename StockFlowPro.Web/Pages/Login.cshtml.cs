@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using StockFlowPro.Web.Services;
 using StockFlowPro.Domain.Enums;
+using StockFlowPro.Web.Configuration;
 
 namespace StockFlowPro.Web.Pages;
 
@@ -58,9 +59,9 @@ public class LoginModel : PageModel
                 new Claim("LastName", user.LastName)
             };
 
-            var claimsIdentity = new ClaimsIdentity(claims, "MyCookieAuth");
+            var claimsIdentity = new ClaimsIdentity(claims, EnvironmentConfig.CookieAuthName);
             var authProperties = new AuthenticationProperties { IsPersistent = true };
-            await HttpContext.SignInAsync("MyCookieAuth", new ClaimsPrincipal(claimsIdentity), authProperties);
+            await HttpContext.SignInAsync(EnvironmentConfig.CookieAuthName, new ClaimsPrincipal(claimsIdentity), authProperties);
 
             return user.Role switch
             {
@@ -120,7 +121,7 @@ public class LoginModel : PageModel
 
     public async Task<IActionResult> OnPostLogoutAsync()
     {
-        await HttpContext.SignOutAsync("MyCookieAuth");
+        await HttpContext.SignOutAsync(EnvironmentConfig.CookieAuthName);
         return RedirectToPage("/Index");
     }
 }
