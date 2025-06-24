@@ -10,7 +10,7 @@ public static class DecimalExtensions
     /// <summary>
     /// Formats decimal as currency
     /// </summary>
-    public static string ToCurrency(this decimal amount, string currencySymbol = "$")
+    public static string ToCurrency(this decimal amount, string currencySymbol = "R")
     {
         return $"{currencySymbol}{amount:N2}";
     }

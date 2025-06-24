@@ -129,7 +129,7 @@ public class ProductsController : ControllerBase
                 LastUpdatedFull = DateTime.Now.ToDisplayFormat(),
                 
                 // Additional insights
-                AverageProductValue = totalProducts > 0 ? (totalValue / totalProducts).ToCurrency() : "$0.00",
+                AverageProductValue = totalProducts > 0 ? (totalValue / totalProducts).ToCurrency() : "R0.00",
                 HealthScore = CalculateInventoryHealthScore(totalProducts, lowStockCount, outOfStockCount),
                 StatusSummary = GetInventoryStatusSummary(totalProducts, lowStockCount, outOfStockCount)
             };

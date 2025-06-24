@@ -22,7 +22,7 @@ public class UpdateProductCommandValidator : AbstractValidator<UpdateProductComm
 
         RuleFor(x => x.CostPerItem)
             .GreaterThan(0).WithMessage("Cost per item must be greater than 0")
-            .LessThan(1000000).WithMessage("Cost per item must be less than $1,000,000");
+            .LessThan(1000000).WithMessage("Cost per item must be less than R1,000,000");
 
         RuleFor(x => x.NumberInStock)
             .GreaterThanOrEqualTo(0).WithMessage("Stock cannot be negative")

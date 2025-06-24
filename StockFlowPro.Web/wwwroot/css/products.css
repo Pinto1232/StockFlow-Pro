@@ -511,6 +511,43 @@
     color: #fca5a5;
 }
 
+.console-log-entry.table-data .timestamp {
+    color: #8b5cf6;
+}
+
+.console-log-entry.table-data .message {
+    color: #c4b5fd;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.8rem;
+}
+
+.console-log-entry.table-render .timestamp {
+    color: #06b6d4;
+}
+
+.console-log-entry.table-render .message {
+    color: #67e8f9;
+    font-weight: 600;
+}
+
+.console-log-entry.data-structure .timestamp {
+    color: #f97316;
+}
+
+.console-log-entry.data-structure .message {
+    color: #fdba74;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.75rem;
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: auto;
+    background: rgba(15, 23, 42, 0.5);
+    padding: 0.5rem;
+    border-radius: 6px;
+    border-left: 3px solid #f97316;
+    margin-top: 0.25rem;
+}
+
 .console-log-container::-webkit-scrollbar {
     width: 8px;
 }

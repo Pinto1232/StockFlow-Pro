@@ -31,12 +31,39 @@ function initializeConsole() {
         clearBtn.addEventListener('click', clearConsole);
     }
     
-    // Log initial message
+    // Log initial message to both browser console and custom UI
+    console.log('🚀 Product Management Console initialized - All data is also logged to browser console (F12)');
+    console.info('💡 Tip: Open Developer Tools (F12) to see detailed product data with expandable objects');
+    
     addConsoleLog('system', 'Product Management Console initialized - Ready to log database operations');
+    addConsoleLog('system', '💡 All data is also logged to browser console (F12) for detailed inspection');
 }
 
 // Add log entry to console
 function addConsoleLog(type, message) {
+    // Log to browser console with appropriate method based on type
+    const browserMessage = `[${type.toUpperCase()}] ${message}`;
+    
+    switch(type) {
+        case 'error':
+            console.error(browserMessage);
+            break;
+        case 'api':
+        case 'database':
+        case 'table-render':
+            console.info(browserMessage);
+            break;
+        case 'table-data':
+        case 'data-structure':
+            console.log(browserMessage);
+            break;
+        case 'system':
+        default:
+            console.log(browserMessage);
+            break;
+    }
+    
+    // Also add to custom console UI
     if (!consoleLogContainer) return;
     
     const timestamp = new Date().toLocaleTimeString();
@@ -143,6 +170,19 @@ async function loadProducts() {
             
             addConsoleLog('api', `Successfully loaded ${products.length} enhanced products from API`);
             addConsoleLog('database', `Database returned ${products.length} product records with shared utility formatting`);
+            
+            // Log complete product data structure for debugging
+            console.group('📋 Complete Product Data Structure');
+            products.forEach((product, index) => {
+                console.log(`🔍 Product ${index + 1} Full Data:`, product);
+            });
+            console.groupEnd();
+            
+            // Also log to custom console UI
+            addConsoleLog('data-structure', `📋 Complete Product Data Structure:`);
+            products.forEach((product, index) => {
+                addConsoleLog('data-structure', `🔍 Product ${index + 1} Full Data: ${JSON.stringify(product, null, 2)}`);
+            });
             
             renderProductsTable();
             renderPagination();
@@ -255,6 +295,41 @@ function renderProductsTable() {
 
     const paginatedProducts = getPaginatedProducts();
     
+    // Console log the products being displayed in the current page
+    console.group(`🔄 Rendering Product Management Table - Page ${currentPage}`);
+    console.info(`Showing ${paginatedProducts.length} of ${filteredProducts.length} products`);
+    
+    addConsoleLog('table-render', `🔄 Rendering Product Management Table - Page ${currentPage}, Showing ${paginatedProducts.length} of ${filteredProducts.length} products`);
+    
+    // Log detailed data for each product being displayed
+    paginatedProducts.forEach((product, index) => {
+        const productData = {
+            id: product.id,
+            name: product.name,
+            formattedName: product.formattedName,
+            costPerItem: product.costPerItem,
+            formattedPrice: product.formattedPrice,
+            numberInStock: product.numberInStock,
+            totalValue: product.totalValue,
+            formattedTotalValue: product.formattedTotalValue,
+            isActive: product.isActive,
+            isInStock: product.isInStock,
+            isLowStock: product.isLowStock,
+            stockStatus: product.stockStatus,
+            createdAt: product.createdAt,
+            createdDisplay: product.createdDisplay,
+            createdFriendly: product.createdFriendly
+        };
+        
+        // Log to browser console with expandable object
+        console.log(`📊 Product ${index + 1} Data:`, productData);
+        
+        // Log to custom console UI
+        addConsoleLog('table-data', `📊 Product ${index + 1}: ${JSON.stringify(productData, null, 2)}`);
+    });
+    
+    console.groupEnd();
+    
     const tableHTML = `
         <div class="table-responsive-wrapper">
             <table class="table table-hover product-table" id="productsTable">
@@ -288,6 +363,9 @@ function createProductRowHTML(product) {
     const stockDisplay = product.stockDisplay || `${product.numberInStock} units`;
     const createdDisplay = product.createdDisplay || new Date(product.createdAt).toLocaleDateString();
     const createdFriendly = product.createdFriendly || '';
+    
+    // Console log the product data being displayed in the table
+    addConsoleLog('table-data', `📋 Product Table Row Data: ID=${product.id}, Name="${productName}", Price="${productPrice}", Stock="${stockDisplay}", TotalValue="${productTotalValue}", Status="${product.isActive ? 'Active' : 'Inactive'}", Created="${createdDisplay}"`);
     
     // Use enhanced status badges if available
     const stockStatusBadge = product.stockStatusBadge;
@@ -762,7 +840,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Log information about enhanced features and shared utilities integration
 function logEnhancedFeaturesInfo() {
-    addConsoleLog('system', '🚀 Enhanced Product Management with Shared Utilities Integration');
     addConsoleLog('system', '📦 String Extensions: Title case formatting, truncation, slug generation');
     addConsoleLog('system', '💰 Decimal Extensions: Currency formatting, percentage calculations, short format (K/M/B)');
     addConsoleLog('system', '⏰ DateTime Extensions: Friendly time display, consistent date formatting');
