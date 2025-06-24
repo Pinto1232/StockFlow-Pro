@@ -403,9 +403,11 @@ public class DualDataService : IDualDataService
         {
             _logger.LogWarning(ex, "Failed to search users in database, falling back to mock data");
             var users = await _mockDataService.GetUsersAsync();
-            
+
             if (string.IsNullOrWhiteSpace(searchTerm))
+            {
                 return users;
+            }
 
             var lowerSearchTerm = searchTerm.ToLower();
             return users.Where(u => 

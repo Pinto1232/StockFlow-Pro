@@ -122,7 +122,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPatch("{id:guid}/stock")]
-    [Authorize(Roles = "User,Manager,Admin")]
+    [Authorize(Roles = "Manager,Admin")]
     public async Task<ActionResult<ProductDto>> UpdateProductStock(Guid id, [FromBody] UpdateProductStockDto updateStockDto)
     {
         try

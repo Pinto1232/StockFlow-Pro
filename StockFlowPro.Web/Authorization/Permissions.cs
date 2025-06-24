@@ -45,6 +45,32 @@ public static class Permissions
     }
 
     /// <summary>
+    /// Invoice management permissions
+    /// </summary>
+    public static class Invoice
+    {
+        public const string ViewInvoices = "invoice.view";
+        public const string CreateInvoices = "invoice.create";
+        public const string EditInvoices = "invoice.edit";
+        public const string DeleteInvoices = "invoice.delete";
+        public const string ViewAllInvoices = "invoice.view_all";
+        public const string ManageInvoiceItems = "invoice.manage_items";
+    }
+
+    /// <summary>
+    /// Product management permissions
+    /// </summary>
+    public static class Product
+    {
+        public const string ViewProducts = "product.view";
+        public const string CreateProducts = "product.create";
+        public const string EditProducts = "product.edit";
+        public const string DeleteProducts = "product.delete";
+        public const string UpdateStock = "product.update_stock";
+        public const string ViewReports = "product.view_reports";
+    }
+
+    /// <summary>
     /// Reporting permissions
     /// </summary>
     public static class Reports
@@ -65,19 +91,34 @@ public static class RolePermissions
     {
         [UserRole.User] = new HashSet<string>
         {
-            // Basic user permissions
+            // Basic user permissions - Users can only view products, no invoice access
             Permissions.Users.View,
             Permissions.Users.Edit, // Can edit their own profile
+            Permissions.Product.ViewProducts, // Users can view products but not edit/create/delete
             Permissions.Reports.ViewBasic
         },
         
         [UserRole.Manager] = new HashSet<string>
         {
-            // Manager inherits all User permissions
+            // Manager inherits all User permissions plus invoice and product management
             Permissions.Users.View,
             Permissions.Users.Edit,
             Permissions.Users.ViewAll,
             Permissions.Users.ViewReports,
+            
+            // Product permissions
+            Permissions.Product.ViewProducts,
+            Permissions.Product.CreateProducts,
+            Permissions.Product.EditProducts,
+            Permissions.Product.UpdateStock,
+            Permissions.Product.ViewReports,
+            
+            // Invoice permissions
+            Permissions.Invoice.ViewInvoices,
+            Permissions.Invoice.CreateInvoices,
+            Permissions.Invoice.EditInvoices,
+            Permissions.Invoice.ViewAllInvoices,
+            Permissions.Invoice.ManageInvoiceItems,
             
             // Manager-specific permissions
             Permissions.System.ViewStatistics,
@@ -97,6 +138,22 @@ public static class RolePermissions
             Permissions.Users.ViewAll,
             Permissions.Users.ManageRoles,
             Permissions.Users.ViewReports,
+            
+            // Product permissions
+            Permissions.Product.ViewProducts,
+            Permissions.Product.CreateProducts,
+            Permissions.Product.EditProducts,
+            Permissions.Product.DeleteProducts,
+            Permissions.Product.UpdateStock,
+            Permissions.Product.ViewReports,
+            
+            // Invoice permissions
+            Permissions.Invoice.ViewInvoices,
+            Permissions.Invoice.CreateInvoices,
+            Permissions.Invoice.EditInvoices,
+            Permissions.Invoice.DeleteInvoices,
+            Permissions.Invoice.ViewAllInvoices,
+            Permissions.Invoice.ManageInvoiceItems,
             
             Permissions.System.ViewAdminPanel,
             Permissions.System.ManageSettings,
