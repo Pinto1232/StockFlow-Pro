@@ -8,13 +8,13 @@ using System.Text.Json;
 
 namespace StockFlowPro.Web.Tests.Integration;
 
-public class UsersControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
+public class UsersControllerIntegrationTests : IClassFixture<TestWebApplicationFactory<Program>>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly TestWebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
     private readonly JsonSerializerOptions _jsonOptions;
 
-    public UsersControllerIntegrationTests(WebApplicationFactory<Program> factory)
+    public UsersControllerIntegrationTests(TestWebApplicationFactory<Program> factory)
     {
         _factory = factory;
         _client = _factory.CreateClient();

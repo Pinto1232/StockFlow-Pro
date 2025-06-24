@@ -39,6 +39,9 @@ public static class ClaimsPrincipalExtensions
     /// </summary>
     public static UserRole? GetUserRole(this ClaimsPrincipal user)
     {
+        if (user?.Identity?.IsAuthenticated != true)
+           { return null;}
+            
         var roleClaim = user.FindFirst(ClaimTypes.Role)?.Value;
         return !string.IsNullOrEmpty(roleClaim) && Enum.TryParse<UserRole>(roleClaim, out var role) 
             ? role 
@@ -50,6 +53,9 @@ public static class ClaimsPrincipalExtensions
     /// </summary>
     public static Guid? GetUserId(this ClaimsPrincipal user)
     {
+        if (user?.Identity?.IsAuthenticated != true)
+            {return null;}
+            
         var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return Guid.TryParse(userIdClaim, out var userId) ? userId : null;
     }
@@ -59,6 +65,9 @@ public static class ClaimsPrincipalExtensions
     /// </summary>
     public static string GetFullName(this ClaimsPrincipal user)
     {
+        if (user?.Identity?.IsAuthenticated != true)
+           { return "Unknown User";}
+            
         return user.FindFirst(ClaimTypes.Name)?.Value ?? "Unknown User";
     }
 
@@ -67,6 +76,9 @@ public static class ClaimsPrincipalExtensions
     /// </summary>
     public static string GetEmail(this ClaimsPrincipal user)
     {
+        if (user?.Identity?.IsAuthenticated != true)
+            {return "";}
+            
         return user.FindFirst(ClaimTypes.Email)?.Value ?? "";
     }
 
@@ -109,7 +121,7 @@ public static class ClaimsPrincipalExtensions
     public static bool CanAccessUser(this ClaimsPrincipal currentUser, Guid targetUserId)
     {
         // Admins can access any user
-        if (currentUser.IsAdmin()) return true;
+        if (currentUser.IsAdmin()) {return true;}
 
         // Users can only access their own data
         var currentUserId = currentUser.GetUserId();

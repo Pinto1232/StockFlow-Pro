@@ -1,6 +1,7 @@
 using AutoMapper;
 using FluentAssertions;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using StockFlowPro.Application.Commands.Users;
@@ -8,6 +9,7 @@ using StockFlowPro.Application.DTOs;
 using StockFlowPro.Application.Queries.Users;
 using StockFlowPro.Domain.Enums;
 using StockFlowPro.Web.Controllers.Api;
+using System.Security.Claims;
 
 namespace StockFlowPro.Web.Tests.Controllers;
 
@@ -22,6 +24,33 @@ public class UsersControllerTests
         _mockMediator = new Mock<IMediator>();
         _mockMapper = new Mock<IMapper>();
         _controller = new UsersController(_mockMediator.Object, _mockMapper.Object);
+        
+        // Setup mock user context for authorization tests
+        SetupMockUser(Guid.NewGuid(), UserRole.Admin);
+    }
+
+    private void SetupMockUser(Guid userId, UserRole role)
+    {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+            new Claim(ClaimTypes.Role, role.ToString()),
+            new Claim(ClaimTypes.Name, "Test User"),
+            new Claim(ClaimTypes.Email, "test@example.com")
+        };
+
+        var identity = new ClaimsIdentity(claims, "Test");
+        var principal = new ClaimsPrincipal(identity);
+
+        var httpContext = new DefaultHttpContext
+        {
+            User = principal
+        };
+
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = httpContext
+        };
     }
 
     [Fact]
