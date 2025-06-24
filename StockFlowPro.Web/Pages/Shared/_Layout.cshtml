@@ -105,7 +105,7 @@
                                     <li class="dropdown-divider modern-divider"></li>
                                     <li>
                                         <a class="dropdown-item modern-dropdown-item" 
-                                           href="#" 
+                                           href="/EditProfile" 
                                            role="menuitem"
                                            tabindex="0"
                                            aria-label="Edit your profile information"
@@ -679,8 +679,7 @@
                         e.preventDefault();
                         const profileLink = document.querySelector('[data-action="edit-profile"]');
                         if (profileLink) {
-                            profileLink.click();
-                            showSnackbar('Profile editing feature coming soon!', 'info');
+                            window.location.href = profileLink.href;
                         }
                         break;
                     case 'a':

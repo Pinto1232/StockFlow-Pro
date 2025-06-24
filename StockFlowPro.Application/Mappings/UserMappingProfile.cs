@@ -24,5 +24,13 @@ public class UserMappingProfile : Profile
         CreateMap<UpdateUserDto, User>()
             .ForMember(dest => dest.Role, opt => opt.MapFrom((src, dest) => src.Role.HasValue ? src.Role.Value : dest.Role));
         CreateMap<UpdateUserEmailDto, UpdateUserEmailCommand>();
+
+        // Profile mappings
+        CreateMap<User, ProfileDto>()
+            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.GetFullName()))
+            .ForMember(dest => dest.Age, opt => opt.MapFrom(src => src.GetAge()))
+            .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()));
+
+        CreateMap<EditProfileDto, EditProfileCommand>();
     }
 }
