@@ -100,7 +100,7 @@ function createInvoiceRowHTML(invoice) {
             <td>${createdDate}</td>
             <td><strong>${createdByUserName}</strong></td>
             <td>${totalItemCount}</td>
-            <td><span class="invoice-total">$${total}</span></td>
+            <td><span class="invoice-total">R${total}</span></td>
             <td>${statusBadge}</td>
             <td>
                 <div class="action-buttons">
@@ -199,7 +199,7 @@ function populateProductSelect() {
     products.forEach(product => {
         const option = document.createElement('option');
         option.value = product.id;
-        option.textContent = `${product.name} - $${product.costPerItem.toFixed(2)}`;
+        option.textContent = `${product.name} - R${product.costPerItem.toFixed(2)}`;
         option.dataset.price = product.costPerItem;
         option.dataset.name = product.name;
         select.appendChild(option);
@@ -216,7 +216,7 @@ function populateNewInvoiceProductSelect() {
     products.forEach(product => {
         const option = document.createElement('option');
         option.value = product.id;
-        option.textContent = `${product.name} - $${product.costPerItem.toFixed(2)}`;
+        option.textContent = `${product.name} - R${product.costPerItem.toFixed(2)}`;
         option.dataset.price = product.costPerItem;
         option.dataset.name = product.name;
         select.appendChild(option);
@@ -287,7 +287,7 @@ function updateNewInvoiceLineTotal() {
     const quantity = parseInt(document.getElementById('newInvoiceItemQuantity').value) || 0;
     const lineTotal = unitPrice * quantity;
     
-    document.getElementById('newInvoiceItemLineTotal').value = `$${lineTotal.toFixed(2)}`;
+    document.getElementById('newInvoiceItemLineTotal').value = `R${lineTotal.toFixed(2)}`;
 }
 
 // Add item to new invoice (client-side only)
@@ -342,13 +342,13 @@ function displayNewInvoiceItems() {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${escapeHtml(item.productName)}</td>
-            <td>$${item.unitPrice.toFixed(2)}</td>
+            <td>R${item.unitPrice.toFixed(2)}</td>
             <td>
                 <input type="number" class="form-control form-control-sm" 
                        value="${item.quantity}" min="1" 
                        onchange="updateNewInvoiceItemQuantity(${index}, this.value)">
             </td>
-            <td>$${item.lineTotal.toFixed(2)}</td>
+            <td>R${item.lineTotal.toFixed(2)}</td>
             <td class="text-end">
                 <button class="btn btn-sm btn-outline-danger" 
                         onclick="removeNewInvoiceItem(${index})" title="Remove">
@@ -389,7 +389,7 @@ function removeNewInvoiceItem(index) {
 // Update total for new invoice (client-side calculation)
 function updateNewInvoiceTotal() {
     const total = newInvoiceItems.reduce((sum, item) => sum + item.lineTotal, 0);
-    document.getElementById('newInvoiceTotal').value = `$${total.toFixed(2)}`;
+    document.getElementById('newInvoiceTotal').value = `R${total.toFixed(2)}`;
 }
 
 // Save new invoice to server
@@ -524,7 +524,7 @@ async function editInvoice(invoiceId) {
 function populateEditForm(invoice) {
     document.getElementById('editInvoiceId').value = invoice.id;
     document.getElementById('editInvoiceDate').value = invoice.createdDate.split('T')[0];
-    document.getElementById('editInvoiceTotal').value = `$${invoice.total.toFixed(2)}`;
+    document.getElementById('editInvoiceTotal').value = `R${invoice.total.toFixed(2)}`;
     
     displayInvoiceItems(invoice.items);
 }
@@ -543,13 +543,13 @@ function displayInvoiceItems(items) {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${escapeHtml(item.productName)}</td>
-            <td>$${item.unitPrice.toFixed(2)}</td>
+            <td>R${item.unitPrice.toFixed(2)}</td>
             <td>
                 <input type="number" class="form-control form-control-sm" 
                        value="${item.quantity}" min="1" 
                        onchange="updateItemQuantity('${item.productId}', this.value)">
             </td>
-            <td>$${item.lineTotal.toFixed(2)}</td>
+            <td>R${item.lineTotal.toFixed(2)}</td>
             <td class="text-end">
                 <button class="btn btn-sm btn-outline-danger" 
                         onclick="removeItemFromInvoice('${item.productId}')" title="Remove">
@@ -581,7 +581,7 @@ function updateLineTotal() {
     const quantity = parseInt(document.getElementById('itemQuantity').value) || 0;
     const lineTotal = unitPrice * quantity;
     
-    document.getElementById('itemLineTotal').value = `$${lineTotal.toFixed(2)}`;
+    document.getElementById('itemLineTotal').value = `R${lineTotal.toFixed(2)}`;
 }
 
 // Show add item form

@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockFlowPro.Infrastructure
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockFlowPro.Web.Tests", "StockFlowPro.Web.Tests\StockFlowPro.Web.Tests.csproj", "{181A9797-14C8-4C56-BA2D-E1048C61ED2F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockFlowPro.Shared", "StockFlowPro.Shared\StockFlowPro.Shared.csproj", "{FBA162FA-2B77-4760-99E6-EEFF3ED5273D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,5 +62,9 @@ Global
 		{181A9797-14C8-4C56-BA2D-E1048C61ED2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{181A9797-14C8-4C56-BA2D-E1048C61ED2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{181A9797-14C8-4C56-BA2D-E1048C61ED2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBA162FA-2B77-4760-99E6-EEFF3ED5273D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBA162FA-2B77-4760-99E6-EEFF3ED5273D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBA162FA-2B77-4760-99E6-EEFF3ED5273D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBA162FA-2B77-4760-99E6-EEFF3ED5273D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

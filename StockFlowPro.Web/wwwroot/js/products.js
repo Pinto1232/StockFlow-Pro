@@ -31,12 +31,39 @@ function initializeConsole() {
         clearBtn.addEventListener('click', clearConsole);
     }
     
-    // Log initial message
+    // Log initial message to both browser console and custom UI
+    console.log('🚀 Product Management Console initialized - All data is also logged to browser console (F12)');
+    console.info('💡 Tip: Open Developer Tools (F12) to see detailed product data with expandable objects');
+    
     addConsoleLog('system', 'Product Management Console initialized - Ready to log database operations');
+    addConsoleLog('system', '💡 All data is also logged to browser console (F12) for detailed inspection');
 }
 
 // Add log entry to console
 function addConsoleLog(type, message) {
+    // Log to browser console with appropriate method based on type
+    const browserMessage = `[${type.toUpperCase()}] ${message}`;
+    
+    switch(type) {
+        case 'error':
+            console.error(browserMessage);
+            break;
+        case 'api':
+        case 'database':
+        case 'table-render':
+            console.info(browserMessage);
+            break;
+        case 'table-data':
+        case 'data-structure':
+            console.log(browserMessage);
+            break;
+        case 'system':
+        default:
+            console.log(browserMessage);
+            break;
+    }
+    
+    // Also add to custom console UI
     if (!consoleLogContainer) return;
     
     const timestamp = new Date().toLocaleTimeString();
@@ -128,19 +155,34 @@ function setupEventListeners() {
     });
 }
 
-// Load all products
+// Load all products using enhanced API
 async function loadProducts() {
     try {
-        addConsoleLog('api', 'Making API call to /api/products - Loading all products');
+        addConsoleLog('api', 'Making API call to /api/products (Enhanced) - Loading all products with formatting');
         
         const response = await fetch('/api/products');
         if (response.ok) {
-            products = await response.json();
+            const apiResponse = await response.json();
+            // Handle both direct array and ApiResponse wrapper
+            products = apiResponse.data || apiResponse;
             filteredProducts = [...products];
             currentPage = 1;
             
-            addConsoleLog('api', `Successfully loaded ${products.length} products from API`);
-            addConsoleLog('database', `Database returned ${products.length} product records`);
+            addConsoleLog('api', `Successfully loaded ${products.length} enhanced products from API`);
+            addConsoleLog('database', `Database returned ${products.length} product records with shared utility formatting`);
+            
+            // Log complete product data structure for debugging
+            console.group('📋 Complete Product Data Structure');
+            products.forEach((product, index) => {
+                console.log(`🔍 Product ${index + 1} Full Data:`, product);
+            });
+            console.groupEnd();
+            
+            // Also log to custom console UI
+            addConsoleLog('data-structure', `📋 Complete Product Data Structure:`);
+            products.forEach((product, index) => {
+                addConsoleLog('data-structure', `🔍 Product ${index + 1} Full Data: ${JSON.stringify(product, null, 2)}`);
+            });
             
             renderProductsTable();
             renderPagination();
@@ -155,21 +197,36 @@ async function loadProducts() {
     }
 }
 
-// Load dashboard statistics
+// Load enhanced dashboard statistics
 async function loadDashboardStats() {
     try {
-        addConsoleLog('api', 'Making API call to /api/products/dashboard-stats - Loading dashboard statistics');
+        addConsoleLog('api', 'Making API call to /api/products/dashboard-stats (Enhanced) - Loading formatted dashboard statistics');
         
         const response = await fetch('/api/products/dashboard-stats');
         if (response.ok) {
-            const stats = await response.json();
-            document.getElementById('totalProducts').textContent = stats.totalProducts;
-            document.getElementById('totalValue').textContent = 'R' + stats.totalValue.toFixed(2);
-            document.getElementById('lowStockCount').textContent = stats.lowStockCount;
-            document.getElementById('outOfStockCount').textContent = stats.outOfStockCount;
+            const apiResponse = await response.json();
+            const stats = apiResponse.data || apiResponse;
             
-            addConsoleLog('api', `Dashboard stats loaded - Total: ${stats.totalProducts}, Low Stock: ${stats.lowStockCount}, Out of Stock: ${stats.outOfStockCount}`);
-            addConsoleLog('database', `Dashboard statistics retrieved from database successfully`);
+            // Use enhanced formatted values from shared utilities
+            document.getElementById('totalProducts').textContent = stats.totalProductsFormatted || stats.totalProducts;
+            document.getElementById('totalProducts').title = `${stats.totalProducts} products total`;
+            
+            document.getElementById('totalValue').textContent = stats.totalValueFormatted || ('R' + stats.totalValue.toFixed(2));
+            document.getElementById('totalValue').title = `Total inventory value: ${stats.totalValueFormatted} (${stats.totalValueShort})`;
+            
+            document.getElementById('lowStockCount').textContent = `${stats.lowStockCount} (${stats.lowStockPercentage || '0%'})`;
+            document.getElementById('lowStockCount').title = `${stats.lowStockCount} products with low stock (${stats.lowStockPercentage})`;
+            
+            document.getElementById('outOfStockCount').textContent = `${stats.outOfStockCount} (${stats.outOfStockPercentage || '0%'})`;
+            document.getElementById('outOfStockCount').title = `${stats.outOfStockCount} products out of stock (${stats.outOfStockPercentage})`;
+            
+            // Add health score and status summary if available
+            if (stats.healthScore !== undefined) {
+                addConsoleLog('api', `Inventory Health Score: ${stats.healthScore}% - ${stats.statusSummary}`);
+            }
+            
+            addConsoleLog('api', `Enhanced dashboard stats loaded - Total: ${stats.totalProductsFormatted}, Value: ${stats.totalValueFormatted}, Health: ${stats.healthScore}%`);
+            addConsoleLog('database', `Enhanced dashboard statistics with shared utility formatting retrieved successfully`);
         } else {
             addConsoleLog('error', `Failed to load dashboard stats - HTTP ${response.status}`);
         }
@@ -238,6 +295,41 @@ function renderProductsTable() {
 
     const paginatedProducts = getPaginatedProducts();
     
+    // Console log the products being displayed in the current page
+    console.group(`🔄 Rendering Product Management Table - Page ${currentPage}`);
+    console.info(`Showing ${paginatedProducts.length} of ${filteredProducts.length} products`);
+    
+    addConsoleLog('table-render', `🔄 Rendering Product Management Table - Page ${currentPage}, Showing ${paginatedProducts.length} of ${filteredProducts.length} products`);
+    
+    // Log detailed data for each product being displayed
+    paginatedProducts.forEach((product, index) => {
+        const productData = {
+            id: product.id,
+            name: product.name,
+            formattedName: product.formattedName,
+            costPerItem: product.costPerItem,
+            formattedPrice: product.formattedPrice,
+            numberInStock: product.numberInStock,
+            totalValue: product.totalValue,
+            formattedTotalValue: product.formattedTotalValue,
+            isActive: product.isActive,
+            isInStock: product.isInStock,
+            isLowStock: product.isLowStock,
+            stockStatus: product.stockStatus,
+            createdAt: product.createdAt,
+            createdDisplay: product.createdDisplay,
+            createdFriendly: product.createdFriendly
+        };
+        
+        // Log to browser console with expandable object
+        console.log(`📊 Product ${index + 1} Data:`, productData);
+        
+        // Log to custom console UI
+        addConsoleLog('table-data', `📊 Product ${index + 1}: ${JSON.stringify(productData, null, 2)}`);
+    });
+    
+    console.groupEnd();
+    
     const tableHTML = `
         <div class="table-responsive-wrapper">
             <table class="table table-hover product-table" id="productsTable">
@@ -264,29 +356,54 @@ function renderProductsTable() {
 }
 
 function createProductRowHTML(product) {
-    // Stock status badge
+    // Use enhanced formatted data from shared utilities if available
+    const productName = product.formattedName || product.name;
+    const productPrice = product.formattedPrice || product.costPerItem.toFixed(2);
+    const productTotalValue = product.formattedTotalValue || product.totalValue.toFixed(2);
+    const stockDisplay = product.stockDisplay || `${product.numberInStock} units`;
+    const createdDisplay = product.createdDisplay || new Date(product.createdAt).toLocaleDateString();
+    const createdFriendly = product.createdFriendly || '';
+    
+    // Console log the product data being displayed in the table
+    addConsoleLog('table-data', `📋 Product Table Row Data: ID=${product.id}, Name="${productName}", Price="${productPrice}", Stock="${stockDisplay}", TotalValue="${productTotalValue}", Status="${product.isActive ? 'Active' : 'Inactive'}", Created="${createdDisplay}"`);
+    
+    // Use enhanced status badges if available
+    const stockStatusBadge = product.stockStatusBadge;
     let stockBadge;
-    if (!product.isInStock) {
-        stockBadge = '<span class="badge bg-danger">Out of Stock</span>';
-    } else if (product.isLowStock) {
-        stockBadge = '<span class="badge bg-warning">Low Stock</span>';
+    if (stockStatusBadge) {
+        const badgeClass = stockStatusBadge === 'danger' ? 'bg-danger' : 
+                          stockStatusBadge === 'warning' ? 'bg-warning' : 'bg-success';
+        const badgeText = product.stockStatus || 'In Stock';
+        stockBadge = `<span class="badge ${badgeClass}">${badgeText}</span>`;
     } else {
-        stockBadge = '<span class="badge bg-success">In Stock</span>';
+        // Fallback to original logic
+        if (!product.isInStock) {
+            stockBadge = '<span class="badge bg-danger">Out of Stock</span>';
+        } else if (product.isLowStock) {
+            stockBadge = '<span class="badge bg-warning">Low Stock</span>';
+        } else {
+            stockBadge = '<span class="badge bg-success">In Stock</span>';
+        }
     }
     
-    // Active status badge
-    const activeBadge = product.isActive 
-        ? '<span class="badge bg-success">Active</span>'
-        : '<span class="badge bg-secondary">Inactive</span>';
+    // Use enhanced active status badge if available
+    const activeBadge = product.activeStatusBadge ? 
+        `<span class="badge ${product.activeStatusBadge === 'Active' ? 'bg-success' : 'bg-secondary'}">${product.activeStatusBadge}</span>` :
+        (product.isActive ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>');
+    
+    // Add enhanced information in tooltips
+    const priceTooltip = product.priceRange ? `Price Range: ${product.priceRange}` : '';
+    const stockTooltip = product.stockLevel ? `Stock Level: ${product.stockLevel}` : '';
+    const createdTooltip = createdFriendly ? `Created ${createdFriendly}` : '';
     
     return `
         <tr>
-            <td><strong>${escapeHtml(product.name)}</strong></td>
-            <td>${product.costPerItem.toFixed(2)}</td>
-            <td>${product.numberInStock} ${stockBadge}</td>
-            <td>${product.totalValue.toFixed(2)}</td>
+            <td><strong title="${escapeHtml(productName)}">${escapeHtml(productName)}</strong></td>
+            <td title="${priceTooltip}">${productPrice}</td>
+            <td title="${stockTooltip}">${stockDisplay} ${stockBadge}</td>
+            <td title="Total Value: ${productTotalValue}">${productTotalValue}</td>
             <td>${activeBadge}</td>
-            <td>${new Date(product.createdAt).toLocaleDateString()}</td>
+            <td title="${createdTooltip}">${createdDisplay}</td>
             <td style="text-align: right;">
                 <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
                     <button class="btn btn-sm btn-primary" onclick="editProduct('${product.id}')" title="Edit Product">
@@ -718,4 +835,15 @@ function initializeProductsPageExtensions() {
 // Initialize the extensions when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     initializeProductsPageExtensions();
+    logEnhancedFeaturesInfo();
 });
+
+// Log information about enhanced features and shared utilities integration
+function logEnhancedFeaturesInfo() {
+    addConsoleLog('system', '📦 String Extensions: Title case formatting, truncation, slug generation');
+    addConsoleLog('system', '💰 Decimal Extensions: Currency formatting, percentage calculations, short format (K/M/B)');
+    addConsoleLog('system', '⏰ DateTime Extensions: Friendly time display, consistent date formatting');
+    addConsoleLog('system', '🎯 Enhanced API: Products now include formatted properties using shared utilities');
+    addConsoleLog('system', '📊 Dashboard Stats: Enhanced with percentages, health scores, and formatted values');
+    addConsoleLog('system', '✨ UI Improvements: Tooltips, enhanced badges, and better visual feedback');
+}
