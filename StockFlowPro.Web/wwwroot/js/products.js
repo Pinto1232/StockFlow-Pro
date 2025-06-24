@@ -653,3 +653,69 @@ function debounce(func, wait) {
         timeout = setTimeout(later, wait);
     };
 }
+
+// Console Log Show/Hide functionality and Stats Tooltips
+function initializeProductsPageExtensions() {
+    const showConsoleBtn = document.getElementById('showConsoleBtn');
+    const toggleConsoleBtn = document.getElementById('toggleConsoleBtn');
+    const consoleLogCard = document.getElementById('consoleLogCard');
+    
+    // Show console log when "Show Console Log" button is clicked
+    if (showConsoleBtn) {
+        showConsoleBtn.addEventListener('click', function() {
+            consoleLogCard.style.display = 'block';
+            showConsoleBtn.style.display = 'none';
+        });
+    }
+    
+    // Hide console log when "Hide" button is clicked
+    if (toggleConsoleBtn) {
+        toggleConsoleBtn.addEventListener('click', function() {
+            consoleLogCard.style.display = 'none';
+            showConsoleBtn.style.display = 'inline-flex';
+        });
+    }
+
+    // Function to update tooltip values
+    function updateTooltipValues() {
+        const statsValues = document.querySelectorAll('.stats-card-value');
+        statsValues.forEach(function(element) {
+            const currentValue = element.textContent || element.innerText;
+            element.setAttribute('title', currentValue);
+        });
+    }
+
+    // Update tooltips initially
+    updateTooltipValues();
+
+    // Create a MutationObserver to watch for changes in stats values
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                const target = mutation.target;
+                if (target.classList && target.classList.contains('stats-card-value')) {
+                    const currentValue = target.textContent || target.innerText;
+                    target.setAttribute('title', currentValue);
+                }
+            }
+        });
+    });
+
+    // Start observing changes to stats card values
+    const statsCards = document.querySelectorAll('.stats-card-value');
+    statsCards.forEach(function(card) {
+        observer.observe(card, {
+            childList: true,
+            characterData: true,
+            subtree: true
+        });
+    });
+
+    // Also provide a global function to manually update tooltips
+    window.updateStatsTooltips = updateTooltipValues;
+}
+
+// Initialize the extensions when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initializeProductsPageExtensions();
+});
