@@ -26,6 +26,8 @@ builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(StockFlowPro.A
 builder.Services.AddValidatorsFromAssembly(typeof(StockFlowPro.Application.Validators.CreateUserCommandValidator).Assembly);
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<StockFlowPro.Domain.Repositories.IInvoiceRepository, StockFlowPro.Infrastructure.Repositories.InvoiceRepository>();
+builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IInvoiceService, StockFlowPro.Application.Services.InvoiceService>();
 builder.Services.AddScoped<IMockDataStorageService, JsonMockDataStorageService>();
 builder.Services.AddScoped<IDataSourceService, HybridDataSourceService>();
 builder.Services.AddScoped<IDualDataService, DualDataService>();
