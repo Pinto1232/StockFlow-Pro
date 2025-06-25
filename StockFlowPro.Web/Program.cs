@@ -45,6 +45,7 @@ builder.Services.AddScoped<IUserSynchronizationService, UserSynchronizationServi
 builder.Services.AddScoped<IUserSecurityService, UserSecurityService>();
 builder.Services.AddScoped<StockFlowPro.Web.Services.IAuthorizationService, StockFlowPro.Web.Services.AuthorizationService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IPasswordService, PasswordService>();
+builder.Services.AddScoped<IInvoiceExportService, InvoiceExportService>();
 builder.Services.AddHostedService<DatabaseInitializationService>();
 
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mobile Navigation Test - StockFlowPro</title>
+    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/site.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/mobile-nav.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3 sticky-top">
+            <div class="container-fluid">
+                <span class="navbar-brand">StockFlowPro</span>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="/Dashboard">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="/Products">
+                                <i class="fas fa-boxes me-1"></i>Products
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="/Invoices">
+                                <i class="fas fa-file-invoice-dollar me-1"></i>Invoices
+                            </a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item dropdown">
+                            <button class="nav-link text-dark btn btn-link border-0 bg-transparent modern-user-toggle" 
+                                    id="userDropdown" 
+                                    type="button" 
+                                    data-bs-toggle="dropdown" 
+                                    aria-expanded="false" 
+                                    aria-haspopup="true"
+                                    aria-label="User account menu"
+                                    title="Click to open account menu">
+                                <div class="user-avatar-wrapper">
+                                    <i class="fas fa-user-circle user-avatar-icon"></i>
+                                    <div class="online-indicator" title="Online"></div>
+                                </div>
+                                <div class="user-info-wrapper">
+                                    <span class="user-name">Test User</span>
+                                    <span class="user-role-badge">Admin</span>
+                                </div>
+                                <i class="fas fa-chevron-down dropdown-arrow"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end modern-account-dropdown" aria-labelledby="userDropdown">
+                                <li class="account-header">
+                                    <div class="account-avatar">
+                                        <i class="fas fa-user-circle"></i>
+                                    </div>
+                                    <div class="account-details">
+                                        <h6 class="account-name">Test User</h6>
+                                        <p class="account-email">test@example.com</p>
+                                        <span class="account-role-tag">Admin</span>
+                                    </div>
+                                </li>
+                                <li class="dropdown-divider modern-divider"></li>
+                                <li>
+                                    <a class="dropdown-item modern-dropdown-item" href="#" role="menuitem">
+                                        <div class="item-icon">
+                                            <i class="fas fa-user-edit"></i>
+                                        </div>
+                                        <div class="item-content">
+                                            <span class="item-title">Edit Profile</span>
+                                            <span class="item-subtitle">Update your personal information</span>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item modern-dropdown-item logout-item" href="#" role="menuitem">
+                                        <div class="item-icon logout-icon">
+                                            <i class="fas fa-sign-out-alt"></i>
+                                        </div>
+                                        <div class="item-content">
+                                            <span class="item-title">Logout</span>
+                                            <span class="item-subtitle">Sign out of your account</span>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <main role="main" class="pb-3">
+            <h1>Mobile Navigation Test</h1>
+            <p>This page is for testing the mobile navigation functionality.</p>
+            
+            <div class="alert alert-info">
+                <h4>Test Instructions:</h4>
+                <ol>
+                    <li>Resize your browser window to mobile size (less than 992px width)</li>
+                    <li>Click the hamburger menu button to open the navigation</li>
+                    <li>Test the navigation links (Dashboard, Products, Invoices)</li>
+                    <li>Test the user dropdown menu</li>
+                    <li>Verify the menu closes when clicking outside or pressing Escape</li>
+                    <li>Check that touch targets are appropriately sized (48px minimum)</li>
+                </ol>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>Mobile Features:</h3>
+                    <ul>
+                        <li>✅ Responsive hamburger menu</li>
+                        <li>✅ Touch-friendly navigation links</li>
+                        <li>✅ Smooth animations and transitions</li>
+                        <li>✅ Auto-close on navigation</li>
+                        <li>✅ Keyboard accessibility (Escape key)</li>
+                        <li>✅ Click outside to close</li>
+                        <li>✅ Active state indication</li>
+                        <li>✅ Modern UI/UX design</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h3>Responsive Breakpoints:</h3>
+                    <ul>
+                        <li><strong>Mobile:</strong> &lt; 576px</li>
+                        <li><strong>Small Mobile:</strong> 576px - 767px</li>
+                        <li><strong>Tablet:</strong> 768px - 991px</li>
+                        <li><strong>Desktop:</strong> ≥ 992px</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="lib/jquery/dist/jquery.min.js"></script>
+    <script src="lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Enhanced mobile navigation (simplified version for testing)
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbarToggler = document.querySelector('.navbar-toggler');
+            const navbarCollapse = document.querySelector('.navbar-collapse');
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link:not(.btn)');
+            
+            // Set active state based on current page
+            const currentPath = window.location.pathname;
+            navLinks.forEach(link => {
+                try {
+                    const href = link.getAttribute('href');
+                    
+                    // Skip invalid, empty, or placeholder links
+                    if (!href || href.trim() === '' || href === '#' || href === 'javascript:void(0)') {
+                        return;
+                    }
+                    
+                    // Handle relative URLs
+                    if (href.startsWith('/')) {
+                        if (href === currentPath) {
+                            link.classList.add('active');
+                            link.setAttribute('aria-current', 'page');
+                        }
+                        return;
+                    }
+                    
+                    // Handle absolute URLs
+                    if (link.href && link.href.trim() !== '') {
+                        const linkPath = new URL(link.href).pathname;
+                        if (linkPath === currentPath) {
+                            link.classList.add('active');
+                            link.setAttribute('aria-current', 'page');
+                        }
+                    }
+                } catch (error) {
+                    // Handle invalid URLs gracefully - only log in development
+                    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                        console.warn('Invalid URL found in navigation link:', link.getAttribute('href'), error);
+                    }
+                }
+            });
+            
+            // Auto-close mobile menu when clicking nav links
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const href = link.getAttribute('href');
+                    if (href && href !== '#' && href.trim() !== '' && window.innerWidth < 992) {
+                        setTimeout(() => {
+                            const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                            if (bsCollapse) {
+                                bsCollapse.hide();
+                            }
+                        }, 100);
+                    }
+                });
+            });
+            
+            // Improve mobile menu accessibility
+            if (navbarToggler && navbarCollapse) {
+                navbarToggler.addEventListener('click', function() {
+                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                    this.setAttribute('aria-expanded', !isExpanded);
+                });
+                
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (window.innerWidth < 992 && 
+                        !navbarToggler.contains(e.target) && 
+                        !navbarCollapse.contains(e.target) &&
+                        navbarCollapse.classList.contains('show')) {
+                        try {
+                            const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                            if (bsCollapse) {
+                                bsCollapse.hide();
+                            }
+                        } catch (error) {
+                            console.warn('Error closing mobile menu:', error);
+                            navbarCollapse.classList.remove('show');
+                            navbarToggler.setAttribute('aria-expanded', 'false');
+                        }
+                    }
+                });
+                
+                // Handle escape key to close mobile menu
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && 
+                        window.innerWidth < 992 && 
+                        navbarCollapse.classList.contains('show')) {
+                        try {
+                            const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                            if (bsCollapse) {
+                                bsCollapse.hide();
+                            }
+                        } catch (error) {
+                            console.warn('Error closing mobile menu with escape:', error);
+                            navbarCollapse.classList.remove('show');
+                            navbarToggler.setAttribute('aria-expanded', 'false');
+                        }
+                        navbarToggler.focus();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
