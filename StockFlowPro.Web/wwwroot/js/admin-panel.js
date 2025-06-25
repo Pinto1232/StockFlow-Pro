@@ -78,7 +78,7 @@ async function createUserRoleModal() {
         <div id="quick-add-modal" class="quick-add-modal" onclick="closeQuickAddModal()">
             <div class="modal-content" onclick="event.stopPropagation()">
                 <div class="modal-header">
-                    <h3><i class="fas fa-user-plus"></i> Quick Add User</h3>
+                    <h3><i class="fas fa-user-plus"></i> Quick Add Role</h3>
                     <button class="modal-close" onclick="closeQuickAddModal()" title="Close modal">&times;</button>
                 </div>
                 <div class="modal-body">
@@ -107,7 +107,7 @@ async function createUserRoleModal() {
             <div id="quick-add-modal" class="quick-add-modal" onclick="closeQuickAddModal()">
                 <div class="modal-content" onclick="event.stopPropagation()">
                     <div class="modal-header">
-                        <h3><i class="fas fa-user-plus"></i> Quick Add User</h3>
+                        <h3><i class="fas fa-user-plus"></i> Quick Add Role</h3>
                         <button class="modal-close" onclick="closeQuickAddModal()" title="Close modal">&times;</button>
                     </div>
                     <div class="modal-body">
