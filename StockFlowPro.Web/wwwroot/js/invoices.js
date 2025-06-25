@@ -979,7 +979,16 @@ function clearFilters() {
 
 // Download invoice in specified format
 async function downloadInvoice(invoiceId, format) {
+    // Find the download button for this invoice
+    const downloadButton = document.querySelector(`[onclick*="downloadInvoice('${invoiceId}', '${format}')"]`)?.closest('.btn-group')?.querySelector('.dropdown-toggle');
+    
     try {
+        // Add loading state to button
+        if (downloadButton) {
+            downloadButton.classList.add('downloading');
+            downloadButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Downloading...</span>';
+        }
+        
         showAlert(`Preparing ${format.toUpperCase()} download...`, 'info');
         
         const response = await fetch(`/api/invoices/${invoiceId}/download/${format}`, {
@@ -1022,6 +1031,12 @@ async function downloadInvoice(invoiceId, format) {
     } catch (error) {
         console.error('Error downloading invoice:', error);
         showAlert(`Error downloading invoice: ${error.message}`, 'danger');
+    } finally {
+        // Reset button state
+        if (downloadButton) {
+            downloadButton.classList.remove('downloading');
+            downloadButton.innerHTML = '<i class="fas fa-download"></i> <span>Download</span>';
+        }
     }
 }
 

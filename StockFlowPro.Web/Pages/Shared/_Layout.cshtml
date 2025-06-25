@@ -149,17 +149,36 @@
                                                href="/AdminPanel"
                                                role="menuitem"
                                                tabindex="0"
-                                               aria-label="Access admin settings and system configuration"
-                                               data-action="admin-settings">
+                                               aria-label="Access admin panel and system overview"
+                                               data-action="admin-panel">
                                                 <div class="item-icon admin-icon">
                                                     <i class="fas fa-tools"></i>
                                                 </div>
                                                 <div class="item-content">
-                                                    <span class="item-title">Admin Settings</span>
-                                                    <span class="item-subtitle">Manage system configuration</span>
+                                                    <span class="item-title">Admin Panel</span>
+                                                    <span class="item-subtitle">System overview and management</span>
                                                 </div>
                                                 <div class="item-shortcut">
                                                     <kbd>Ctrl+A</kbd>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item modern-dropdown-item" 
+                                               href="/SystemSettings"
+                                               role="menuitem"
+                                               tabindex="0"
+                                               aria-label="Configure system settings and preferences"
+                                               data-action="system-settings">
+                                                <div class="item-icon admin-icon">
+                                                    <i class="fas fa-cogs"></i>
+                                                </div>
+                                                <div class="item-content">
+                                                    <span class="item-title">System Settings</span>
+                                                    <span class="item-subtitle">Configure system preferences</span>
+                                                </div>
+                                                <div class="item-shortcut">
+                                                    <kbd>Ctrl+G</kbd>
                                                 </div>
                                             </a>
                                         </li>
@@ -207,7 +226,7 @@
     <!-- Snackbar for notifications -->
     <div id="snackbar" class="snackbar"></div>
     
-    <div class="@(ViewData["Title"] as string == "Dashboard" || ViewData["Title"] as string == "Admin Panel" ? "container-fluid" : "container") overflow-x-hidden">
+    <div class="@(ViewData["Title"] as string == "Dashboard" || ViewData["Title"] as string == "Admin Panel" || ViewData["UseFullWidth"] != null ? "container-fluid" : "container") overflow-x-hidden">
         <main role="main" class="pb-3 overflow-x-hidden">
             @RenderBody()
         </main>
@@ -885,9 +904,16 @@
                         break;
                     case 'a':
                         e.preventDefault();
-                        const adminLink = document.querySelector('[data-action="admin-settings"]');
+                        const adminLink = document.querySelector('[data-action="admin-panel"]');
                         if (adminLink) {
                             adminLink.click();
+                        }
+                        break;
+                    case 'g':
+                        e.preventDefault();
+                        const settingsLink = document.querySelector('[data-action="system-settings"]');
+                        if (settingsLink) {
+                            settingsLink.click();
                         }
                         break;
                     case 's':

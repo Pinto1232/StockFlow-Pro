@@ -2,12 +2,20 @@
 
 /* Enhanced Admin Panel Layout */
 .admin-panel-layout {
-    width: 100vw;
-    margin-left: calc(-50vw + 50%);
+    width: 100%;
     background: linear-gradient(135deg, #f4f6fb 0%, #e8ecf4 100%);
     min-height: 100vh;
     overflow-x: hidden;
     font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Full width container override */
+.container-fluid .admin-panel-layout {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 /* Breadcrumb Navigation */
@@ -19,6 +27,16 @@
     position: sticky;
     top: 0;
     z-index: 100;
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+}
+
+/* Full width breadcrumb for container-fluid pages */
+.container-fluid .admin-breadcrumb {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .breadcrumb-list {
@@ -166,6 +184,67 @@
     border-color: #5a5cdb;
     transform: translateY(-2px);
     box-shadow: 0 4px 16px rgba(90,92,219,0.3);
+}
+
+/* Prevent text wrapping in all action buttons */
+.action-btn,
+.header-actions .btn,
+.page-header .btn {
+    white-space: nowrap;
+    min-width: fit-content;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.header-actions .btn:hover,
+.page-header .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.header-actions .btn-outline-secondary,
+.page-header .btn-outline-secondary {
+    border: 2px solid #64748b;
+    color: #64748b;
+    background: transparent;
+    font-weight: 500;
+}
+
+.header-actions .btn-outline-secondary:hover,
+.page-header .btn-outline-secondary:hover {
+    background: #64748b;
+    color: white;
+    border-color: #64748b;
+}
+
+.header-actions .btn-primary,
+.page-header .btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    border: none;
+    color: white;
+}
+
+.header-actions .btn-primary:hover,
+.page-header .btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    color: white;
+}
+
+.header-actions .btn-success,
+.page-header .btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    color: white;
+}
+
+.header-actions .btn-success:hover,
+.page-header .btn-success:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: white;
 }
 
 /* System Status Banner */
@@ -384,7 +463,7 @@
 
 .stat-label {
     font-size: 0.8rem;
-    color: #6c7a89;
+    color: #fff;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -1012,11 +1091,26 @@
 
 @media (max-width: 991.98px) {
     .admin-panel-layout {
-        margin-left: calc(-50vw + 50%);
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
     }
     
     .admin-content-wrapper {
         padding: 1.5rem 2rem;
+    }
+    
+    .admin-breadcrumb {
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        margin-right: calc(-50vw + 50%);
+        padding: 0.75rem 1rem;
+    }
+    
+    .container-fluid .admin-breadcrumb {
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
     }
     
     .title-main {
@@ -1075,7 +1169,16 @@
     }
 
     .admin-breadcrumb {
-        padding: 0.75rem 1rem;
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        margin-right: calc(-50vw + 50%);
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .container-fluid .admin-breadcrumb {
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
     }
 
     .quick-actions-grid {

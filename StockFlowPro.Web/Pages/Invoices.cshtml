@@ -3,7 +3,24 @@
 @model StockFlowPro.Web.Pages.InvoicesModel
 @{
     ViewData["Title"] = "Invoice Management";
+    ViewData["UseFullWidth"] = true;
 }
+
+<!-- Navigation Breadcrumb -->
+<nav class="admin-breadcrumb" aria-label="Breadcrumb">
+    <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+            <a href="/Dashboard" class="breadcrumb-link">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>Invoice Management</span>
+        </li>
+    </ol>
+</nav>
 
 <div class="manage-invoices-container container-fluid">
     <!-- Header -->
@@ -266,6 +283,7 @@
 </div>
 
 @section Styles {
+    <link rel="stylesheet" href="~/css/admin-panel.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/invoices.css" asp-append-version="true" />
 }
 
