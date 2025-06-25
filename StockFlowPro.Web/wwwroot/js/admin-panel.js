@@ -20,7 +20,10 @@ function refreshDashboard() {
 }
 
 function openSettings() {
-    showNotification('System settings panel coming soon!', 'info');
+    showNotification('Opening system settings...', 'info');
+    setTimeout(() => {
+        window.location.href = '/SystemSettings';
+    }, 1000);
 }
 
 function createUser() {
@@ -560,6 +563,9 @@ function generateReport() {
 
 function openSystemSettings() {
     showNotification('Opening system configuration...', 'info');
+    setTimeout(() => {
+        window.location.href = '/SystemSettings';
+    }, 1000);
 }
 
 function securitySettings() {

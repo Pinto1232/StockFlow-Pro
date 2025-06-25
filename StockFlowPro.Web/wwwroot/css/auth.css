@@ -1,5 +1,65 @@
 /* Authentication Form Styles */
 
+/* Consistent Header Button Styles */
+.header-actions .btn,
+.page-header .btn {
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    min-width: fit-content;
+}
+
+.header-actions .btn:hover,
+.page-header .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.header-actions .btn-outline-secondary,
+.page-header .btn-outline-secondary {
+    border: 2px solid #64748b;
+    color: #64748b;
+    background: transparent;
+    font-weight: 500;
+}
+
+.header-actions .btn-outline-secondary:hover,
+.page-header .btn-outline-secondary:hover {
+    background: #64748b;
+    color: white;
+    border-color: #64748b;
+}
+
+.header-actions .btn-primary,
+.page-header .btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    border: none;
+    color: white;
+}
+
+.header-actions .btn-primary:hover,
+.page-header .btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    color: white;
+}
+
+.header-actions .btn-success,
+.page-header .btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    color: white;
+}
+
+.header-actions .btn-success:hover,
+.page-header .btn-success:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: white;
+}
+
 /* Form Error Styles */
 .form-error {
     display: none;

@@ -2,10 +2,12 @@
 @model UserSyncModel
 @{
     ViewData["Title"] = "User Synchronization";
+    ViewData["UseFullWidth"] = true;
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-panel.css" asp-append-version="true" />
     <style>
         .sync-container {
             max-width: 800px;
@@ -98,6 +100,22 @@
         }
     </style>
 }
+
+<!-- Navigation Breadcrumb -->
+<nav class="admin-breadcrumb" aria-label="Breadcrumb">
+    <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+            <a href="/Dashboard" class="breadcrumb-link">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fas fa-sync-alt"></i>
+            <span>User Synchronization</span>
+        </li>
+    </ol>
+</nav>
 
 <div class="sync-container">
     <div class="sync-card">

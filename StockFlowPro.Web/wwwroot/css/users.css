@@ -49,11 +49,48 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    white-space: nowrap;
+    min-width: fit-content;
 }
 
 .header-actions .btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.header-actions .btn-outline-secondary {
+    border: 2px solid #64748b;
+    color: #64748b;
+    background: transparent;
+    font-weight: 500;
+}
+
+.header-actions .btn-outline-secondary:hover {
+    background: #64748b;
+    color: white;
+    border-color: #64748b;
+}
+
+.header-actions .btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    border: none;
+    color: white;
+}
+
+.header-actions .btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    color: white;
+}
+
+.header-actions .btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    color: white;
+}
+
+.header-actions .btn-success:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: white;
 }
 
 .search-filters-bar {
