@@ -187,6 +187,92 @@
     transform: translateY(-1px);
 }
 
+/* Prevent text wrapping in filter option buttons */
+.filter-options .btn {
+    white-space: nowrap;
+    min-width: fit-content;
+}
+
+/* Enhanced Pagination Dropdown Styling */
+.filter-options .dropdown .btn {
+    border: 2px solid #e2e8f0;
+    color: #64748b;
+    background: #fff;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-options .dropdown .btn:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: #f8fafc;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.filter-options .dropdown .btn:focus {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: #f8fafc;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
+
+.filter-options .dropdown .btn[aria-expanded="true"] {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: #f8fafc;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Pagination Dropdown Menu */
+.filter-options .dropdown-menu {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem;
+    margin-top: 0.25rem;
+    background: white;
+    min-width: 120px;
+}
+
+.filter-options .dropdown-item {
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.25rem;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    color: #374151;
+    text-decoration: none;
+    font-size: 0.875rem;
+}
+
+.filter-options .dropdown-item:last-child {
+    margin-bottom: 0;
+}
+
+.filter-options .dropdown-item:hover {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    color: #1f2937;
+    transform: translateX(4px);
+}
+
+.filter-options .dropdown-item:active {
+    background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+}
+
+.filter-options .dropdown-item:focus {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    color: #1f2937;
+    outline: none;
+}
+
 .user-table-card {
     border: none;
     border-radius: 16px;
