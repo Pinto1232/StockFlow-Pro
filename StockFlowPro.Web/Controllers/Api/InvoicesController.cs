@@ -15,17 +15,20 @@ public class InvoicesController : ControllerBase
     private readonly IInvoiceService _invoiceService;
     private readonly IDualDataService _dualDataService;
     private readonly IUserSynchronizationService _userSyncService;
+    private readonly IInvoiceExportService _exportService;
     private readonly ILogger<InvoicesController> _logger;
 
     public InvoicesController(
         IInvoiceService invoiceService, 
         IDualDataService dualDataService,
         IUserSynchronizationService userSyncService,
+        IInvoiceExportService exportService,
         ILogger<InvoicesController> logger)
     {
         _invoiceService = invoiceService;
         _dualDataService = dualDataService;
         _userSyncService = userSyncService;
+        _exportService = exportService;
         _logger = logger;
     }
 
@@ -278,6 +281,61 @@ public class InvoicesController : ControllerBase
         }
         catch (Exception ex)
         {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    [HttpGet("{id:guid}/download/{format}")]
+    public async Task<IActionResult> DownloadInvoice(Guid id, string format)
+    {
+        try
+        {
+            // Validate format
+            var validFormats = new[] { "pdf", "excel", "csv", "json" };
+            if (!validFormats.Contains(format.ToLower()))
+            {
+                return BadRequest($"Invalid format. Supported formats: {string.Join(", ", validFormats)}");
+            }
+
+            // Get invoice
+            var invoice = await _invoiceService.GetByIdAsync(id);
+            if (invoice == null)
+            {
+                return NotFound($"Invoice with ID {id} not found");
+            }
+
+            // Generate file based on format
+            byte[] fileBytes;
+            switch (format.ToLower())
+            {
+                case "pdf":
+                    fileBytes = await _exportService.ExportToPdfAsync(invoice);
+                    break;
+                case "excel":
+                    fileBytes = await _exportService.ExportToExcelAsync(invoice);
+                    break;
+                case "csv":
+                    fileBytes = await _exportService.ExportToCsvAsync(invoice);
+                    break;
+                case "json":
+                    fileBytes = await _exportService.ExportToJsonAsync(invoice);
+                    break;
+                default:
+                    return BadRequest("Invalid format");
+            }
+
+            var contentType = _exportService.GetContentType(format);
+            var fileName = _exportService.GetFileName(invoice, format);
+
+            return File(fileBytes, contentType, fileName);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error downloading invoice {InvoiceId} in format {Format}", id, format);
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }

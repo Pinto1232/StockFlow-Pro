@@ -33,5 +33,9 @@
     <PackageVersion Include="FluentValidation.AspNetCore" Version="11.3.1" />
     <PackageVersion Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
     <PackageVersion Include="DotNetEnv" Version="3.1.1" />
+    <!-- Export Libraries -->
+    <PackageVersion Include="iTextSharp.LGPLv2.Core" Version="3.4.22" />
+    <PackageVersion Include="EPPlus" Version="7.0.0" />
+    <PackageVersion Include="CsvHelper" Version="30.0.1" />
   </ItemGroup>
 </Project>

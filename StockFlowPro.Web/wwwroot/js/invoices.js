@@ -1,8 +1,15 @@
 // Invoice Management JavaScript
 
 let currentInvoice = null;
-let products = [];
-let newInvoiceItems = []; // Client-side storage for new invoice items
+let products = []; // CRITICAL: Always initialize as empty array
+let newInvoiceItems = [];
+
+// EMERGENCY SAFETY CHECK - Ensure products is always an array
+if (!Array.isArray(products)) {
+    console.error('GLOBAL FIX: Products was not an array at startup:', typeof products, products);
+    products = [];
+}
+window.products = products; // Also set on window for debugging 
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
@@ -110,6 +117,25 @@ function createInvoiceRowHTML(invoice) {
                     <button class="btn btn-sm btn-outline-info" onclick="viewInvoice('${invoice.id}')" title="View">
                         <i class="fas fa-eye"></i> <span>View</span>
                     </button>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-sm btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Download">
+                            <i class="fas fa-download"></i> <span>Download</span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="downloadInvoice('${invoice.id}', 'pdf')">
+                                <i class="fas fa-file-pdf text-danger me-2"></i>PDF
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="downloadInvoice('${invoice.id}', 'excel')">
+                                <i class="fas fa-file-excel text-success me-2"></i>Excel
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="downloadInvoice('${invoice.id}', 'csv')">
+                                <i class="fas fa-file-csv text-info me-2"></i>CSV
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="downloadInvoice('${invoice.id}', 'json')">
+                                <i class="fas fa-file-code text-warning me-2"></i>JSON
+                            </a></li>
+                        </ul>
+                    </div>
                     <button class="btn btn-sm btn-outline-danger" onclick="deleteInvoice('${invoice.id}')" title="Delete">
                         <i class="fas fa-trash"></i> <span>Delete</span>
                     </button>
@@ -175,52 +201,201 @@ function escapeHtml(text) {
 
 // Load products for the dropdown
 async function loadProducts() {
+    console.log('=== LOADING PRODUCTS START ===');
+    
+    // FORCE initialize products as empty array - CRITICAL
+    window.products = [];
+    products = [];
+    
+    console.log('Products initialized as:', products, 'Type:', typeof products, 'IsArray:', Array.isArray(products));
+    
     try {
+        console.log('Fetching from /api/products?activeOnly=true');
         const response = await fetch('/api/products?activeOnly=true');
+        console.log('Response status:', response.status, 'OK:', response.ok);
+        
         if (response.ok) {
-            products = await response.json();
-            populateProductSelect();
-            populateNewInvoiceProductSelect();
+            const data = await response.json();
+            console.log('Raw API response type:', typeof data);
+            console.log('Raw API response:', data);
+            console.log('Is data an array?', Array.isArray(data));
+            
+            // Handle different possible API response structures
+            let productsArray = [];
+            
+            if (Array.isArray(data)) {
+                productsArray = data;
+                console.log('Products set from direct array:', productsArray.length);
+            } else if (data && Array.isArray(data.data)) {
+                productsArray = data.data;
+                console.log('Products set from data.data:', productsArray.length);
+            } else if (data && Array.isArray(data.items)) {
+                productsArray = data.items;
+                console.log('Products set from data.items:', productsArray.length);
+            } else if (data && Array.isArray(data.products)) {
+                productsArray = data.products;
+                console.log('Products set from data.products:', productsArray.length);
+            } else if (data && typeof data === 'object') {
+                // If data is an object but not an array, try to extract array from common property names
+                const possibleArrays = ['data', 'items', 'products', 'result', 'results'];
+                for (const prop of possibleArrays) {
+                    if (data[prop] && Array.isArray(data[prop])) {
+                        productsArray = data[prop];
+                        console.log(`Products set from data.${prop}:`, productsArray.length);
+                        break;
+                    }
+                }
+                
+                if (productsArray.length === 0) {
+                    console.error('Could not find array in API response. Available properties:', Object.keys(data));
+                    showAlert('Products API returned unexpected data structure. Using empty list.', 'warning');
+                }
+            } else {
+                console.error('API returned unexpected data type:', typeof data, data);
+                showAlert('Products API returned invalid data. Using empty list.', 'warning');
+            }
+            
+            // Ensure we have a valid array and create a safe copy
+            products = Array.isArray(productsArray) ? [...productsArray] : [];
+            
         } else {
-            console.error('Failed to load products');
+            console.error('API request failed with status:', response.status);
+            const errorText = await response.text();
+            console.error('Error response body:', errorText);
+            products = [];
+            showAlert('Failed to load products from server', 'danger');
         }
     } catch (error) {
-        console.error('Error loading products:', error);
+        console.error('CATCH BLOCK - Error loading products:', error);
+        products = [];
+        showAlert('Network error loading products: ' + error.message, 'danger');
     }
+    
+    // FINAL SAFETY CHECK - ENSURE products is ALWAYS an array before calling populate functions
+    if (!Array.isArray(products)) {
+        console.error('EMERGENCY FIX - products is not array:', typeof products, products);
+        products = [];
+    }
+    
+    // Set window.products to the same reference
+    window.products = products;
+    
+    console.log('Final products before populate:', products, 'Length:', products.length, 'IsArray:', Array.isArray(products));
+    
+    // ONLY call populate functions if products is confirmed to be an array
+    if (Array.isArray(products)) {
+        console.log('=== CALLING POPULATE FUNCTIONS ===');
+        populateProductSelect();
+        populateNewInvoiceProductSelect();
+    } else {
+        console.error('SKIPPING POPULATE - products is still not an array');
+    }
+    
+    console.log('=== LOADING PRODUCTS END ===');
 }
 
 // Populate product select dropdown for edit modal
 function populateProductSelect() {
+    console.log('=== POPULATE PRODUCT SELECT START ===');
+    console.log('populateProductSelect called, products:', products, 'isArray:', Array.isArray(products));
+    
     const select = document.getElementById('productSelect');
-    if (!select) return;
+    if (!select) {
+        console.log('productSelect element not found');
+        return;
+    }
+    
+    // IMMEDIATE SAFETY CHECK - PREVENT CRASH AT ALL COSTS
+    if (!products || !Array.isArray(products)) {
+        console.error('EMERGENCY: Products is not an array, forcing empty array:', typeof products, products);
+        products = [];
+        window.products = [];
+        select.innerHTML = '<option value="">No products available</option>';
+        showAlert('Products data is invalid. Please refresh the page.', 'warning');
+        return;
+    }
     
     select.innerHTML = '<option value="">Select a product...</option>';
     
-    products.forEach(product => {
-        const option = document.createElement('option');
-        option.value = product.id;
-        option.textContent = `${product.name} - R${product.costPerItem.toFixed(2)}`;
-        option.dataset.price = product.costPerItem;
-        option.dataset.name = product.name;
-        select.appendChild(option);
-    });
+    console.log('Populating product select with', products.length, 'products');
+    
+    if (products.length === 0) {
+        select.innerHTML = '<option value="">No products available</option>';
+        return;
+    }
+    
+    try {
+        products.forEach(product => {
+            if (!product || typeof product !== 'object') {
+                console.warn('Invalid product object:', product);
+                return;
+            }
+            
+            const option = document.createElement('option');
+            option.value = product.id || '';
+            option.textContent = `${product.name || 'Unknown Product'} - R${(product.costPerItem || 0).toFixed(2)}`;
+            option.dataset.price = product.costPerItem || 0;
+            option.dataset.name = product.name || 'Unknown Product';
+            select.appendChild(option);
+        });
+        console.log('Successfully populated product select with', products.length, 'products');
+    } catch (error) {
+        console.error('Error in populateProductSelect forEach:', error);
+        select.innerHTML = '<option value="">Error loading products</option>';
+        showAlert('Error populating product dropdown: ' + error.message, 'danger');
+    }
 }
 
 // Populate product select dropdown for new invoice modal
 function populateNewInvoiceProductSelect() {
+    console.log('=== POPULATE NEW INVOICE PRODUCT SELECT START ===');
+    console.log('populateNewInvoiceProductSelect called, products:', products, 'isArray:', Array.isArray(products));
+    
     const select = document.getElementById('newInvoiceProductSelect');
-    if (!select) return;
+    if (!select) {
+        console.log('newInvoiceProductSelect element not found');
+        return;
+    }
+    
+    // IMMEDIATE SAFETY CHECK - PREVENT CRASH AT ALL COSTS
+    if (!products || !Array.isArray(products)) {
+        console.error('EMERGENCY: Products is not an array, forcing empty array:', typeof products, products);
+        products = [];
+        window.products = [];
+        select.innerHTML = '<option value="">No products available</option>';
+        showAlert('Products data is invalid. Please refresh the page.', 'warning');
+        return;
+    }
     
     select.innerHTML = '<option value="">Select a product...</option>';
     
-    products.forEach(product => {
-        const option = document.createElement('option');
-        option.value = product.id;
-        option.textContent = `${product.name} - R${product.costPerItem.toFixed(2)}`;
-        option.dataset.price = product.costPerItem;
-        option.dataset.name = product.name;
-        select.appendChild(option);
-    });
+    console.log('Populating new invoice product select with', products.length, 'products');
+    
+    if (products.length === 0) {
+        select.innerHTML = '<option value="">No products available</option>';
+        return;
+    }
+    
+    try {
+        products.forEach(product => {
+            if (!product || typeof product !== 'object') {
+                console.warn('Invalid product object:', product);
+                return;
+            }
+            
+            const option = document.createElement('option');
+            option.value = product.id || '';
+            option.textContent = `${product.name || 'Unknown Product'} - R${(product.costPerItem || 0).toFixed(2)}`;
+            option.dataset.price = product.costPerItem || 0;
+            option.dataset.name = product.name || 'Unknown Product';
+            select.appendChild(option);
+        });
+        console.log('Successfully populated new invoice product select with', products.length, 'products');
+    } catch (error) {
+        console.error('Error in populateNewInvoiceProductSelect forEach:', error);
+        select.innerHTML = '<option value="">Error loading products</option>';
+        showAlert('Error populating new invoice product dropdown: ' + error.message, 'danger');
+    }
 }
 
 // Load users for the filter dropdown
@@ -800,6 +975,86 @@ function clearFilters() {
     document.getElementById('endDate').value = '';
     document.getElementById('userFilter').value = '';
     loadInvoices();
+}
+
+// Download invoice in specified format
+async function downloadInvoice(invoiceId, format) {
+    try {
+        showAlert(`Preparing ${format.toUpperCase()} download...`, 'info');
+        
+        const response = await fetch(`/api/invoices/${invoiceId}/download/${format}`, {
+            method: 'GET',
+            headers: {
+                'Accept': getAcceptHeader(format)
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            showAlert(`Failed to download invoice: ${errorText}`, 'danger');
+            return;
+        }
+
+        // Get filename from response headers or create default
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let filename = `invoice_${invoiceId.substring(0, 8)}.${getFileExtension(format)}`;
+        
+        if (contentDisposition) {
+            const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+            if (filenameMatch && filenameMatch[1]) {
+                filename = filenameMatch[1].replace(/['"]/g, '');
+            }
+        }
+
+        // Create blob and download
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        showAlert(`${format.toUpperCase()} downloaded successfully`, 'success');
+    } catch (error) {
+        console.error('Error downloading invoice:', error);
+        showAlert(`Error downloading invoice: ${error.message}`, 'danger');
+    }
+}
+
+// Get appropriate Accept header for format
+function getAcceptHeader(format) {
+    switch (format.toLowerCase()) {
+        case 'pdf':
+            return 'application/pdf';
+        case 'excel':
+            return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        case 'csv':
+            return 'text/csv';
+        case 'json':
+            return 'application/json';
+        default:
+            return 'application/octet-stream';
+    }
+}
+
+// Get file extension for format
+function getFileExtension(format) {
+    switch (format.toLowerCase()) {
+        case 'pdf':
+            return 'pdf';
+        case 'excel':
+            return 'xlsx';
+        case 'csv':
+            return 'csv';
+        case 'json':
+            return 'json';
+        default:
+            return 'txt';
+    }
 }
 
 // Show alert message
