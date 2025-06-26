@@ -1,7 +1,7 @@
 let products = [];
 let filteredProducts = [];
 let currentPage = 1;
-let itemsPerPage = 25;
+let itemsPerPage = 5;
 
 // Console log functionality
 let consoleLogContainer;
@@ -458,11 +458,22 @@ function escapeHtml(text) {
 // Render pagination controls
 function renderPagination() {
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-    const paginationContainer = document.getElementById('paginationNav');
+    const paginationContainer = document.getElementById('pagination');
     
-    if (!paginationContainer) return;
+    console.log('Product Pagination Debug:', {
+        filteredProductsLength: filteredProducts.length,
+        itemsPerPage: itemsPerPage,
+        totalPages: totalPages,
+        paginationContainer: paginationContainer
+    });
+    
+    if (!paginationContainer) {
+        console.error('Pagination container not found!');
+        return;
+    }
     
     if (totalPages <= 1) {
+        console.log('Not enough pages for pagination, hiding pagination');
         paginationContainer.innerHTML = '';
         return;
     }
@@ -513,6 +524,7 @@ function renderPagination() {
     `;
 
     paginationContainer.innerHTML = paginationHTML;
+    console.log('Product pagination rendered successfully with', totalPages, 'pages');
 
     // Add event listeners to pagination links
     paginationContainer.querySelectorAll('.page-link').forEach(link => {

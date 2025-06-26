@@ -3,6 +3,10 @@
 let currentInvoice = null;
 let products = []; // CRITICAL: Always initialize as empty array
 let newInvoiceItems = [];
+let allInvoices = [];
+let filteredInvoices = [];
+let currentPage = 1;
+let itemsPerPage = 5;
 
 // EMERGENCY SAFETY CHECK - Ensure products is always an array
 if (!Array.isArray(products)) {
@@ -27,6 +31,17 @@ document.addEventListener('DOMContentLoaded', function() {
     if (newInvoiceDateField) {
         newInvoiceDateField.value = today;
     }
+    
+    // Initialize page size dropdown event listeners
+    document.querySelectorAll('.page-size-option').forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.preventDefault();
+            itemsPerPage = parseInt(e.target.dataset.size);
+            currentPage = 1;
+            document.getElementById('pageSize').textContent = itemsPerPage;
+            displayInvoices();
+        });
+    });
 });
 
 // Load all invoices
@@ -36,7 +51,10 @@ async function loadInvoices() {
         const response = await fetch('/api/invoices');
         if (response.ok) {
             const invoices = await response.json();
-            displayInvoices(invoices);
+            allInvoices = invoices;
+            filteredInvoices = [...invoices];
+            currentPage = 1;
+            displayInvoices();
         } else {
             console.error('Failed to load invoices');
             showAlert('Failed to load invoices', 'danger');
@@ -50,20 +68,29 @@ async function loadInvoices() {
 }
 
 // Display invoices in the table
-function displayInvoices(invoices) {
+function displayInvoices() {
     const container = document.getElementById('invoice-table-section');
     const countElement = document.getElementById('invoiceCount');
     
     // Update count
     if (countElement) {
-        const total = invoices.length;
+        const total = filteredInvoices.length;
         countElement.textContent = `${total} invoice${total !== 1 ? 's' : ''}`;
     }
 
-    if (invoices.length === 0) {
+    if (filteredInvoices.length === 0) {
         container.innerHTML = getEmptyStateHTML();
+        const paginationContainer = document.getElementById('pagination');
+        if (paginationContainer) {
+            paginationContainer.innerHTML = '';
+        }
         return;
     }
+
+    // Calculate pagination
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const pageInvoices = filteredInvoices.slice(startIndex, endIndex);
 
     const tableHTML = `
         <div class="table-responsive-wrapper">
@@ -80,13 +107,14 @@ function displayInvoices(invoices) {
                     </tr>
                 </thead>
                 <tbody>
-                    ${invoices.map(invoice => createInvoiceRowHTML(invoice)).join('')}
+                    ${pageInvoices.map(invoice => createInvoiceRowHTML(invoice)).join('')}
                 </tbody>
             </table>
         </div>
     `;
 
     container.innerHTML = tableHTML;
+    renderPagination();
 }
 
 // Create invoice row HTML
@@ -991,7 +1019,10 @@ async function filterInvoices() {
         const response = await fetch(url);
         if (response.ok) {
             const invoices = await response.json();
-            displayInvoices(invoices);
+            allInvoices = invoices;
+            filteredInvoices = [...invoices];
+            currentPage = 1;
+            displayInvoices();
         } else {
             showAlert('Failed to filter invoices', 'danger');
             showErrorState('Failed to filter invoices');
@@ -1104,6 +1135,87 @@ function getFileExtension(format) {
         default:
             return 'txt';
     }
+}
+
+// Render pagination controls
+function renderPagination() {
+    const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage);
+    const paginationContainer = document.getElementById('pagination');
+
+    console.log('Invoice Pagination Debug:', {
+        filteredInvoicesLength: filteredInvoices.length,
+        itemsPerPage: itemsPerPage,
+        totalPages: totalPages,
+        paginationContainer: paginationContainer
+    });
+
+    if (!paginationContainer) {
+        console.error('Pagination container not found!');
+        return;
+    }
+
+    if (totalPages <= 1) {
+        console.log('Not enough pages for pagination, hiding pagination');
+        paginationContainer.innerHTML = '';
+        return;
+    }
+
+    let paginationHTML = '';
+
+    // Previous button
+    paginationHTML += `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
+        </li>
+    `;
+
+    // Page numbers
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, currentPage + 2);
+
+    if (startPage > 1) {
+        paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`;
+        if (startPage > 2) {
+            paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        paginationHTML += `
+            <li class="page-item ${i === currentPage ? 'active' : ''}">
+                <a class="page-link" href="#" data-page="${i}">${i}</a>
+            </li>
+        `;
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+        paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>`;
+    }
+
+    // Next button
+    paginationHTML += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
+        </li>
+    `;
+
+    paginationContainer.innerHTML = paginationHTML;
+    console.log('Invoice pagination rendered successfully with', totalPages, 'pages');
+
+    // Add event listeners to pagination links
+    paginationContainer.querySelectorAll('.page-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const page = parseInt(e.target.dataset.page);
+            if (page && page !== currentPage && page >= 1 && page <= totalPages) {
+                currentPage = page;
+                displayInvoices();
+            }
+        });
+    });
 }
 
 // Show alert message

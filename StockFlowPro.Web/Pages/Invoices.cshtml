@@ -60,6 +60,17 @@
                 <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">
                     <i class="fas fa-times me-1"></i>Clear
                 </button>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <span id="pageSize">5</span> per page
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item page-size-option" href="#" data-size="5">5</a></li>
+                        <li><a class="dropdown-item page-size-option" href="#" data-size="10">10</a></li>
+                        <li><a class="dropdown-item page-size-option" href="#" data-size="25">25</a></li>
+                        <li><a class="dropdown-item page-size-option" href="#" data-size="50">50</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
