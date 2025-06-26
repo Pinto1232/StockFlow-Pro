@@ -6,6 +6,7 @@ using iTextSharp.text;
 using iTextSharp.text.pdf;
 using OfficeOpenXml;
 using StockFlowPro.Application.DTOs;
+using StockFlowPro.Shared.Extensions;
 
 namespace StockFlowPro.Web.Services;
 
@@ -80,7 +81,7 @@ public class InvoiceExportService : IInvoiceExportService
         foreach (var item in invoice.Items)
         {
             table.AddCell(new PdfPCell(new Phrase(item.ProductName, cellFont)) { Padding = 5 });
-            table.AddCell(new PdfPCell(new Phrase($"R{item.UnitPrice:F2}", cellFont)) 
+            table.AddCell(new PdfPCell(new Phrase(item.UnitPrice.ToCurrency(), cellFont)) 
             { 
                 Padding = 5, 
                 HorizontalAlignment = Element.ALIGN_RIGHT 
@@ -90,7 +91,7 @@ public class InvoiceExportService : IInvoiceExportService
                 Padding = 5, 
                 HorizontalAlignment = Element.ALIGN_CENTER 
             });
-            table.AddCell(new PdfPCell(new Phrase($"R{item.LineTotal:F2}", cellFont)) 
+            table.AddCell(new PdfPCell(new Phrase(item.LineTotal.ToCurrency(), cellFont)) 
             { 
                 Padding = 5, 
                 HorizontalAlignment = Element.ALIGN_RIGHT 
@@ -100,7 +101,7 @@ public class InvoiceExportService : IInvoiceExportService
         document.Add(table);
 
         // Total
-        var totalParagraph = new Paragraph($"Total: R{invoice.Total:F2}", boldFont)
+        var totalParagraph = new Paragraph($"Total: {invoice.Total.ToCurrency()}", boldFont)
         {
             Alignment = Element.ALIGN_RIGHT,
             SpacingBefore = 20
@@ -154,10 +155,10 @@ public class InvoiceExportService : IInvoiceExportService
         {
             worksheet.Cells[row, 1].Value = item.ProductName;
             worksheet.Cells[row, 2].Value = item.UnitPrice;
-            worksheet.Cells[row, 2].Style.Numberformat.Format = "R#,##0.00";
+            worksheet.Cells[row, 2].Style.Numberformat.Format = "\"R\"#,##0.00";
             worksheet.Cells[row, 3].Value = item.Quantity;
             worksheet.Cells[row, 4].Value = item.LineTotal;
-            worksheet.Cells[row, 4].Style.Numberformat.Format = "R#,##0.00";
+            worksheet.Cells[row, 4].Style.Numberformat.Format = "\"R\"#,##0.00";
             row++;
         }
 
@@ -166,7 +167,7 @@ public class InvoiceExportService : IInvoiceExportService
         worksheet.Cells[row + 1, 3].Style.Font.Bold = true;
         worksheet.Cells[row + 1, 4].Value = invoice.Total;
         worksheet.Cells[row + 1, 4].Style.Font.Bold = true;
-        worksheet.Cells[row + 1, 4].Style.Numberformat.Format = "R#,##0.00";
+        worksheet.Cells[row + 1, 4].Style.Numberformat.Format = "\"R\"#,##0.00";
 
         // Auto-fit columns
         worksheet.Cells.AutoFitColumns();
@@ -185,7 +186,7 @@ public class InvoiceExportService : IInvoiceExportService
         await writer.WriteLineAsync($"Invoice Number,{invoiceNumber}");
         await writer.WriteLineAsync($"Date,{invoice.CreatedDate:yyyy-MM-dd}");
         await writer.WriteLineAsync($"Created By,{invoice.CreatedByUserName}");
-        await writer.WriteLineAsync($"Total,R{invoice.Total:F2}");
+        await writer.WriteLineAsync($"Total,{invoice.Total.ToCurrency()}");
         await writer.WriteLineAsync(); // Empty line
 
         // Write items header
@@ -194,7 +195,7 @@ public class InvoiceExportService : IInvoiceExportService
         // Write items
         foreach (var item in invoice.Items)
         {
-            await writer.WriteLineAsync($"{item.ProductName},R{item.UnitPrice:F2},{item.Quantity},R{item.LineTotal:F2}");
+            await writer.WriteLineAsync($"{item.ProductName},{item.UnitPrice.ToCurrency()},{item.Quantity},{item.LineTotal.ToCurrency()}");
         }
 
         await writer.FlushAsync();

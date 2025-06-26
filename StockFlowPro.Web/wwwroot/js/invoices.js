@@ -95,7 +95,9 @@ function createInvoiceRowHTML(invoice) {
     const createdDate = new Date(invoice.createdDate).toLocaleDateString();
     const createdByUserName = escapeHtml(invoice.createdByUserName || 'Unknown User');
     const totalItemCount = invoice.totalItemCount || 0;
-    const total = invoice.total ? invoice.total.toFixed(2) : '0.00';
+    const total = window.FormattingUtils ? 
+        window.FormattingUtils.formatCurrency(invoice.total || 0) : 
+        `R${(invoice.total || 0).toFixed(2)}`;
     
     const statusBadge = invoice.isActive ? 
         '<span class="badge bg-success">Active</span>' : 
@@ -107,7 +109,7 @@ function createInvoiceRowHTML(invoice) {
             <td>${createdDate}</td>
             <td><strong>${createdByUserName}</strong></td>
             <td>${totalItemCount}</td>
-            <td><span class="invoice-total">R${total}</span></td>
+            <td><span class="invoice-total">${total}</span></td>
             <td>${statusBadge}</td>
             <td>
                 <div class="action-buttons">
@@ -333,7 +335,10 @@ function populateProductSelect() {
             
             const option = document.createElement('option');
             option.value = product.id || '';
-            option.textContent = `${product.name || 'Unknown Product'} - R${(product.costPerItem || 0).toFixed(2)}`;
+            const formattedPrice = window.FormattingUtils ? 
+                window.FormattingUtils.formatCurrency(product.costPerItem || 0) : 
+                `R${(product.costPerItem || 0).toFixed(2)}`;
+            option.textContent = `${product.name || 'Unknown Product'} - ${formattedPrice}`;
             option.dataset.price = product.costPerItem || 0;
             option.dataset.name = product.name || 'Unknown Product';
             select.appendChild(option);
@@ -385,7 +390,10 @@ function populateNewInvoiceProductSelect() {
             
             const option = document.createElement('option');
             option.value = product.id || '';
-            option.textContent = `${product.name || 'Unknown Product'} - R${(product.costPerItem || 0).toFixed(2)}`;
+            const formattedPrice = window.FormattingUtils ? 
+                window.FormattingUtils.formatCurrency(product.costPerItem || 0) : 
+                `R${(product.costPerItem || 0).toFixed(2)}`;
+            option.textContent = `${product.name || 'Unknown Product'} - ${formattedPrice}`;
             option.dataset.price = product.costPerItem || 0;
             option.dataset.name = product.name || 'Unknown Product';
             select.appendChild(option);
@@ -462,7 +470,10 @@ function updateNewInvoiceLineTotal() {
     const quantity = parseInt(document.getElementById('newInvoiceItemQuantity').value) || 0;
     const lineTotal = unitPrice * quantity;
     
-    document.getElementById('newInvoiceItemLineTotal').value = `R${lineTotal.toFixed(2)}`;
+    const formattedLineTotal = window.FormattingUtils ? 
+        window.FormattingUtils.formatCurrency(lineTotal) : 
+        `R${lineTotal.toFixed(2)}`;
+    document.getElementById('newInvoiceItemLineTotal').value = formattedLineTotal;
 }
 
 // Add item to new invoice (client-side only)
@@ -514,16 +525,23 @@ function displayNewInvoiceItems() {
     }
 
     newInvoiceItems.forEach((item, index) => {
+        const formattedUnitPrice = window.FormattingUtils ? 
+            window.FormattingUtils.formatCurrency(item.unitPrice) : 
+            `R${item.unitPrice.toFixed(2)}`;
+        const formattedLineTotal = window.FormattingUtils ? 
+            window.FormattingUtils.formatCurrency(item.lineTotal) : 
+            `R${item.lineTotal.toFixed(2)}`;
+            
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${escapeHtml(item.productName)}</td>
-            <td>R${item.unitPrice.toFixed(2)}</td>
+            <td>${formattedUnitPrice}</td>
             <td>
                 <input type="number" class="form-control form-control-sm" 
                        value="${item.quantity}" min="1" 
                        onchange="updateNewInvoiceItemQuantity(${index}, this.value)">
             </td>
-            <td>R${item.lineTotal.toFixed(2)}</td>
+            <td>${formattedLineTotal}</td>
             <td class="text-end">
                 <button class="btn btn-sm btn-outline-danger" 
                         onclick="removeNewInvoiceItem(${index})" title="Remove">
@@ -564,7 +582,10 @@ function removeNewInvoiceItem(index) {
 // Update total for new invoice (client-side calculation)
 function updateNewInvoiceTotal() {
     const total = newInvoiceItems.reduce((sum, item) => sum + item.lineTotal, 0);
-    document.getElementById('newInvoiceTotal').value = `R${total.toFixed(2)}`;
+    const formattedTotal = window.FormattingUtils ? 
+        window.FormattingUtils.formatCurrency(total) : 
+        `R${total.toFixed(2)}`;
+    document.getElementById('newInvoiceTotal').value = formattedTotal;
 }
 
 // Save new invoice to server
@@ -699,7 +720,10 @@ async function editInvoice(invoiceId) {
 function populateEditForm(invoice) {
     document.getElementById('editInvoiceId').value = invoice.id;
     document.getElementById('editInvoiceDate').value = invoice.createdDate.split('T')[0];
-    document.getElementById('editInvoiceTotal').value = `R${invoice.total.toFixed(2)}`;
+    const formattedTotal = window.FormattingUtils ? 
+        window.FormattingUtils.formatCurrency(invoice.total) : 
+        `R${invoice.total.toFixed(2)}`;
+    document.getElementById('editInvoiceTotal').value = formattedTotal;
     
     displayInvoiceItems(invoice.items);
 }
@@ -715,16 +739,23 @@ function displayInvoiceItems(items) {
     }
 
     items.forEach(item => {
+        const formattedUnitPrice = window.FormattingUtils ? 
+            window.FormattingUtils.formatCurrency(item.unitPrice) : 
+            `R${item.unitPrice.toFixed(2)}`;
+        const formattedLineTotal = window.FormattingUtils ? 
+            window.FormattingUtils.formatCurrency(item.lineTotal) : 
+            `R${item.lineTotal.toFixed(2)}`;
+            
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${escapeHtml(item.productName)}</td>
-            <td>R${item.unitPrice.toFixed(2)}</td>
+            <td>${formattedUnitPrice}</td>
             <td>
                 <input type="number" class="form-control form-control-sm" 
                        value="${item.quantity}" min="1" 
                        onchange="updateItemQuantity('${item.productId}', this.value)">
             </td>
-            <td>R${item.lineTotal.toFixed(2)}</td>
+            <td>${formattedLineTotal}</td>
             <td class="text-end">
                 <button class="btn btn-sm btn-outline-danger" 
                         onclick="removeItemFromInvoice('${item.productId}')" title="Remove">
@@ -756,7 +787,10 @@ function updateLineTotal() {
     const quantity = parseInt(document.getElementById('itemQuantity').value) || 0;
     const lineTotal = unitPrice * quantity;
     
-    document.getElementById('itemLineTotal').value = `R${lineTotal.toFixed(2)}`;
+    const formattedLineTotal = window.FormattingUtils ? 
+        window.FormattingUtils.formatCurrency(lineTotal) : 
+        `R${lineTotal.toFixed(2)}`;
+    document.getElementById('itemLineTotal').value = formattedLineTotal;
 }
 
 // Show add item form
