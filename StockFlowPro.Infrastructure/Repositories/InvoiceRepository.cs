@@ -51,6 +51,16 @@ public class InvoiceRepository : IInvoiceRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Invoice>> GetInvoicesByDateRangeAsync(DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)
+    {
+        return await _context.Invoices
+            .Include(i => i.Items)
+            .Include(i => i.CreatedByUser)
+            .Where(i => i.CreatedDate >= startDate && i.CreatedDate <= endDate)
+            .OrderByDescending(i => i.CreatedDate)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Invoice> AddAsync(Invoice invoice)
     {
         await _context.Invoices.AddAsync(invoice);

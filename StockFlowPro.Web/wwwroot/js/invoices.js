@@ -17,6 +17,7 @@ window.products = products; // Also set on window for debugging
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
+    checkUserPermissions();
     loadInvoices();
     loadProducts();
     loadUsers();
@@ -43,6 +44,61 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Check user permissions and show appropriate UI
+async function checkUserPermissions() {
+    try {
+        const response = await fetch('/api/diagnostics/auth-status');
+        if (response.ok) {
+            const authStatus = await response.json();
+            
+            if (!authStatus.IsAuthenticated) {
+                showPermissionWarning('You need to be logged in to manage invoices. Please <a href="/Login" class="alert-link">sign in</a> to continue.');
+                disableInvoiceCreation();
+            } else if (!authStatus.Roles.includes('Manager') && !authStatus.Roles.includes('Admin')) {
+                showPermissionWarning('You need Manager or Administrator privileges to create invoices. You currently have "' + (authStatus.Roles[0] || 'User') + '" role. Please contact your administrator to upgrade your account.');
+                disableInvoiceCreation();
+            }
+        }
+    } catch (error) {
+        console.warn('Could not check user permissions:', error);
+        // Don't show error to user, just log it
+    }
+}
+
+// Show permission warning
+function showPermissionWarning(message) {
+    const container = document.getElementById('invoice-table-section');
+    if (container) {
+        const warningDiv = document.createElement('div');
+        warningDiv.className = 'alert alert-warning mb-3';
+        warningDiv.innerHTML = `
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            ${message}
+            <div class="mt-2">
+                <button class="btn btn-sm btn-outline-primary" onclick="requestRoleUpgrade()">
+                    <i class="fas fa-user-plus me-1"></i>Request Role Upgrade
+                </button>
+            </div>
+        `;
+        container.parentNode.insertBefore(warningDiv, container);
+    }
+}
+
+// Request role upgrade (placeholder - could be enhanced to send actual requests)
+function requestRoleUpgrade() {
+    showAlert('Role upgrade requests should be directed to your system administrator. Please contact them directly to request Manager or Administrator privileges.', 'info');
+}
+
+// Disable invoice creation buttons
+function disableInvoiceCreation() {
+    const createButtons = document.querySelectorAll('[data-bs-target="#createInvoiceModal"], [onclick*="createInvoice"]');
+    createButtons.forEach(button => {
+        button.disabled = true;
+        button.classList.add('disabled');
+        button.title = 'You need Manager or Administrator privileges to create invoices';
+    });
+}
 
 // Load all invoices
 async function loadInvoices() {
@@ -643,8 +699,7 @@ async function saveNewInvoice() {
         });
 
         if (!createResponse.ok) {
-            const error = await createResponse.text();
-            showAlert(`Failed to create invoice: ${error}`, 'danger');
+            await handleInvoiceCreationError(createResponse);
             return;
         }
 
@@ -686,6 +741,39 @@ async function saveNewInvoice() {
         console.error('Error creating invoice:', error);
         showAlert('Error creating invoice', 'danger');
     }
+}
+
+// Handle invoice creation errors with helpful messages
+async function handleInvoiceCreationError(response) {
+    const status = response.status;
+    let errorMessage = '';
+    
+    try {
+        const errorText = await response.text();
+        
+        if (status === 401) {
+            errorMessage = 'You need to be logged in to create invoices. Please <a href="/Login" class="alert-link">sign in</a> to continue.';
+        } else if (status === 403) {
+            errorMessage = 'You don\'t have permission to create invoices. Only Managers and Administrators can create invoices. Please contact your administrator to upgrade your account.';
+        } else if (status === 400) {
+            // Try to parse the error for more specific messages
+            if (errorText.includes('authentication') || errorText.includes('log in')) {
+                errorMessage = 'Authentication required. Please <a href="/Login" class="alert-link">sign in</a> to create invoices.';
+            } else if (errorText.includes('permission') || errorText.includes('role') || errorText.includes('Manager') || errorText.includes('Admin')) {
+                errorMessage = 'You need Manager or Administrator privileges to create invoices. Please contact your administrator to upgrade your account.';
+            } else if (errorText.includes('synchronization') || errorText.includes('sync')) {
+                errorMessage = 'Your account needs to be synchronized with the database. Please contact an administrator or try logging out and back in.';
+            } else {
+                errorMessage = `Unable to create invoice: ${errorText}`;
+            }
+        } else {
+            errorMessage = `Failed to create invoice (Error ${status}): ${errorText}`;
+        }
+    } catch (parseError) {
+        errorMessage = `Failed to create invoice (Error ${status}). Please try again or contact support.`;
+    }
+    
+    showAlert(errorMessage, 'danger');
 }
 
 // EXISTING INVOICE FUNCTIONS (for editing)

@@ -187,8 +187,8 @@ public class SystemSettingsModel : PageModel
             CompanyName = "Your Company",
             TimeZone = "UTC",
             DateFormat = "MM/dd/yyyy",
-            Currency = "USD",
-            Language = "en-US",
+            Currency = "ZAR",
+            Language = "en-ZA",
             MaintenanceMode = false,
             DebugMode = false,
             MaxFileUploadSize = 10,
@@ -314,10 +314,10 @@ public class SystemConfigurationSettings
     public string DateFormat { get; set; } = "MM/dd/yyyy";
 
     [Required]
-    public string Currency { get; set; } = "USD";
+    public string Currency { get; set; } = "ZAR";
 
     [Required]
-    public string Language { get; set; } = "en-US";
+    public string Language { get; set; } = "en-ZA";
 
     public bool MaintenanceMode { get; set; }
     public bool DebugMode { get; set; }

@@ -14,9 +14,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddDbContext<ApplicationDbContext>(options =>
         {
-            options.UseSqlite(configuration.GetConnectionString("DefaultConnection"), sqliteOptions =>
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"), sqlServerOptions =>
             {
-                sqliteOptions.CommandTimeout(30);
+                sqlServerOptions.CommandTimeout(30);
+                sqlServerOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorNumbersToAdd: null);
             });
             
             options.EnableSensitiveDataLogging(false);

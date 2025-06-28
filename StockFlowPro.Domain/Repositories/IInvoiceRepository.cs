@@ -8,6 +8,7 @@ public interface IInvoiceRepository
     Task<IEnumerable<Invoice>> GetAllAsync();
     Task<IEnumerable<Invoice>> GetByUserIdAsync(Guid userId);
     Task<IEnumerable<Invoice>> GetByDateRangeAsync(DateTime startDate, DateTime endDate);
+    Task<IEnumerable<Invoice>> GetInvoicesByDateRangeAsync(DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default);
     Task<Invoice> AddAsync(Invoice invoice);
     Task<Invoice> UpdateAsync(Invoice invoice);
     Task DeleteAsync(Guid id);

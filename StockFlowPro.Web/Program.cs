@@ -28,7 +28,8 @@ builder.Services.AddHttpContextAccessor();
 
 // Configure database connection using environment variables
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(EnvironmentConfig.DatabaseConnectionString));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), 
+        b => b.MigrationsAssembly("StockFlowPro.Infrastructure")));
 
 builder.Services.AddMediatR(typeof(StockFlowPro.Application.Commands.Users.CreateUserCommand).Assembly);
 builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(StockFlowPro.Application.Mappings.ProductMappingProfile));
@@ -46,6 +47,8 @@ builder.Services.AddScoped<IUserSecurityService, UserSecurityService>();
 builder.Services.AddScoped<StockFlowPro.Web.Services.IAuthorizationService, StockFlowPro.Web.Services.AuthorizationService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IPasswordService, PasswordService>();
 builder.Services.AddScoped<IInvoiceExportService, InvoiceExportService>();
+builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IReportService, StockFlowPro.Application.Services.ReportService>();
+builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IEnhancedRoleService, StockFlowPro.Infrastructure.Services.EnhancedRoleService>();
 builder.Services.AddHostedService<DatabaseInitializationService>();
 
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
