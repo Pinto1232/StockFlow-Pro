@@ -48,6 +48,7 @@ builder.Services.AddScoped<StockFlowPro.Web.Services.IAuthorizationService, Stoc
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IPasswordService, PasswordService>();
 builder.Services.AddScoped<IInvoiceExportService, InvoiceExportService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IReportService, StockFlowPro.Application.Services.ReportService>();
+builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IEnhancedRoleService, StockFlowPro.Infrastructure.Services.EnhancedRoleService>();
 builder.Services.AddHostedService<DatabaseInitializationService>();
 
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();

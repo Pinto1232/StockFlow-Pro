@@ -26,9 +26,9 @@ public class GetInventoryOverviewHandler : IRequestHandler<GetInventoryOverviewQ
         var totalProducts = allProducts.Count();
         var activeProducts = allProducts.Count(p => p.IsActive);
         var inactiveProducts = totalProducts - activeProducts;
-        var inStockProducts = allProducts.Count(p => p.IsInStock());
-        var outOfStockProducts = allProducts.Count(p => !p.IsInStock());
-        var lowStockProducts = allProducts.Count(p => p.IsLowStock());
+        var inStockProducts = allProducts.Count(p => p.IsActive && p.IsInStock());
+        var outOfStockProducts = allProducts.Count(p => !p.IsActive || !p.IsInStock());
+        var lowStockProducts = allProducts.Count(p => p.IsActive && p.IsInStock() && p.IsLowStock());
         var totalInventoryValue = allProducts.Sum(p => p.GetTotalValue());
         var averageProductValue = totalProducts > 0 ? totalInventoryValue / totalProducts : 0;
 

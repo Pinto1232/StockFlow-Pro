@@ -48,8 +48,8 @@ public class GetInventoryOverviewHandlerTests
         result.InStockProducts.Should().Be(2); // Products 1 and 3
         result.OutOfStockProducts.Should().Be(2); // Products 2 and 4
         result.LowStockProducts.Should().Be(1); // Product 3
-        result.TotalInventoryValue.Should().Be(3500.00m); // (10*50) + (20*0) + (15*5) + (25*100)
-        result.AverageProductValue.Should().Be(875.00m); // 3500 / 4
+        result.TotalInventoryValue.Should().Be(3075.00m); // (10*50) + (20*0) + (15*5) + (25*100) = 500 + 0 + 75 + 2500 = 3075
+        result.AverageProductValue.Should().Be(768.75m); // 3075 / 4
     }
 
     [Fact]

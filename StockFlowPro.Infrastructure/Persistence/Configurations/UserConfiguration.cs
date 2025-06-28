@@ -52,6 +52,32 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.PasswordHash)
             .IsRequired(false)
             .HasMaxLength(500);
+            
+        // SQL Server enhanced security fields
+        builder.Property(u => u.LastLoginIp)
+            .HasMaxLength(45);
+            
+        builder.Property(u => u.SecurityStamp)
+            .HasMaxLength(100);
+            
+        builder.Property(u => u.FailedLoginAttempts)
+            .HasDefaultValue(0);
+            
+        builder.Property(u => u.RequirePasswordChange)
+            .HasDefaultValue(false);
+            
+        // Indexes for SQL Server optimization
+        builder.HasIndex(u => u.LastLoginAt)
+            .HasDatabaseName("IX_Users_LastLogin");
+            
+        builder.HasIndex(u => u.RoleId)
+            .HasDatabaseName("IX_Users_RoleId");
+            
+        builder.HasIndex(u => u.IsActive)
+            .HasDatabaseName("IX_Users_IsActive");
+            
+        builder.HasIndex(u => u.LockedUntil)
+            .HasDatabaseName("IX_Users_LockedUntil");
 
         builder.ToTable("Users");
     }
