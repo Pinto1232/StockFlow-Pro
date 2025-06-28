@@ -9,7 +9,7 @@
     "dateOfBirth": "1980-01-01T00:00:00Z",
     "age": 45,
     "isActive": true,
-    "createdAt": "2025-06-28T06:37:01.5512709Z",
+    "createdAt": "2025-06-28T08:33:38.8831059Z",
     "updatedAt": null,
     "role": "Admin",
     "passwordHash": "lhYqmKfEnhdQZTEU1c/w9JRG1B\u002BA9RmMvwNrMqDo8wM=:550e8400-e29b-41d4-a716-446655440000"
@@ -24,7 +24,7 @@
     "dateOfBirth": "1985-05-15T00:00:00Z",
     "age": 40,
     "isActive": true,
-    "createdAt": "2025-06-28T06:37:01.5527042Z",
+    "createdAt": "2025-06-28T08:33:38.8860246Z",
     "updatedAt": null,
     "role": "Admin",
     "passwordHash": "9uY5g\u002B2Xn6RzY56rnJDwCcEECPdHqCwyYbugJJ\u002BeJxc=:550e8400-e29b-41d4-a716-446655440001"
@@ -39,7 +39,7 @@
     "dateOfBirth": "1990-08-22T00:00:00Z",
     "age": 35,
     "isActive": true,
-    "createdAt": "2025-06-28T06:37:01.5527938Z",
+    "createdAt": "2025-06-28T08:33:38.8861689Z",
     "updatedAt": null,
     "role": "Manager",
     "passwordHash": "DlDCngVJc6Ywv1XU0AmJitu32FCM75j2EaTdX/k2LTI=:550e8400-e29b-41d4-a716-446655440002"
@@ -54,7 +54,7 @@
     "dateOfBirth": "1992-12-10T00:00:00Z",
     "age": 33,
     "isActive": true,
-    "createdAt": "2025-06-28T06:37:01.5528016Z",
+    "createdAt": "2025-06-28T08:33:38.8861826Z",
     "updatedAt": null,
     "role": "User",
     "passwordHash": "hcOYa4Y0UUm8qHILwKbuHqeH9CJZCYsGoEEvF6xMxnI=:550e8400-e29b-41d4-a716-446655440003"
@@ -69,24 +69,9 @@
     "dateOfBirth": "1988-03-07T00:00:00Z",
     "age": 37,
     "isActive": false,
-    "createdAt": "2025-06-28T06:37:01.5528047Z",
+    "createdAt": "2025-06-28T08:33:38.8861889Z",
     "updatedAt": null,
     "role": "User",
     "passwordHash": "8\u002BupOWwjzjPmhLwLcvIQqlO3FlqJed0q0pOkYyYU7sA=:550e8400-e29b-41d4-a716-446655440004"
-  },
-  {
-    "id": "5fb6acef-75f6-4fc1-b2bd-49cf2f587732",
-    "firstName": "Greg",
-    "lastName": "Montana",
-    "fullName": "Greg Montana",
-    "email": "gregmontana@gmail.com",
-    "phoneNumber": "\u002B27835270710",
-    "dateOfBirth": "1988-01-09T00:00:00",
-    "age": 37,
-    "isActive": true,
-    "createdAt": "2025-06-28T06:38:53.9911565Z",
-    "updatedAt": null,
-    "role": "Admin",
-    "passwordHash": "mm5Y/Qg9i\u002BEw47qz8cjuMOQPtdNFk/L1Egr1XnMd\u002BbM=:9403b2ec-7926-4c83-91b5-187ee3bd2537"
   }
 ]
