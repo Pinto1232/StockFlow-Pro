@@ -1,0 +1,359 @@
+@page
+@model StockFlowPro.Web.Pages.SignalRTestModel
+@{
+    ViewData["Title"] = "SignalR Test";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-broadcast-tower me-2"></i>
+                        SignalR Real-Time Communication Test
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Connection Status -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">Connection Status</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <span class="me-2">Status:</span>
+                                        <span id="connection-status" class="badge bg-secondary">Connecting...</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>User ID:</strong> <span id="user-id">@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>User Name:</strong> <span id="user-name">@User.Identity?.Name</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Role:</strong> <span id="user-role">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Test Controls -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card border-success">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">Test Controls</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="test-message" class="form-label">Test Message</label>
+                                        <input type="text" class="form-control" id="test-message" placeholder="Enter test message" value="Hello from SignalR!">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="message-type" class="form-label">Message Type</label>
+                                        <select class="form-select" id="message-type">
+                                            <option value="info">Info</option>
+                                            <option value="success">Success</option>
+                                            <option value="warning">Warning</option>
+                                            <option value="error">Error</option>
+                                        </select>
+                                    </div>
+                                    <button type="button" class="btn btn-primary me-2" onclick="sendTestNotification()">
+                                        <i class="fas fa-paper-plane me-1"></i>Send Test Notification
+                                    </button>
+                                    <button type="button" class="btn btn-info" onclick="checkConnectionStatus()">
+                                        <i class="fas fa-sync me-1"></i>Check Status
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stock Update Test -->
+                    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                    {
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="card border-warning">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h5 class="mb-0">Stock Update Test</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="product-id" class="form-label">Product ID (GUID)</label>
+                                            <input type="text" class="form-control" id="product-id" placeholder="Enter product GUID">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="new-quantity" class="form-label">New Quantity</label>
+                                            <input type="number" class="form-control" id="new-quantity" placeholder="Enter new stock quantity" min="0">
+                                        </div>
+                                        <button type="button" class="btn btn-warning" onclick="updateStock()">
+                                            <i class="fas fa-boxes me-1"></i>Update Stock
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <div class="card border-danger">
+                                    <div class="card-header bg-danger text-white">
+                                        <h5 class="mb-0">Broadcast Message</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="broadcast-message" class="form-label">Broadcast Message</label>
+                                            <textarea class="form-control" id="broadcast-message" rows="3" placeholder="Enter message to broadcast to all users"></textarea>
+                                        </div>
+                                        <button type="button" class="btn btn-danger" onclick="broadcastMessage()">
+                                            <i class="fas fa-bullhorn me-1"></i>Broadcast to All
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Event Log -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card border-secondary">
+                                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Real-Time Event Log</h5>
+                                    <button type="button" class="btn btn-sm btn-outline-light" onclick="clearEventLog()">
+                                        <i class="fas fa-trash me-1"></i>Clear Log
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div id="event-log" class="border rounded p-3" style="height: 300px; overflow-y: auto; background-color: #f8f9fa;">
+                                        <div class="text-muted">Event log will appear here...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // SignalR Test Page JavaScript
+        let eventLogCounter = 0;
+
+        function logEvent(message, type = 'info') {
+            const eventLog = document.getElementById('event-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const eventId = ++eventLogCounter;
+            
+            const eventDiv = document.createElement('div');
+            eventDiv.className = `alert alert-${getBootstrapAlertClass(type)} alert-dismissible fade show mb-2`;
+            eventDiv.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <strong>#${eventId} [${timestamp}]</strong><br>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // Remove the placeholder text if it exists
+            const placeholder = eventLog.querySelector('.text-muted');
+            if (placeholder) {
+                placeholder.remove();
+            }
+            
+            eventLog.insertBefore(eventDiv, eventLog.firstChild);
+            
+            // Keep only last 20 events
+            while (eventLog.children.length > 20) {
+                eventLog.removeChild(eventLog.lastChild);
+            }
+            
+            // Scroll to top to show new event
+            eventLog.scrollTop = 0;
+        }
+
+        function getBootstrapAlertClass(type) {
+            const typeMap = {
+                'info': 'info',
+                'success': 'success',
+                'warning': 'warning',
+                'error': 'danger',
+                'danger': 'danger'
+            };
+            return typeMap[type] || 'info';
+        }
+
+        function updateConnectionStatus(status, type = 'secondary') {
+            const statusElement = document.getElementById('connection-status');
+            if (statusElement) {
+                statusElement.textContent = status;
+                statusElement.className = `badge bg-${type}`;
+            }
+        }
+
+        async function sendTestNotification() {
+            const message = document.getElementById('test-message').value;
+            const type = document.getElementById('message-type').value;
+            
+            if (!message.trim()) {
+                alert('Please enter a test message');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/realtime/test-notification', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        type: type
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    logEvent(`Test notification sent: "${message}" (${type})`, 'success');
+                } else {
+                    logEvent(`Failed to send notification: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                logEvent(`Error sending notification: ${error.message}`, 'error');
+            }
+        }
+
+        async function updateStock() {
+            const productId = document.getElementById('product-id').value;
+            const newQuantity = document.getElementById('new-quantity').value;
+            
+            if (!productId.trim() || !newQuantity) {
+                alert('Please enter both Product ID and New Quantity');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/realtime/update-stock/${productId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        newQuantity: parseInt(newQuantity)
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    logEvent(`Stock update sent for product ${productId}: ${newQuantity} units`, 'success');
+                } else {
+                    logEvent(`Failed to update stock: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                logEvent(`Error updating stock: ${error.message}`, 'error');
+            }
+        }
+
+        async function broadcastMessage() {
+            const message = document.getElementById('broadcast-message').value;
+            
+            if (!message.trim()) {
+                alert('Please enter a broadcast message');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/realtime/broadcast-message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        type: 'info'
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    logEvent(`Broadcast message sent: "${message}"`, 'success');
+                    document.getElementById('broadcast-message').value = '';
+                } else {
+                    logEvent(`Failed to broadcast message: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                logEvent(`Error broadcasting message: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkConnectionStatus() {
+            try {
+                const response = await fetch('/api/realtime/connection-status');
+                const result = await response.json();
+                
+                if (result.connected) {
+                    logEvent(`Connection status: Connected as ${result.userName} (${result.role})`, 'success');
+                    updateConnectionStatus('Connected', 'success');
+                } else {
+                    logEvent('Connection status: Disconnected', 'warning');
+                    updateConnectionStatus('Disconnected', 'warning');
+                }
+            } catch (error) {
+                logEvent(`Error checking connection status: ${error.message}`, 'error');
+                updateConnectionStatus('Error', 'danger');
+            }
+        }
+
+        function clearEventLog() {
+            const eventLog = document.getElementById('event-log');
+            eventLog.innerHTML = '<div class="text-muted">Event log cleared...</div>';
+            eventLogCounter = 0;
+        }
+
+        // Override SignalR event handlers for this test page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait for SignalR to initialize
+            setTimeout(() => {
+                if (window.stockFlowSignalR) {
+                    // Override notification handlers to log events
+                    const originalHandleUserNotification = window.stockFlowSignalR.handleUserNotification;
+                    window.stockFlowSignalR.handleUserNotification = function(data) {
+                        logEvent(`User Notification: ${data.Message} (${data.Type})`, data.Type);
+                        originalHandleUserNotification.call(this, data);
+                    };
+
+                    const originalHandleStockUpdate = window.stockFlowSignalR.handleStockUpdate;
+                    window.stockFlowSignalR.handleStockUpdate = function(data) {
+                        logEvent(`Stock Update: Product ${data.ProductId} quantity changed to ${data.NewQuantity}`, 'info');
+                        originalHandleStockUpdate.call(this, data);
+                    };
+
+                    const originalHandleStockLevelAlert = window.stockFlowSignalR.handleStockLevelAlert;
+                    window.stockFlowSignalR.handleStockLevelAlert = function(data) {
+                        logEvent(`Stock Alert: ${data.ProductName} - ${data.CurrentStock} units (${data.Severity})`, data.Severity === 'critical' ? 'error' : 'warning');
+                        originalHandleStockLevelAlert.call(this, data);
+                    };
+
+                    // Add handler for broadcast messages
+                    if (window.stockFlowSignalR.connection) {
+                        window.stockFlowSignalR.connection.on("BroadcastMessage", function(data) {
+                            logEvent(`Broadcast from ${data.Sender}: ${data.Message}`, data.Type);
+                        });
+                    }
+
+                    // Update connection status when SignalR connects
+                    if (window.stockFlowSignalR.isConnected) {
+                        updateConnectionStatus('Connected', 'success');
+                        logEvent('SignalR connection established', 'success');
+                    }
+                }
+            }, 1000);
+        });
+    </script>
+}

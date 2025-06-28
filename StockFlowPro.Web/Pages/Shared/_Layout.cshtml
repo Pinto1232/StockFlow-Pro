@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/mobile-nav.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/signalr.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/StockFlowPro.Web.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     
@@ -73,6 +74,13 @@
                     <ul class="navbar-nav ms-auto">
                         @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
+                            <!-- SignalR Connection Status in Navbar -->
+                            <li class="nav-item d-flex align-items-center me-3">
+                                <div id="signalr-connection-status" class="d-flex align-items-center gap-2 bg-white border rounded-pill px-3 py-2 shadow-sm">
+                                    <div id="signalr-status" class="signalr-status info">Connecting...</div>
+                                    <div class="signalr-loading" id="signalr-loading"></div>
+                                </div>
+                            </li>
                             <li class="nav-item dropdown">
                                 <button class="nav-link text-dark btn btn-link border-0 bg-transparent modern-user-toggle" 
                                         id="userDropdown" 
@@ -1153,5 +1161,8 @@
     }
     
     @await RenderSectionAsync("Scripts", required: false)
+    
+    @* SignalR Integration *@
+    @await Html.PartialAsync("_SignalRPartial")
 </body>
 </html>

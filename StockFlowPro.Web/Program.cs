@@ -25,6 +25,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddSignalR();
 
 // Configure database connection using environment variables
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -49,6 +50,9 @@ builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IPasswordService,
 builder.Services.AddScoped<IInvoiceExportService, InvoiceExportService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IReportService, StockFlowPro.Application.Services.ReportService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IEnhancedRoleService, StockFlowPro.Infrastructure.Services.EnhancedRoleService>();
+builder.Services.AddScoped<StockFlowPro.Application.Interfaces.INotificationService, StockFlowPro.Web.Services.NotificationService>();
+builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IRealTimeService, StockFlowPro.Web.Services.RealTimeService>();
+builder.Services.AddScoped<StockFlowPro.Application.Services.ProductNotificationService>();
 builder.Services.AddHostedService<DatabaseInitializationService>();
 
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
@@ -101,6 +105,7 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 app.MapControllers();
+app.MapHub<StockFlowPro.Web.Hubs.StockFlowHub>("/stockflowhub");
 
 await app.RunAsync();
 
