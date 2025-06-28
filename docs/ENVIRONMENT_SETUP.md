@@ -51,7 +51,7 @@ Edit the `.env` file with your actual values:
 
 ```bash
 # Example configuration for development
-DATABASE_CONNECTION_STRING=Data Source=StockFlowProDb.sqlite
+DATABASE_CONNECTION_STRING=Server=localhost;Database=StockFlowProDB;Trusted_Connection=true;TrustServerCertificate=true;MultipleActiveResultSets=true;
 USE_MOCK_DATA=true
 SMTP_HOST=localhost
 SMTP_PORT=587
@@ -65,14 +65,14 @@ The application will validate configuration on startup and show any missing requ
 
 ### 🗄️ **Database Configuration**
 ```bash
-# SQLite (Development)
-DATABASE_CONNECTION_STRING=Data Source=StockFlowProDb.sqlite
+# SQL Server (Default)
+DATABASE_CONNECTION_STRING=Server=localhost;Database=StockFlowProDB;Trusted_Connection=true;TrustServerCertificate=true;MultipleActiveResultSets=true;
 
 # SQL Server (Production)
-DATABASE_CONNECTION_STRING=Server=your-server;Database=StockFlowPro;Trusted_Connection=true;
+DATABASE_CONNECTION_STRING=Server=your-server;Database=StockFlowPro;Trusted_Connection=true;TrustServerCertificate=true;
 
-# PostgreSQL (Alternative)
-DATABASE_CONNECTION_STRING=Host=localhost;Database=stockflowpro;Username=user;Password=pass;
+# SQL Server (With Authentication)
+DATABASE_CONNECTION_STRING=Server=localhost;Database=StockFlowProDB;User Id=sa;Password=YourPassword;TrustServerCertificate=true;
 ```
 
 ### 🔐 **Security Configuration**

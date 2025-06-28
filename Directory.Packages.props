@@ -10,7 +10,6 @@
     <PackageVersion Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.2" />
     <!-- Entity Framework Core -->
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.6" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.6" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.6" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.6" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.6" />
@@ -37,5 +36,8 @@
     <PackageVersion Include="iTextSharp.LGPLv2.Core" Version="3.4.22" />
     <PackageVersion Include="EPPlus" Version="7.0.0" />
     <PackageVersion Include="CsvHelper" Version="30.0.1" />
+    <!-- Configuration -->
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
   </ItemGroup>
 </Project>

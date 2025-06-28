@@ -468,6 +468,12 @@
     letter-spacing: 0.5px;
 }
 
+/* Administration Tools section - Black text for stat labels */
+.admin-section .admin-card .stat-label {
+    color: #000000 !important;
+    font-weight: 600;
+}
+
 .card-actions {
     display: flex;
     gap: 0.75rem;

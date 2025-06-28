@@ -7,7 +7,7 @@ public static class EnvironmentConfig
 {
     // Database Configuration
     public static string DatabaseConnectionString => 
-        Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING") ?? "Data Source=StockFlowProDb.sqlite";
+        Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING") ?? "Server=localhost;Database=StockFlowProDB;Trusted_Connection=true;TrustServerCertificate=true;MultipleActiveResultSets=true;";
 
     // Application Settings
     public static string AspNetCoreEnvironment => 
@@ -176,7 +176,7 @@ public static class EnvironmentConfig
         {
             ["Environment"] = AspNetCoreEnvironment,
             ["UseMockData"] = UseMockData,
-            ["DatabaseType"] = DatabaseConnectionString.Contains("sqlite", StringComparison.OrdinalIgnoreCase) ? "SQLite" : "Other",
+            ["DatabaseType"] = DatabaseConnectionString.Contains("Server=", StringComparison.OrdinalIgnoreCase) ? "SQL Server" : "Other",
             ["CookieSecure"] = CookieSecure,
             ["CookieSameSite"] = CookieSameSite.ToString(),
             ["PasswordMinLength"] = PasswordMinLength,

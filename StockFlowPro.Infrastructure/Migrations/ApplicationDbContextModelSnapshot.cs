@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StockFlowPro.Infrastructure.Data;
 
@@ -15,32 +16,36 @@ namespace StockFlowPro.Infrastructure.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.6");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "9.0.6")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("StockFlowPro.Domain.Entities.Invoice", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("CreatedByUserId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bit")
                         .HasDefaultValue(true);
 
                     b.Property<decimal>("Total")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -56,30 +61,30 @@ namespace StockFlowPro.Infrastructure.Migrations
             modelBuilder.Entity("StockFlowPro.Domain.Entities.InvoiceItem", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("InvoiceId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ProductId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ProductName")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -93,29 +98,29 @@ namespace StockFlowPro.Infrastructure.Migrations
             modelBuilder.Entity("StockFlowPro.Domain.Entities.Product", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("CostPerItem")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bit")
                         .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("NumberInStock")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -128,48 +133,48 @@ namespace StockFlowPro.Infrastructure.Migrations
             modelBuilder.Entity("StockFlowPro.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bit")
                         .HasDefaultValue(true);
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("PasswordHash")
                         .HasMaxLength(500)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<int>("Role")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
