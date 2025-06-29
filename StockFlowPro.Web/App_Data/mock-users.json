@@ -9,11 +9,10 @@
     "dateOfBirth": "1980-01-01T00:00:00Z",
     "age": 45,
     "isActive": true,
-    "createdAt": "2025-06-29T22:18:05.2156544Z",
+    "createdAt": "2025-06-29T22:25:46.8933516Z",
     "updatedAt": null,
     "role": "Admin",
-    "passwordHash": "lhYqmKfEnhdQZTEU1c/w9JRG1B\u002BA9RmMvwNrMqDo8wM=:550e8400-e29b-41d4-a716-446655440000",
-    "profilePhotoUrl": null
+    "passwordHash": "lhYqmKfEnhdQZTEU1c/w9JRG1B\u002BA9RmMvwNrMqDo8wM=:550e8400-e29b-41d4-a716-446655440000"
   },
   {
     "id": "550e8400-e29b-41d4-a716-446655440001",
@@ -25,11 +24,10 @@
     "dateOfBirth": "1985-05-15T00:00:00Z",
     "age": 40,
     "isActive": true,
-    "createdAt": "2025-06-29T22:18:05.217597Z",
+    "createdAt": "2025-06-29T22:25:46.8953066Z",
     "updatedAt": null,
     "role": "Admin",
-    "passwordHash": "9uY5g\u002B2Xn6RzY56rnJDwCcEECPdHqCwyYbugJJ\u002BeJxc=:550e8400-e29b-41d4-a716-446655440001",
-    "profilePhotoUrl": null
+    "passwordHash": "9uY5g\u002B2Xn6RzY56rnJDwCcEECPdHqCwyYbugJJ\u002BeJxc=:550e8400-e29b-41d4-a716-446655440001"
   },
   {
     "id": "550e8400-e29b-41d4-a716-446655440002",
@@ -41,11 +39,10 @@
     "dateOfBirth": "1990-08-22T00:00:00Z",
     "age": 35,
     "isActive": true,
-    "createdAt": "2025-06-29T22:18:05.2177135Z",
+    "createdAt": "2025-06-29T22:25:46.8954168Z",
     "updatedAt": null,
     "role": "Manager",
-    "passwordHash": "DlDCngVJc6Ywv1XU0AmJitu32FCM75j2EaTdX/k2LTI=:550e8400-e29b-41d4-a716-446655440002",
-    "profilePhotoUrl": null
+    "passwordHash": "DlDCngVJc6Ywv1XU0AmJitu32FCM75j2EaTdX/k2LTI=:550e8400-e29b-41d4-a716-446655440002"
   },
   {
     "id": "550e8400-e29b-41d4-a716-446655440003",
@@ -57,11 +54,10 @@
     "dateOfBirth": "1992-12-10T00:00:00Z",
     "age": 33,
     "isActive": true,
-    "createdAt": "2025-06-29T22:18:05.2177254Z",
+    "createdAt": "2025-06-29T22:25:46.8954293Z",
     "updatedAt": null,
     "role": "User",
-    "passwordHash": "hcOYa4Y0UUm8qHILwKbuHqeH9CJZCYsGoEEvF6xMxnI=:550e8400-e29b-41d4-a716-446655440003",
-    "profilePhotoUrl": null
+    "passwordHash": "hcOYa4Y0UUm8qHILwKbuHqeH9CJZCYsGoEEvF6xMxnI=:550e8400-e29b-41d4-a716-446655440003"
   },
   {
     "id": "550e8400-e29b-41d4-a716-446655440004",
@@ -73,10 +69,9 @@
     "dateOfBirth": "1988-03-07T00:00:00Z",
     "age": 37,
     "isActive": false,
-    "createdAt": "2025-06-29T22:18:05.2177323Z",
+    "createdAt": "2025-06-29T22:25:46.8954349Z",
     "updatedAt": null,
     "role": "User",
-    "passwordHash": "8\u002BupOWwjzjPmhLwLcvIQqlO3FlqJed0q0pOkYyYU7sA=:550e8400-e29b-41d4-a716-446655440004",
-    "profilePhotoUrl": null
+    "passwordHash": "8\u002BupOWwjzjPmhLwLcvIQqlO3FlqJed0q0pOkYyYU7sA=:550e8400-e29b-41d4-a716-446655440004"
   }
 ]
