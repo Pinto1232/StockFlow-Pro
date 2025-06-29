@@ -57,7 +57,15 @@ class ProfileManager {
         try {
             const response = await fetch('/api/profile');
             if (!response.ok) {
-                throw new Error('Failed to load profile: ' + response.status);
+                if (response.status === 401) {
+                    // User is not authenticated
+                    this.showAuthenticationError();
+                    return;
+                } else if (response.status === 404) {
+                    throw new Error('Profile not found. Please contact support.');
+                } else {
+                    throw new Error('Failed to load profile: ' + response.status);
+                }
             }
             
             const profile = await response.json();
@@ -66,7 +74,7 @@ class ProfileManager {
             this.originalProfileData = Object.assign({}, profile);
         } catch (error) {
             console.error('Error loading profile:', error);
-            this.showToast('Error', 'Failed to load profile data', 'error');
+            this.showToast('Error', error.message || 'Failed to load profile data', 'error');
         } finally {
             this.showLoading(false);
         }

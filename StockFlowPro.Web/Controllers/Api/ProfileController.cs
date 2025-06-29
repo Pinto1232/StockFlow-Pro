@@ -31,10 +31,16 @@ public class ProfileController : ControllerBase
     {
         try
         {
+            // Check if user is authenticated
+            if (!User.Identity?.IsAuthenticated ?? true)
+            {
+                return Unauthorized(new { message = "Authentication required", requiresLogin = true });
+            }
+
             var userId = User.GetUserId();
             if (!userId.HasValue)
             {
-                return Unauthorized("User ID not found in token");
+                return Unauthorized(new { message = "User ID not found in token", requiresLogin = true });
             }
 
             var query = new GetUserByIdQuery { Id = userId.Value };
@@ -42,7 +48,7 @@ public class ProfileController : ControllerBase
             
             if (user == null)
             {
-                return NotFound("User profile not found");
+                return NotFound(new { message = "User profile not found" });
             }
 
             var profile = new ProfileDto
@@ -64,7 +70,7 @@ public class ProfileController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
+            return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
         }
     }
 
@@ -212,28 +218,34 @@ public class ProfileController : ControllerBase
     [HttpPost("upload-photo")]
     public async Task<ActionResult> UploadPhoto(IFormFile photo)
     {
+        // Check if user is authenticated
+        if (!User.Identity?.IsAuthenticated ?? true)
+        {
+            return Unauthorized(new { message = "Authentication required", requiresLogin = true });
+        }
+
         var userId = User.GetUserId();
         if (!userId.HasValue)
         {
-            return Unauthorized("User ID not found in token");
+            return Unauthorized(new { message = "User ID not found in token", requiresLogin = true });
         }
 
         if (photo == null || photo.Length == 0)
         {
-            return BadRequest("No photo file provided");
+            return BadRequest(new { message = "No photo file provided" });
         }
 
         // Validate file
         var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png", "image/gif" };
         if (!allowedTypes.Contains(photo.ContentType.ToLower()))
         {
-            return BadRequest("Invalid file type. Only JPG, PNG, and GIF files are allowed");
+            return BadRequest(new { message = "Invalid file type. Only JPG, PNG, and GIF files are allowed" });
         }
 
         const long maxFileSize = 5 * 1024 * 1024; // 5MB
         if (photo.Length > maxFileSize)
         {
-            return BadRequest("File size exceeds 5MB limit");
+            return BadRequest(new { message = "File size exceeds 5MB limit" });
         }
 
         try
@@ -266,11 +278,11 @@ public class ProfileController : ControllerBase
 
             await _mediator.Send(command);
 
-            return Ok(new { photoUrl });
+            return Ok(new { photoUrl, message = "Photo uploaded successfully" });
         }
         catch (Exception ex)
         {
-            return BadRequest($"Failed to upload photo: {ex.Message}");
+            return BadRequest(new { message = $"Failed to upload photo: {ex.Message}" });
         }
     }
 

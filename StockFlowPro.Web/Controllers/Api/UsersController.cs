@@ -56,9 +56,22 @@ public class UsersController : ControllerBase
     [Permission(Permissions.Users.ViewAll)]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers([FromQuery] bool activeOnly = false)
     {
-        var query = new GetAllUsersQuery { ActiveOnly = activeOnly };
-        var users = await _mediator.Send(query);
-        return Ok(users);
+        try
+        {
+            // Check if user is authenticated
+            if (!User.Identity?.IsAuthenticated ?? true)
+            {
+                return Unauthorized(new { message = "Authentication required", requiresLogin = true });
+            }
+
+            var query = new GetAllUsersQuery { ActiveOnly = activeOnly };
+            var users = await _mediator.Send(query);
+            return Ok(users);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
+        }
     }
 
     [HttpGet("{id:guid}")]
