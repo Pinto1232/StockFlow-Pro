@@ -238,19 +238,27 @@
             const serverStatusDiv = document.getElementById('server-status');
             
             try {
-                // Simple health check endpoint
+                // Simple health check endpoint - use GET instead of HEAD since HEAD is not supported
                 const response = await fetch('/api/UserSynchronization/check/@(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)', {
-                    method: 'HEAD', // Use HEAD to just check if server responds
+                    method: 'GET',
                     headers: {
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
                     }
                 });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                // Server is responding, now get the actual sync status
+                const status = await response.json();
                 
                 serverStatusDiv.className = 'server-status online';
                 serverStatusDiv.innerHTML = '<i class="fas fa-check-circle"></i><span>Server connection established. Synchronization service is available.</span>';
                 
-                // If server is online, proceed to check sync status
-                setTimeout(checkSyncStatus, 500);
+                // Process the sync status directly since we already have it
+                processSyncStatus(status);
                 
             } catch (error) {
                 console.error('Server status check failed:', error);
@@ -268,6 +276,23 @@
                 const syncStatusDiv = document.getElementById('sync-status');
                 syncStatusDiv.className = 'sync-status error';
                 syncStatusDiv.innerHTML = '<i class="fas fa-times-circle"></i><span>Cannot check synchronization status - server unavailable.</span>';
+            }
+        }
+        
+        function processSyncStatus(status) {
+            const statusDiv = document.getElementById('sync-status');
+            const actionsDiv = document.getElementById('sync-actions');
+            
+            if (status.requiresSync) {
+                statusDiv.className = 'sync-status requires-sync';
+                statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Your account requires synchronization with the database.</span>';
+                actionsDiv.style.display = 'block';
+            } else if (status.existsInDatabase) {
+                statusDiv.className = 'sync-status synced';
+                statusDiv.innerHTML = '<i class="fas fa-check-circle"></i><span>Your account is synchronized and up to date.</span>';
+            } else {
+                statusDiv.className = 'sync-status error';
+                statusDiv.innerHTML = '<i class="fas fa-times-circle"></i><span>Account not found in system. Please contact an administrator.</span>';
             }
         }
         
@@ -289,18 +314,8 @@
                 }
                 
                 const status = await response.json();
+                processSyncStatus(status);
                 
-                if (status.requiresSync) {
-                    statusDiv.className = 'sync-status requires-sync';
-                    statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Your account requires synchronization with the database.</span>';
-                    actionsDiv.style.display = 'block';
-                } else if (status.existsInDatabase) {
-                    statusDiv.className = 'sync-status synced';
-                    statusDiv.innerHTML = '<i class="fas fa-check-circle"></i><span>Your account is synchronized and up to date.</span>';
-                } else {
-                    statusDiv.className = 'sync-status error';
-                    statusDiv.innerHTML = '<i class="fas fa-times-circle"></i><span>Account not found in system. Please contact an administrator.</span>';
-                }
             } catch (error) {
                 console.error('Sync status check failed:', error);
                 statusDiv.className = 'sync-status error';
