@@ -37,8 +37,8 @@ else
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-tabs">
-                <button class="auth-tab active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" aria-controls="login">Sign In</button>
-                <button class="auth-tab" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" aria-controls="register">Register</button>
+                <button class="auth-tab active" id="login-tab" type="button" aria-controls="login">Sign In</button>
+                <button class="auth-tab" id="register-tab" type="button" aria-controls="register">Register</button>
             </div>
             
             <div class="tab-content" id="authTabsContent">
@@ -154,9 +154,7 @@ else
                                 <div class="form-select-wrapper">
                                     <label for="Register_Role">Role</label>
                                     <select id="Register_Role" name="RegisterModel.Role">
-                                        <option value="2" selected>User</option>
-                                        <option value="3">Manager</option>
-                                        <option value="1">Admin</option>
+                                        <option value="">Loading roles...</option>
                                     </select>
                                 </div>
                             </div>

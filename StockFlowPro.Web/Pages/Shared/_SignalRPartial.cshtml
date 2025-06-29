@@ -50,29 +50,39 @@
     <!-- Page-specific SignalR Integration -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Hide loading indicator once connected
-            window.stockFlowSignalR.connection?.onreconnected(() => {
-                const loadingIndicator = document.getElementById('signalr-loading');
-                if (loadingIndicator) {
-                    loadingIndicator.style.display = 'none';
-                }
-            });
+            // Wait for SignalR to be initialized
+            const waitForSignalR = () => {
+                if (window.stockFlowSignalR && window.stockFlowSignalR.connection) {
+                    // Hide loading indicator once connected
+                    window.stockFlowSignalR.connection.onreconnected(() => {
+                        const loadingIndicator = document.getElementById('signalr-loading');
+                        if (loadingIndicator) {
+                            loadingIndicator.style.display = 'none';
+                        }
+                    });
 
-            // Show loading indicator when reconnecting
-            window.stockFlowSignalR.connection?.onreconnecting(() => {
-                const loadingIndicator = document.getElementById('signalr-loading');
-                if (loadingIndicator) {
-                    loadingIndicator.style.display = 'inline-block';
-                }
-            });
+                    // Show loading indicator when reconnecting
+                    window.stockFlowSignalR.connection.onreconnecting(() => {
+                        const loadingIndicator = document.getElementById('signalr-loading');
+                        if (loadingIndicator) {
+                            loadingIndicator.style.display = 'inline-block';
+                        }
+                    });
 
-            // Hide loading indicator when connected
-            window.stockFlowSignalR.connection?.start().then(() => {
-                const loadingIndicator = document.getElementById('signalr-loading');
-                if (loadingIndicator) {
-                    loadingIndicator.style.display = 'none';
+                    // Hide loading indicator if already connected
+                    if (window.stockFlowSignalR.isConnected) {
+                        const loadingIndicator = document.getElementById('signalr-loading');
+                        if (loadingIndicator) {
+                            loadingIndicator.style.display = 'none';
+                        }
+                    }
+                } else {
+                    // Retry after a short delay if SignalR isn't ready yet
+                    setTimeout(waitForSignalR, 100);
                 }
-            });
+            };
+            
+            waitForSignalR();
         });
     </script>
 
@@ -83,25 +93,32 @@
         <script>
             // Dashboard-specific SignalR handlers
             document.addEventListener('DOMContentLoaded', function() {
-                if (window.stockFlowSignalR && window.stockFlowSignalR.connection) {
-                    // Join dashboard group for real-time updates
-                    window.stockFlowSignalR.joinGroup('Dashboard');
-                    
-                    // Override dashboard update handler
-                    window.stockFlowSignalR.handleDashboardUpdate = function(data) {
-                        console.log('Dashboard Update:', data);
+                const initializeDashboard = () => {
+                    if (window.stockFlowSignalR && window.stockFlowSignalR.isConnected) {
+                        // Join dashboard group for real-time updates
+                        window.stockFlowSignalR.joinGroup('Dashboard');
                         
-                        // Update dashboard metrics
-                        Object.keys(data).forEach(key => {
-                            const element = document.getElementById(`dashboard-$${key}`);
-                            if (element) {
-                                element.textContent = data[key];
-                                element.classList.add('updated');
-                                setTimeout(() => element.classList.remove('updated'), 2000);
-                            }
-                        });
-                    };
-                }
+                        // Override dashboard update handler
+                        window.stockFlowSignalR.handleDashboardUpdate = function(data) {
+                            console.log('Dashboard Update:', data);
+                            
+                            // Update dashboard metrics
+                            Object.keys(data).forEach(key => {
+                                const element = document.getElementById(`dashboard-${key}`);
+                                if (element) {
+                                    element.textContent = data[key];
+                                    element.classList.add('updated');
+                                    setTimeout(() => element.classList.remove('updated'), 2000);
+                                }
+                            });
+                        };
+                    } else {
+                        // Wait for SignalR to be ready
+                        setTimeout(initializeDashboard, 100);
+                    }
+                };
+                
+                initializeDashboard();
             });
         </script>
     }
@@ -111,35 +128,42 @@
         <script>
             // Products page-specific SignalR handlers
             document.addEventListener('DOMContentLoaded', function() {
-                if (window.stockFlowSignalR && window.stockFlowSignalR.connection) {
-                    // Join products group for real-time updates
-                    window.stockFlowSignalR.joinGroup('Products');
-                    
-                    // Override stock update handler for products page
-                    window.stockFlowSignalR.handleStockUpdate = function(data) {
-                        console.log('Stock Update on Products Page:', data);
+                const initializeProducts = () => {
+                    if (window.stockFlowSignalR && window.stockFlowSignalR.isConnected) {
+                        // Join products group for real-time updates
+                        window.stockFlowSignalR.joinGroup('Products');
                         
-                        // Update product stock display
-                        const productRow = document.querySelector(`tr[data-product-id="${data.ProductId}"]`);
-                        if (productRow) {
-                            const stockCell = productRow.querySelector('.stock-quantity');
-                            if (stockCell) {
-                                stockCell.textContent = data.NewQuantity;
-                                stockCell.classList.add('updated');
-                                
-                                // Update stock level indicator
-                                stockCell.classList.remove('low', 'critical');
-                                if (data.NewQuantity === 0) {
-                                    stockCell.classList.add('critical');
-                                } else if (data.NewQuantity <= 10) {
-                                    stockCell.classList.add('low');
+                        // Override stock update handler for products page
+                        window.stockFlowSignalR.handleStockUpdate = function(data) {
+                            console.log('Stock Update on Products Page:', data);
+                            
+                            // Update product stock display
+                            const productRow = document.querySelector(`tr[data-product-id="${data.ProductId}"]`);
+                            if (productRow) {
+                                const stockCell = productRow.querySelector('.stock-quantity');
+                                if (stockCell) {
+                                    stockCell.textContent = data.NewQuantity;
+                                    stockCell.classList.add('updated');
+                                    
+                                    // Update stock level indicator
+                                    stockCell.classList.remove('low', 'critical');
+                                    if (data.NewQuantity === 0) {
+                                        stockCell.classList.add('critical');
+                                    } else if (data.NewQuantity <= 10) {
+                                        stockCell.classList.add('low');
+                                    }
+                                    
+                                    setTimeout(() => stockCell.classList.remove('updated'), 2000);
                                 }
-                                
-                                setTimeout(() => stockCell.classList.remove('updated'), 2000);
                             }
-                        }
-                    };
-                }
+                        };
+                    } else {
+                        // Wait for SignalR to be ready
+                        setTimeout(initializeProducts, 100);
+                    }
+                };
+                
+                initializeProducts();
             });
         </script>
     }
@@ -149,27 +173,34 @@
         <script>
             // Invoices page-specific SignalR handlers
             document.addEventListener('DOMContentLoaded', function() {
-                if (window.stockFlowSignalR && window.stockFlowSignalR.connection) {
-                    // Join invoices group for real-time updates
-                    window.stockFlowSignalR.joinGroup('Invoices');
-                    
-                    // Override invoice update handler
-                    window.stockFlowSignalR.handleInvoiceUpdate = function(data) {
-                        console.log('Invoice Update on Invoices Page:', data);
+                const initializeInvoices = () => {
+                    if (window.stockFlowSignalR && window.stockFlowSignalR.isConnected) {
+                        // Join invoices group for real-time updates
+                        window.stockFlowSignalR.joinGroup('Invoices');
                         
-                        // Update invoice status display
-                        const invoiceRow = document.querySelector(`tr[data-invoice-id="${data.InvoiceId}"]`);
-                        if (invoiceRow) {
-                            const statusCell = invoiceRow.querySelector('.invoice-status');
-                            if (statusCell) {
-                                statusCell.textContent = data.Status;
-                                statusCell.className = `invoice-status status-$${data.Status.toLowerCase()}`;
-                                statusCell.classList.add('updated');
-                                setTimeout(() => statusCell.classList.remove('updated'), 2000);
+                        // Override invoice update handler
+                        window.stockFlowSignalR.handleInvoiceUpdate = function(data) {
+                            console.log('Invoice Update on Invoices Page:', data);
+                            
+                            // Update invoice status display
+                            const invoiceRow = document.querySelector(`tr[data-invoice-id="${data.InvoiceId}"]`);
+                            if (invoiceRow) {
+                                const statusCell = invoiceRow.querySelector('.invoice-status');
+                                if (statusCell) {
+                                    statusCell.textContent = data.Status;
+                                    statusCell.className = `invoice-status status-${data.Status.toLowerCase()}`;
+                                    statusCell.classList.add('updated');
+                                    setTimeout(() => statusCell.classList.remove('updated'), 2000);
+                                }
                             }
-                        }
-                    };
-                }
+                        };
+                    } else {
+                        // Wait for SignalR to be ready
+                        setTimeout(initializeInvoices, 100);
+                    }
+                };
+                
+                initializeInvoices();
             });
         </script>
     }
@@ -179,48 +210,55 @@
         <script>
             // Admin panel-specific SignalR handlers
             document.addEventListener('DOMContentLoaded', function() {
-                if (window.stockFlowSignalR && window.stockFlowSignalR.connection) {
-                    // Join admin group for system notifications
-                    window.stockFlowSignalR.joinGroup('Admin');
-                    
-                    // Override system metrics handler
-                    window.stockFlowSignalR.handleSystemMetrics = function(data) {
-                        console.log('System Metrics Update:', data);
+                const initializeAdmin = () => {
+                    if (window.stockFlowSignalR && window.stockFlowSignalR.isConnected) {
+                        // Join admin group for system notifications
+                        window.stockFlowSignalR.joinGroup('Admin');
                         
-                        // Update system metrics display
-                        Object.keys(data.Metrics).forEach(key => {
-                            const element = document.getElementById(`system-metric-$${key}`);
-                            if (element) {
-                                element.textContent = data.Metrics[key];
-                                element.classList.add('updated');
-                                setTimeout(() => element.classList.remove('updated'), 1000);
-                            }
-                        });
-                    };
-                    
-                    // Override user activity handler
-                    window.stockFlowSignalR.handleUserActivity = function(data) {
-                        console.log('User Activity:', data);
-                        
-                        // Update user activity log
-                        const activityLog = document.getElementById('user-activity-log');
-                        if (activityLog) {
-                            const logEntry = document.createElement('div');
-                            logEntry.className = 'activity-entry';
-                            logEntry.innerHTML = `
-                                <span class="timestamp">${new Date(data.Timestamp).toLocaleTimeString()}</span>
-                                <span class="user">User $${data.UserId}</span>
-                                <span class="activity">${data.Activity}</span>
-                            `;
-                            activityLog.prepend(logEntry);
+                        // Override system metrics handler
+                        window.stockFlowSignalR.handleSystemMetrics = function(data) {
+                            console.log('System Metrics Update:', data);
                             
-                            // Keep only last 50 entries
-                            while (activityLog.children.length > 50) {
-                                activityLog.removeChild(activityLog.lastChild);
+                            // Update system metrics display
+                            Object.keys(data.Metrics).forEach(key => {
+                                const element = document.getElementById(`system-metric-${key}`);
+                                if (element) {
+                                    element.textContent = data.Metrics[key];
+                                    element.classList.add('updated');
+                                    setTimeout(() => element.classList.remove('updated'), 1000);
+                                }
+                            });
+                        };
+                        
+                        // Override user activity handler
+                        window.stockFlowSignalR.handleUserActivity = function(data) {
+                            console.log('User Activity:', data);
+                            
+                            // Update user activity log
+                            const activityLog = document.getElementById('user-activity-log');
+                            if (activityLog) {
+                                const logEntry = document.createElement('div');
+                                logEntry.className = 'activity-entry';
+                                logEntry.innerHTML = `
+                                    <span class="timestamp">${new Date(data.Timestamp).toLocaleTimeString()}</span>
+                                    <span class="user">User ${data.UserId}</span>
+                                    <span class="activity">${data.Activity}</span>
+                                `;
+                                activityLog.prepend(logEntry);
+                                
+                                // Keep only last 50 entries
+                                while (activityLog.children.length > 50) {
+                                    activityLog.removeChild(activityLog.lastChild);
+                                }
                             }
-                        }
-                    };
-                }
+                        };
+                    } else {
+                        // Wait for SignalR to be ready
+                        setTimeout(initializeAdmin, 100);
+                    }
+                };
+                
+                initializeAdmin();
             });
         </script>
     }
