@@ -356,7 +356,7 @@
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ reason: reason || 'Self-service synchronization' })
+                    body: JSON.stringify({ Reason: reason || 'Self-service synchronization' })
                 });
                 
                 if (!response.ok) {
@@ -415,24 +415,44 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            'Accept': 'application/json'
                         },
-                        body: JSON.stringify({ reason: reason })
+                        body: JSON.stringify({ Reason: reason })
                     });
+                    
+                    if (!response.ok) {
+                        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                        try {
+                            const errorData = await response.json();
+                            errorMessage = errorData.message || errorData.error || errorMessage;
+                        } catch (e) {
+                            // If response is not JSON, use the status text
+                        }
+                        throw new Error(errorMessage);
+                    }
                     
                     const result = await response.json();
                     
-                    if (response.ok) {
-                        resultDiv.className = 'alert alert-success';
-                        resultDiv.innerHTML = '<i class="fas fa-check-circle"></i> ' + result.message;
+                    resultDiv.className = 'alert alert-success';
+                    resultDiv.innerHTML = '<i class="fas fa-check-circle"></i> ' + result.message;
+                    resultDiv.style.display = 'block';
+                    
+                } catch (error) {
+                    console.error('Admin sync failed:', error);
+                    resultDiv.className = 'alert alert-danger';
+                    
+                    if (error.message.includes('Failed to fetch') || error.message.includes('ERR_CONNECTION_REFUSED')) {
+                        resultDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Unable to connect to synchronization service. Please ensure the server is running and try again.';
+                    } else if (error.message.includes('401')) {
+                        resultDiv.innerHTML = '<i class="fas fa-lock"></i> Authentication required. Please log in and try again.';
+                    } else if (error.message.includes('403')) {
+                        resultDiv.innerHTML = '<i class="fas fa-ban"></i> Access denied. You may not have permission to perform this action.';
+                    } else if (error.message.includes('400')) {
+                        resultDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Bad request. Please check the User ID format and reason field.';
                     } else {
-                        resultDiv.className = 'alert alert-danger';
-                        resultDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + (result.message || result.error || 'Synchronization failed');
+                        resultDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> Error during synchronization: ${error.message}`;
                     }
                     
-                    resultDiv.style.display = 'block';
-                } catch (error) {
-                    resultDiv.className = 'alert alert-danger';
-                    resultDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error during synchronization';
                     resultDiv.style.display = 'block';
                 } finally {
                     button.disabled = false;
