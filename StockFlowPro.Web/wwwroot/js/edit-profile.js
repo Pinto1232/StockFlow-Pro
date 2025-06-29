@@ -13,6 +13,8 @@ class ProfileManager {
     bindEvents() {
         const profileForm = document.getElementById('profileForm');
         const passwordForm = document.getElementById('passwordForm');
+        const photoInput = document.getElementById('photoInput');
+        const profilePhotoWrapper = document.querySelector('.profile-photo-wrapper');
 
         if (profileForm) {
             profileForm.addEventListener('submit', (e) => this.handleProfileSubmit(e));
@@ -20,6 +22,15 @@ class ProfileManager {
 
         if (passwordForm) {
             passwordForm.addEventListener('submit', (e) => this.handlePasswordSubmit(e));
+        }
+
+        // Photo upload events
+        if (photoInput) {
+            photoInput.addEventListener('change', (e) => this.handlePhotoSelect(e));
+        }
+
+        if (profilePhotoWrapper) {
+            profilePhotoWrapper.addEventListener('click', () => this.selectPhoto());
         }
 
         // Real-time validation
@@ -71,6 +82,141 @@ class ProfileManager {
         if (profile.dateOfBirth) {
             const date = new Date(profile.dateOfBirth);
             document.getElementById('dateOfBirth').value = date.toISOString().split('T')[0];
+        }
+
+        // Update profile photo
+        this.updateProfilePhoto(profile.profilePhotoUrl);
+    }
+
+    updateProfilePhoto(photoUrl) {
+        const profilePhoto = document.getElementById('profilePhoto');
+        const removePhotoBtn = document.getElementById('removePhotoBtn');
+        
+        if (photoUrl && photoUrl !== '/images/default-avatar.svg') {
+            profilePhoto.src = photoUrl;
+            removePhotoBtn.style.display = 'inline-block';
+        } else {
+            profilePhoto.src = '/images/default-avatar.svg';
+            removePhotoBtn.style.display = 'none';
+        }
+    }
+
+    selectPhoto() {
+        const photoInput = document.getElementById('photoInput');
+        photoInput.click();
+    }
+
+    async handlePhotoSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Validate file
+        if (!this.validatePhotoFile(file)) {
+            return;
+        }
+
+        // Show preview
+        this.showPhotoPreview(file);
+
+        // Upload photo
+        await this.uploadPhoto(file);
+    }
+
+    validatePhotoFile(file) {
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+
+        if (!allowedTypes.includes(file.type)) {
+            this.showToast('Error', 'Please select a valid image file (JPG, PNG, GIF)', 'error');
+            return false;
+        }
+
+        if (file.size > maxSize) {
+            this.showToast('Error', 'File size must be less than 5MB', 'error');
+            return false;
+        }
+
+        return true;
+    }
+
+    showPhotoPreview(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const profilePhoto = document.getElementById('profilePhoto');
+            profilePhoto.src = e.target.result;
+            document.getElementById('removePhotoBtn').style.display = 'inline-block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async uploadPhoto(file) {
+        this.showLoading(true);
+
+        const formData = new FormData();
+        formData.append('photo', file);
+
+        try {
+            const response = await fetch('/api/profile/upload-photo', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to upload photo');
+            }
+
+            const result = await response.json();
+            this.updateProfilePhoto(result.photoUrl);
+            
+            // Update navbar avatar
+            if (typeof window.updateNavbarAvatar === 'function') {
+                window.updateNavbarAvatar(result.photoUrl);
+            }
+            
+            this.showToast('Success', 'Profile photo updated successfully!', 'success');
+        } catch (error) {
+            console.error('Error uploading photo:', error);
+            this.showToast('Error', error.message, 'error');
+            // Revert to original photo on error
+            this.updateProfilePhoto(this.originalProfileData?.profilePhotoUrl);
+        } finally {
+            this.showLoading(false);
+            // Clear the input
+            document.getElementById('photoInput').value = '';
+        }
+    }
+
+    async removePhoto() {
+        if (!confirm('Are you sure you want to remove your profile photo?')) {
+            return;
+        }
+
+        this.showLoading(true);
+
+        try {
+            const response = await fetch('/api/profile/remove-photo', {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to remove photo');
+            }
+
+            this.updateProfilePhoto(null);
+            
+            // Update navbar avatar
+            if (typeof window.updateNavbarAvatar === 'function') {
+                window.updateNavbarAvatar(null);
+            }
+            
+            this.showToast('Success', 'Profile photo removed successfully!', 'success');
+        } catch (error) {
+            console.error('Error removing photo:', error);
+            this.showToast('Error', error.message, 'error');
+        } finally {
+            this.showLoading(false);
         }
     }
 
@@ -416,6 +562,18 @@ function togglePasswordVisibility(fieldId) {
         field.type = 'password';
         icon.classList.remove('fa-eye-slash');
         icon.classList.add('fa-eye');
+    }
+}
+
+function selectPhoto() {
+    if (profileManager) {
+        profileManager.selectPhoto();
+    }
+}
+
+function removePhoto() {
+    if (profileManager) {
+        profileManager.removePhoto();
     }
 }
 

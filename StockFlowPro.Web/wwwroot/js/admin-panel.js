@@ -97,13 +97,17 @@ async function createUserRoleModal() {
     document.body.insertAdjacentHTML('beforeend', loadingModalHTML);
 
     try {
-        // Fetch available roles from the API
-        const response = await fetch('/api/role-management/roles/options');
+        // Fetch available roles from the API with cache busting
+        const timestamp = new Date().getTime();
+        console.log('🔄 Fetching roles from /api/role-management/roles/options with timestamp:', timestamp);
+        const response = await fetch(`/api/role-management/roles/options?_t=${timestamp}`);
         if (!response.ok) {
             throw new Error('Failed to load roles');
         }
 
         const roles = await response.json();
+        console.log('🔄 Fetched roles:', roles);
+        console.log('🔄 Number of roles:', roles.length);
         
         // Create the full modal with dynamic roles
         const modalHTML = `
@@ -145,6 +149,14 @@ async function createUserRoleModal() {
                                                 ).join('')}
                                             </div>
                                         </div>
+                                        <div class="role-actions">
+                                            <button class="role-action-btn edit-btn" onclick="editRole('${role.id}', event)" title="Edit Role">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="role-action-btn delete-btn" onclick="deleteRole('${role.id}', '${role.displayName}', event)" title="Delete Role">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 `).join('')}
                             </div>
@@ -174,7 +186,12 @@ async function createUserRoleModal() {
         // Add event listeners for role selection
         const roleOptions = document.querySelectorAll('.role-option');
         roleOptions.forEach(option => {
-            option.addEventListener('click', function() {
+            option.addEventListener('click', function(event) {
+                // Don't select role if clicking on action buttons
+                if (event.target.closest('.role-actions')) {
+                    return;
+                }
+                
                 roleOptions.forEach(opt => opt.classList.remove('selected'));
                 this.classList.add('selected');
 
@@ -527,10 +544,12 @@ async function submitCreateRole() {
             console.log('refreshUserManagementRoles function not found');
         }
         
-        // Refresh the Quick Add User modal to show the new role
+        // Refresh the Quick Add User modal to show the new role with longer delay
+        console.log('🔄 Refreshing role dropdown to include new role...');
         setTimeout(() => {
+            console.log('🔄 Calling createUserRoleModal() to refresh roles...');
             createUserRoleModal();
-        }, 1000);
+        }, 1500); // Increased delay to ensure database has been updated
 
     } catch (error) {
         console.error('Error creating role:', error);
@@ -538,6 +557,231 @@ async function submitCreateRole() {
         
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fas fa-plus"></i> Create Role';
+    }
+}
+
+// Function to edit a role
+async function editRole(roleId, event) {
+    event.stopPropagation(); // Prevent role selection
+    
+    try {
+        // Fetch role details
+        const response = await fetch(`/api/role-management/roles/${roleId}`);
+        if (!response.ok) {
+            throw new Error('Failed to load role details');
+        }
+
+        const role = await response.json();
+        
+        // Fetch available permissions
+        const permissionsResponse = await fetch('/api/role-management/permissions');
+        if (!permissionsResponse.ok) {
+            throw new Error('Failed to load permissions');
+        }
+
+        const permissionCategories = await permissionsResponse.json();
+
+        // Hide the Quick Add User modal temporarily
+        const quickAddModal = document.getElementById('quick-add-modal');
+        if (quickAddModal) {
+            quickAddModal.style.display = 'none';
+        }
+
+        const editRoleModalHTML = `
+            <div id="edit-role-modal" class="quick-add-modal" onclick="closeEditRoleModal()">
+                <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-edit"></i> Edit Role</h3>
+                        <button class="modal-close" onclick="closeEditRoleModal()" title="Close modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="edit-role-name">
+                                <i class="fas fa-tag"></i> Role Name <span style="color: #e74c3c;">*</span>
+                            </label>
+                            <input type="text" id="edit-role-name" value="${role.name}" class="form-input" required>
+                            <div class="input-hint">Internal name for the role</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-role-display-name">
+                                <i class="fas fa-eye"></i> Display Name
+                            </label>
+                            <input type="text" id="edit-role-display-name" value="${role.displayName || ''}" class="form-input">
+                            <div class="input-hint">Name shown to users</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-role-description">
+                                <i class="fas fa-info-circle"></i> Description
+                            </label>
+                            <textarea id="edit-role-description" class="form-input" rows="3">${role.description || ''}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-role-priority">
+                                <i class="fas fa-sort-numeric-up"></i> Priority Level
+                            </label>
+                            <input type="number" id="edit-role-priority" value="${role.priority || 0}" class="form-input" min="0" max="100">
+                            <div class="input-hint">Higher numbers = higher priority (0-100)</div>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <i class="fas fa-key"></i> Permissions
+                            </label>
+                            <div class="permissions-container">
+                                ${permissionCategories.map(category => `
+                                    <div class="permission-category">
+                                        <h5 class="permission-category-title">
+                                            <i class="fas fa-folder"></i> ${category.category}
+                                        </h5>
+                                        <div class="permission-options">
+                                            ${category.permissions.map(permission => `
+                                                <label class="permission-checkbox">
+                                                    <input type="checkbox" value="${permission}" name="edit-permissions" ${role.permissions && role.permissions.includes(permission) ? 'checked' : ''}>
+                                                    <span class="checkmark"></span>
+                                                    <span class="permission-label">${permission.replace(/^[^.]+\./, '')}</span>
+                                                </label>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline" onclick="closeEditRoleModal()">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button class="btn btn-primary" onclick="submitEditRole('${roleId}')">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', editRoleModalHTML);
+
+        // Focus on the role name input
+        setTimeout(() => {
+            document.getElementById('edit-role-name').focus();
+        }, 300);
+
+    } catch (error) {
+        console.error('Error loading role for editing:', error);
+        showNotification(`Failed to load role details: ${error.message}`, 'error');
+    }
+}
+
+// Function to close edit role modal
+function closeEditRoleModal() {
+    const editRoleModal = document.getElementById('edit-role-modal');
+    if (editRoleModal) {
+        editRoleModal.remove();
+    }
+
+    // Show the Quick Add User modal again
+    const quickAddModal = document.getElementById('quick-add-modal');
+    if (quickAddModal) {
+        quickAddModal.style.display = 'flex';
+    }
+}
+
+// Function to submit role edits
+async function submitEditRole(roleId) {
+    const roleName = document.getElementById('edit-role-name').value.trim();
+    const displayName = document.getElementById('edit-role-display-name').value.trim();
+    const description = document.getElementById('edit-role-description').value.trim();
+    const priority = parseInt(document.getElementById('edit-role-priority').value) || 0;
+    const selectedPermissions = Array.from(document.querySelectorAll('input[name="edit-permissions"]:checked'))
+                                    .map(cb => cb.value);
+
+    if (!roleName) {
+        showNotification('Role name is required.', 'error');
+        return;
+    }
+
+    const submitBtn = document.querySelector('#edit-role-modal .btn-primary');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+    try {
+        const response = await fetch(`/api/role-management/roles/${roleId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: roleName,
+                displayName: displayName || roleName,
+                description: description,
+                priority: priority,
+                permissions: selectedPermissions
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to update role');
+        }
+
+        const updatedRole = await response.json();
+        
+        closeEditRoleModal();
+        showNotification(`Role "${updatedRole.displayName}" updated successfully!`, 'success');
+        
+        // Refresh roles in the user management page if it's open
+        if (typeof window.refreshUserManagementRoles === 'function') {
+            window.refreshUserManagementRoles();
+        }
+        
+        // Refresh the Quick Add User modal to show the updated role
+        setTimeout(() => {
+            createUserRoleModal();
+        }, 1000);
+
+    } catch (error) {
+        console.error('Error updating role:', error);
+        showNotification(`Failed to update role: ${error.message}`, 'error');
+        
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+    }
+}
+
+// Function to delete a role
+async function deleteRole(roleId, roleName, event) {
+    event.stopPropagation(); // Prevent role selection
+    
+    const confirmed = confirm(`Are you sure you want to delete the role "${roleName}"?\n\nThis action cannot be undone and may affect users who have this role assigned.`);
+    
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/role-management/roles/${roleId}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to delete role');
+        }
+
+        showNotification(`Role "${roleName}" deleted successfully!`, 'success');
+        
+        // Refresh roles in the user management page if it's open
+        if (typeof window.refreshUserManagementRoles === 'function') {
+            window.refreshUserManagementRoles();
+        }
+        
+        // Refresh the Quick Add User modal to remove the deleted role
+        setTimeout(() => {
+            createUserRoleModal();
+        }, 1000);
+
+    } catch (error) {
+        console.error('Error deleting role:', error);
+        showNotification(`Failed to delete role: ${error.message}`, 'error');
     }
 }
 
