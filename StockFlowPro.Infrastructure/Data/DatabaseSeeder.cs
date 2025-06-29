@@ -68,6 +68,7 @@ public class DatabaseSeeder
                 }
                 
                 // Check and seed products separately
+                await SeedRolesAsync();
                 await SeedProductsAsync();
                 return;
             }
@@ -131,6 +132,9 @@ public class DatabaseSeeder
 
             _logger.LogInformation("Successfully seeded database with {Count} users", seedUsers.Count);
 
+            // Seed Roles
+            await SeedRolesAsync();
+
             // Seed Products
             await SeedProductsAsync();
         }
@@ -184,6 +188,60 @@ public class DatabaseSeeder
         {
             _logger.LogError(ex, "An error occurred while seeding products: {ErrorMessage}", ex.Message);
             throw new InvalidOperationException("Failed to seed products data", ex);
+        }
+    }
+
+    private async Task SeedRolesAsync()
+    {
+        try
+        {
+            // Seed Roles if none exist
+            if (!await _context.Roles.AnyAsync())
+            {
+                _logger.LogInformation("Seeding database with initial roles...");
+
+                var seedRoles = new List<Role>
+                {
+                    new Role(
+                        "Admin",
+                        "Administrator",
+                        "Full system access and user management capabilities",
+                        new List<string> { "Users.ViewAll", "Users.Create", "Users.Update", "Users.Delete", "System.ViewAdminPanel", "Reports.ViewAll", "Products.Manage", "Inventory.Manage" },
+                        100,
+                        true // System role
+                    ),
+                    new Role(
+                        "Manager",
+                        "Manager",
+                        "Elevated privileges including reporting access and team management",
+                        new List<string> { "Users.ViewTeam", "Products.Manage", "Reports.ViewAdvanced", "Inventory.Manage", "Reports.Create" },
+                        50,
+                        true // System role
+                    ),
+                    new Role(
+                        "User",
+                        "User",
+                        "Standard user role with basic system access and product viewing",
+                        new List<string> { "Products.View", "Reports.ViewBasic", "Profile.Update", "Profile.View" },
+                        10,
+                        true // System role
+                    )
+                };
+
+                await _context.Roles.AddRangeAsync(seedRoles);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Successfully seeded database with {Count} roles", seedRoles.Count);
+            }
+            else
+            {
+                _logger.LogInformation("Roles already exist in database. Skipping role seed.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while seeding roles: {ErrorMessage}", ex.Message);
+            throw new InvalidOperationException("Failed to seed roles data", ex);
         }
     }
 }

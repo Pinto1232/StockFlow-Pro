@@ -1,0 +1,107 @@
+@page
+@model StockFlowPro.Web.Pages.AuthDebugModel
+@{
+    ViewData["Title"] = "Authentication Debug";
+}
+
+<div class="container mt-4">
+    <h2>Authentication Debug Information</h2>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Server-Side Authentication Info</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>Is Authenticated:</strong></td>
+                            <td>@(User.Identity?.IsAuthenticated ?? false)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>User Name:</strong></td>
+                            <td>@(User.Identity?.Name ?? "N/A")</td>
+                        </tr>
+                        <tr>
+                            <td><strong>User ID:</strong></td>
+                            <td>@(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "N/A")</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Role Claim:</strong></td>
+                            <td>@(User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "N/A")</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Is Admin (IsInRole):</strong></td>
+                            <td>@User.IsInRole("Admin")</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Is Manager (IsInRole):</strong></td>
+                            <td>@User.IsInRole("Manager")</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Is User (IsInRole):</strong></td>
+                            <td>@User.IsInRole("User")</td>
+                        </tr>
+                    </table>
+                    
+                    <h6>All Claims:</h6>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var claim in User.Claims)
+                        {
+                            <li class="list-group-item">
+                                <strong>@claim.Type:</strong> @claim.Value
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Client-Side API Response</h5>
+                </div>
+                <div class="card-body">
+                    <button class="btn btn-primary" onclick="checkAuthStatus()">Check Auth Status API</button>
+                    <div id="authStatusResult" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function checkAuthStatus() {
+    const resultDiv = document.getElementById('authStatusResult');
+    resultDiv.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Loading...';
+    
+    try {
+        const response = await fetch('/api/diagnostics/auth-status');
+        if (response.ok) {
+            const authStatus = await response.json();
+            
+            resultDiv.innerHTML = `
+                <div class="alert alert-info">
+                    <h6>API Response:</h6>
+                    <pre>${JSON.stringify(authStatus, null, 2)}</pre>
+                </div>
+                <div class="alert ${authStatus.IsAuthenticated ? 'alert-success' : 'alert-warning'}">
+                    <strong>Authentication Status:</strong> ${authStatus.IsAuthenticated ? 'Authenticated' : 'Not Authenticated'}
+                </div>
+                <div class="alert ${authStatus.Roles && (authStatus.Roles.includes('Admin') || authStatus.Roles.includes('Manager')) ? 'alert-success' : 'alert-danger'}">
+                    <strong>Invoice Permission Check:</strong> 
+                    ${authStatus.Roles && (authStatus.Roles.includes('Admin') || authStatus.Roles.includes('Manager')) ? 'ALLOWED' : 'DENIED'}
+                    <br>
+                    <small>Roles: ${authStatus.Roles ? authStatus.Roles.join(', ') : 'None'}</small>
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = `<div class="alert alert-danger">API Error: ${response.status} ${response.statusText}</div>`;
+        }
+    } catch (error) {
+        resultDiv.innerHTML = `<div class="alert alert-danger">Network Error: ${error.message}</div>`;
+    }
+}
+</script>

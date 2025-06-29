@@ -16,6 +16,7 @@ public class User : IEntity
     public DateTime? UpdatedAt { get; private set; }
     public UserRole Role { get; private set; }
     public string? PasswordHash { get; private set; }
+    public string? ProfilePhotoUrl { get; private set; }
     
     // SQL Server enhanced fields
     public Guid? RoleId { get; private set; }
@@ -87,6 +88,12 @@ public class User : IEntity
         PasswordChangedAt = DateTime.UtcNow;
         SecurityStamp = Guid.NewGuid().ToString();
         RequirePasswordChange = false;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateProfilePhoto(string? profilePhotoUrl)
+    {
+        ProfilePhotoUrl = profilePhotoUrl;
         UpdatedAt = DateTime.UtcNow;
     }
 

@@ -47,9 +47,14 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.Role)
             .IsRequired()
-            .HasConversion<int>();
+            .HasConversion<string>()
+            .HasMaxLength(50);
 
         builder.Property(u => u.PasswordHash)
+            .IsRequired(false)
+            .HasMaxLength(500);
+
+        builder.Property(u => u.ProfilePhotoUrl)
             .IsRequired(false)
             .HasMaxLength(500);
             

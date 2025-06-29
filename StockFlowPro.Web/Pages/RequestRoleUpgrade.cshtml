@@ -1,0 +1,243 @@
+@page
+@model StockFlowPro.Web.Pages.RequestRoleUpgradeModel
+@{
+    ViewData["Title"] = "Request Role Upgrade";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-user-shield"></i>
+                        Request Role Upgrade
+                    </h3>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            @Model.ErrorMessage
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                    {
+                        <div class="alert alert-success" role="alert">
+                            <i class="fas fa-check-circle"></i>
+                            @Model.SuccessMessage
+                        </div>
+                    }
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="info-box mb-4">
+                                <span class="info-box-icon bg-info">
+                                    <i class="fas fa-info-circle"></i>
+                                </span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Current Role</span>
+                                    <span class="info-box-number">@Model.CurrentUserRole</span>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-info" style="width: @(Model.CurrentUserRole == "User" ? "33" : Model.CurrentUserRole == "Manager" ? "66" : "100")%"></div>
+                                    </div>
+                                    <span class="progress-description">
+                                        Role upgrade requests are reviewed by system administrators
+                                    </span>
+                                </div>
+                            </div>
+
+                            @if (Model.AvailableRoles.Any())
+                            {
+                                <form method="post" asp-page-handler="CreateRequest">
+                                    <div class="form-group">
+                                        <label for="RequestedRole" class="form-label">
+                                            <i class="fas fa-user-cog"></i>
+                                            Requested Role
+                                        </label>
+                                        <select class="form-control" id="RequestedRole" name="RequestedRole" required>
+                                            <option value="">Select a role...</option>
+                                            @foreach (var role in Model.AvailableRoles)
+                                            {
+                                                <option value="@role.Role" data-description="@role.Description">
+                                                    @role.DisplayName
+                                                </option>
+                                            }
+                                        </select>
+                                        <small class="form-text text-muted" id="roleDescription">
+                                            Select a role to see its description
+                                        </small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="Justification" class="form-label">
+                                            <i class="fas fa-comment-alt"></i>
+                                            Justification <span class="text-danger">*</span>
+                                        </label>
+                                        <textarea class="form-control" id="Justification" name="Justification" rows="4" 
+                                                  placeholder="Please explain why you need this role upgrade. Include details about your responsibilities, projects, or business needs that require elevated privileges." 
+                                                  required maxlength="1000"></textarea>
+                                        <small class="form-text text-muted">
+                                            Provide a clear business justification for the role upgrade (max 1000 characters)
+                                        </small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="AdditionalDocuments" class="form-label">
+                                            <i class="fas fa-paperclip"></i>
+                                            Additional Information
+                                        </label>
+                                        <textarea class="form-control" id="AdditionalDocuments" name="AdditionalDocuments" rows="2" 
+                                                  placeholder="Any additional information, references, or documentation that supports your request (optional)" 
+                                                  maxlength="500"></textarea>
+                                        <small class="form-text text-muted">
+                                            Optional: Reference documents, approvals, or additional context (max 500 characters)
+                                        </small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="Priority" class="form-label">
+                                            <i class="fas fa-exclamation"></i>
+                                            Priority Level
+                                        </label>
+                                        <select class="form-control" id="Priority" name="Priority">
+                                            <option value="1">Low - No immediate need</option>
+                                            <option value="2" selected>Normal - Standard business need</option>
+                                            <option value="3">Medium - Important for current projects</option>
+                                            <option value="4">High - Blocking current work</option>
+                                            <option value="5">Critical - Urgent business requirement</option>
+                                        </select>
+                                        <small class="form-text text-muted">
+                                            Select the appropriate priority level for your request
+                                        </small>
+                                    </div>
+
+                                    <div class="alert alert-warning" role="alert">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <strong>Important:</strong> Role upgrade requests require approval from a system administrator. 
+                                        You will be notified via email when your request is reviewed. Please ensure your justification 
+                                        clearly explains the business need for elevated privileges.
+                                    </div>
+
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-paper-plane"></i>
+                                            Submit Request
+                                        </button>
+                                        <a href="/Dashboard" class="btn btn-secondary">
+                                            <i class="fas fa-arrow-left"></i>
+                                            Cancel
+                                        </a>
+                                    </div>
+                                </form>
+                            }
+                            else
+                            {
+                                <div class="alert alert-info" role="alert">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>No Role Upgrades Available</strong><br>
+                                    You currently have the highest available role or have pending requests for all eligible roles.
+                                    If you believe you should have access to additional roles, please contact your system administrator directly.
+                                </div>
+                            }
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title">
+                                        <i class="fas fa-question-circle"></i>
+                                        Need Help?
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Role Upgrade Process:</strong></p>
+                                    <ol class="small">
+                                        <li>Submit your request with clear justification</li>
+                                        <li>System administrator reviews your request</li>
+                                        <li>You receive notification of the decision</li>
+                                        <li>If approved, your role is upgraded automatically</li>
+                                    </ol>
+                                    
+                                    <hr>
+                                    
+                                    <p><strong>Contact Information:</strong></p>
+                                    <p class="small">
+                                        For urgent requests or questions about role permissions, 
+                                        please contact your system administrator directly.
+                                    </p>
+                                    
+                                    <div class="alert alert-light" role="alert">
+                                        <i class="fas fa-lightbulb"></i>
+                                        <strong>Tip:</strong> Include specific examples of tasks or 
+                                        responsibilities that require elevated privileges in your justification.
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (Model.UserRequests.Any())
+                            {
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h5 class="card-title">
+                                            <i class="fas fa-history"></i>
+                                            Your Recent Requests
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        @foreach (var request in Model.UserRequests.Take(3))
+                                        {
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <div>
+                                                    <strong>@request.RequestedRole</strong><br>
+                                                    <small class="text-muted">@request.RequestedAt.ToString("MMM dd, yyyy")</small>
+                                                </div>
+                                                <span class="badge badge-@(request.Status == StockFlowPro.Domain.Enums.RoleUpgradeRequestStatus.Pending ? "warning" : 
+                                                                         request.Status == StockFlowPro.Domain.Enums.RoleUpgradeRequestStatus.Approved ? "success" : 
+                                                                         request.Status == StockFlowPro.Domain.Enums.RoleUpgradeRequestStatus.Rejected ? "danger" : "secondary")">
+                                                    @request.StatusDisplayText
+                                                </span>
+                                            </div>
+                                            @if (request != Model.UserRequests.Take(3).Last())
+                                            {
+                                                <hr>
+                                            }
+                                        }
+                                        @if (Model.UserRequests.Count() > 3)
+                                        {
+                                            <a href="/MyRoleRequests" class="btn btn-sm btn-outline-primary">
+                                                View All Requests
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.getElementById('RequestedRole');
+    const roleDescription = document.getElementById('roleDescription');
+    
+    roleSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const description = selectedOption.getAttribute('data-description');
+        
+        if (description) {
+            roleDescription.textContent = description;
+            roleDescription.className = 'form-text text-info';
+        } else {
+            roleDescription.textContent = 'Select a role to see its description';
+            roleDescription.className = 'form-text text-muted';
+        }
+    });
+});
+</script>

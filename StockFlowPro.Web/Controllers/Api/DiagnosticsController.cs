@@ -25,7 +25,7 @@ public class DiagnosticsController : ControllerBase
             Email = email,
             Roles = roles,
             // Only include detailed claims for authenticated users
-            AllClaims = isAuthenticated ? User.Claims.Select(c => new { c.Type, c.Value }).ToList() : null
+            AllClaims = isAuthenticated ? User.Claims.Select(c => new { Type = c.Type, Value = c.Value }).ToList() : null
         });
     }
 }

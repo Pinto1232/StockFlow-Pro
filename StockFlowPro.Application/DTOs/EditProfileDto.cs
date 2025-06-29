@@ -28,4 +28,5 @@ public class ProfileDto
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public string Role { get; set; } = string.Empty;
+    public string? ProfilePhotoUrl { get; set; }
 }
