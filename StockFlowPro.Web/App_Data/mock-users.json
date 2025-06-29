@@ -73,5 +73,20 @@
     "updatedAt": null,
     "role": "User",
     "passwordHash": "8\u002BupOWwjzjPmhLwLcvIQqlO3FlqJed0q0pOkYyYU7sA=:550e8400-e29b-41d4-a716-446655440004"
+  },
+  {
+    "id": "c3291369-2a80-4fca-86c6-63272295f8e4",
+    "firstName": "Greg",
+    "lastName": "Milys",
+    "fullName": "Greg Milys",
+    "email": "gregmilys@gmail.com",
+    "phoneNumber": "\u002B27835270710",
+    "dateOfBirth": "2007-01-01T00:00:00",
+    "age": 18,
+    "isActive": true,
+    "createdAt": "2025-06-28T10:28:13.0729857Z",
+    "updatedAt": null,
+    "role": "Admin",
+    "passwordHash": "pxgBdZ3QBYzyTarnXdr489jKT3zeXijKsWuRDwzfo8s=:5092acee-5673-4e3a-9dfb-b429a8883cd9"
   }
 ]
