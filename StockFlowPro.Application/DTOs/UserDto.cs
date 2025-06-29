@@ -17,6 +17,7 @@ public class UserDto
     public DateTime? UpdatedAt { get; set; }
     public UserRole Role { get; set; }
     public string? PasswordHash { get; set; }
+    public string? ProfilePhotoUrl { get; set; }
 }
 
 public class CreateUserDto

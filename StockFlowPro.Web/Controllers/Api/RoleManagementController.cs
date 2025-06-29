@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockFlowPro.Application.DTOs;
-using StockFlowPro.Domain.Entities;
-using StockFlowPro.Domain.Enums;
+using StockFlowPro.Application.Interfaces;
 
 namespace StockFlowPro.Web.Controllers.Api;
 
@@ -10,39 +9,12 @@ namespace StockFlowPro.Web.Controllers.Api;
 [Route("api/role-management")]
 public class RoleManagementController : ControllerBase
 {
+    private readonly IRoleService _roleService;
     private readonly ILogger<RoleManagementController> _logger;
-    
-    // In-memory storage for demonstration - in production, this would use a database service
-    private static readonly List<Role> _roles = new()
-    {
-        new Role(
-            "Admin",
-            "Administrator",
-            "Full system access and user management capabilities",
-            new List<string> { "Users.ViewAll", "Users.Create", "Users.Update", "Users.Delete", "System.ViewAdminPanel", "Reports.ViewAll" },
-            100,
-            true
-        ),
-        new Role(
-            "Manager",
-            "Manager",
-            "Elevated privileges including reporting access and team management",
-            new List<string> { "Users.ViewTeam", "Products.Manage", "Reports.ViewAdvanced", "Inventory.Manage" },
-            50,
-            true
-        ),
-        new Role(
-            "User",
-            "User",
-            "Standard user role with basic system access and product viewing",
-            new List<string> { "Products.View", "Reports.ViewBasic", "Profile.Update" },
-            10,
-            true
-        )
-    };
 
-    public RoleManagementController(ILogger<RoleManagementController> logger)
+    public RoleManagementController(IRoleService roleService, ILogger<RoleManagementController> logger)
     {
+        _roleService = roleService;
         _logger = logger;
     }
 
@@ -51,16 +23,11 @@ public class RoleManagementController : ControllerBase
     /// </summary>
     [HttpGet("roles")]
     [Authorize(Roles = "Admin")]
-    public ActionResult<IEnumerable<RoleDto>> GetAllRoles([FromQuery] bool activeOnly = true)
+    public async Task<ActionResult<IEnumerable<RoleDto>>> GetAllRoles([FromQuery] bool activeOnly = true)
     {
         try
         {
-            var roles = _roles.Where(r => !activeOnly || r.IsActive)
-                             .OrderByDescending(r => r.Priority)
-                             .ThenBy(r => r.Name)
-                             .Select(MapToRoleDto)
-                             .ToList();
-
+            var roles = await _roleService.GetAllRolesAsync(activeOnly);
             return Ok(roles);
         }
         catch (Exception ex)
@@ -75,15 +42,11 @@ public class RoleManagementController : ControllerBase
     /// </summary>
     [HttpGet("roles/options")]
     [AllowAnonymous] // Allow for user creation forms
-    public ActionResult<IEnumerable<RoleOptionDto>> GetRoleOptions()
+    public async Task<ActionResult<IEnumerable<RoleOptionDto>>> GetRoleOptions()
     {
         try
         {
-            var roleOptions = _roles.Where(r => r.IsActive)
-                                   .OrderByDescending(r => r.Priority)
-                                   .Select(MapToRoleOptionDto)
-                                   .ToList();
-
+            var roleOptions = await _roleService.GetRoleOptionsAsync();
             return Ok(roleOptions);
         }
         catch (Exception ex)
@@ -98,17 +61,17 @@ public class RoleManagementController : ControllerBase
     /// </summary>
     [HttpGet("roles/{id:guid}")]
     [Authorize(Roles = "Admin")]
-    public ActionResult<RoleDto> GetRoleById(Guid id)
+    public async Task<ActionResult<RoleDto>> GetRoleById(Guid id)
     {
         try
         {
-            var role = _roles.FirstOrDefault(r => r.Id == id);
+            var role = await _roleService.GetRoleByIdAsync(id);
             if (role == null)
             {
                 return NotFound($"Role with ID {id} not found");
             }
 
-            return Ok(MapToRoleDto(role));
+            return Ok(role);
         }
         catch (Exception ex)
         {
@@ -122,35 +85,22 @@ public class RoleManagementController : ControllerBase
     /// </summary>
     [HttpPost("roles")]
     [Authorize(Roles = "Admin")]
-    public ActionResult<RoleDto> CreateRole([FromBody] CreateRoleDto createRoleDto)
+    public async Task<ActionResult<RoleDto>> CreateRole([FromBody] CreateRoleDto createRoleDto)
     {
         try
         {
-            // Validate role name uniqueness
-            if (_roles.Any(r => r.Name.Equals(createRoleDto.Name, StringComparison.OrdinalIgnoreCase)))
-            {
-                return BadRequest(new { message = "A role with this name already exists" });
-            }
-
-            var newRole = new Role(
-                createRoleDto.Name.Trim(),
-                string.IsNullOrWhiteSpace(createRoleDto.DisplayName) 
-                    ? createRoleDto.Name.Trim() 
-                    : createRoleDto.DisplayName.Trim(),
-                createRoleDto.Description?.Trim() ?? string.Empty,
-                createRoleDto.Permissions ?? new List<string>(),
-                createRoleDto.Priority,
-                false
-            );
-
-            _roles.Add(newRole);
+            var newRole = await _roleService.CreateRoleAsync(createRoleDto);
 
             _logger.LogInformation("Created new role: {RoleName} with ID: {RoleId}", newRole.Name, newRole.Id);
 
             return CreatedAtAction(
                 nameof(GetRoleById),
                 new { id = newRole.Id },
-                MapToRoleDto(newRole));
+                newRole);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {
@@ -164,42 +114,23 @@ public class RoleManagementController : ControllerBase
     /// </summary>
     [HttpPut("roles/{id:guid}")]
     [Authorize(Roles = "Admin")]
-    public ActionResult<RoleDto> UpdateRole(Guid id, [FromBody] UpdateRoleDto updateRoleDto)
+    public async Task<ActionResult<RoleDto>> UpdateRole(Guid id, [FromBody] UpdateRoleDto updateRoleDto)
     {
         try
         {
-            var role = _roles.FirstOrDefault(r => r.Id == id);
-            if (role == null)
-            {
-                return NotFound($"Role with ID {id} not found");
-            }
+            var updatedRole = await _roleService.UpdateRoleAsync(id, updateRoleDto);
 
-            if (role.IsSystemRole)
-            {
-                return BadRequest(new { message = "System roles cannot be modified" });
-            }
+            _logger.LogInformation("Updated role: {RoleName} with ID: {RoleId}", updatedRole.Name, updatedRole.Id);
 
-            // Update role properties
-            role.UpdateDisplayName(string.IsNullOrWhiteSpace(updateRoleDto.DisplayName) 
-                ? role.Name 
-                : updateRoleDto.DisplayName.Trim());
-            role.UpdateDescription(updateRoleDto.Description?.Trim() ?? string.Empty);
-            role.UpdatePermissions(updateRoleDto.Permissions ?? new List<string>());
-            role.UpdatePriority(updateRoleDto.Priority);
-
-            if (updateRoleDto.IsActive)
-            {
-                role.Activate();
-            }
-
-            else
-            {
-                role.Deactivate();
-            }
-
-            _logger.LogInformation("Updated role: {RoleName} with ID: {RoleId}", role.Name, role.Id);
-
-            return Ok(MapToRoleDto(role));
+            return Ok(updatedRole);
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {
@@ -213,26 +144,23 @@ public class RoleManagementController : ControllerBase
     /// </summary>
     [HttpDelete("roles/{id:guid}")]
     [Authorize(Roles = "Admin")]
-    public ActionResult DeleteRole(Guid id)
+    public async Task<ActionResult> DeleteRole(Guid id)
     {
         try
         {
-            var role = _roles.FirstOrDefault(r => r.Id == id);
-            if (role == null)
-            {
-                return NotFound($"Role with ID {id} not found");
-            }
+            await _roleService.DeleteRoleAsync(id);
 
-            if (role.IsSystemRole)
-            {
-                return BadRequest(new { message = "System roles cannot be deleted" });
-            }
-
-            _roles.Remove(role);
-
-            _logger.LogInformation("Deleted role: {RoleName} with ID: {RoleId}", role.Name, role.Id);
+            _logger.LogInformation("Deleted role with ID: {RoleId}", id);
 
             return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {
@@ -246,20 +174,11 @@ public class RoleManagementController : ControllerBase
     /// </summary>
     [HttpGet("permissions")]
     [Authorize(Roles = "Admin")]
-    public ActionResult<IEnumerable<object>> GetAvailablePermissions()
+    public async Task<ActionResult<IEnumerable<object>>> GetAvailablePermissions()
     {
         try
         {
-            var permissions = new[]
-            {
-                new { Category = "Users", Permissions = new[] { "Users.ViewAll", "Users.ViewTeam", "Users.Create", "Users.Update", "Users.Delete" } },
-                new { Category = "Products", Permissions = new[] { "Products.View", "Products.Create", "Products.Update", "Products.Delete", "Products.Manage" } },
-                new { Category = "Inventory", Permissions = new[] { "Inventory.View", "Inventory.Update", "Inventory.Manage", "Inventory.Reports" } },
-                new { Category = "Reports", Permissions = new[] { "Reports.ViewBasic", "Reports.ViewAdvanced", "Reports.ViewAll", "Reports.Create", "Reports.Export" } },
-                new { Category = "System", Permissions = new[] { "System.ViewAdminPanel", "System.ManageSettings", "System.ViewLogs", "System.Backup" } },
-                new { Category = "Profile", Permissions = new[] { "Profile.View", "Profile.Update", "Profile.ChangePassword" } }
-            };
-
+            var permissions = await _roleService.GetAvailablePermissionsAsync();
             return Ok(permissions);
         }
         catch (Exception ex)
@@ -267,50 +186,5 @@ public class RoleManagementController : ControllerBase
             _logger.LogError(ex, "Failed to retrieve available permissions");
             return StatusCode(500, new { message = "Failed to retrieve permissions", error = ex.Message });
         }
-    }
-
-    private static RoleDto MapToRoleDto(Role role)
-    {
-        return new RoleDto
-        {
-            Id = role.Id,
-            Name = role.Name,
-            DisplayName = role.DisplayName,
-            Description = role.Description,
-            Permissions = role.Permissions,
-            IsActive = role.IsActive,
-            IsSystemRole = role.IsSystemRole,
-            Priority = role.Priority,
-            CreatedAt = role.CreatedAt,
-            UpdatedAt = role.UpdatedAt,
-            UserCount = 0 // This would be calculated from the database in a real implementation
-        };
-    }
-
-    private static RoleOptionDto MapToRoleOptionDto(Role role)
-    {
-        var iconClass = role.Name.ToLower() switch
-        {
-            "admin" => "fas fa-user-shield",
-            "manager" => "fas fa-user-tie",
-            "user" => "fas fa-user",
-            "supervisor" => "fas fa-user-check",
-            "analyst" => "fas fa-chart-line",
-            "operator" => "fas fa-cogs",
-            _ => "fas fa-user-tag"
-        };
-
-        var keyPermissions = role.Permissions.Take(3).ToList();
-
-        return new RoleOptionDto
-        {
-            Id = role.Id,
-            Name = role.Name,
-            DisplayName = role.DisplayName,
-            Description = role.Description,
-            IconClass = iconClass,
-            Priority = role.Priority,
-            KeyPermissions = keyPermissions
-        };
     }
 }

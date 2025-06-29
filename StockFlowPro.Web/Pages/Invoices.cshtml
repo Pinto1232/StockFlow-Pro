@@ -30,7 +30,7 @@
             <a href="/AdminPanel" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left me-2"></i>Back to Admin Panel
             </a>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createInvoiceModal">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createInvoiceModal" onclick="console.log('🟡 Button clicked!'); openCreateInvoiceModal(); return false;">
                 <i class="fas fa-plus me-2"></i>Create New Invoice
             </button>
         </div>
@@ -116,7 +116,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="createInvoiceModalLabel">Create New Invoice</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeCreateInvoiceModal()"></button>
             </div>
             <div class="modal-body">
                 <form id="createInvoiceForm">
@@ -195,7 +195,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closeCreateInvoiceModal()">Cancel</button>
                 <button type="button" class="btn btn-primary" onclick="saveNewInvoice()">Save Invoice</button>
             </div>
         </div>

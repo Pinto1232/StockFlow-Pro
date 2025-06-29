@@ -3,6 +3,8 @@ using StockFlowPro.Application.Mappings;
 using StockFlowPro.Domain.Repositories;
 using StockFlowPro.Infrastructure.Data;
 using StockFlowPro.Infrastructure.Repositories;
+using StockFlowPro.Application.Interfaces;
+using StockFlowPro.Application.Services;
 using StockFlowPro.Web.Services;
 using StockFlowPro.Web.Authorization;
 using FluentValidation;
@@ -37,8 +39,10 @@ builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(StockFlowPro.A
 builder.Services.AddValidatorsFromAssembly(typeof(StockFlowPro.Application.Validators.CreateUserCommandValidator).Assembly);
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<StockFlowPro.Domain.Repositories.IInvoiceRepository, StockFlowPro.Infrastructure.Repositories.InvoiceRepository>();
-builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IInvoiceService, StockFlowPro.Application.Services.InvoiceService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IMockDataStorageService, JsonMockDataStorageService>();
 builder.Services.AddScoped<IDataSourceService, HybridDataSourceService>();
 builder.Services.AddScoped<IDualDataService, DualDataService>();
@@ -52,6 +56,9 @@ builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IReportService, S
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IEnhancedRoleService, StockFlowPro.Infrastructure.Services.EnhancedRoleService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.INotificationService, StockFlowPro.Web.Services.NotificationService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IRealTimeService, StockFlowPro.Web.Services.RealTimeService>();
+// ADD THIS LINE - Missing IUserService registration
+builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IUserService, StockFlowPro.Application.Services.UserService>();
+builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IRoleUpgradeRequestService, StockFlowPro.Application.Services.RoleUpgradeRequestService>();
 builder.Services.AddScoped<StockFlowPro.Application.Services.ProductNotificationService>();
 builder.Services.AddHostedService<DatabaseInitializationService>();
 

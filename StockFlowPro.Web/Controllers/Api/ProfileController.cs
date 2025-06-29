@@ -29,35 +29,68 @@ public class ProfileController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<ProfileDto>> GetProfile()
     {
-        var userId = User.GetUserId();
-        if (!userId.HasValue)
+        try
         {
-            return Unauthorized("User ID not found in token");
-        }
+            var userId = User.GetUserId();
+            if (!userId.HasValue)
+            {
+                return Unauthorized("User ID not found in token");
+            }
 
-        var query = new GetUserByIdQuery { Id = userId.Value };
-        var user = await _mediator.Send(query);
-        
-        if (user == null)
-        {
-            return NotFound("User profile not found");
-        }
+            var query = new GetUserByIdQuery { Id = userId.Value };
+            var user = await _mediator.Send(query);
+            
+            if (user == null)
+            {
+                return NotFound("User profile not found");
+            }
 
-        var profile = new ProfileDto
+            var profile = new ProfileDto
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                FullName = user.FullName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                DateOfBirth = user.DateOfBirth,
+                Age = user.Age,
+                CreatedAt = user.CreatedAt,
+                UpdatedAt = user.UpdatedAt,
+                Role = user.Role.ToString(),
+                ProfilePhotoUrl = user.ProfilePhotoUrl ?? "/images/default-avatar.svg"
+            };
+            return Ok(profile);
+        }
+        catch (Exception ex)
         {
-            Id = user.Id,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            FullName = user.FullName,
-            Email = user.Email,
-            PhoneNumber = user.PhoneNumber,
-            DateOfBirth = user.DateOfBirth,
-            Age = user.Age,
-            CreatedAt = user.CreatedAt,
-            UpdatedAt = user.UpdatedAt,
-            Role = user.Role.ToString()
-        };
-        return Ok(profile);
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Debug endpoint to test authentication
+    /// </summary>
+    [HttpGet("debug")]
+    public ActionResult GetDebugInfo()
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+            var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
+            
+            return Ok(new 
+            { 
+                IsAuthenticated = isAuthenticated,
+                UserId = userId,
+                Claims = claims
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Debug error: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -167,8 +200,130 @@ public class ProfileController : ControllerBase
             Age = user.Age,
             CreatedAt = user.CreatedAt,
             UpdatedAt = user.UpdatedAt,
-            Role = user.Role.ToString()
+            Role = user.Role.ToString(),
+            ProfilePhotoUrl = user.ProfilePhotoUrl ?? "/images/default-avatar.svg"
         };
         return Ok(profile);
+    }
+
+    /// <summary>
+    /// Upload profile photo
+    /// </summary>
+    [HttpPost("upload-photo")]
+    public async Task<ActionResult> UploadPhoto(IFormFile photo)
+    {
+        var userId = User.GetUserId();
+        if (!userId.HasValue)
+        {
+            return Unauthorized("User ID not found in token");
+        }
+
+        if (photo == null || photo.Length == 0)
+        {
+            return BadRequest("No photo file provided");
+        }
+
+        // Validate file
+        var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png", "image/gif" };
+        if (!allowedTypes.Contains(photo.ContentType.ToLower()))
+        {
+            return BadRequest("Invalid file type. Only JPG, PNG, and GIF files are allowed");
+        }
+
+        const long maxFileSize = 5 * 1024 * 1024; // 5MB
+        if (photo.Length > maxFileSize)
+        {
+            return BadRequest("File size exceeds 5MB limit");
+        }
+
+        try
+        {
+            // Create uploads directory if it doesn't exist
+            var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "profiles");
+            if (!Directory.Exists(uploadsPath))
+            {
+                Directory.CreateDirectory(uploadsPath);
+            }
+
+            // Generate unique filename
+            var fileExtension = Path.GetExtension(photo.FileName);
+            var fileName = $"{userId}_{Guid.NewGuid()}{fileExtension}";
+            var filePath = Path.Combine(uploadsPath, fileName);
+
+            // Save file
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await photo.CopyToAsync(stream);
+            }
+
+            // Update user profile with photo URL
+            var photoUrl = $"/uploads/profiles/{fileName}";
+            var command = new UpdateProfilePhotoCommand
+            {
+                UserId = userId.Value,
+                ProfilePhotoUrl = photoUrl
+            };
+
+            await _mediator.Send(command);
+
+            return Ok(new { photoUrl });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Failed to upload photo: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Remove profile photo
+    /// </summary>
+    [HttpDelete("remove-photo")]
+    public async Task<ActionResult> RemovePhoto()
+    {
+        var userId = User.GetUserId();
+        if (!userId.HasValue)
+        {
+            return Unauthorized("User ID not found in token");
+        }
+
+        try
+        {
+            // Get current user to find existing photo
+            var query = new GetUserByIdQuery { Id = userId.Value };
+            var user = await _mediator.Send(query);
+            
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            // Delete existing photo file if it exists
+            if (!string.IsNullOrEmpty(user.ProfilePhotoUrl) && 
+                user.ProfilePhotoUrl != "/images/default-avatar.svg")
+            {
+                var fileName = Path.GetFileName(user.ProfilePhotoUrl);
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "profiles", fileName);
+                
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                }
+            }
+
+            // Update user profile to remove photo URL
+            var command = new UpdateProfilePhotoCommand
+            {
+                UserId = userId.Value,
+                ProfilePhotoUrl = null
+            };
+
+            await _mediator.Send(command);
+
+            return Ok(new { message = "Profile photo removed successfully" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Failed to remove photo: {ex.Message}");
+        }
     }
 }

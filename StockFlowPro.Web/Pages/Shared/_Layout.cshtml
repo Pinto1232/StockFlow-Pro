@@ -91,7 +91,8 @@
                                         aria-label="User account menu for @User.GetFullName()"
                                         title="Click to open account menu">
                                     <div class="user-avatar-wrapper">
-                                        <i class="fas fa-user-circle user-avatar-icon"></i>
+                                        <img id="navbar-user-avatar" src="/images/default-avatar.svg" alt="User Avatar" class="user-avatar-image" style="display: none;">
+                                        <i id="navbar-user-icon" class="fas fa-user-circle user-avatar-icon"></i>
                                         <div class="online-indicator" title="Online"></div>
                                     </div>
                                     <div class="user-info-wrapper">
@@ -103,7 +104,8 @@
                                 <ul class="dropdown-menu dropdown-menu-end modern-account-dropdown" aria-labelledby="userDropdown">
                                     <li class="account-header">
                                         <div class="account-avatar">
-                                            <i class="fas fa-user-circle"></i>
+                                            <img id="dropdown-user-avatar" src="/images/default-avatar.svg" alt="User Avatar" class="dropdown-avatar-image" style="display: none;">
+                                            <i id="dropdown-user-icon" class="fas fa-user-circle"></i>
                                         </div>
                                         <div class="account-details">
                                             <h6 class="account-name">@User.GetFullName()</h6>
@@ -358,6 +360,22 @@
         .user-avatar-icon {
             font-size: 1.8rem;
             color: #5a5cdb;
+        }
+        
+        .user-avatar-image {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #5a5cdb;
+        }
+        
+        .dropdown-avatar-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #5a5cdb;
         }
         
         .online-indicator {
@@ -942,8 +960,64 @@
             }
         });
         
+        // User Avatar Management
+        window.updateNavbarAvatar = function(photoUrl) {
+            const navbarAvatar = document.getElementById('navbar-user-avatar');
+            const navbarIcon = document.getElementById('navbar-user-icon');
+            const dropdownAvatar = document.getElementById('dropdown-user-avatar');
+            const dropdownIcon = document.getElementById('dropdown-user-icon');
+            
+            if (photoUrl && photoUrl !== '/images/default-avatar.svg') {
+                // Show photo, hide icon
+                if (navbarAvatar) {
+                    navbarAvatar.src = photoUrl;
+                    navbarAvatar.style.display = 'block';
+                }
+                if (navbarIcon) {
+                    navbarIcon.style.display = 'none';
+                }
+                if (dropdownAvatar) {
+                    dropdownAvatar.src = photoUrl;
+                    dropdownAvatar.style.display = 'block';
+                }
+                if (dropdownIcon) {
+                    dropdownIcon.style.display = 'none';
+                }
+            } else {
+                // Show icon, hide photo
+                if (navbarAvatar) {
+                    navbarAvatar.style.display = 'none';
+                }
+                if (navbarIcon) {
+                    navbarIcon.style.display = 'block';
+                }
+                if (dropdownAvatar) {
+                    dropdownAvatar.style.display = 'none';
+                }
+                if (dropdownIcon) {
+                    dropdownIcon.style.display = 'block';
+                }
+            }
+        }
+        
+        // Load user profile photo on page load
+        async function loadUserAvatar() {
+            try {
+                const response = await fetch('/api/profile');
+                if (response.ok) {
+                    const profile = await response.json();
+                    updateNavbarAvatar(profile.profilePhotoUrl);
+                }
+            } catch (error) {
+                console.warn('Could not load user avatar:', error);
+                // Keep default icon
+            }
+        }
+        
         // Enhanced dropdown behavior
         document.addEventListener('DOMContentLoaded', function() {
+            // Load user avatar
+            loadUserAvatar();
             const dropdown = document.getElementById('userDropdown');
             const dropdownMenu = document.querySelector('.modern-account-dropdown');
             

@@ -199,9 +199,9 @@ class UserManagement {
         this.isLoading = false;
         this.availableRoles = [];
         
-        // Legacy role mappings for backward compatibility
-        this.roleNames = { 1: 'Admin', 2: 'User', 3: 'Manager' };
-        this.roleNumbers = { 'Admin': 1, 'User': 2, 'Manager': 3 };
+        // Role mappings for string-based roles
+        this.roleNames = { 'Admin': 'Admin', 'User': 'User', 'Manager': 'Manager' };
+        this.roleNumbers = { 'Admin': 'Admin', 'User': 'User', 'Manager': 'Manager' };
         
         this.init();
     }
@@ -229,9 +229,9 @@ class UserManagement {
             } else {
                 console.warn('Failed to load roles, using default roles');
                 this.availableRoles = [
-                    { id: '1', name: 'Admin', displayName: 'Administrator' },
-                    { id: '2', name: 'User', displayName: 'User' },
-                    { id: '3', name: 'Manager', displayName: 'Manager' }
+                    { id: 'Admin', name: 'Admin', displayName: 'Administrator' },
+                    { id: 'User', name: 'User', displayName: 'User' },
+                    { id: 'Manager', name: 'Manager', displayName: 'Manager' }
                 ];
                 this.populateRoleDropdown();
             }
@@ -239,9 +239,9 @@ class UserManagement {
             console.error('Error loading roles:', error);
             // Use default roles as fallback
             this.availableRoles = [
-                { id: '1', name: 'Admin', displayName: 'Administrator' },
-                { id: '2', name: 'User', displayName: 'User' },
-                { id: '3', name: 'Manager', displayName: 'Manager' }
+                { id: 'Admin', name: 'Admin', displayName: 'Administrator' },
+                { id: 'User', name: 'User', displayName: 'User' },
+                { id: 'Manager', name: 'Manager', displayName: 'Manager' }
             ];
             this.populateRoleDropdown();
         }
@@ -693,10 +693,10 @@ class UserManagement {
         const userData = {
             firstName: document.getElementById('firstName').value.trim(),
             lastName: document.getElementById('lastName').value.trim(),
-             email: document.getElementById('email').value.trim(),
+            email: document.getElementById('email').value.trim(),
             phoneNumber: document.getElementById('phoneNumber').value.trim(),
             dateOfBirth: document.getElementById('dateOfBirth').value,
-            role: parseInt(roleId) || null
+            role: roleId || selectedRoleName
         };
 
         if (!userData.firstName || !userData.lastName) {
