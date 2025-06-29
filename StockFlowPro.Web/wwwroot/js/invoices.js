@@ -22,6 +22,9 @@ document.addEventListener('DOMContentLoaded', function() {
     loadProducts();
     loadUsers();
     
+    // Add global modal cleanup event listeners
+    setupModalCleanup();
+    
     // Set default date to today for both modals
     const today = new Date().toISOString().split('T')[0];
     const invoiceDateField = document.getElementById('invoiceDate');
@@ -45,24 +48,136 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Setup modal cleanup event listeners
+function setupModalCleanup() {
+    console.log('🔧 Setting up modal cleanup listeners...');
+    
+    // Listen for Bootstrap modal hidden events
+    const modal = document.getElementById('createInvoiceModal');
+    if (modal) {
+        modal.addEventListener('hidden.bs.modal', function () {
+            console.log('🔴 Bootstrap modal hidden event triggered');
+            // Ensure backdrop is completely removed
+            setTimeout(() => {
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => {
+                    console.log('🔴 Cleanup: Removing leftover backdrop');
+                    backdrop.remove();
+                });
+                
+                // Reset body styles
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }, 100);
+        });
+        
+        // Also listen for hide event (before hidden)
+        modal.addEventListener('hide.bs.modal', function () {
+            console.log('🔴 Bootstrap modal hide event triggered');
+        });
+    }
+}
+
 // Check user permissions and show appropriate UI
 async function checkUserPermissions() {
+    console.log('🟢 === CHECKING USER PERMISSIONS ===');
+    
     try {
+        console.log('🟢 Fetching auth status from /api/diagnostics/auth-status');
         const response = await fetch('/api/diagnostics/auth-status');
+        console.log('🟢 Auth status response:', response.status, response.ok);
+        
         if (response.ok) {
             const authStatus = await response.json();
+            console.log('🟢 Auth status data:', authStatus);
+            console.log('🟢 isAuthenticated:', authStatus.isAuthenticated);
+            console.log('🟢 roles:', authStatus.roles);
+            console.log('🟢 userId:', authStatus.userId);
             
-            if (!authStatus.IsAuthenticated) {
+            if (!authStatus.isAuthenticated) {
+                console.log('🔴 User not authenticated - showing login warning');
                 showPermissionWarning('You need to be logged in to manage invoices. Please <a href="/Login" class="alert-link">sign in</a> to continue.');
                 disableInvoiceCreation();
-            } else if (!authStatus.Roles.includes('Manager') && !authStatus.Roles.includes('Admin')) {
-                showPermissionWarning('You need Manager or Administrator privileges to create invoices. You currently have "' + (authStatus.Roles[0] || 'User') + '" role. Please contact your administrator to upgrade your account.');
+            } else if (!authStatus.roles.includes('Manager') && !authStatus.roles.includes('Admin')) {
+                console.log('🔴 User lacks required role - showing role upgrade warning');
+                console.log('🔴 Current roles:', authStatus.roles);
+                showPermissionWarning('You need Manager or Administrator privileges to create invoices. You currently have "' + (authStatus.roles[0] || 'User') + '" role. Please contact your administrator to upgrade your account.');
                 disableInvoiceCreation();
+            } else {
+                console.log('🟢 ✅ User has correct role! Checking sync status...');
+                // User has correct role, but check if they need synchronization
+                await checkUserSyncStatus(authStatus.userId);
             }
+        } else {
+            console.error('🔴 Auth status request failed:', response.status);
+            const errorText = await response.text();
+            console.error('🔴 Auth status error:', errorText);
+            // Don't disable on auth check failure - let user try
+            console.log('🟡 Auth check failed, but not disabling invoice creation');
         }
     } catch (error) {
-        console.warn('Could not check user permissions:', error);
-        // Don't show error to user, just log it
+        console.error('🔴 Error checking user permissions:', error);
+        // Don't disable on error - let user try
+        console.log('🟡 Permission check failed, but not disabling invoice creation');
+    }
+    
+    console.log('🟢 === PERMISSION CHECK COMPLETE ===');
+}
+
+// Check if user needs synchronization
+async function checkUserSyncStatus(userId) {
+    console.log('🔵 === CHECKING USER SYNC STATUS ===');
+    console.log('🔵 Checking sync for user ID:', userId);
+    
+    try {
+        const response = await fetch(`/api/usersynchronization/check/${userId}`);
+        console.log('🔵 Sync check response:', response.status, response.ok);
+        
+        if (response.ok) {
+            const syncStatus = await response.json();
+            console.log('🔵 Sync status data:', syncStatus);
+            console.log('🔵 Requires sync:', syncStatus.requiresSync);
+            
+            if (syncStatus.requiresSync) {
+                console.log('🔴 User requires sync - showing sync warning');
+                showSyncWarning('Your account needs to be synchronized with the database before you can create invoices.');
+                disableInvoiceCreation();
+            } else {
+                console.log('🟢 ✅ User does not require sync - invoice creation enabled!');
+            }
+        } else {
+            console.error('🔴 Sync check request failed:', response.status);
+            const errorText = await response.text();
+            console.error('🔴 Sync check error:', errorText);
+            // Don't disable on sync check failure - let user try
+            console.log('🟡 Sync check failed, but not disabling invoice creation');
+        }
+    } catch (error) {
+        console.error('🔴 Error checking user sync status:', error);
+        // Don't disable on error - let user try
+        console.log('🟡 Sync check failed, but not disabling invoice creation');
+    }
+    
+    console.log('🔵 === SYNC CHECK COMPLETE ===');
+}
+
+// Show synchronization warning
+function showSyncWarning(message) {
+    const container = document.getElementById('invoice-table-section');
+    if (container) {
+        const warningDiv = document.createElement('div');
+        warningDiv.className = 'alert alert-warning mb-3';
+        warningDiv.innerHTML = `
+            <i class="fas fa-sync-alt me-2"></i>
+            ${message}
+            <div class="mt-2">
+                <button class="btn btn-sm btn-primary" onclick="attemptUserSync()">
+                    <i class="fas fa-sync-alt me-1"></i>Sync My Account
+                </button>
+            </div>
+        `;
+        container.parentNode.insertBefore(warningDiv, container);
     }
 }
 
@@ -85,9 +200,9 @@ function showPermissionWarning(message) {
     }
 }
 
-// Request role upgrade (placeholder - could be enhanced to send actual requests)
+// Request role upgrade - redirect to the role upgrade request page
 function requestRoleUpgrade() {
-    showAlert('Role upgrade requests should be directed to your system administrator. Please contact them directly to request Manager or Administrator privileges.', 'info');
+    window.location.href = '/RequestRoleUpgrade';
 }
 
 // Disable invoice creation buttons
@@ -674,19 +789,25 @@ function updateNewInvoiceTotal() {
 
 // Save new invoice to server
 async function saveNewInvoice() {
+    console.log('=== SAVE NEW INVOICE START ===');
+    
     const invoiceDate = document.getElementById('newInvoiceDate').value;
+    console.log('Invoice date:', invoiceDate);
     
     if (!invoiceDate) {
         showAlert('Please select an invoice date', 'warning');
         return;
     }
 
+    console.log('New invoice items:', newInvoiceItems);
     if (newInvoiceItems.length === 0) {
         showAlert('Please add at least one item to the invoice', 'warning');
         return;
     }
 
     try {
+        console.log('Creating invoice with date:', invoiceDate);
+        
         // First create the invoice
         const createResponse = await fetch('/api/invoices', {
             method: 'POST',
@@ -698,15 +819,25 @@ async function saveNewInvoice() {
             })
         });
 
+        console.log('Create response status:', createResponse.status);
+        console.log('Create response ok:', createResponse.ok);
+
         if (!createResponse.ok) {
+            console.error('Invoice creation failed with status:', createResponse.status);
+            const errorText = await createResponse.text();
+            console.error('Error response:', errorText);
             await handleInvoiceCreationError(createResponse);
             return;
         }
 
         const invoice = await createResponse.json();
+        console.log('Invoice created successfully:', invoice);
 
         // Then add all items to the invoice
+        console.log('Adding', newInvoiceItems.length, 'items to invoice');
         for (const item of newInvoiceItems) {
+            console.log('Adding item:', item);
+            
             const addItemResponse = await fetch(`/api/invoices/${invoice.id}/items`, {
                 method: 'POST',
                 headers: {
@@ -720,15 +851,21 @@ async function saveNewInvoice() {
                 })
             });
 
+            console.log('Add item response status:', addItemResponse.status);
+
             if (!addItemResponse.ok) {
                 const error = await addItemResponse.text();
+                console.error('Failed to add item:', error);
                 showAlert(`Failed to add item ${item.productName}: ${error}`, 'danger');
                 return;
             }
         }
 
+        console.log('All items added successfully');
         showAlert('Invoice created successfully', 'success');
-        bootstrap.Modal.getInstance(document.getElementById('createInvoiceModal')).hide();
+        
+        // Close modal properly
+        closeCreateInvoiceModal();
         
         // Reset the form
         newInvoiceItems = [];
@@ -737,9 +874,10 @@ async function saveNewInvoice() {
         document.getElementById('newInvoiceDate').value = new Date().toISOString().split('T')[0];
         
         loadInvoices();
+        console.log('=== SAVE NEW INVOICE END ===');
     } catch (error) {
         console.error('Error creating invoice:', error);
-        showAlert('Error creating invoice', 'danger');
+        showAlert('Error creating invoice: ' + error.message, 'danger');
     }
 }
 
@@ -750,19 +888,30 @@ async function handleInvoiceCreationError(response) {
     
     try {
         const errorText = await response.text();
+        let errorData = null;
+        
+        // Try to parse JSON error response
+        try {
+            errorData = JSON.parse(errorText);
+        } catch {
+            // If not JSON, use the text as is
+        }
         
         if (status === 401) {
             errorMessage = 'You need to be logged in to create invoices. Please <a href="/Login" class="alert-link">sign in</a> to continue.';
         } else if (status === 403) {
             errorMessage = 'You don\'t have permission to create invoices. Only Managers and Administrators can create invoices. Please contact your administrator to upgrade your account.';
         } else if (status === 400) {
-            // Try to parse the error for more specific messages
-            if (errorText.includes('authentication') || errorText.includes('log in')) {
+            // Check if this is a synchronization error
+            if (errorData && errorData.requiresSync) {
+                showSyncRequiredDialog(errorData.userId, errorData.message);
+                return;
+            } else if (errorText.includes('authentication') || errorText.includes('log in')) {
                 errorMessage = 'Authentication required. Please <a href="/Login" class="alert-link">sign in</a> to create invoices.';
             } else if (errorText.includes('permission') || errorText.includes('role') || errorText.includes('Manager') || errorText.includes('Admin')) {
                 errorMessage = 'You need Manager or Administrator privileges to create invoices. Please contact your administrator to upgrade your account.';
             } else if (errorText.includes('synchronization') || errorText.includes('sync')) {
-                errorMessage = 'Your account needs to be synchronized with the database. Please contact an administrator or try logging out and back in.';
+                errorMessage = 'Your account needs to be synchronized with the database. <button class="btn btn-sm btn-primary ms-2" onclick="attemptUserSync()">Sync Account</button>';
             } else {
                 errorMessage = `Unable to create invoice: ${errorText}`;
             }
@@ -1304,6 +1453,361 @@ function renderPagination() {
             }
         });
     });
+}
+
+// Show synchronization required dialog
+function showSyncRequiredDialog(userId, message) {
+    const modalHtml = `
+        <div class="modal fade" id="syncRequiredModal" tabindex="-1" aria-labelledby="syncRequiredModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="syncRequiredModalLabel">
+                            <i class="fas fa-sync-alt me-2"></i>Account Synchronization Required
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            ${message || 'Your account needs to be synchronized with the database before you can create invoices.'}
+                        </div>
+                        <p>This is a one-time process that will enable all invoice management features for your account.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="performUserSync('${userId}')">
+                            <i class="fas fa-sync-alt me-2"></i>Sync My Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if present
+    const existingModal = document.getElementById('syncRequiredModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('syncRequiredModal'));
+    modal.show();
+}
+
+// Attempt user synchronization - simplified version
+async function attemptUserSync() {
+    try {
+        showAlert('Synchronizing your account...', 'info');
+        
+        const response = await fetch('/api/usersynchronization/sync-self', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                reason: 'Self-service synchronization for invoice creation'
+            })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            showAlert('Account synchronized successfully! You can now create invoices.', 'success');
+            
+            // Refresh the page to update permissions
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            const errorText = await response.text();
+            console.error('Sync failed with status:', response.status, 'Error:', errorText);
+            let errorMessage = 'Account synchronization failed.';
+            
+            if (response.status === 400) {
+                if (errorText.includes('already synchronized') || errorText.includes("doesn't require sync")) {
+                    errorMessage = 'Your account is already synchronized and ready to use.';
+                    showAlert(errorMessage, 'info');
+                    return; // Don't show as error if already synced
+                } else if (errorText.includes('not found')) {
+                    errorMessage = 'Your account was not found in the system. Please contact an administrator.';
+                } else if (errorText.includes('authentication')) {
+                    errorMessage = 'Authentication error. Please log out and log back in.';
+                } else {
+                    errorMessage = `Synchronization failed: ${errorText}`;
+                }
+            } else if (response.status === 401) {
+                errorMessage = 'You need to be logged in to sync your account. Please log out and log back in.';
+            } else if (response.status === 403) {
+                errorMessage = 'You don\'t have permission to synchronize your account. Please contact an administrator.';
+            }
+            
+            showAlert(errorMessage, 'danger');
+        }
+    } catch (error) {
+        console.error('Error performing user sync:', error);
+        showAlert('Network error during account synchronization. Please try again.', 'danger');
+    }
+}
+
+// Perform user synchronization
+async function performUserSync(userId) {
+    try {
+        showAlert('Synchronizing your account...', 'info');
+        
+        const response = await fetch('/api/usersynchronization/sync-self', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                reason: 'Self-service synchronization for invoice creation'
+            })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            showAlert('Account synchronized successfully! You can now create invoices.', 'success');
+            
+            // Close any open modals
+            const syncModal = document.getElementById('syncRequiredModal');
+            if (syncModal) {
+                bootstrap.Modal.getInstance(syncModal)?.hide();
+            }
+            
+            // Refresh the page to update permissions
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            const errorText = await response.text();
+            let errorMessage = 'Account synchronization failed.';
+            
+            if (response.status === 400) {
+                if (errorText.includes('already synchronized')) {
+                    errorMessage = 'Your account is already synchronized. Please refresh the page and try again.';
+                } else if (errorText.includes('not found')) {
+                    errorMessage = 'Your account was not found in the system. Please contact an administrator.';
+                } else {
+                    errorMessage = `Synchronization failed: ${errorText}`;
+                }
+            } else if (response.status === 403) {
+                errorMessage = 'You don\'t have permission to synchronize your account. Please contact an administrator.';
+            }
+            
+            showAlert(errorMessage, 'danger');
+        }
+    } catch (error) {
+        console.error('Error performing user sync:', error);
+        showAlert('Network error during account synchronization. Please try again.', 'danger');
+    }
+}
+
+// Open create invoice modal
+function openCreateInvoiceModal() {
+    console.log('🔵 === MODAL DEBUG START ===');
+    console.log('🔵 Function openCreateInvoiceModal() called');
+    
+    try {
+        // Check if modal element exists
+        const modalElement = document.getElementById('createInvoiceModal');
+        console.log('🔵 Modal element found:', !!modalElement);
+        console.log('🔵 Modal element:', modalElement);
+        
+        // Check Bootstrap availability
+        console.log('🔵 Bootstrap available:', typeof bootstrap !== 'undefined');
+        console.log('🔵 Bootstrap.Modal available:', typeof bootstrap !== 'undefined' && !!bootstrap.Modal);
+        
+        // Try Bootstrap 5 method first
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            console.log('🔵 Attempting Bootstrap modal...');
+            try {
+                const modal = new bootstrap.Modal(modalElement);
+                console.log('🔵 Bootstrap Modal instance created:', modal);
+                modal.show();
+                console.log('🔵 ✅ Modal.show() called successfully');
+                
+                // Check if modal is actually visible
+                setTimeout(() => {
+                    const isVisible = modalElement.classList.contains('show');
+                    console.log('🔵 Modal visible after 100ms:', isVisible);
+                    console.log('🔵 Modal classes:', modalElement.className);
+                    console.log('🔵 Modal style.display:', modalElement.style.display);
+                }, 100);
+                
+            } catch (bootstrapError) {
+                console.error('🔴 Bootstrap modal error:', bootstrapError);
+                throw bootstrapError;
+            }
+        } else {
+            // Fallback: manually show modal
+            console.log('🔵 Bootstrap not available, using manual method');
+            
+            if (modalElement) {
+                console.log('🔵 Setting modal styles manually...');
+                modalElement.style.display = 'block';
+                modalElement.classList.add('show');
+                modalElement.setAttribute('aria-hidden', 'false');
+                document.body.classList.add('modal-open');
+                
+                console.log('🔵 Modal classes after manual show:', modalElement.className);
+                console.log('🔵 Modal style.display after manual show:', modalElement.style.display);
+                
+                // Add backdrop
+                console.log('🔵 Adding backdrop...');
+                const existingBackdrop = document.getElementById('modal-backdrop');
+                if (existingBackdrop) {
+                    existingBackdrop.remove();
+                }
+                
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop fade show';
+                backdrop.id = 'modal-backdrop';
+                document.body.appendChild(backdrop);
+                
+                console.log('🔵 ✅ Modal shown manually');
+            } else {
+                console.error('🔴 Modal element not found!');
+                showAlert('Error: Could not find invoice creation modal', 'danger');
+                return;
+            }
+        }
+        
+        // Reset form
+        console.log('🔵 Resetting form...');
+        const dateField = document.getElementById('newInvoiceDate');
+        if (dateField) {
+            dateField.value = new Date().toISOString().split('T')[0];
+            console.log('🔵 Date field set to:', dateField.value);
+        } else {
+            console.error('🔴 Date field not found!');
+        }
+        
+        newInvoiceItems = [];
+        displayNewInvoiceItems();
+        updateNewInvoiceTotal();
+        
+        console.log('🔵 ✅ Modal opening process completed');
+        
+    } catch (error) {
+        console.error('🔴 Error opening modal:', error);
+        console.error('🔴 Error stack:', error.stack);
+        showAlert('Error opening invoice creation modal: ' + error.message, 'danger');
+    }
+    
+    console.log('🔵 === MODAL DEBUG END ===');
+}
+
+// Close create invoice modal (fallback)
+function closeCreateInvoiceModal() {
+    console.log('🔴 Closing create invoice modal...');
+    
+    try {
+        const modal = document.getElementById('createInvoiceModal');
+        if (modal) {
+            // Try Bootstrap method first
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                try {
+                    const modalInstance = bootstrap.Modal.getInstance(modal);
+                    if (modalInstance) {
+                        console.log('🔴 Closing with Bootstrap instance');
+                        modalInstance.hide();
+                    } else {
+                        console.log('🔴 No Bootstrap instance found, creating new one to close');
+                        const newModalInstance = new bootstrap.Modal(modal);
+                        newModalInstance.hide();
+                    }
+                } catch (bootstrapError) {
+                    console.error('🔴 Bootstrap close error:', bootstrapError);
+                    // Fall back to manual close
+                    manualCloseModal(modal);
+                }
+            } else {
+                // Manual close
+                manualCloseModal(modal);
+            }
+        }
+    } catch (error) {
+        console.error('🔴 Error closing modal:', error);
+    }
+}
+
+// Manual modal close function
+function manualCloseModal(modal) {
+    console.log('🔴 Closing modal manually...');
+    
+    // Hide modal
+    modal.style.display = 'none';
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+    
+    // Remove modal-open class from body
+    document.body.classList.remove('modal-open');
+    
+    // Remove all backdrops (in case there are multiple)
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(backdrop => {
+        console.log('🔴 Removing backdrop:', backdrop);
+        backdrop.remove();
+    });
+    
+    // Also remove by ID
+    const namedBackdrop = document.getElementById('modal-backdrop');
+    if (namedBackdrop) {
+        console.log('🔴 Removing named backdrop');
+        namedBackdrop.remove();
+    }
+    
+    // Reset body styles that might be set by Bootstrap
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+    
+    console.log('🔴 ✅ Modal closed manually');
+}
+
+// Test invoice creation function
+async function testInvoiceCreation() {
+    console.log('=== TEST INVOICE CREATION START ===');
+    
+    try {
+        showAlert('Testing invoice creation...', 'info');
+        
+        const today = new Date().toISOString().split('T')[0];
+        console.log('Creating test invoice with date:', today);
+        
+        const response = await fetch('/api/invoices', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                createdDate: today
+            })
+        });
+
+        console.log('Test response status:', response.status);
+        console.log('Test response ok:', response.ok);
+
+        if (response.ok) {
+            const invoice = await response.json();
+            console.log('Test invoice created successfully:', invoice);
+            showAlert('✅ Test invoice created successfully! Invoice ID: ' + invoice.id.substring(0, 8), 'success');
+            loadInvoices(); // Refresh the invoice list
+        } else {
+            const errorText = await response.text();
+            console.error('❌ Test invoice creation failed with status:', response.status);
+            console.error('❌ Error response:', errorText);
+            showAlert('❌ Test invoice creation failed: ' + errorText, 'danger');
+        }
+    } catch (error) {
+        console.error('Error in test invoice creation:', error);
+        showAlert('Error in test invoice creation: ' + error.message, 'danger');
+    }
+    
+    console.log('=== TEST INVOICE CREATION END ===');
 }
 
 // Show alert message

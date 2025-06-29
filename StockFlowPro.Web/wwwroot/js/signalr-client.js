@@ -3,12 +3,21 @@ class StockFlowSignalRClient {
     constructor() {
         this.connection = null;
         this.isConnected = false;
+        this.isInitializing = false;
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = 5;
         this.reconnectDelay = 5000; // 5 seconds
     }
 
     async initialize() {
+        // Prevent multiple initialization attempts
+        if (this.isInitializing || this.isConnected) {
+            console.log("SignalR already initializing or connected");
+            return;
+        }
+
+        this.isInitializing = true;
+        
         try {
             // Create connection
             this.connection = new signalR.HubConnectionBuilder()
@@ -23,12 +32,14 @@ class StockFlowSignalRClient {
             // Start connection
             await this.connection.start();
             this.isConnected = true;
+            this.isInitializing = false;
             this.reconnectAttempts = 0;
             
             console.log("SignalR Connected successfully");
             this.showConnectionStatus("Connected", "connected");
             
         } catch (error) {
+            this.isInitializing = false;
             console.error("SignalR Connection failed:", error);
             this.showConnectionStatus("Connection Failed", "error");
             this.scheduleReconnect();
@@ -343,12 +354,15 @@ class StockFlowSignalRClient {
     }
 
     async scheduleReconnect() {
-        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+        if (this.reconnectAttempts < this.maxReconnectAttempts && !this.isInitializing) {
             this.reconnectAttempts++;
             console.log(`Attempting to reconnect... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
             
             setTimeout(async () => {
                 try {
+                    // Reset connection state before reconnecting
+                    this.isConnected = false;
+                    this.connection = null;
                     await this.initialize();
                 } catch (error) {
                     console.error("Reconnection failed:", error);
@@ -357,6 +371,36 @@ class StockFlowSignalRClient {
         } else {
             console.error("Max reconnection attempts reached");
             this.showConnectionStatus("Connection Lost", "error");
+        }
+    }
+
+    // Safe method to start connection if not already started
+    async safeStart() {
+        if (!this.connection) {
+            console.log("No connection exists, initializing...");
+            await this.initialize();
+            return;
+        }
+
+        const connectionState = this.connection.state;
+        console.log("Current connection state:", connectionState);
+
+        if (connectionState === signalR.HubConnectionState.Disconnected) {
+            try {
+                await this.connection.start();
+                this.isConnected = true;
+                console.log("SignalR Connection started successfully");
+                this.showConnectionStatus("Connected", "connected");
+            } catch (error) {
+                console.error("Failed to start SignalR connection:", error);
+                this.showConnectionStatus("Connection Failed", "error");
+            }
+        } else if (connectionState === signalR.HubConnectionState.Connected) {
+            console.log("SignalR already connected");
+            this.isConnected = true;
+            this.showConnectionStatus("Connected", "connected");
+        } else {
+            console.log("SignalR connection is in state:", connectionState);
         }
     }
 

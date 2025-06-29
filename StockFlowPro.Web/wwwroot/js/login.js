@@ -14,20 +14,21 @@ function togglePassword(inputId, button) {
     }
 }
 
-// Enhanced tab functionality
-function switchTab(tabId) {
-    // Remove active class from all tabs and content
-    document.querySelectorAll('.auth-tab').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-pane').forEach(pane => {
-        pane.classList.remove('show', 'active');
-    });
-    
-    // Add active class to clicked tab
-    document.getElementById(tabId + '-tab').classList.add('active');
-    document.getElementById(tabId).classList.add('show', 'active');
-}
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Load roles for register form
+    loadRolesForRegisterForm();
+    
+    // Clear form errors function
+    function clearFormErrors() {
+        document.querySelectorAll('.input-error').forEach(input => {
+            input.classList.remove('input-error');
+        });
+        document.querySelectorAll('.form-error').forEach(error => {
+            error.style.display = 'none';
+        });
+    }
+    
     // Get server-side data passed from the page
     const pageData = window.loginPageData || {};
     const hasRegisterError = pageData.hasRegisterError || false;
@@ -35,24 +36,85 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show register tab if there are register messages
     if (hasRegisterError || hasRegisterSuccess) {
-        switchTab('register');
+        // Use manual tab switching to avoid Bootstrap issues
+        const registerTab = document.getElementById('register-tab');
+        const registerPane = document.getElementById('register');
+        const loginPane = document.getElementById('login');
+        const loginTab = document.getElementById('login-tab');
+        
+        if (registerTab && registerPane && loginPane && loginTab) {
+            // Remove active classes from login tab
+            loginTab.classList.remove('active');
+            loginPane.classList.remove('show', 'active');
+            
+            // Add active classes to register tab
+            registerTab.classList.add('active');
+            registerPane.classList.add('show', 'active');
+        } else {
+            console.error('Tab elements not found:', {
+                registerTab: !!registerTab,
+                registerPane: !!registerPane,
+                loginPane: !!loginPane,
+                loginTab: !!loginTab
+            });
+        }
     }
 
-    // Enhanced tab click handlers
+    // Add event listeners for tab switching to clear form errors
     const loginTab = document.getElementById('login-tab');
     const registerTab = document.getElementById('register-tab');
     
     if (loginTab) {
-        loginTab.addEventListener('click', function() {
-            switchTab('login');
+        // Bootstrap tab event
+        loginTab.addEventListener('shown.bs.tab', function() {
             clearFormErrors();
+        });
+        
+        // Manual click event
+        loginTab.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Manual tab switching
+            const loginPane = document.getElementById('login');
+            const registerPane = document.getElementById('register');
+            
+            if (loginPane && registerPane) {
+                // Remove active from register
+                registerTab?.classList.remove('active');
+                registerPane.classList.remove('show', 'active');
+                
+                // Add active to login
+                loginTab.classList.add('active');
+                loginPane.classList.add('show', 'active');
+                
+                clearFormErrors();
+            }
         });
     }
     
     if (registerTab) {
-        registerTab.addEventListener('click', function() {
-            switchTab('register');
+        // Bootstrap tab event
+        registerTab.addEventListener('shown.bs.tab', function() {
             clearFormErrors();
+        });
+        
+        // Manual click event
+        registerTab.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Manual tab switching
+            const loginPane = document.getElementById('login');
+            const registerPane = document.getElementById('register');
+            
+            if (loginPane && registerPane) {
+                // Remove active from login
+                loginTab?.classList.remove('active');
+                loginPane.classList.remove('show', 'active');
+                
+                // Add active to register
+                registerTab.classList.add('active');
+                registerPane.classList.add('show', 'active');
+                
+                clearFormErrors();
+            }
         });
     }
 
@@ -120,16 +182,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Clear form errors function
-    function clearFormErrors() {
-        document.querySelectorAll('.input-error').forEach(input => {
-            input.classList.remove('input-error');
-        });
-        document.querySelectorAll('.form-error').forEach(error => {
-            error.style.display = 'none';
-        });
-    }
-    
     // Enhanced floating label behavior
     document.querySelectorAll('.floating-input input').forEach(input => {
         // Handle autofill detection
@@ -166,3 +218,77 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(group);
     });
 });
+
+// Load roles for register form dropdown
+async function loadRolesForRegisterForm() {
+    console.log('🔄 === LOADING ROLES FOR REGISTER FORM ===');
+    
+    const roleSelect = document.getElementById('Register_Role');
+    if (!roleSelect) {
+        console.log('🔴 Register_Role select element not found');
+        return;
+    }
+    
+    try {
+        // Add cache busting to ensure fresh data
+        const timestamp = new Date().getTime();
+        console.log('🔄 Fetching roles from /api/role-management/roles/options with timestamp:', timestamp);
+        
+        const response = await fetch(`/api/role-management/roles/options?_t=${timestamp}`);
+        console.log('🔄 Response status:', response.status, 'OK:', response.ok);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to load roles: ${response.status}`);
+        }
+        
+        const roles = await response.json();
+        console.log('🔄 Fetched roles for register form:', roles);
+        console.log('🔄 Number of roles:', roles.length);
+        
+        // Clear existing options
+        roleSelect.innerHTML = '';
+        
+        if (roles.length === 0) {
+            console.log('🔴 No roles found, adding default option');
+            roleSelect.innerHTML = '<option value="">No roles available</option>';
+            return;
+        }
+        
+        // Add default option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Select a role...';
+        roleSelect.appendChild(defaultOption);
+        
+        // Add role options
+        roles.forEach((role, index) => {
+            console.log(`🔄 Adding role ${index + 1}:`, role.name, '-', role.displayName);
+            
+            const option = document.createElement('option');
+            option.value = role.name;
+            option.textContent = role.displayName;
+            
+            // Set User as default selected
+            if (role.name === 'User') {
+                option.selected = true;
+                console.log('🔄 Set User role as default selected');
+            }
+            
+            roleSelect.appendChild(option);
+        });
+        
+        console.log('🔄 ✅ Successfully populated register form with', roles.length, 'roles');
+        
+    } catch (error) {
+        console.error('🔴 Error loading roles for register form:', error);
+        
+        // Fallback to hardcoded roles
+        console.log('🔄 Using fallback hardcoded roles');
+        roleSelect.innerHTML = `
+            <option value="">Select a role...</option>
+            <option value="User" selected>User</option>
+            <option value="Manager">Manager</option>
+            <option value="Admin">Admin</option>
+        `;
+    }
+}
