@@ -170,8 +170,21 @@ class ProfileManager {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to upload photo');
+                if (response.status === 401) {
+                    this.showToast('Authentication Required', 'Please sign in to upload photos', 'error');
+                    return;
+                }
+                
+                let errorMessage = 'Failed to upload photo';
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || errorMessage;
+                } catch {
+                    // If response is not JSON, try to get text
+                    const errorText = await response.text();
+                    errorMessage = errorText || errorMessage;
+                }
+                throw new Error(errorMessage);
             }
 
             const result = await response.json();
@@ -182,7 +195,7 @@ class ProfileManager {
                 window.updateNavbarAvatar(result.photoUrl);
             }
             
-            this.showToast('Success', 'Profile photo updated successfully!', 'success');
+            this.showToast('Success', result.message || 'Profile photo updated successfully!', 'success');
         } catch (error) {
             console.error('Error uploading photo:', error);
             this.showToast('Error', error.message, 'error');
@@ -523,6 +536,24 @@ class ProfileManager {
                 }
             }
         });
+    }
+
+    showAuthenticationError() {
+        // Show authentication required message
+        const profileContainer = document.querySelector('.profile-container');
+        if (profileContainer) {
+            profileContainer.innerHTML = `
+                <div class="alert alert-warning text-center">
+                    <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                    <h4>Authentication Required</h4>
+                    <p>You need to be logged in to view and edit your profile.</p>
+                    <a href="/Login" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                    </a>
+                </div>
+            `;
+        }
+        this.showToast('Authentication Required', 'Please sign in to access your profile', 'error');
     }
 
     showToast(title, message, type) {

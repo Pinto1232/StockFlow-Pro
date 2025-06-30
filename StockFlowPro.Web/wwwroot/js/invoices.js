@@ -612,11 +612,16 @@ async function loadUsers() {
         if (response.ok) {
             const users = await response.json();
             populateUserFilter(users);
+        } else if (response.status === 401) {
+            console.log('User not authenticated - users filter will be limited');
+            // Don't show error for authentication issues in user loading
         } else {
-            console.error('Failed to load users');
+            console.error('Failed to load users:', response.status);
+            showAlert('Failed to load users for filtering', 'warning');
         }
     } catch (error) {
         console.error('Error loading users:', error);
+        showAlert('Error loading users for filtering', 'warning');
     }
 }
 
