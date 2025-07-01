@@ -21,6 +21,16 @@ namespace StockFlowPro.Infrastructure.Data
         public DbSet<Role> Roles { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
+        
+        // Subscription system entities
+        public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
+        public DbSet<Subscription> Subscriptions { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<PaymentRefund> PaymentRefunds { get; set; }
+        public DbSet<SubscriptionHistory> SubscriptionHistories { get; set; }
+        public DbSet<PlanFeature> PlanFeatures { get; set; }
+        public DbSet<SubscriptionPlanFeature> SubscriptionPlanFeatures { get; set; }
+        public DbSet<PaymentMethodEntity> PaymentMethods { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -35,6 +45,16 @@ namespace StockFlowPro.Infrastructure.Data
             modelBuilder.ApplyConfiguration(new RoleConfiguration());
             modelBuilder.ApplyConfiguration(new PermissionConfiguration());
             modelBuilder.ApplyConfiguration(new RolePermissionConfiguration());
+            
+            // Subscription system configurations
+            modelBuilder.ApplyConfiguration(new SubscriptionPlanConfiguration());
+            modelBuilder.ApplyConfiguration(new SubscriptionConfiguration());
+            modelBuilder.ApplyConfiguration(new PaymentConfiguration());
+            modelBuilder.ApplyConfiguration(new PaymentRefundConfiguration());
+            modelBuilder.ApplyConfiguration(new SubscriptionHistoryConfiguration());
+            modelBuilder.ApplyConfiguration(new PlanFeatureConfiguration());
+            modelBuilder.ApplyConfiguration(new SubscriptionPlanFeatureConfiguration());
+            modelBuilder.ApplyConfiguration(new PaymentMethodEntityConfiguration());
         }
     }
 }
