@@ -1,5 +1,37 @@
 // Enhanced Admin Panel JavaScript functionality
 
+// Global confirmLogout function to handle logout confirmation
+function confirmLogout(event) {
+    event.preventDefault();
+    
+    const button = event.currentTarget;
+    const form = button.closest('form') || document.getElementById('logoutForm');
+    
+    if (!form) {
+        console.error('Logout form not found');
+        return;
+    }
+    
+    // Show confirmation dialog
+    const confirmed = confirm('Are you sure you want to logout?');
+    if (confirmed) {
+        // Show loading state if button exists
+        if (button) {
+            const originalText = button.textContent || button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing out...';
+        }
+        
+        // Submit the form after a brief delay
+        setTimeout(() => {
+            form.submit();
+        }, 500);
+    }
+}
+
+// Make confirmLogout available globally
+window.confirmLogout = confirmLogout;
+
 document.addEventListener('DOMContentLoaded', function() {
     initializeAnimations();
     updateSystemStats();

@@ -1,5 +1,6 @@
 using StockFlowPro.Application.DTOs;
 using StockFlowPro.Domain.Enums;
+using StockFlowPro.Web.Configuration;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -191,9 +192,39 @@ public class UserAuthenticationService : IUserAuthenticationService
             return Task.FromResult(false);
         }
 
-        if (password.Length < 6)
+        var minLength = EnvironmentConfig.PasswordMinLength;
+        if (password.Length < minLength)
         {
-            _logger.LogWarning("Password validation failed: Password length {Length} is less than 6 characters (minimum required: 6)", password.Length);
+            _logger.LogWarning("Password validation failed: Password length {Length} is less than {MinLength} characters", 
+                password.Length, minLength);
+            return Task.FromResult(false);
+        }
+
+        var validationErrors = new List<string>();
+
+        if (EnvironmentConfig.PasswordRequireUppercase && !password.Any(char.IsUpper))
+        {
+            validationErrors.Add("Password must contain at least one uppercase letter");
+        }
+
+        if (EnvironmentConfig.PasswordRequireLowercase && !password.Any(char.IsLower))
+        {
+            validationErrors.Add("Password must contain at least one lowercase letter");
+        }
+
+        if (EnvironmentConfig.PasswordRequireNumbers && !password.Any(char.IsDigit))
+        {
+            validationErrors.Add("Password must contain at least one number");
+        }
+
+        if (EnvironmentConfig.PasswordRequireSpecialChars && !password.Any(c => !char.IsLetterOrDigit(c)))
+        {
+            validationErrors.Add("Password must contain at least one special character");
+        }
+
+        if (validationErrors.Any())
+        {
+            _logger.LogWarning("Password validation failed: {Errors}", string.Join(", ", validationErrors));
             return Task.FromResult(false);
         }
 
@@ -214,13 +245,13 @@ public class UserAuthenticationService : IUserAuthenticationService
     public Task<bool> VerifyPasswordAsync(string password, string hashedPassword)
     {
         if (string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(hashedPassword))
-            return Task.FromResult(false);
+            {return Task.FromResult(false);}
 
         try
         {
             var parts = hashedPassword.Split(':');
             if (parts.Length != 2)
-                return Task.FromResult(false);
+                {return Task.FromResult(false);}
 
             var hash = parts[0];
             var salt = parts[1];

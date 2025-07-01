@@ -1,4 +1,4 @@
-﻿@using StockFlowPro.Web.Extensions
+@using StockFlowPro.Web.Extensions
 @using StockFlowPro.Web.Authorization
 <!DOCTYPE html>
 <html lang="en">
@@ -1004,20 +1004,33 @@
         async function loadUserAvatar() {
             try {
                 const response = await fetch('/api/profile');
+
                 if (response.ok) {
                     const profile = await response.json();
                     updateNavbarAvatar(profile.profilePhotoUrl);
+                } else if (response.status === 401) {
+                    // User not authenticated - this is expected for non-authenticated users
+                    // Silently use default avatar without logging
+                    updateNavbarAvatar(null);
+                } else {
+                    console.warn('Unexpected response when loading user avatar:', response.status, response.statusText);
+                    updateNavbarAvatar(null);
                 }
             } catch (error) {
                 console.warn('Could not load user avatar:', error);
                 // Keep default icon
+                updateNavbarAvatar(null);
             }
         }
+
         
         // Enhanced dropdown behavior
         document.addEventListener('DOMContentLoaded', function() {
-            // Load user avatar
-            loadUserAvatar();
+            // Load user avatar only if user dropdown exists (user is authenticated)
+            const userDropdown = document.getElementById('userDropdown');
+            if (userDropdown) {
+                loadUserAvatar();
+            }
             const dropdown = document.getElementById('userDropdown');
             const dropdownMenu = document.querySelector('.modern-account-dropdown');
             
@@ -1114,26 +1127,26 @@
             });
             
             // Auto-close mobile menu when clicking nav links
-            navLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    const href = link.getAttribute('href');
-                    
-                    // Only close menu for valid navigation links (not placeholders or buttons)
-                    if (href && 
-                        href !== '#' && 
-                        href.trim() !== '' && 
-                        href !== 'javascript:void(0)' &&
-                        !href.startsWith('javascript:') &&
-                        window.innerWidth < 992) {
-                        
-                        // Add small delay to allow navigation to start
-                        setTimeout(() => {
-                            try {
-                                const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-                                if (bsCollapse) {
-                                    bsCollapse.hide();
-                                }
-                            } catch (error) {
+         navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                const href = link.getAttribute('href');
+                
+                // Only close menu for valid navigation links (not placeholders or buttons)
+                if (
+                    href &&
+                    href !== '#' &&
+                    href.trim() !== '' &&
+                    href !== 'javascript:void(0)' &&
+                    !href.startsWith('javascript:') &&
+                    window.innerWidth < 992
+                ) {
+                    // Add small delay to allow navigation to start
+                    setTimeout(() => {
+                        try {
+                            const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                            if (bsCollapse) {
+                                bsCollapse.hide();
+                            } else {
                                 // Fallback: manually hide the menu
                                 if (navbarCollapse) {
                                     navbarCollapse.classList.remove('show');
@@ -1143,10 +1156,23 @@
                                     }
                                 }
                             }
-                        }, 100);
-                    }
-                });
+                        } catch (error) {
+                            console.warn('Error collapsing navbar:', error);
+
+                            // Fallback: manually hide the menu
+                            if (navbarCollapse) {
+                                navbarCollapse.classList.remove('show');
+                                const toggler = document.querySelector('.navbar-toggler');
+                                if (toggler) {
+                                    toggler.setAttribute('aria-expanded', 'false');
+                                }
+                            }
+                        }
+                    }, 100);
+                }
             });
+        });
+
             
             // Improve mobile menu accessibility
             if (navbarToggler && navbarCollapse) {

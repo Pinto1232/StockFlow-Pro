@@ -1,3 +1,7 @@
+@{
+    var currentPage = ViewContext.RouteData.Values["page"]?.ToString();
+}
+
 @if (User.Identity != null && User.Identity.IsAuthenticated)
 {
     <style>
@@ -35,8 +39,10 @@
     <!-- Alert Container for Critical Notifications -->
     <div id="alert-container" class="position-fixed top-0 start-50 translate-middle-x mt-5" style="z-index: 1050; width: 90%; max-width: 500px;"></div>
 
-    <!-- SignalR Scripts -->
-    <script src="https://unpkg.com/@@microsoft/signalr@latest/dist/browser/signalr.min.js"></script>
+    <!-- SignalR Scripts - Using CDN without integrity check for now -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js" 
+            crossorigin="anonymous" 
+            referrerpolicy="no-referrer"></script>
     <script src="~/js/signalr-client.js" asp-append-version="true"></script>
 
     <!-- User Context for SignalR -->
@@ -85,8 +91,6 @@
             waitForSignalR();
         });
     </script>
-
-    var currentPage = ViewContext.RouteData.Values["page"]?.ToString();
 
     @if (currentPage == "/Dashboard")
     {

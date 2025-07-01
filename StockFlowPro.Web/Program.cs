@@ -7,6 +7,7 @@ using StockFlowPro.Application.Interfaces;
 using StockFlowPro.Application.Services;
 using StockFlowPro.Web.Services;
 using StockFlowPro.Web.Authorization;
+using StockFlowPro.Web.Middleware;
 using FluentValidation;
 using MediatR;
 using System.Reflection;
@@ -60,6 +61,7 @@ builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IRealTimeService,
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IUserService, StockFlowPro.Application.Services.UserService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IRoleUpgradeRequestService, StockFlowPro.Application.Services.RoleUpgradeRequestService>();
 builder.Services.AddScoped<StockFlowPro.Application.Services.ProductNotificationService>();
+builder.Services.AddScoped<ISecurityAuditService, SecurityAuditService>();
 builder.Services.AddHostedService<DatabaseInitializationService>();
 
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
@@ -77,7 +79,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AllRoles", policy => policy.RequireRole("User", "Manager", "Admin"));
 });
 
-// Configure authentication using environment variables
+// Configure authentication using environment variables with enhanced security
 builder.Services.AddAuthentication(EnvironmentConfig.CookieAuthName)
     .AddCookie(EnvironmentConfig.CookieAuthName, options =>
     {
@@ -87,13 +89,32 @@ builder.Services.AddAuthentication(EnvironmentConfig.CookieAuthName)
         options.SlidingExpiration = true;
         options.Cookie.SecurePolicy = EnvironmentConfig.CookieSecure ? CookieSecurePolicy.Always : CookieSecurePolicy.SameAsRequest;
         options.Cookie.SameSite = EnvironmentConfig.CookieSameSite;
+        options.Cookie.HttpOnly = true; // Prevent XSS attacks
+        options.Cookie.Name = EnvironmentConfig.CookieAuthName;
+        options.Cookie.IsEssential = true;
+        
+        // Enhanced security settings
+        options.Events.OnRedirectToLogin = context =>
+        {
+            if (context.Request.Path.StartsWithSegments("/api"))
+            {
+                context.Response.StatusCode = 401;
+                return Task.CompletedTask;
+            }
+            context.Response.Redirect(context.RedirectUri);
+            return Task.CompletedTask;
+        };
     });
 
 var app = builder.Build();
 
+// Security middleware should be added early in the pipeline
+app.UseSecurityHeaders();
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
+    // Enhanced HSTS configuration for production
     app.UseHsts();
 }
 else
@@ -103,7 +124,27 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
+// Add input validation and rate limiting middleware
+app.UseInputValidation();
+app.UseRateLimiting();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        // Add security headers for static files
+        ctx.Context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+        ctx.Context.Response.Headers["X-Frame-Options"] = "DENY";
+        
+        // Cache static files for performance but with security considerations
+        var pathValue = ctx.Context.Request.Path.Value;
+        if (!string.IsNullOrEmpty(pathValue) && !pathValue.Contains("/api/"))
+        {
+            ctx.Context.Response.Headers["Cache-Control"] = "public,max-age=31536000";
+        }
+    }
+});
 
 app.UseRouting();
 

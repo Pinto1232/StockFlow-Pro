@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using StockFlowPro.Web.Configuration;
 using StockFlowPro.Web.Services;
 using System.Security.Claims;
 
@@ -37,9 +38,9 @@ public class AuthController : ControllerBase
                 new Claim("LastName", user.LastName)
             };
 
-            var claimsIdentity = new ClaimsIdentity(claims, "MyCookieAuth");
+            var claimsIdentity = new ClaimsIdentity(claims, EnvironmentConfig.CookieAuthName);
             var authProperties = new AuthenticationProperties { IsPersistent = true };
-            await HttpContext.SignInAsync("MyCookieAuth", new ClaimsPrincipal(claimsIdentity), authProperties);
+            await HttpContext.SignInAsync(EnvironmentConfig.CookieAuthName, new ClaimsPrincipal(claimsIdentity), authProperties);
 
             return Ok(new 
             { 
@@ -60,7 +61,7 @@ public class AuthController : ControllerBase
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
-        await HttpContext.SignOutAsync("MyCookieAuth");
+        await HttpContext.SignOutAsync(EnvironmentConfig.CookieAuthName);
         return Ok(new { message = "Logout successful" });
     }
 }
