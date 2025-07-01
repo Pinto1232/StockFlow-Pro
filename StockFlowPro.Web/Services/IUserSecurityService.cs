@@ -51,27 +51,3 @@ public class UserSecurityValidationResult
     public string? ErrorMessage { get; set; }
     public SecurityRiskLevel RiskLevel { get; set; } = SecurityRiskLevel.Low;
 }
-
-/// <summary>
-/// Types of security events for audit logging
-/// </summary>
-public enum SecurityEventType
-{
-    UnauthorizedUserCreationAttempt,
-    UnauthorizedUserSyncAttempt,
-    UnauthorizedUserModificationAttempt,
-    SuspiciousUserCreationPattern,
-    RateLimitExceeded,
-    InvalidUserDataSubmission
-}
-
-/// <summary>
-/// Security risk levels
-/// </summary>
-public enum SecurityRiskLevel
-{
-    Low,
-    Medium,
-    High,
-    Critical
-}
