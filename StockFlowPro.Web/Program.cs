@@ -30,20 +30,75 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSignalR();
 
-// Configure database connection using environment variables
+// Add CORS configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:8081", 
+                "http://localhost:3000", 
+                "http://localhost:5173",
+                "http://localhost:8081/", // Expo web
+                "http://localhost:19000", // Expo DevTools
+                "exp://localhost:19000",  // Expo protocol
+                "http://127.0.0.1:8081",  // Alternative localhost
+                "http://10.0.2.2:8081"    // Android emulator host
+              )
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials()
+              .SetIsOriginAllowedToAllowWildcardSubdomains();
+    });
+    
+    // Add a more permissive policy for development
+    options.AddPolicy("DevelopmentCors", policy =>
+    {
+        policy.SetIsOriginAllowed(origin => 
+        {
+            if (string.IsNullOrWhiteSpace(origin)){ return false;}
+            
+            // Allow localhost on any port
+            if (origin.StartsWith("http://localhost:") || 
+                origin.StartsWith("https://localhost:") ||
+                origin.StartsWith("http://127.0.0.1:") ||
+                origin.StartsWith("https://127.0.0.1:"))
+                {return true;}
+                
+            // Allow Expo development URLs
+            if (origin.StartsWith("exp://") || 
+                origin.StartsWith("exps://"))
+               { return true;}
+                
+            if (origin.StartsWith("http://10.") || 
+                origin.StartsWith("http://192.168.") ||
+                origin.StartsWith("http://172."))
+               { return true;}
+                
+            return false;
+        })
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials();
+    });
+});
+
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), 
         b => b.MigrationsAssembly("StockFlowPro.Infrastructure")));
 
 builder.Services.AddMediatR(typeof(StockFlowPro.Application.Commands.Users.CreateUserCommand).Assembly);
-builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(StockFlowPro.Application.Mappings.ProductMappingProfile));
+builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(StockFlowPro.Application.Mappings.ProductMappingProfile), typeof(StockFlowPro.Application.Mappings.SubscriptionPlanMappingProfile));
 builder.Services.AddValidatorsFromAssembly(typeof(StockFlowPro.Application.Validators.CreateUserCommandValidator).Assembly);
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<StockFlowPro.Domain.Repositories.IInvoiceRepository, StockFlowPro.Infrastructure.Repositories.InvoiceRepository>();
+builder.Services.AddScoped<StockFlowPro.Domain.Repositories.ISubscriptionPlanRepository, StockFlowPro.Infrastructure.Repositories.SubscriptionPlanRepository>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<StockFlowPro.Application.Interfaces.ISubscriptionPlanService, StockFlowPro.Application.Services.SubscriptionPlanService>();
 builder.Services.AddScoped<IMockDataStorageService, JsonMockDataStorageService>();
 builder.Services.AddScoped<IDataSourceService, HybridDataSourceService>();
 builder.Services.AddScoped<IDualDataService, DualDataService>();
@@ -147,6 +202,16 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.UseRouting();
+
+// Enable CORS - must be before authentication
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors("DevelopmentCors");
+}
+else
+{
+    app.UseCors("AllowFrontend");
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
