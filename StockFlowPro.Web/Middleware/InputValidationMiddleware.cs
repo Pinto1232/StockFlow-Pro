@@ -61,6 +61,7 @@ public class InputValidationMiddleware
 
         try
         {
+            _logger.LogDebug("Validating request from {ClientIp} to {Path}", clientIp, context.Request.Path);
             // Validate query parameters
             if (context.Request.Query.Any())
             {
@@ -140,6 +141,12 @@ public class InputValidationMiddleware
 
         // Skip validation for SignalR
         if (path.Contains("/stockflowhub"))
+        {
+            return true;
+        }
+
+        // Skip validation for home page and basic GET requests
+        if (context.Request.Method == "GET" && (path == "/" || path == "" || path == "/home"))
         {
             return true;
         }

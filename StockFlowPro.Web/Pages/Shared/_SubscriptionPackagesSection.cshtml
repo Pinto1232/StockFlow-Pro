@@ -1,0 +1,265 @@
+@model IList<StockFlowPro.Application.DTOs.SubscriptionPlanDto>
+
+<section class="subscription-packages py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center mb-5">
+                <h2 class="section-title">Choose Your Plan</h2>
+                <p class="section-subtitle">Select the perfect subscription plan for your business needs</p>
+            </div>
+        </div>
+        
+        <div class="row justify-content-center">
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var plan in Model)
+                {
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card pricing-card h-100 @(plan.Name.ToLower().Contains("pro") ? "featured" : "")">
+                            @if (plan.Name.ToLower().Contains("pro"))
+                            {
+                                <div class="badge-featured">Most Popular</div>
+                            }
+                            
+                            <div class="card-header text-center">
+                                <h3 class="plan-name">@plan.Name</h3>
+                                <div class="plan-price">
+                                    <span class="currency">@plan.Currency</span>
+                                    <span class="amount">@plan.Price.ToString("F2")</span>
+                                    <span class="period">/@plan.BillingInterval.ToString().ToLower()</span>
+                                </div>
+                                @if (plan.HasTrial)
+                                {
+                                    <div class="trial-info">
+                                        <small class="text-muted">@plan.TrialPeriodDays days free trial</small>
+                                    </div>
+                                }
+                            </div>
+                            
+                            <div class="card-body">
+                                <p class="plan-description">@plan.Description</p>
+                                
+                                <ul class="plan-features">
+                                    @if (plan.MaxUsers.HasValue)
+                                    {
+                                        <li><i class="fas fa-check text-success"></i> Up to @plan.MaxUsers users</li>
+                                    }
+                                    else
+                                    {
+                                        <li><i class="fas fa-check text-success"></i> Unlimited users</li>
+                                    }
+                                    
+                                    @if (plan.MaxProjects.HasValue)
+                                    {
+                                        <li><i class="fas fa-check text-success"></i> Up to @plan.MaxProjects projects</li>
+                                    }
+                                    else
+                                    {
+                                        <li><i class="fas fa-check text-success"></i> Unlimited projects</li>
+                                    }
+                                    
+                                    @if (plan.MaxStorageGB.HasValue)
+                                    {
+                                        <li><i class="fas fa-check text-success"></i> @plan.MaxStorageGB GB storage</li>
+                                    }
+                                    else
+                                    {
+                                        <li><i class="fas fa-check text-success"></i> Unlimited storage</li>
+                                    }
+                                    
+                                    @if (plan.HasAdvancedReporting)
+                                    {
+                                        <li><i class="fas fa-check text-success"></i> Advanced reporting</li>
+                                    }
+                                    
+                                    @if (plan.HasApiAccess)
+                                    {
+                                        <li><i class="fas fa-check text-success"></i> API access</li>
+                                    }
+                                    
+                                    @if (plan.HasPrioritySupport)
+                                    {
+                                        <li><i class="fas fa-check text-success"></i> Priority support</li>
+                                    }
+                                </ul>
+                            </div>
+                            
+                            <div class="card-footer text-center">
+                                <a href="/Register?plan=@plan.Id" class="btn btn-primary btn-lg">
+                                    @if (plan.HasTrial)
+                                    {
+                                        <text>Start Free Trial</text>
+                                    }
+                                    else
+                                    {
+                                        <text>Get Started</text>
+                                    }
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center">
+                    <div class="alert alert-info">
+                        <h4>Coming Soon!</h4>
+                        <p>Our subscription plans are being prepared. Please check back soon for exciting pricing options.</p>
+                        <a href="/Contact" class="btn btn-primary">Contact Us for Early Access</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<style>
+.subscription-packages {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.section-subtitle {
+    font-size: 1.2rem;
+    color: #6c757d;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.pricing-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.pricing-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.pricing-card.featured {
+    border: 3px solid #007bff;
+    transform: scale(1.05);
+}
+
+.pricing-card.featured:hover {
+    transform: scale(1.05) translateY(-10px);
+}
+
+.badge-featured {
+    position: absolute;
+    top: 20px;
+    right: -30px;
+    background: #007bff;
+    color: white;
+    padding: 5px 40px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transform: rotate(45deg);
+    z-index: 1;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    border-radius: 15px 15px 0 0 !important;
+    padding: 2rem 1rem;
+}
+
+.plan-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.plan-price {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.plan-price .currency {
+    font-size: 1rem;
+    vertical-align: top;
+}
+
+.plan-price .period {
+    font-size: 1rem;
+    font-weight: 400;
+    opacity: 0.8;
+}
+
+.trial-info {
+    margin-top: 0.5rem;
+}
+
+.plan-description {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+    min-height: 3rem;
+}
+
+.plan-features {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 2rem;
+}
+
+.plan-features li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.plan-features li:last-child {
+    border-bottom: none;
+}
+
+.plan-features i {
+    margin-right: 0.5rem;
+    width: 20px;
+}
+
+.card-footer {
+    background: transparent;
+    border-top: none;
+    padding: 1.5rem;
+}
+
+.btn-lg {
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+}
+
+@@media (max-width: 768px) {
+    .pricing-card.featured {
+        transform: none;
+        margin-bottom: 2rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .plan-price {
+        font-size: 2rem;
+    }
+}
+</style>
