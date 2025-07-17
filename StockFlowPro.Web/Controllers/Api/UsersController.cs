@@ -5,14 +5,14 @@ using Microsoft.AspNetCore.Mvc;
 using StockFlowPro.Application.Commands.Users;
 using StockFlowPro.Application.DTOs;
 using StockFlowPro.Application.Queries.Users;
+using StockFlowPro.Shared.Models;
 using StockFlowPro.Web.Authorization;
 using StockFlowPro.Web.Extensions;
 
 namespace StockFlowPro.Web.Controllers.Api;
 
-[ApiController]
 [Route("api/[controller]")]
-public class UsersController : ControllerBase
+public class UsersController : ApiBaseController
 {
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
@@ -54,44 +54,52 @@ public class UsersController : ControllerBase
 
     [HttpGet]
     [Permission(Permissions.Users.ViewAll)]
-    public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers([FromQuery] bool activeOnly = false)
+    public async Task<ActionResult<ApiResponse<IEnumerable<UserDto>>>> GetAllUsers([FromQuery] bool activeOnly = false)
     {
         try
         {
             // Check if user is authenticated
-            if (!User.Identity?.IsAuthenticated ?? true)
+            if (!IsAuthenticated)
             {
-                return Unauthorized(new { message = "Authentication required", requiresLogin = true });
+                return UnauthorizedResponse<IEnumerable<UserDto>>("Authentication required");
             }
 
             var query = new GetAllUsersQuery { ActiveOnly = activeOnly };
             var users = await _mediator.Send(query);
-            return Ok(users);
+            
+            return SuccessResponse(users, $"Retrieved {users.Count()} users from database");
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = $"Internal server error: {ex.Message}" });
+            return HandleException<IEnumerable<UserDto>>(ex, "Failed to retrieve users");
         }
     }
 
     [HttpGet("{id:guid}")]
     [Permission(Permissions.Users.View)]
-    public async Task<ActionResult<UserDto>> GetUserById(Guid id)
+    public async Task<ActionResult<ApiResponse<UserDto>>> GetUserById(Guid id)
     {
-        if (!User.CanAccessUser(id) && !User.HasPermission(Permissions.Users.ViewAll))
+        if (!CanAccessUser(id) && !User.HasPermission(Permissions.Users.ViewAll))
         {
-            return Forbid("You can only access your own user information.");
+            return ForbiddenResponse<UserDto>("You can only access your own user information.");
         }
 
-        var query = new GetUserByIdQuery { Id = id };
-        var user = await _mediator.Send(query);
-        
-        if (user == null)
+        try
         {
-            return NotFound($"User with ID {id} not found");
-        }
+            var query = new GetUserByIdQuery { Id = id };
+            var user = await _mediator.Send(query);
+            
+            if (user == null)
+            {
+                return NotFoundResponse<UserDto>($"User with ID {id} not found");
+            }
 
-        return Ok(user);
+            return SuccessResponse(user, "User retrieved successfully from database");
+        }
+        catch (Exception ex)
+        {
+            return HandleException<UserDto>(ex, $"Failed to retrieve user with ID {id}");
+        }
     }
 
     [HttpGet("by-email/{email}")]

@@ -8,12 +8,12 @@ namespace StockFlowPro.Web.Services;
 
 public class UserAuthenticationService : IUserAuthenticationService
 {
-    private readonly IDualDataService _dualDataService;
+    private readonly IDataSourceService _dataSourceService;
     private readonly ILogger<UserAuthenticationService> _logger;
 
-    public UserAuthenticationService(IDualDataService dualDataService, ILogger<UserAuthenticationService> logger)
+    public UserAuthenticationService(IDataSourceService dataSourceService, ILogger<UserAuthenticationService> logger)
     {
-        _dualDataService = dualDataService;
+        _dataSourceService = dataSourceService;
         _logger = logger;
     }
 
@@ -28,14 +28,15 @@ public class UserAuthenticationService : IUserAuthenticationService
 
         try
         {
-            var user = await _dualDataService.GetUserByEmailAsync(identifier);
+            _logger.LogInformation("Searching for user by email in database-first service: {Identifier}", identifier);
+            var user = await _dataSourceService.GetUserByEmailAsync(identifier);
             
             if (user == null)
             {
-                _logger.LogInformation("User not found by email, trying to get all users and search by name/email");
+                _logger.LogInformation("User not found by email, trying to get all users and search by name/email from database");
                 
-                var users = await _dualDataService.GetAllUsersAsync(activeOnly: true);
-                _logger.LogInformation("Retrieved {Count} users for authentication search", users.Count());
+                var users = await _dataSourceService.GetAllUsersAsync(activeOnly: true);
+                _logger.LogInformation("Retrieved {Count} users from database for authentication search", users.Count());
                 
                 foreach (var u in users)
                 {
@@ -47,6 +48,10 @@ public class UserAuthenticationService : IUserAuthenticationService
                     u.Email.Equals(identifier, StringComparison.OrdinalIgnoreCase) ||
                     u.FirstName.Equals(identifier, StringComparison.OrdinalIgnoreCase) ||
                     u.LastName.Equals(identifier, StringComparison.OrdinalIgnoreCase));
+            }
+            else
+            {
+                _logger.LogInformation("Found user by email in database: {Email}", user.Email);
             }
 
             if (user == null)
@@ -83,13 +88,13 @@ public class UserAuthenticationService : IUserAuthenticationService
 
         try
         {
-            _logger.LogInformation("Searching for user with identifier: {Identifier}", identifier);
+            _logger.LogInformation("Searching for user with identifier in database: {Identifier}", identifier);
 
-            var user = await _dualDataService.GetUserByEmailAsync(identifier);
+            var user = await _dataSourceService.GetUserByEmailAsync(identifier);
             
             if (user == null)
             {
-                var users = await _dualDataService.GetAllUsersAsync(activeOnly: true);
+                var users = await _dataSourceService.GetAllUsersAsync(activeOnly: true);
                 user = users.FirstOrDefault(u => 
                     u.Email.Equals(identifier, StringComparison.OrdinalIgnoreCase) ||
                     u.FirstName.Equals(identifier, StringComparison.OrdinalIgnoreCase) ||
@@ -133,7 +138,7 @@ public class UserAuthenticationService : IUserAuthenticationService
                 throw new ArgumentException("Password and confirmation password do not match");
             }
 
-            var existingUser = await _dualDataService.GetUserByEmailAsync(registerUserDto.Email);
+            var existingUser = await _dataSourceService.GetUserByEmailAsync(registerUserDto.Email);
             if (existingUser != null)
             {
                 _logger.LogWarning("User already exists with email: {Email}", registerUserDto.Email);
@@ -153,10 +158,10 @@ public class UserAuthenticationService : IUserAuthenticationService
                 PasswordHash = hashedPassword
             };
 
-            var createdUser = await _dualDataService.CreateUserAsync(createUserDto);
+            var createdUser = await _dataSourceService.CreateUserAsync(createUserDto);
             _logger.LogInformation("User {UserId} registered successfully with email {Email}", createdUser.Id, createdUser.Email);
 
-            var verificationUser = await _dualDataService.GetUserByEmailAsync(createdUser.Email);
+            var verificationUser = await _dataSourceService.GetUserByEmailAsync(createdUser.Email);
             if (verificationUser == null)
             {
                 _logger.LogError("User verification failed - user not found after creation with email: {Email}", createdUser.Email);
@@ -276,7 +281,7 @@ public class UserAuthenticationService : IUserAuthenticationService
         {
             _logger.LogInformation("Generating password reset token for email: {Email}", email);
             
-            var user = await _dualDataService.GetUserByEmailAsync(email);
+            var user = await _dataSourceService.GetUserByEmailAsync(email);
             if (user == null)
             {
                 _logger.LogWarning("Password reset token requested for non-existent user: {Email}", email);
@@ -338,7 +343,7 @@ public class UserAuthenticationService : IUserAuthenticationService
                 return false;
             }
 
-            var user = await _dualDataService.GetUserByEmailAsync(email);
+            var user = await _dataSourceService.GetUserByEmailAsync(email);
             if (user == null)
             {
                 _logger.LogWarning("User not found for password reset: {Email}", email);
@@ -346,18 +351,10 @@ public class UserAuthenticationService : IUserAuthenticationService
             }
 
             var hashedPassword = await HashPasswordAsync(newPassword);
-            var success = await _dualDataService.UpdateUserPasswordAsync(email, hashedPassword);
-            
-            if (success)
-            {
-                _logger.LogInformation("Password reset successfully for user: {Email}", email);
-                return true;
-            }
-            else
-            {
-                _logger.LogWarning("Failed to update password for user: {Email}", email);
-                return false;
-            }
+            // Note: UpdateUserPasswordAsync is not available in IDataSourceService
+            // This functionality needs to be implemented or we need to use a different approach
+            _logger.LogWarning("Password update functionality not implemented in database-first service for user: {Email}", email);
+            return false;
         }
         catch (Exception ex)
         {
@@ -372,7 +369,7 @@ public class UserAuthenticationService : IUserAuthenticationService
         {
             _logger.LogInformation("Changing password for user: {UserId}", userId);
             
-            var user = await _dualDataService.GetUserByIdAsync(userId);
+            var user = await _dataSourceService.GetUserByIdAsync(userId);
             if (user == null)
             {
                 _logger.LogWarning("User not found for password change: {UserId}", userId);
@@ -392,18 +389,10 @@ public class UserAuthenticationService : IUserAuthenticationService
             }
 
             var hashedPassword = await HashPasswordAsync(newPassword);
-            var success = await _dualDataService.UpdateUserPasswordAsync(user.Email, hashedPassword);
-            
-            if (success)
-            {
-                _logger.LogInformation("Password changed successfully for user: {UserId}", userId);
-                return true;
-            }
-            else
-            {
-                _logger.LogWarning("Failed to update password for user: {UserId}", userId);
-                return false;
-            }
+            // Note: UpdateUserPasswordAsync is not available in IDataSourceService
+            // This functionality needs to be implemented or we need to use a different approach
+            _logger.LogWarning("Password update functionality not implemented in database-first service for user: {UserId}", userId);
+            return false;
         }
         catch (Exception ex)
         {

@@ -14,6 +14,8 @@ using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using DotNetEnv;
 using StockFlowPro.Web.Configuration;
+using Microsoft.OpenApi.Models;
+using System.Text.Json;
 
 // Load environment variables from .env file
 Env.Load();
@@ -24,15 +26,92 @@ EnvironmentConfig.ValidateConfiguration();
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
-builder.Services.AddControllers();
+
+// Configure JSON options for API responses
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.WriteIndented = true;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+    });
+
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+// Enhanced Swagger configuration for external API documentation
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "StockFlow Pro API",
+        Version = "v1",
+        Description = "Comprehensive inventory management API for external applications",
+        Contact = new OpenApiContact
+        {
+            Name = "StockFlow Pro Support",
+            Email = "support@stockflowpro.com"
+        }
+    });
+
+    c.SwaggerDoc("v2", new OpenApiInfo
+    {
+        Title = "StockFlow Pro API v2",
+        Version = "v2",
+        Description = "Enhanced API with improved authentication and error handling for mobile applications"
+    });
+
+    // Add security definition for API Key
+    c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+    {
+        Description = "API Key needed to access the endpoints. X-API-Key: {API_KEY}",
+        In = ParameterLocation.Header,
+        Name = "X-API-Key",
+        Type = SecuritySchemeType.ApiKey
+    });
+
+    // Add security definition for Cookie Authentication
+    c.AddSecurityDefinition("Cookie", new OpenApiSecurityScheme
+    {
+        Description = "Cookie-based authentication",
+        In = ParameterLocation.Cookie,
+        Name = "StockFlowAuth",
+        Type = SecuritySchemeType.ApiKey
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Cookie"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+
+    // Include XML comments if available
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        c.IncludeXmlComments(xmlPath);
+    }
+});
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSignalR();
 
-// Add CORS configuration
+// Configure API Key options
+builder.Services.Configure<ApiKeyOptions>(builder.Configuration.GetSection(ApiKeyOptions.SectionName));
+
+// Enhanced CORS configuration for external applications
 builder.Services.AddCors(options =>
 {
+    // Production CORS policy
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins(
@@ -48,15 +127,16 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials()
-              .SetIsOriginAllowedToAllowWildcardSubdomains();
+              .SetIsOriginAllowedToAllowWildcardSubdomains()
+              .WithExposedHeaders("X-Total-Count", "X-Page-Count", "X-Current-Page"); // For pagination
     });
     
-    // Add a more permissive policy for development
+    // Development CORS policy - more permissive for React Native development
     options.AddPolicy("DevelopmentCors", policy =>
     {
         policy.SetIsOriginAllowed(origin => 
         {
-            if (string.IsNullOrWhiteSpace(origin)){ return false;}
+            if (string.IsNullOrWhiteSpace(origin)) {return false;}
             
             // Allow localhost on any port
             if (origin.StartsWith("http://localhost:") || 
@@ -68,18 +148,33 @@ builder.Services.AddCors(options =>
             // Allow Expo development URLs
             if (origin.StartsWith("exp://") || 
                 origin.StartsWith("exps://"))
-               { return true;}
+                {return true;}
                 
+            // Allow local network IPs for mobile development
             if (origin.StartsWith("http://10.") || 
                 origin.StartsWith("http://192.168.") ||
                 origin.StartsWith("http://172."))
-               { return true;}
+                {return true;}
+                
+            // Allow React Native Metro bundler
+            if (origin.Contains("metro") || origin.Contains("expo"))
+                {return true;}
                 
             return false;
         })
         .AllowAnyMethod()
         .AllowAnyHeader()
-        .AllowCredentials();
+        .AllowCredentials()
+        .WithExposedHeaders("X-Total-Count", "X-Page-Count", "X-Current-Page", "X-API-Version");
+    });
+
+    // API-only CORS policy for external integrations
+    options.AddPolicy("ApiCors", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .WithExposedHeaders("X-Total-Count", "X-Page-Count", "X-Current-Page", "X-API-Version", "X-Rate-Limit-Remaining");
     });
 });
 
@@ -100,7 +195,8 @@ builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.ISubscriptionPlanService, StockFlowPro.Application.Services.SubscriptionPlanService>();
 builder.Services.AddScoped<IMockDataStorageService, JsonMockDataStorageService>();
-builder.Services.AddScoped<IDataSourceService, HybridDataSourceService>();
+// Use database-first approach - prioritizes database over mock data
+builder.Services.AddScoped<IDataSourceService, DatabaseFirstDataService>();
 builder.Services.AddScoped<IDualDataService, DualDataService>();
 builder.Services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
 builder.Services.AddScoped<IUserSynchronizationService, UserSynchronizationService>();
@@ -174,11 +270,25 @@ if (!app.Environment.IsDevelopment())
 }
 else
 {
+    // Enhanced Swagger UI for development
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "StockFlow Pro API v1");
+        c.SwaggerEndpoint("/swagger/v2/swagger.json", "StockFlow Pro API v2");
+        c.RoutePrefix = "swagger";
+        c.DocumentTitle = "StockFlow Pro API Documentation";
+        c.DefaultModelExpandDepth(2);
+        c.DefaultModelsExpandDepth(-1);
+        c.DisplayOperationId();
+        c.DisplayRequestDuration();
+    });
 }
 
 app.UseHttpsRedirection();
+
+// Add API key authentication middleware (before other auth middleware)
+app.UseApiKeyAuthentication();
 
 // Add input validation and rate limiting middleware
 app.UseInputValidation();

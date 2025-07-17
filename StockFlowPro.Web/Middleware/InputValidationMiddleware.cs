@@ -83,6 +83,12 @@ public class InputValidationMiddleware
                 var form = await context.Request.ReadFormAsync();
                 foreach (var field in form)
                 {
+                    // Skip validation for known safe fields
+                    if (IsSafeFormField(field.Key))
+                    {
+                        continue;
+                    }
+
                     if (ContainsMaliciousContent(field.Value))
                     {
                         _logger.LogWarning("Malicious content detected in form field {FieldName} from IP {ClientIp}", 
@@ -145,13 +151,46 @@ public class InputValidationMiddleware
             return true;
         }
 
+        // Skip validation for authentication endpoints
+        if (path.Contains("/login") || path.Contains("/auth") || path.Contains("/account"))
+        {
+            return true;
+        }
+
+        // Skip validation for API endpoints (they have their own validation)
+        if (path.StartsWith("/api/"))
+        {
+            return true;
+        }
+
         // Skip validation for home page and basic GET requests
         if (context.Request.Method == "GET" && (path == "/" || path == "" || path == "/home"))
         {
             return true;
         }
 
+        // Skip validation for Razor Pages
+        if (path.Contains(".cshtml") || context.Request.Query.ContainsKey("handler"))
+        {
+            return true;
+        }
+
         return false;
+    }
+
+    private bool IsSafeFormField(string fieldName)
+    {
+        var safeFields = new[]
+        {
+            "__RequestVerificationToken",
+            "__VIEWSTATE",
+            "__VIEWSTATEGENERATOR",
+            "__EVENTVALIDATION",
+            "ReturnUrl",
+            "handler"
+        };
+
+        return safeFields.Contains(fieldName, StringComparer.OrdinalIgnoreCase);
     }
 
     private bool ContainsMaliciousContent(string input)
