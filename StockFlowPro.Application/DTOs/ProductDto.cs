@@ -7,6 +7,7 @@ public class ProductDto
     public decimal CostPerItem { get; set; }
     public int NumberInStock { get; set; }
     public bool IsActive { get; set; }
+    public string? ImageUrl { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public decimal TotalValue => CostPerItem * NumberInStock;
@@ -19,6 +20,7 @@ public class CreateProductDto
     public string Name { get; set; } = string.Empty;
     public decimal CostPerItem { get; set; }
     public int NumberInStock { get; set; }
+    public string? ImageUrl { get; set; }
 }
 
 public class UpdateProductDto
@@ -26,6 +28,7 @@ public class UpdateProductDto
     public string Name { get; set; } = string.Empty;
     public decimal CostPerItem { get; set; }
     public int NumberInStock { get; set; }
+    public string? ImageUrl { get; set; }
 }
 
 public class UpdateProductStockDto

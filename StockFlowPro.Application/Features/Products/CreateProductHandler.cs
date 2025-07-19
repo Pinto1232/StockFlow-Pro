@@ -35,6 +35,11 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
 
         var product = new Product(request.Name, request.CostPerItem, request.NumberInStock);
         
+        if (!string.IsNullOrEmpty(request.ImageUrl))
+        {
+            product.UpdateImage(request.ImageUrl);
+        }
+        
         await _productRepository.AddAsync(product, cancellationToken);
         
         Console.WriteLine($"[PRODUCT MANAGEMENT - DATABASE] Successfully created product in database: '{product.Name}' (ID: {product.Id})");

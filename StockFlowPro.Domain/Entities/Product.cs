@@ -9,6 +9,7 @@ public class Product : IEntity
     public decimal CostPerItem { get; private set; }
     public int NumberInStock { get; private set; }
     public bool IsActive { get; private set; }
+    public string? ImageUrl { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
 
@@ -87,6 +88,12 @@ public class Product : IEntity
     public void Deactivate()
     {
         IsActive = false;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateImage(string? imageUrl)
+    {
+        ImageUrl = imageUrl;
         UpdatedAt = DateTime.UtcNow;
     }
 

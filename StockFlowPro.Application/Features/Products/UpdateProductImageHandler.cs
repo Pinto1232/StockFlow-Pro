@@ -6,18 +6,18 @@ using StockFlowPro.Domain.Repositories;
 
 namespace StockFlowPro.Application.Features.Products;
 
-public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, ProductDto>
+public class UpdateProductImageHandler : IRequestHandler<UpdateProductImageCommand, ProductDto>
 {
     private readonly IProductRepository _productRepository;
     private readonly IMapper _mapper;
 
-    public UpdateProductHandler(IProductRepository productRepository, IMapper mapper)
+    public UpdateProductImageHandler(IProductRepository productRepository, IMapper mapper)
     {
         _productRepository = productRepository;
         _mapper = mapper;
     }
 
-    public async Task<ProductDto> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
+    public async Task<ProductDto> Handle(UpdateProductImageCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
@@ -27,15 +27,6 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
             throw new KeyNotFoundException($"Product with ID {request.Id} not found.");
         }
 
-        // Check if product name already exists (excluding current product)
-        if (await _productRepository.ProductNameExistsAsync(request.Name, request.Id, cancellationToken))
-        {
-            throw new InvalidOperationException($"A product with the name '{request.Name}' already exists.");
-        }
-
-        product.UpdateName(request.Name);
-        product.UpdateCostPerItem(request.CostPerItem);
-        product.UpdateStock(request.NumberInStock);
         product.UpdateImage(request.ImageUrl);
         
         await _productRepository.UpdateAsync(product, cancellationToken);

@@ -31,6 +31,10 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .IsRequired()
             .HasDefaultValue(true);
 
+        builder.Property(p => p.ImageUrl)
+            .IsRequired(false)
+            .HasMaxLength(500);
+
         builder.Property(p => p.CreatedAt)
             .IsRequired();
 

@@ -57,6 +57,7 @@ public class ProductsController : ControllerBase
                 IsActive = p.IsActive,
                 IsInStock = p.IsInStock,
                 IsLowStock = p.IsLowStock,
+                ImageUrl = p.ImageUrl,
                 CreatedAt = p.CreatedAt,
                 
                 // 🚀 ENHANCED: Formatted properties using shared utilities
@@ -71,7 +72,9 @@ public class ProductsController : ControllerBase
                 StockStatusBadge = GetStockStatusBadge(p.IsInStock, p.IsLowStock),
                 ActiveStatusBadge = p.IsActive ? "Active" : "Inactive",
                 PriceRange = GetPriceRange(p.CostPerItem),
-                StockLevel = GetStockLevel(p.NumberInStock)
+                StockLevel = GetStockLevel(p.NumberInStock),
+                ImageDisplay = GetImageDisplay(p.ImageUrl),
+                HasImage = !string.IsNullOrEmpty(p.ImageUrl)
             }).ToList();
             
             Console.WriteLine($"[PRODUCT MANAGEMENT] Retrieved and enhanced {enhancedProducts.Count} products from database");
@@ -208,6 +211,15 @@ public class ProductsController : ControllerBase
         };
     }
 
+    private static string GetImageDisplay(string? imageUrl)
+    {
+        if (string.IsNullOrEmpty(imageUrl))
+        {
+            return "/images/default-product.svg";
+        }
+        return imageUrl;
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ProductDto>> GetProductById(Guid id)
     {
@@ -321,6 +333,120 @@ public class ProductsController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPost("{id:guid}/upload-image")]
+    [Authorize(Roles = "Manager,Admin")]
+    public async Task<ActionResult> UploadProductImage(Guid id, IFormFile image)
+    {
+        try
+        {
+            if (image == null || image.Length == 0)
+            {
+                return BadRequest(new { message = "No image file provided" });
+            }
+
+            // Validate file type
+            var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp" };
+            if (!allowedTypes.Contains(image.ContentType.ToLower()))
+            {
+                return BadRequest(new { message = "Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed." });
+            }
+
+            // Validate file size (5MB max)
+            const long maxFileSize = 5 * 1024 * 1024;
+            if (image.Length > maxFileSize)
+            {
+                return BadRequest(new { message = "File size exceeds 5MB limit" });
+            }
+
+            // Check if product exists
+            var productQuery = new GetProductByIdQuery { Id = id };
+            var product = await _mediator.Send(productQuery);
+            if (product == null)
+            {
+                return NotFound($"Product with ID {id} not found");
+            }
+
+            // Create uploads directory if it doesn't exist
+            var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products");
+            Directory.CreateDirectory(uploadsDir);
+
+            // Generate unique filename
+            var fileExtension = Path.GetExtension(image.FileName);
+            var fileName = $"{id}_{Guid.NewGuid()}{fileExtension}";
+            var filePath = Path.Combine(uploadsDir, fileName);
+
+            // Save file
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await image.CopyToAsync(stream);
+            }
+
+            // Update product with image URL
+            var imageUrl = $"/uploads/products/{fileName}";
+            var updateCommand = new UpdateProductImageCommand
+            {
+                Id = id,
+                ImageUrl = imageUrl
+            };
+
+            await _mediator.Send(updateCommand);
+
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Image uploaded for product {id}: {imageUrl}");
+            return Ok(new { imageUrl, message = "Product image uploaded successfully" });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Error uploading image for product {id}: {ex.Message}");
+            return BadRequest(new { message = $"Failed to upload image: {ex.Message}" });
+        }
+    }
+
+    [HttpDelete("{id:guid}/remove-image")]
+    [Authorize(Roles = "Manager,Admin")]
+    public async Task<ActionResult> RemoveProductImage(Guid id)
+    {
+        try
+        {
+            // Check if product exists
+            var productQuery = new GetProductByIdQuery { Id = id };
+            var product = await _mediator.Send(productQuery);
+            if (product == null)
+            {
+                return NotFound($"Product with ID {id} not found");
+            }
+
+            // Delete existing image file if it exists
+            if (!string.IsNullOrEmpty(product.ImageUrl) &&
+                product.ImageUrl != "/images/default-product.svg")
+            {
+                var fileName = Path.GetFileName(product.ImageUrl);
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products", fileName);
+
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                }
+            }
+
+            // Update product to remove image URL
+            var updateCommand = new UpdateProductImageCommand
+            {
+                Id = id,
+                ImageUrl = null
+            };
+
+            await _mediator.Send(updateCommand);
+
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Image removed for product {id}");
+            return Ok(new { message = "Product image removed successfully" });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Error removing image for product {id}: {ex.Message}");
+            return BadRequest(new { message = $"Failed to remove image: {ex.Message}" });
+        }
+    }
 }
 
 // 🚀 ENHANCED DTOs with formatted properties
@@ -335,6 +461,7 @@ public class EnhancedProductDto
     public bool IsActive { get; set; }
     public bool IsInStock { get; set; }
     public bool IsLowStock { get; set; }
+    public string? ImageUrl { get; set; }
     public DateTime CreatedAt { get; set; }
     
     // 🎯 ENHANCED: Formatted properties using shared utilities
@@ -350,6 +477,8 @@ public class EnhancedProductDto
     public string ActiveStatusBadge { get; set; } = string.Empty;
     public string PriceRange { get; set; } = string.Empty;
     public string StockLevel { get; set; } = string.Empty;
+    public string ImageDisplay { get; set; } = string.Empty;
+    public bool HasImage { get; set; }
 }
 
 public class EnhancedDashboardStats
