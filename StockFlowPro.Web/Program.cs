@@ -103,10 +103,40 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddSignalR();
+
+// Configure SignalR options
+builder.Services.Configure<StockFlowPro.Web.Configuration.SignalROptions>(
+    builder.Configuration.GetSection(StockFlowPro.Web.Configuration.SignalROptions.SectionName));
+
+builder.Services.AddSignalR(options =>
+{
+    var signalRConfig = builder.Configuration
+        .GetSection(StockFlowPro.Web.Configuration.SignalROptions.SectionName)
+        .Get<StockFlowPro.Web.Configuration.SignalROptions>() ?? new StockFlowPro.Web.Configuration.SignalROptions();
+
+    // Validate configuration
+    signalRConfig.Validate();
+
+    // Configure timeout settings to prevent premature disconnections
+    options.ClientTimeoutInterval = signalRConfig.ClientTimeoutInterval;
+    options.KeepAliveInterval = signalRConfig.KeepAliveInterval;
+    options.HandshakeTimeout = signalRConfig.HandshakeTimeout;
+    
+    // Enable detailed errors in development or if configured
+    options.EnableDetailedErrors = builder.Environment.IsDevelopment() || signalRConfig.EnableDetailedErrors;
+    
+    // Configure maximum message size
+    options.MaximumReceiveMessageSize = signalRConfig.MaximumReceiveMessageSize;
+    
+    // Configure streaming settings
+    options.StreamBufferCapacity = signalRConfig.StreamBufferCapacity;
+});
 
 // Configure API Key options
 builder.Services.Configure<ApiKeyOptions>(builder.Configuration.GetSection(ApiKeyOptions.SectionName));
+
+// Configure Enhanced API Security options
+builder.Services.Configure<StockFlowPro.Web.Configuration.ApiSecurityOptions>(builder.Configuration.GetSection(StockFlowPro.Web.Configuration.ApiSecurityOptions.SectionName));
 
 // Enhanced CORS configuration for external applications
 builder.Services.AddCors(options =>
@@ -286,6 +316,9 @@ else
 }
 
 app.UseHttpsRedirection();
+
+// Add enhanced API security middleware (before other auth middleware)
+app.UseEnhancedApiSecurity();
 
 // Add API key authentication middleware (before other auth middleware)
 app.UseApiKeyAuthentication();

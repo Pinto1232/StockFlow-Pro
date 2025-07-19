@@ -627,15 +627,85 @@ async function loadUsers() {
 
 // Populate user filter dropdown
 function populateUserFilter(users) {
+    console.log('=== POPULATE USER FILTER START ===');
+    console.log('populateUserFilter called with:', users, 'Type:', typeof users, 'IsArray:', Array.isArray(users));
+    
     const select = document.getElementById('userFilter');
+    if (!select) {
+        console.log('userFilter element not found');
+        return;
+    }
+    
     select.innerHTML = '<option value="">All Users</option>';
     
-    users.forEach(user => {
-        const option = document.createElement('option');
-        option.value = user.id;
-        option.textContent = `${user.firstName} ${user.lastName}`;
-        select.appendChild(option);
-    });
+    // SAFETY CHECK - Handle different response formats
+    let usersArray = [];
+    
+    if (Array.isArray(users)) {
+        usersArray = users;
+        console.log('Users set from direct array:', usersArray.length);
+    } else if (users && Array.isArray(users.data)) {
+        usersArray = users.data;
+        console.log('Users set from users.data:', usersArray.length);
+    } else if (users && Array.isArray(users.items)) {
+        usersArray = users.items;
+        console.log('Users set from users.items:', usersArray.length);
+    } else if (users && Array.isArray(users.users)) {
+        usersArray = users.users;
+        console.log('Users set from users.users:', usersArray.length);
+    } else if (users && typeof users === 'object') {
+        // If users is an object but not an array, try to extract array from common property names
+        const possibleArrays = ['data', 'items', 'users', 'result', 'results'];
+        for (const prop of possibleArrays) {
+            if (users[prop] && Array.isArray(users[prop])) {
+                usersArray = users[prop];
+                console.log(`Users set from users.${prop}:`, usersArray.length);
+                break;
+            }
+        }
+        
+        if (usersArray.length === 0) {
+            console.error('Could not find array in users response. Available properties:', Object.keys(users));
+            showAlert('Users API returned unexpected data structure. Filter will be limited.', 'warning');
+        }
+    } else {
+        console.error('Users API returned unexpected data type:', typeof users, users);
+        showAlert('Users API returned invalid data. Filter will be limited.', 'warning');
+    }
+    
+    // FINAL SAFETY CHECK - ENSURE usersArray is ALWAYS an array
+    if (!Array.isArray(usersArray)) {
+        console.error('EMERGENCY FIX - usersArray is not array:', typeof usersArray, usersArray);
+        usersArray = [];
+    }
+    
+    console.log('Final usersArray before populate:', usersArray, 'Length:', usersArray.length, 'IsArray:', Array.isArray(usersArray));
+    
+    if (usersArray.length === 0) {
+        select.innerHTML = '<option value="">All Users (No users available)</option>';
+        return;
+    }
+    
+    try {
+        usersArray.forEach(user => {
+            if (!user || typeof user !== 'object') {
+                console.warn('Invalid user object:', user);
+                return;
+            }
+            
+            const option = document.createElement('option');
+            option.value = user.id || '';
+            option.textContent = `${user.firstName || 'Unknown'} ${user.lastName || 'User'}`;
+            select.appendChild(option);
+        });
+        console.log('Successfully populated user filter with', usersArray.length, 'users');
+    } catch (error) {
+        console.error('Error in populateUserFilter forEach:', error);
+        select.innerHTML = '<option value="">All Users (Error loading users)</option>';
+        showAlert('Error populating user filter: ' + error.message, 'danger');
+    }
+    
+    console.log('=== POPULATE USER FILTER END ===');
 }
 
 // NEW INVOICE FUNCTIONS

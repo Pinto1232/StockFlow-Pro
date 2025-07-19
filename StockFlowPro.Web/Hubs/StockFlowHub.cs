@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using StockFlowPro.Application.Interfaces;
 using System.Security.Claims;
+using System.Collections.Concurrent;
 
 namespace StockFlowPro.Web.Hubs;
 
@@ -10,6 +11,7 @@ public class StockFlowHub : Hub
 {
     private readonly IRealTimeService _realTimeService;
     private readonly ILogger<StockFlowHub> _logger;
+    private static readonly ConcurrentDictionary<string, DateTime> _connectionHeartbeats = new();
 
     public StockFlowHub(IRealTimeService realTimeService, ILogger<StockFlowHub> logger)
     {
@@ -21,6 +23,9 @@ public class StockFlowHub : Hub
     {
         var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var userRole = Context.User?.FindFirst(ClaimTypes.Role)?.Value;
+
+        // Initialize heartbeat tracking
+        _connectionHeartbeats[Context.ConnectionId] = DateTime.UtcNow;
 
         if (!string.IsNullOrEmpty(userId))
         {
@@ -34,6 +39,9 @@ public class StockFlowHub : Hub
             _logger.LogInformation("User {UserId} joined role group {Role}", userId, userRole);
         }
 
+        // Send initial connection confirmation
+        await Clients.Caller.SendAsync("ConnectionEstablished", Context.ConnectionId);
+
         await base.OnConnectedAsync();
     }
 
@@ -41,6 +49,9 @@ public class StockFlowHub : Hub
     {
         var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var userRole = Context.User?.FindFirst(ClaimTypes.Role)?.Value;
+
+        // Remove heartbeat tracking
+        _connectionHeartbeats.TryRemove(Context.ConnectionId, out _);
 
         if (!string.IsNullOrEmpty(userId))
         {
@@ -55,7 +66,7 @@ public class StockFlowHub : Hub
 
         if (exception != null)
         {
-            _logger.LogError(exception, "User {UserId} disconnected with error", userId);
+            _logger.LogError(exception, "User {UserId} disconnected with error: {ErrorMessage}", userId, exception.Message);
         }
 
         await base.OnDisconnectedAsync(exception);
@@ -77,5 +88,64 @@ public class StockFlowHub : Hub
     {
         var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         await Clients.Group(groupName).SendAsync("ReceiveMessage", userId, message);
+    }
+
+    /// <summary>
+    /// Client heartbeat method to keep connection alive
+    /// </summary>
+    public async Task Ping()
+    {
+        _connectionHeartbeats[Context.ConnectionId] = DateTime.UtcNow;
+        await Clients.Caller.SendAsync("Pong", DateTime.UtcNow);
+    }
+
+    /// <summary>
+    /// Get connection status and statistics
+    /// </summary>
+    public async Task GetConnectionStatus()
+    {
+        var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var connectionTime = _connectionHeartbeats.GetValueOrDefault(Context.ConnectionId, DateTime.UtcNow);
+        var uptime = DateTime.UtcNow - connectionTime;
+
+        await Clients.Caller.SendAsync("ConnectionStatus", new
+        {
+            ConnectionId = Context.ConnectionId,
+            UserId = userId,
+            ConnectedAt = connectionTime,
+            Uptime = uptime.ToString(@"hh\:mm\:ss"),
+            LastHeartbeat = _connectionHeartbeats.GetValueOrDefault(Context.ConnectionId)
+        });
+    }
+
+    /// <summary>
+    /// Force reconnection for troubleshooting
+    /// </summary>
+    public async Task ForceReconnect()
+    {
+        var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        _logger.LogInformation("Force reconnect requested by user {UserId} on connection {ConnectionId}", userId, Context.ConnectionId);
+        
+        await Clients.Caller.SendAsync("ForceReconnect", "Reconnection requested");
+        Context.Abort();
+    }
+
+    /// <summary>
+    /// Send real-time notification to specific user
+    /// </summary>
+    public async Task SendNotificationToUser(string targetUserId, string title, string message, string type = "info")
+    {
+        var senderId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        await Clients.Group($"user_{targetUserId}").SendAsync("ReceiveNotification", new
+        {
+            Title = title,
+            Message = message,
+            Type = type,
+            SenderId = senderId,
+            Timestamp = DateTime.UtcNow
+        });
+
+        _logger.LogInformation("Notification sent from {SenderId} to {TargetUserId}: {Title}", senderId, targetUserId, title);
     }
 }
