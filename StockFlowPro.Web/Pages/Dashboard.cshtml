@@ -36,92 +36,169 @@
         
         <div class="sidebar-content">
             <ul class="sidebar-menu">
+                <!-- Navigation Links -->
                 <li class="sidebar-menu-item active">
                     <a href="/Dashboard" 
                        class="sidebar-menu-link" 
                        aria-current="page"
-                       data-tooltip="Dashboard Overview">
+                       data-tooltip="Overview">
                         <div class="menu-icon">
                             <i class="fas fa-home"></i>
                         </div>
-                        <span class="menu-text">Dashboard</span>
+                        <span class="menu-text">Overview</span>
                         <div class="menu-indicator"></div>
                     </a>
                 </li>
-                @if (User.HasPermission(Permissions.System.ViewAdminPanel))
-                {
-                    <li class="sidebar-menu-item">
-                        <a href="/AdminPanel" 
-                           class="sidebar-menu-link" 
-                           data-tooltip="System Administration">
-                            <div class="menu-icon">
-                                <i class="fas fa-cogs"></i>
-                            </div>
-                            <span class="menu-text">Admin Panel</span>
-                            <div class="menu-indicator"></div>
-                        </a>
-                    </li>
-                }
-                @if (User.HasPermission(Permissions.Users.ViewAll))
-                {
-                    <li class="sidebar-menu-item">
-                        <a href="/ManageUsers" 
-                           class="sidebar-menu-link" 
-                           data-tooltip="User Management">
-                            <div class="menu-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <span class="menu-text">Users</span>
-                            <div class="menu-indicator"></div>
-                        </a>
-                    </li>
-                }
-                @if (User.HasPermission(Permissions.Reports.ViewBasic))
-                {
-                    <li class="sidebar-menu-item has-submenu">
-                        <button type="button" 
-                                class="sidebar-menu-link btn btn-link text-start w-100" 
-                                onclick="toggleSubmenu(this)"
-                                aria-expanded="false"
-                                aria-haspopup="true"
-                                data-tooltip="Reports & Analytics">
-                            <div class="menu-icon">
-                                <i class="fas fa-chart-bar"></i>
-                            </div>
-                            <span class="menu-text">Reports</span>
-                            <i class="fas fa-chevron-down submenu-arrow"></i>
-                        </button>
-                        <ul class="sidebar-submenu" aria-label="Reports submenu">
-                            @if (User.HasPermission(Permissions.Reports.ViewBasic))
-                            {
-                                <li>
-                                    <a href="/Reports" class="sidebar-submenu-link">
-                                        <i class="fas fa-chart-line submenu-icon"></i>
-                                        Basic Reports
-                                    </a>
-                                </li>
-                            }
-                            @if (User.HasPermission(Permissions.Reports.ViewAdvanced))
-                            {
-                                <li>
-                                    <a href="/Reports" class="sidebar-submenu-link">
-                                        <i class="fas fa-chart-pie submenu-icon"></i>
-                                        Advanced Reports
-                                    </a>
-                                </li>
-                            }
-                            @if (User.HasPermission(Permissions.System.ViewStatistics))
-                            {
-                                <li>
-                                    <a href="/Reports" class="sidebar-submenu-link">
-                                        <i class="fas fa-analytics submenu-icon"></i>
-                                        Statistics
-                                    </a>
-                                </li>
-                            }
-                        </ul>
-                    </li>
-                }
+                <li class="sidebar-menu-item">
+                    <a href="/Projects" 
+                       class="sidebar-menu-link" 
+                       data-tooltip="Projects">
+                        <div class="menu-icon">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <span class="menu-text">Projects</span>
+                        <div class="menu-indicator"></div>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="/Tasks" 
+                       class="sidebar-menu-link" 
+                       data-tooltip="Tasks">
+                        <div class="menu-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <span class="menu-text">Tasks</span>
+                        <div class="menu-indicator"></div>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="/Team" 
+                       class="sidebar-menu-link" 
+                       data-tooltip="Team">
+                        <div class="menu-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <span class="menu-text">Team</span>
+                        <div class="menu-indicator"></div>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="/Income" 
+                       class="sidebar-menu-link" 
+                       data-tooltip="Income">
+                        <div class="menu-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <span class="menu-text">Income</span>
+                        <div class="menu-indicator"></div>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="/Expenses" 
+                       class="sidebar-menu-link" 
+                       data-tooltip="Expenses">
+                        <div class="menu-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <span class="menu-text">Expenses</span>
+                        <div class="menu-indicator"></div>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="/Invoices" 
+                       class="sidebar-menu-link" 
+                       data-tooltip="Invoices">
+                        <div class="menu-icon">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <span class="menu-text">Invoices</span>
+                        <div class="menu-indicator"></div>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item has-submenu">
+                    <button type="button" 
+                            class="sidebar-menu-link btn btn-link text-start w-100" 
+                            onclick="toggleSubmenu(this)"
+                            aria-expanded="false"
+                            aria-haspopup="true"
+                            data-tooltip="Reports">
+                        <div class="menu-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <span class="menu-text">Reports</span>
+                        <i class="fas fa-chevron-down submenu-arrow"></i>
+                    </button>
+                    <ul class="sidebar-submenu" aria-label="Reports submenu">
+                        <li>
+                            <a href="/Reports/Financial" class="sidebar-submenu-link">
+                                <i class="fas fa-chart-line submenu-icon"></i>
+                                Financial Report
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/Reports/Project" class="sidebar-submenu-link">
+                                <i class="fas fa-chart-pie submenu-icon"></i>
+                                Project Report
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/Reports/Payroll" class="sidebar-submenu-link">
+                                <i class="fas fa-money-check-alt submenu-icon"></i>
+                                Payroll Report
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/Reports/Attendance" class="sidebar-submenu-link">
+                                <i class="fas fa-calendar-check submenu-icon"></i>
+                                Attendance Report
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="/Employees" 
+                       class="sidebar-menu-link" 
+                       data-tooltip="Employees">
+                        <div class="menu-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <span class="menu-text">Employees</span>
+                        <div class="menu-indicator"></div>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="/Attendance" 
+                       class="sidebar-menu-link" 
+                       data-tooltip="Attendance">
+                        <div class="menu-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <span class="menu-text">Attendance</span>
+                        <div class="menu-indicator"></div>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="/Payroll" 
+                       class="sidebar-menu-link" 
+                       data-tooltip="Payroll">
+                        <div class="menu-icon">
+                            <i class="fas fa-money-check-alt"></i>
+                        </div>
+                        <span class="menu-text">Payroll</span>
+                        <div class="menu-indicator"></div>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="/Leaves" 
+                       class="sidebar-menu-link" 
+                       data-tooltip="Leaves">
+                        <div class="menu-icon">
+                            <i class="fas fa-calendar-times"></i>
+                        </div>
+                        <span class="menu-text">Leaves</span>
+                        <div class="menu-indicator"></div>
+                    </a>
+                </li>
             </ul>
             
             <div class="sidebar-footer">
