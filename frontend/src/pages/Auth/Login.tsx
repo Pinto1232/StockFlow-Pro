@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { useLogin, useRegister, useIsAuthenticated } from '../../hooks/useAuth';
+import DemoCredentials from '../../components/Auth/DemoCredentials';
 import type { LoginRequest, RegisterRequest } from '../../types/index';
 import './Auth.css';
 
@@ -121,9 +122,12 @@ const Login: React.FC = () => {
     try {
       await loginMutation.mutateAsync(loginData);
       // Navigation will be handled by the redirect logic above
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Login failed. Please try again.';
       setLoginErrors({
-        submit: error.response?.data?.message || 'Login failed. Please try again.',
+        submit: errorMessage,
       });
     }
   };
@@ -136,9 +140,12 @@ const Login: React.FC = () => {
     try {
       await registerMutation.mutateAsync(registerData);
       setRegisterSuccess(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Registration failed. Please try again.';
       setRegisterErrors({
-        submit: error.response?.data?.message || 'Registration failed. Please try again.',
+        submit: errorMessage,
       });
     }
   };
@@ -149,6 +156,12 @@ const Login: React.FC = () => {
 
   const toggleConfirmPassword = () => {
     setShowConfirmPassword(!showConfirmPassword);
+  };
+
+  const handleCredentialSelect = (email: string, password: string) => {
+    setLoginData({ email, password });
+    // Clear any existing errors
+    setLoginErrors({});
   };
 
   if (registerSuccess) {
@@ -288,6 +301,8 @@ const Login: React.FC = () => {
                     <Link to="/forgot-password">Forgot your password?</Link>
                   </div>
                 </form>
+                
+                <DemoCredentials onCredentialSelect={handleCredentialSelect} />
               </div>
             </div>
           )}

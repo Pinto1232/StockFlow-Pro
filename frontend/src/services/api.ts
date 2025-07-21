@@ -44,25 +44,25 @@ api.interceptors.response.use(
 // Generic API methods
 export const apiService = {
   // GET request
-  get: async <T>(url: string, params?: any): Promise<T> => {
+  get: async <T>(url: string, params?: Record<string, unknown>): Promise<T> => {
     const response = await api.get<T>(url, { params });
     return response.data;
   },
 
   // POST request
-  post: async <T>(url: string, data?: any, config?: any): Promise<T> => {
+  post: async <T>(url: string, data?: unknown, config?: Record<string, unknown>): Promise<T> => {
     const response = await api.post<T>(url, data, config);
     return response.data;
   },
 
   // PUT request
-  put: async <T>(url: string, data?: any): Promise<T> => {
+  put: async <T>(url: string, data?: unknown): Promise<T> => {
     const response = await api.put<T>(url, data);
     return response.data;
   },
 
   // PATCH request
-  patch: async <T>(url: string, data?: any): Promise<T> => {
+  patch: async <T>(url: string, data?: unknown): Promise<T> => {
     const response = await api.patch<T>(url, data);
     return response.data;
   },

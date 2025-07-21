@@ -119,9 +119,12 @@ const Register: React.FC = () => {
     try {
       await loginMutation.mutateAsync(loginData);
       // Navigation will be handled by the redirect logic above
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Login failed. Please try again.';
       setLoginErrors({
-        submit: error.response?.data?.message || 'Login failed. Please try again.',
+        submit: errorMessage,
       });
     }
   };
@@ -134,9 +137,12 @@ const Register: React.FC = () => {
     try {
       await registerMutation.mutateAsync(registerData);
       setRegisterSuccess(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Registration failed. Please try again.';
       setRegisterErrors({
-        submit: error.response?.data?.message || 'Registration failed. Please try again.',
+        submit: errorMessage,
       });
     }
   };
