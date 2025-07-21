@@ -182,6 +182,7 @@ export interface RegisterRequest {
   confirmPassword: string;
   phoneNumber: string;
   dateOfBirth: string;
+  role?: string;
 }
 
 // Dashboard Types
