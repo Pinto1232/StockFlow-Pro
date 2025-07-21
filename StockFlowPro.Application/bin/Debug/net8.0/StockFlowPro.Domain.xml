@@ -1,0 +1,625 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>StockFlowPro.Domain</name>
+    </assembly>
+    <members>
+        <member name="T:StockFlowPro.Domain.Entities.Payment">
+            <summary>
+            Represents a payment transaction for a subscription.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Entities.PaymentMethodEntity">
+            <summary>
+            Represents a saved payment method for a user.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Entities.PaymentRefund">
+            <summary>
+            Represents a refund transaction for a payment.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Entities.Permission">
+            <summary>
+            Represents a specific permission in the system
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Entities.PlanFeature">
+            <summary>
+            Represents a feature that can be associated with subscription plans.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Entities.Role">
+            <summary>
+            Represents a role in the system with associated permissions and metadata.
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Role.Id">
+            <summary>
+            Gets the unique identifier for the role.
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Role.Name">
+            <summary>
+            Gets the unique name of the role (e.g., "Admin", "Manager", "User").
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Role.DisplayName">
+            <summary>
+            Gets the display name of the role for UI purposes.
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Role.Description">
+            <summary>
+            Gets the description of the role and its purpose.
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Role.Permissions">
+            <summary>
+            Gets the list of permissions associated with this role.
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Role.IsActive">
+            <summary>
+            Gets a value indicating whether the role is currently active.
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Role.IsSystemRole">
+            <summary>
+            Gets a value indicating whether this is a system-defined role that cannot be deleted.
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Role.Priority">
+            <summary>
+            Gets the priority of the role for ordering purposes (higher values = higher priority).
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Role.CreatedAt">
+            <summary>
+            Gets the creation timestamp.
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Role.UpdatedAt">
+            <summary>
+            Gets the last update timestamp.
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Role.Users">
+            <summary>
+            Navigation property for users assigned to this role.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Entities.RolePermission">
+            <summary>
+            Junction table for many-to-many relationship between Roles and Permissions
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Entities.RoleUpgradeRequest">
+            <summary>
+            Represents a request for role upgrade in the system
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Entities.Subscription">
+            <summary>
+            Represents a user's subscription to a specific plan.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Entities.SubscriptionHistory">
+            <summary>
+            Represents a historical record of subscription status changes.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Entities.SubscriptionPlan">
+            <summary>
+            Represents a subscription plan that defines pricing and features for users.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Entities.SubscriptionPlanFeature">
+            <summary>
+            Represents the relationship between subscription plans and their features with specific values.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Enums.BillingInterval">
+            <summary>
+            Defines the billing intervals for subscription plans.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.BillingInterval.Monthly">
+            <summary>
+            Monthly billing cycle.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.BillingInterval.Quarterly">
+            <summary>
+            Quarterly billing cycle (every 3 months).
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.BillingInterval.SemiAnnual">
+            <summary>
+            Semi-annual billing cycle (every 6 months).
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.BillingInterval.Annual">
+            <summary>
+            Annual billing cycle.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.BillingInterval.Weekly">
+            <summary>
+            Weekly billing cycle.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.BillingInterval.OneTime">
+            <summary>
+            One-time payment (no recurring billing).
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Enums.PaymentMethod">
+            <summary>
+            Defines the available payment methods.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentMethod.CreditCard">
+            <summary>
+            Credit card payment.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentMethod.DebitCard">
+            <summary>
+            Debit card payment.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentMethod.PayPal">
+            <summary>
+            PayPal payment.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentMethod.BankTransfer">
+            <summary>
+            Bank transfer/ACH payment.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentMethod.ApplePay">
+            <summary>
+            Apple Pay payment.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentMethod.GooglePay">
+            <summary>
+            Google Pay payment.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentMethod.Stripe">
+            <summary>
+            Stripe payment.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentMethod.WireTransfer">
+            <summary>
+            Wire transfer payment.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentMethod.Cryptocurrency">
+            <summary>
+            Cryptocurrency payment.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentMethod.Other">
+            <summary>
+            Other payment method.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Enums.PaymentStatus">
+            <summary>
+            Defines the possible statuses for a payment transaction.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentStatus.Pending">
+            <summary>
+            Payment is pending processing.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentStatus.Completed">
+            <summary>
+            Payment has been successfully processed.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentStatus.Failed">
+            <summary>
+            Payment has failed.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentStatus.Cancelled">
+            <summary>
+            Payment has been cancelled.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentStatus.Refunded">
+            <summary>
+            Payment has been refunded.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentStatus.PartiallyRefunded">
+            <summary>
+            Payment has been partially refunded.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentStatus.Processing">
+            <summary>
+            Payment is being processed.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentStatus.RequiresAction">
+            <summary>
+            Payment requires additional action (e.g., 3D Secure authentication).
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.PaymentStatus.Disputed">
+            <summary>
+            Payment has been disputed/charged back.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Enums.RoleUpgradeRequestStatus">
+            <summary>
+            Defines the possible statuses for role upgrade requests
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.RoleUpgradeRequestStatus.Pending">
+            <summary>
+            Request is pending review by an administrator
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.RoleUpgradeRequestStatus.Approved">
+            <summary>
+            Request has been approved and role upgrade is authorized
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.RoleUpgradeRequestStatus.Rejected">
+            <summary>
+            Request has been rejected by an administrator
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.RoleUpgradeRequestStatus.Cancelled">
+            <summary>
+            Request has been cancelled by the requesting user
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Enums.SubscriptionStatus">
+            <summary>
+            Defines the possible statuses for a subscription.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.SubscriptionStatus.Active">
+            <summary>
+            Subscription is active and in good standing.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.SubscriptionStatus.Suspended">
+            <summary>
+            Subscription is temporarily suspended (e.g., payment failed but within grace period).
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.SubscriptionStatus.Cancelled">
+            <summary>
+            Subscription has been cancelled but may still be active until the end of the billing period.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.SubscriptionStatus.Expired">
+            <summary>
+            Subscription has expired and is no longer active.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.SubscriptionStatus.Trial">
+            <summary>
+            Subscription is in trial period.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.SubscriptionStatus.PastDue">
+            <summary>
+            Subscription is past due (payment failed and outside grace period).
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.SubscriptionStatus.Pending">
+            <summary>
+            Subscription is pending activation (e.g., waiting for payment confirmation).
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Enums.UserRole">
+            <summary>
+            Defines the available user roles in the StockFlow Pro system.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.UserRole.Admin">
+            <summary>
+            Administrator role with full system access and user management capabilities.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.UserRole.User">
+            <summary>
+            Standard user role with basic system access.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.UserRole.Manager">
+            <summary>
+            Manager role with elevated privileges including reporting access.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Events.IDomainEvent">
+            <summary>
+            Defines the contract for domain events in the StockFlow Pro system.
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Events.IDomainEvent.OccurredOn">
+            <summary>
+            Gets the date and time when the domain event occurred.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Exceptions.DomainException">
+            <summary>
+            Represents errors that occur within the domain layer of the StockFlow Pro application.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Exceptions.DomainException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:StockFlowPro.Domain.Exceptions.DomainException"/> class with a specified error message.
+            </summary>
+            <param name="message">The message that describes the error.</param>
+        </member>
+        <member name="M:StockFlowPro.Domain.Exceptions.DomainException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:StockFlowPro.Domain.Exceptions.DomainException"/> class with a specified error message and a reference to the inner exception that is the cause of this exception.
+            </summary>
+            <param name="message">The error message that explains the reason for the exception.</param>
+            <param name="innerException">The exception that is the cause of the current exception.</param>
+        </member>
+        <member name="T:StockFlowPro.Domain.Interfaces.IEntity">
+            <summary>
+            Defines the contract for domain entities with a unique identifier.
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Interfaces.IEntity.Id">
+            <summary>
+            Gets the unique identifier for the entity.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Interfaces.IRepository`1">
+            <summary>
+            Defines the contract for a generic repository pattern implementation.
+            </summary>
+            <typeparam name="T">The entity type that implements <see cref="T:StockFlowPro.Domain.Interfaces.IEntity"/>.</typeparam>
+        </member>
+        <member name="M:StockFlowPro.Domain.Interfaces.IRepository`1.GetByIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves an entity by its unique identifier.
+            </summary>
+            <param name="id">The unique identifier of the entity.</param>
+            <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+            <returns>The entity if found; otherwise, null.</returns>
+        </member>
+        <member name="M:StockFlowPro.Domain.Interfaces.IRepository`1.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Retrieves all entities of the specified type.
+            </summary>
+            <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+            <returns>A collection of all entities.</returns>
+        </member>
+        <member name="M:StockFlowPro.Domain.Interfaces.IRepository`1.AddAsync(`0,System.Threading.CancellationToken)">
+            <summary>
+            Adds a new entity to the repository.
+            </summary>
+            <param name="entity">The entity to add.</param>
+            <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+            <returns>A task representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:StockFlowPro.Domain.Interfaces.IRepository`1.UpdateAsync(`0,System.Threading.CancellationToken)">
+            <summary>
+            Updates an existing entity in the repository.
+            </summary>
+            <param name="entity">The entity to update.</param>
+            <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+            <returns>A task representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:StockFlowPro.Domain.Interfaces.IRepository`1.DeleteAsync(`0,System.Threading.CancellationToken)">
+            <summary>
+            Removes an entity from the repository.
+            </summary>
+            <param name="entity">The entity to delete.</param>
+            <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+            <returns>A task representing the asynchronous operation.</returns>
+        </member>
+        <member name="T:StockFlowPro.Domain.Repositories.IPaymentRepository">
+            <summary>
+            Repository interface for payment management operations.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Repositories.IProductRepository">
+            <summary>
+            Defines the contract for product-specific repository operations.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IProductRepository.GetByNameAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves a product by its name.
+            </summary>
+            <param name="name">The product name to search for.</param>
+            <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+            <returns>The product if found; otherwise, null.</returns>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IProductRepository.GetActiveProductsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Retrieves all active products from the repository.
+            </summary>
+            <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+            <returns>A collection of active products.</returns>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IProductRepository.GetInStockProductsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Retrieves products that are currently in stock.
+            </summary>
+            <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+            <returns>A collection of products with stock greater than zero.</returns>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IProductRepository.GetLowStockProductsAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves products with low stock based on a threshold.
+            </summary>
+            <param name="threshold">The stock threshold to consider as low stock.</param>
+            <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+            <returns>A collection of products with stock at or below the threshold.</returns>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IProductRepository.SearchProductsAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Searches for products based on a search term matching the product name.
+            </summary>
+            <param name="searchTerm">The search term to filter products.</param>
+            <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+            <returns>A collection of products matching the search criteria.</returns>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IProductRepository.ProductNameExistsAsync(System.String,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>
+            Checks if a product name already exists in the system.
+            </summary>
+            <param name="name">The product name to check.</param>
+            <param name="excludeProductId">Optional product ID to exclude from the check (useful for updates).</param>
+            <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+            <returns>True if the product name exists; otherwise, false.</returns>
+        </member>
+        <member name="T:StockFlowPro.Domain.Repositories.IRoleRepository">
+            <summary>
+            Repository interface for Role entity operations.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IRoleRepository.GetAllAsync">
+            <summary>
+            Gets all roles from the database.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IRoleRepository.GetActiveRolesAsync">
+            <summary>
+            Gets active roles only.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IRoleRepository.GetByIdAsync(System.Guid)">
+            <summary>
+            Gets a role by its unique identifier.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IRoleRepository.GetByNameAsync(System.String)">
+            <summary>
+            Gets a role by its name.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IRoleRepository.CreateAsync(StockFlowPro.Domain.Entities.Role)">
+            <summary>
+            Creates a new role in the database.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IRoleRepository.UpdateAsync(StockFlowPro.Domain.Entities.Role)">
+            <summary>
+            Updates an existing role in the database.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IRoleRepository.DeleteAsync(System.Guid)">
+            <summary>
+            Deletes a role from the database.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IRoleRepository.ExistsAsync(System.String)">
+            <summary>
+            Checks if a role with the given name already exists.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IRoleRepository.GetOrderedByPriorityAsync">
+            <summary>
+            Gets roles ordered by priority (highest first).
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Repositories.ISubscriptionPlanRepository">
+            <summary>
+            Repository interface for subscription plan management operations.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Repositories.ISubscriptionRepository">
+            <summary>
+            Repository interface for subscription management operations.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Repositories.IUserRepository">
+            <summary>
+            Defines the contract for user-specific repository operations.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IUserRepository.GetByEmailAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves a user by their email address.
+            </summary>
+            <param name="email">The email address to search for.</param>
+            <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+            <returns>The user if found; otherwise, null.</returns>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IUserRepository.GetActiveUsersAsync(System.Threading.CancellationToken)">
+            <summary>
+            Retrieves all active users from the repository.
+            </summary>
+            <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+            <returns>A collection of active users.</returns>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IUserRepository.EmailExistsAsync(System.String,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>
+            Checks if an email address already exists in the system.
+            </summary>
+            <param name="email">The email address to check.</param>
+            <param name="excludeUserId">Optional user ID to exclude from the check (useful for updates).</param>
+            <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+            <returns>True if the email exists; otherwise, false.</returns>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IUserRepository.SearchUsersAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Searches for users based on a search term matching name or email.
+            </summary>
+            <param name="searchTerm">The search term to filter users.</param>
+            <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+            <returns>A collection of users matching the search criteria.</returns>
+        </member>
+        <member name="T:StockFlowPro.Domain.Utilities.EmailNormalizer">
+            <summary>
+            Utility class for email normalization and validation
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Utilities.EmailNormalizer.Normalize(System.String)">
+            <summary>
+            Normalizes an email address for consistent storage and comparison
+            </summary>
+            <param name="email">The email address to normalize</param>
+            <returns>Normalized email address</returns>
+        </member>
+        <member name="M:StockFlowPro.Domain.Utilities.EmailNormalizer.IsValidFormat(System.String)">
+            <summary>
+            Validates if an email address has a valid format
+            </summary>
+            <param name="email">The email address to validate</param>
+            <returns>True if the email format is valid, false otherwise</returns>
+        </member>
+        <member name="M:StockFlowPro.Domain.Utilities.EmailNormalizer.IsBlockedDomain(System.String,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Checks if an email domain is in the blocked list
+            </summary>
+            <param name="email">The email address to check</param>
+            <param name="blockedDomains">List of blocked domains</param>
+            <returns>True if the domain is blocked, false otherwise</returns>
+        </member>
+        <member name="M:StockFlowPro.Domain.Utilities.EmailNormalizer.ExtractDomain(System.String)">
+            <summary>
+            Extracts the domain part from an email address
+            </summary>
+            <param name="email">The email address</param>
+            <returns>The domain part of the email, or empty string if invalid</returns>
+        </member>
+        <member name="M:StockFlowPro.Domain.Utilities.EmailNormalizer.GetCommonBlockedDomains">
+            <summary>
+            Gets a list of commonly blocked temporary email domains
+            </summary>
+            <returns>List of blocked domains</returns>
+        </member>
+    </members>
+</doc>

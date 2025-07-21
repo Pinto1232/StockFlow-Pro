@@ -1,0 +1,1000 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>StockFlowPro.Web</name>
+    </assembly>
+    <members>
+        <member name="T:StockFlowPro.Web.Attributes.ApiSecurityAttribute">
+            <summary>
+            Attribute to enforce API security at the controller/action level
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Attributes.HighSecurityApiAttribute">
+            <summary>
+            Specialized attribute for high-security API endpoints
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Attributes.AdminOnlyApiAttribute">
+            <summary>
+            Attribute for admin-only API endpoints
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Attributes.PublicApiAttribute">
+            <summary>
+            Attribute for public API endpoints with basic protection
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Authorization.PermissionAttribute">
+            <summary>
+            Attribute for permission-based authorization
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Authorization.AnyPermissionAttribute">
+            <summary>
+            Attribute for multiple permission-based authorization (user needs ANY of the permissions)
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Authorization.AllPermissionsAttribute">
+            <summary>
+            Attribute for multiple permission-based authorization (user needs ALL of the permissions)
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Authorization.PermissionRequirement">
+            <summary>
+            Authorization requirement for permission-based access control
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Authorization.PermissionAuthorizationHandler">
+            <summary>
+            Authorization handler for permission requirements
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Authorization.Permissions">
+            <summary>
+            Defines all permissions available in the StockFlow Pro system.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Authorization.Permissions.Users">
+            <summary>
+            User management permissions
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Authorization.Permissions.System">
+            <summary>
+            System administration permissions
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Authorization.Permissions.Data">
+            <summary>
+            Data management permissions
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Authorization.Permissions.Invoice">
+            <summary>
+            Invoice management permissions
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Authorization.Permissions.Product">
+            <summary>
+            Product management permissions
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Authorization.Permissions.Reports">
+            <summary>
+            Reporting permissions
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Authorization.RolePermissions">
+            <summary>
+            Maps user roles to their permissions
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Authorization.RolePermissions.GetPermissions(StockFlowPro.Domain.Enums.UserRole)">
+            <summary>
+            Gets all permissions for a specific role
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Authorization.RolePermissions.HasPermission(StockFlowPro.Domain.Enums.UserRole,System.String)">
+            <summary>
+            Checks if a role has a specific permission
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Authorization.RolePermissions.GetAllPermissions">
+            <summary>
+            Gets all available permissions in the system
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Configuration.ApiKeyOptions">
+            <summary>
+            Configuration options for API key authentication
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.ApiKeyOptions.RequireApiKey">
+            <summary>
+            Whether API key authentication is required
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.ApiKeyOptions.HeaderName">
+            <summary>
+            The header name for the API key
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.ApiKeyOptions.QueryParameterName">
+            <summary>
+            The query parameter name for the API key
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.ApiKeyOptions.ValidApiKeys">
+            <summary>
+            List of valid API keys
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.ApiKeyOptions.AllowQueryParameter">
+            <summary>
+            Whether to allow API key in query parameters (less secure)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.ApiKeyOptions.LogApiKeyUsage">
+            <summary>
+            Whether to log API key usage
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Configuration.ApiSecurityOptions">
+            <summary>
+            Configuration options for enhanced API security
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Configuration.SecurityMetrics">
+            <summary>
+            Security metrics for monitoring
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Configuration.SecurityEventType">
+            <summary>
+            Security event types for logging
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Configuration.EnvironmentConfig">
+            <summary>
+            Centralized configuration helper for environment variables
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Configuration.EnvironmentConfig.ValidateConfiguration">
+            <summary>
+            Validates that all required environment variables are set
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Configuration.EnvironmentConfig.GetConfigurationSummary">
+            <summary>
+            Gets all configuration values for debugging (excludes sensitive data)
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Configuration.SignalROptions">
+            <summary>
+            Configuration options for SignalR hub settings
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.ClientTimeoutIntervalMinutes">
+            <summary>
+            Client timeout interval in minutes (default: 5 minutes)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.KeepAliveIntervalSeconds">
+            <summary>
+            Keep alive interval in seconds (default: 30 seconds)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.HandshakeTimeoutSeconds">
+            <summary>
+            Handshake timeout in seconds (default: 30 seconds)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.MaximumReceiveMessageSize">
+            <summary>
+            Maximum receive message size in bytes (default: 1MB)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.StreamBufferCapacity">
+            <summary>
+            Stream buffer capacity (default: 10)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.EnableDetailedErrors">
+            <summary>
+            Enable detailed errors in development (default: false)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.EnableHeartbeat">
+            <summary>
+            Enable connection heartbeat monitoring (default: true)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.HeartbeatIntervalSeconds">
+            <summary>
+            Heartbeat interval in seconds (default: 25 seconds)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.MaxReconnectAttempts">
+            <summary>
+            Maximum number of automatic reconnection attempts (default: 5)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.ReconnectDelayMs">
+            <summary>
+            Base reconnection delay in milliseconds (default: 5000ms)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.EnableConnectionLogging">
+            <summary>
+            Enable connection logging (default: true)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.ConnectionTimeoutSeconds">
+            <summary>
+            Connection timeout for initial handshake in seconds (default: 15 seconds)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.EnableAutomaticGroupCleanup">
+            <summary>
+            Enable automatic group cleanup for disconnected users (default: true)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.GroupCleanupIntervalMinutes">
+            <summary>
+            Group cleanup interval in minutes (default: 30 minutes)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.MaxConcurrentConnectionsPerUser">
+            <summary>
+            Maximum concurrent connections per user (default: 5)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.EnableRateLimiting">
+            <summary>
+            Enable rate limiting for hub methods (default: true)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.MaxRequestsPerMinute">
+            <summary>
+            Rate limit: maximum requests per minute per connection (default: 60)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.ClientTimeoutInterval">
+            <summary>
+            Convert to TimeSpan for ClientTimeoutInterval
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.KeepAliveInterval">
+            <summary>
+            Convert to TimeSpan for KeepAliveInterval
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.HandshakeTimeout">
+            <summary>
+            Convert to TimeSpan for HandshakeTimeout
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.HeartbeatInterval">
+            <summary>
+            Convert to TimeSpan for HeartbeatInterval
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.ReconnectDelay">
+            <summary>
+            Convert to TimeSpan for ReconnectDelay
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.ConnectionTimeout">
+            <summary>
+            Convert to TimeSpan for ConnectionTimeout
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Configuration.SignalROptions.GroupCleanupInterval">
+            <summary>
+            Convert to TimeSpan for GroupCleanupInterval
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Configuration.SignalROptions.Validate">
+            <summary>
+            Validate configuration values
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Controllers.Api.ApiBaseController">
+            <summary>
+            Base controller for API endpoints providing common functionality
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Controllers.Api.ApiBaseController.IsAuthenticated">
+            <summary>
+            Gets a value indicating whether the current user is authenticated
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Web.Controllers.Api.ApiBaseController.CurrentUserId">
+            <summary>
+            Gets the current user's ID from claims
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ApiBaseController.CanAccessUser(System.Guid)">
+            <summary>
+            Checks if the current user can access the specified user's data
+            </summary>
+            <param name="userId">The user ID to check access for</param>
+            <returns>True if the user can access the data, false otherwise</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ApiBaseController.SuccessResponse``1(``0,System.String)">
+            <summary>
+            Creates a successful API response
+            </summary>
+            <typeparam name="T">The type of data being returned</typeparam>
+            <param name="data">The data to return</param>
+            <param name="message">Optional success message</param>
+            <returns>A successful API response</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ApiBaseController.UnauthorizedResponse``1(System.String)">
+            <summary>
+            Creates an unauthorized API response
+            </summary>
+            <typeparam name="T">The type of data being returned</typeparam>
+            <param name="message">The error message</param>
+            <returns>An unauthorized API response</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ApiBaseController.ForbiddenResponse``1(System.String)">
+            <summary>
+            Creates a forbidden API response
+            </summary>
+            <typeparam name="T">The type of data being returned</typeparam>
+            <param name="message">The error message</param>
+            <returns>A forbidden API response</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ApiBaseController.NotFoundResponse``1(System.String)">
+            <summary>
+            Creates a not found API response
+            </summary>
+            <typeparam name="T">The type of data being returned</typeparam>
+            <param name="message">The error message</param>
+            <returns>A not found API response</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ApiBaseController.BadRequestResponse``1(System.String)">
+            <summary>
+            Creates a bad request API response
+            </summary>
+            <typeparam name="T">The type of data being returned</typeparam>
+            <param name="message">The error message</param>
+            <returns>A bad request API response</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ApiBaseController.HandleException``1(System.Exception,System.String)">
+            <summary>
+            Handles exceptions and returns appropriate error responses
+            </summary>
+            <typeparam name="T">The type of data being returned</typeparam>
+            <param name="ex">The exception that occurred</param>
+            <param name="message">Custom error message</param>
+            <returns>An error API response</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ApiBaseController.ValidationErrorResponse``1(System.Collections.Generic.List{System.String})">
+            <summary>
+            Creates a validation error response
+            </summary>
+            <typeparam name="T">The type of data being returned</typeparam>
+            <param name="errors">List of validation errors</param>
+            <returns>A validation error API response</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ApiBaseController.ValidationErrorResponse``1">
+            <summary>
+            Creates a validation error response from ModelState
+            </summary>
+            <typeparam name="T">The type of data being returned</typeparam>
+            <returns>A validation error API response</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.AuthController.Register(StockFlowPro.Web.Controllers.Api.RegisterRequest)">
+            <summary>
+            Register a new user account
+            </summary>
+            <param name="request">Registration details</param>
+            <returns>Created user information</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.AuthController.ForgotPassword(StockFlowPro.Web.Controllers.Api.ForgotPasswordRequest)">
+            <summary>
+            Initiate password reset process
+            </summary>
+            <param name="request">Email for password reset</param>
+            <returns>Success message</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.AuthController.ResetPassword(StockFlowPro.Web.Controllers.Api.ResetPasswordRequest)">
+            <summary>
+            Reset password using token
+            </summary>
+            <param name="request">Password reset details</param>
+            <returns>Success message</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.AuthController.ChangePassword(StockFlowPro.Web.Controllers.Api.ChangePasswordRequest)">
+            <summary>
+            Change password for authenticated user
+            </summary>
+            <param name="request">Password change details</param>
+            <returns>Success message</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.AuthTestController.GetPublicInfo">
+            <summary>
+            Test endpoint that doesn't require authentication
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.AuthTestController.GetProtectedInfo">
+            <summary>
+            Test endpoint that requires authentication
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.DiagnosticsController.CheckDatabaseHealth">
+            <summary>
+            Check database connection and basic functionality
+            </summary>
+            <returns>Database health status</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.DiagnosticsController.TestRegistrationFlow(StockFlowPro.Web.Controllers.Api.TestRegistrationRequest)">
+            <summary>
+            Test the complete registration flow without actually creating a user
+            </summary>
+            <returns>Registration flow test results</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.DiagnosticsController.GetUsersTableInfo">
+            <summary>
+            Get detailed information about the Users table structure
+            </summary>
+            <returns>Table structure information</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.DiagnosticsController.GetAuthStatus">
+            <summary>
+            Get current user authentication status and roles
+            </summary>
+            <returns>Authentication status information</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.DiagnosticsController.LogClientError(StockFlowPro.Web.Controllers.Api.ClientErrorInfo)">
+            <summary>
+            Log client-side errors for debugging purposes
+            </summary>
+            <param name="errorInfo">Error information from client</param>
+            <returns>Acknowledgment of error logging</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.EnhancedAuthController.RegisterWithVerification(StockFlowPro.Web.Controllers.Api.EnhancedRegisterRequest)">
+            <summary>
+            Enhanced registration endpoint with comprehensive data verification
+            </summary>
+            <param name="request">Registration details</param>
+            <returns>Created user information with verification details</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.EnhancedAuthController.VerifyUserExists(System.String)">
+            <summary>
+            Verify if a user exists in the database by email
+            </summary>
+            <param name="email">Email to check</param>
+            <returns>User existence verification</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.EnhancedAuthController.GetDatabaseStats">
+            <summary>
+            Get database statistics for monitoring
+            </summary>
+            <returns>Database statistics</returns>
+        </member>
+        <member name="T:StockFlowPro.Web.Controllers.Api.EnhancedRegisterRequest">
+            <summary>
+            Enhanced registration request with additional validation
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ProfileController.GetProfile">
+            <summary>
+            Get current user's profile
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ProfileController.GetDebugInfo">
+            <summary>
+            Debug endpoint to test authentication
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ProfileController.UpdateProfile(StockFlowPro.Application.DTOs.EditProfileDto)">
+            <summary>
+            Update current user's profile
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ProfileController.ChangePassword(StockFlowPro.Application.DTOs.ChangePasswordDto)">
+            <summary>
+            Change current user's password
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ProfileController.GetProfileById(System.Guid)">
+            <summary>
+            Get profile by user ID (for admins/managers)
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ProfileController.UploadPhoto(Microsoft.AspNetCore.Http.IFormFile)">
+            <summary>
+            Upload profile photo
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ProfileController.RemovePhoto">
+            <summary>
+            Remove profile photo
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ReportsController.GetInventoryOverview(System.Nullable{System.DateTime})">
+            <summary>
+            Get inventory overview report
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ReportsController.GetSalesOverview(System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            Get sales overview report
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ReportsController.GetProductPerformance(System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.Int32},System.String)">
+            <summary>
+            Get product performance report
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ReportsController.GenerateBasicReport(System.String,StockFlowPro.Web.Controllers.Api.ReportRequestDto)">
+            <summary>
+            Generate basic report by type
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ReportsController.GetTrendAnalysis(System.DateTime,System.DateTime,System.String)">
+            <summary>
+            Get trend analysis report
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ReportsController.GetProfitabilityAnalysis(System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.String)">
+            <summary>
+            Get profitability analysis report
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ReportsController.GenerateAdvancedReport(System.String,StockFlowPro.Web.Controllers.Api.AdvancedReportRequestDto)">
+            <summary>
+            Generate advanced report by type
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ReportsController.GetAnalyticsDashboard(System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.String,System.String[])">
+            <summary>
+            Get analytics dashboard
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ReportsController.GetKpiMetrics(System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            Get KPI metrics
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ReportsController.GetChartData(System.String,System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.String,System.Nullable{System.Int32})">
+            <summary>
+            Get chart data
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ReportsController.GetAlerts(System.String,System.Nullable{System.Boolean},System.Nullable{System.DateTime})">
+            <summary>
+            Get system alerts
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ReportsController.ExportReport(System.String,StockFlowPro.Web.Controllers.Api.ExportRequestDto)">
+            <summary>
+            Export report
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.ReportsController.GetReportTypes">
+            <summary>
+            Get available report types
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RoleManagementController.GetAllRoles(System.Boolean)">
+            <summary>
+            Gets all roles in the system.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RoleManagementController.GetRoleOptions">
+            <summary>
+            Gets role options for dropdowns and selection lists.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RoleManagementController.GetRoleById(System.Guid)">
+            <summary>
+            Gets a specific role by ID.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RoleManagementController.CreateRole(StockFlowPro.Application.DTOs.CreateRoleDto)">
+            <summary>
+            Creates a new role.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RoleManagementController.UpdateRole(System.Guid,StockFlowPro.Application.DTOs.UpdateRoleDto)">
+            <summary>
+            Updates an existing role.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RoleManagementController.DeleteRole(System.Guid)">
+            <summary>
+            Deletes a role.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RoleManagementController.GetAvailablePermissions">
+            <summary>
+            Gets available permissions that can be assigned to roles.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Controllers.Api.RoleUpgradeRequestController">
+            <summary>
+            API controller for managing role upgrade requests
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RoleUpgradeRequestController.CreateRequest(StockFlowPro.Application.DTOs.CreateRoleUpgradeRequestDto)">
+            <summary>
+            Creates a new role upgrade request
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RoleUpgradeRequestController.GetAllRequests(System.Nullable{StockFlowPro.Domain.Enums.RoleUpgradeRequestStatus},System.Nullable{StockFlowPro.Domain.Enums.UserRole})">
+            <summary>
+            Gets all role upgrade requests (Admin only)
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RoleUpgradeRequestController.GetMyRequests">
+            <summary>
+            Gets role upgrade requests for the current user
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RoleUpgradeRequestController.GetRequestById(System.Guid)">
+            <summary>
+            Gets a specific role upgrade request by ID
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RoleUpgradeRequestController.ReviewRequest(System.Guid,StockFlowPro.Application.DTOs.ReviewRoleUpgradeRequestDto)">
+            <summary>
+            Reviews a role upgrade request (approve or reject) - Admin only
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RoleUpgradeRequestController.CancelRequest(System.Guid)">
+            <summary>
+            Cancels a pending role upgrade request
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RoleUpgradeRequestController.UpdateRequestPriority(System.Guid,System.Int32)">
+            <summary>
+            Updates the priority of a role upgrade request - Admin only
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RoleUpgradeRequestController.GetStatistics">
+            <summary>
+            Gets statistics about role upgrade requests - Admin only
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RoleUpgradeRequestController.GetRequestsRequiringAttention">
+            <summary>
+            Gets requests requiring attention (high priority or old requests) - Admin only
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RoleUpgradeRequestController.CanRequestRole(StockFlowPro.Domain.Enums.UserRole)">
+            <summary>
+            Checks if the current user can request a specific role
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RoleUpgradeRequestController.GetAvailableRoles">
+            <summary>
+            Gets available roles that the current user can request
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Controllers.Api.UserSynchronizationController">
+            <summary>
+            Controller for secure user synchronization operations
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.UserSynchronizationController.CheckUserSyncStatus(System.Guid)">
+            <summary>
+            Check if a user requires synchronization
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.UserSynchronizationController.ValidateUserSync(System.Guid)">
+            <summary>
+            Validate if a user can be synchronized
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.UserSynchronizationController.SyncUser(System.Guid,StockFlowPro.Web.Controllers.Api.SyncUserRequest)">
+            <summary>
+            Securely synchronize a user to the database
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.UserSynchronizationController.GetSyncAuditLogs(System.Guid)">
+            <summary>
+            Get synchronization audit logs for a user
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.UserSynchronizationController.SyncSelf(StockFlowPro.Web.Controllers.Api.SyncSelfRequest)">
+            <summary>
+            Synchronize current user (self-service) - with enhanced security validation
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Controllers.Api.SyncUserRequest">
+            <summary>
+            Request model for user synchronization
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Controllers.Api.SyncSelfRequest">
+            <summary>
+            Request model for self-synchronization
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Extensions.ClaimsPrincipalExtensions">
+            <summary>
+            Extension methods for ClaimsPrincipal to check permissions
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Extensions.ClaimsPrincipalExtensions.HasPermission(System.Security.Claims.ClaimsPrincipal,System.String)">
+            <summary>
+            Checks if the user has a specific permission
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Extensions.ClaimsPrincipalExtensions.HasAnyPermission(System.Security.Claims.ClaimsPrincipal,System.String[])">
+            <summary>
+            Checks if the user has any of the specified permissions
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Extensions.ClaimsPrincipalExtensions.HasAllPermissions(System.Security.Claims.ClaimsPrincipal,System.String[])">
+            <summary>
+            Checks if the user has all of the specified permissions
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Extensions.ClaimsPrincipalExtensions.GetUserRole(System.Security.Claims.ClaimsPrincipal)">
+            <summary>
+            Gets the user's role
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Extensions.ClaimsPrincipalExtensions.GetUserId(System.Security.Claims.ClaimsPrincipal)">
+            <summary>
+            Gets the user's ID
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Extensions.ClaimsPrincipalExtensions.GetFullName(System.Security.Claims.ClaimsPrincipal)">
+            <summary>
+            Gets the user's full name
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Extensions.ClaimsPrincipalExtensions.GetEmail(System.Security.Claims.ClaimsPrincipal)">
+            <summary>
+            Gets the user's email
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Extensions.ClaimsPrincipalExtensions.IsInRole(System.Security.Claims.ClaimsPrincipal,StockFlowPro.Domain.Enums.UserRole)">
+            <summary>
+            Checks if the user is in a specific role
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Extensions.ClaimsPrincipalExtensions.IsAdmin(System.Security.Claims.ClaimsPrincipal)">
+            <summary>
+            Checks if the user is an admin
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Extensions.ClaimsPrincipalExtensions.IsManager(System.Security.Claims.ClaimsPrincipal)">
+            <summary>
+            Checks if the user is a manager
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Extensions.ClaimsPrincipalExtensions.IsUser(System.Security.Claims.ClaimsPrincipal)">
+            <summary>
+            Checks if the user is a regular user
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Extensions.ClaimsPrincipalExtensions.CanAccessUser(System.Security.Claims.ClaimsPrincipal,System.Guid)">
+            <summary>
+            Checks if the user can access another user's data
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Hubs.StockFlowHub.Ping">
+            <summary>
+            Client heartbeat method to keep connection alive
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Hubs.StockFlowHub.GetConnectionStatus">
+            <summary>
+            Get connection status and statistics
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Hubs.StockFlowHub.ForceReconnect">
+            <summary>
+            Force reconnection for troubleshooting
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Hubs.StockFlowHub.SendNotificationToUser(System.String,System.String,System.String,System.String)">
+            <summary>
+            Send real-time notification to specific user
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Middleware.ApiKeyAuthenticationMiddleware">
+            <summary>
+            Middleware for API key authentication
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Middleware.ApiKeyAuthenticationMiddlewareExtensions">
+            <summary>
+            Extension methods for API key authentication middleware
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Middleware.ApiKeyAuthenticationMiddlewareExtensions.UseApiKeyAuthentication(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            Adds API key authentication middleware to the pipeline
+            </summary>
+            <param name="builder">The application builder</param>
+            <returns>The application builder</returns>
+        </member>
+        <member name="T:StockFlowPro.Web.Middleware.EnhancedApiSecurityMiddleware">
+            <summary>
+            Enhanced API security middleware with multiple layers of protection
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Middleware.InputValidationMiddleware">
+            <summary>
+            Middleware to validate and sanitize input to prevent injection attacks
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Middleware.InputValidationMiddlewareExtensions">
+            <summary>
+            Extension method to register the input validation middleware
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Middleware.RateLimitingMiddleware">
+            <summary>
+            Middleware to implement rate limiting for API endpoints
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Middleware.RateLimitRule">
+            <summary>
+            Rate limiting rule configuration
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Middleware.RequestCounter">
+            <summary>
+            Request counter for tracking requests per client
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Middleware.RateLimitingMiddlewareExtensions">
+            <summary>
+            Extension method to register the rate limiting middleware
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Middleware.SecurityHeadersMiddleware">
+            <summary>
+            Middleware to add security headers to HTTP responses
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Middleware.SecurityHeadersMiddlewareExtensions">
+            <summary>
+            Extension method to register the security headers middleware
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Services.DatabaseFirstDataService">
+            <summary>
+            Data service that prioritizes database over mock data
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Services.IUserSecurityService">
+            <summary>
+            Service responsible for user security validation and authorization
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Services.IUserSecurityService.ValidateUserCreationAsync(StockFlowPro.Application.DTOs.CreateUserDto,System.Guid)">
+            <summary>
+            Validates if a user creation request is authorized and secure
+            </summary>
+            <param name="createUserDto">User creation data</param>
+            <param name="requestingUserId">ID of the user making the request</param>
+            <returns>Validation result with security checks</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Services.IUserSecurityService.ValidateUserSyncAuthorizationAsync(System.Guid,System.Guid)">
+            <summary>
+            Validates if a user synchronization request is authorized
+            </summary>
+            <param name="targetUserId">User to be synchronized</param>
+            <param name="requestingUserId">User making the request</param>
+            <returns>True if authorized, false otherwise</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Services.IUserSecurityService.ValidateUserModificationAuthorizationAsync(System.Guid,System.Guid)">
+            <summary>
+            Validates if a user modification request is authorized
+            </summary>
+            <param name="targetUserId">User to be modified</param>
+            <param name="requestingUserId">User making the request</param>
+            <returns>True if authorized, false otherwise</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Services.IUserSecurityService.LogSecurityEventAsync(StockFlowPro.Web.Services.SecurityEventType,System.Guid,System.String,System.String)">
+            <summary>
+            Logs security events for audit purposes
+            </summary>
+            <param name="eventType">Type of security event</param>
+            <param name="userId">User involved in the event</param>
+            <param name="details">Additional event details</param>
+            <param name="ipAddress">IP address of the request</param>
+        </member>
+        <member name="T:StockFlowPro.Web.Services.UserSecurityValidationResult">
+            <summary>
+            Result of user security validation
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Services.IUserSynchronizationService">
+            <summary>
+            Service responsible for secure user synchronization between data sources
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Services.IUserSynchronizationService.ValidateUserForSyncAsync(System.Guid,System.Guid)">
+            <summary>
+            Validates if a user can be safely synchronized to the database
+            </summary>
+            <param name="userId">The user ID to validate</param>
+            <param name="requestingUserId">The ID of the user making the request</param>
+            <returns>Validation result with details</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Services.IUserSynchronizationService.SecureSyncUserAsync(System.Guid,System.Guid,System.String)">
+            <summary>
+            Securely synchronizes a user to the database with proper validation
+            </summary>
+            <param name="userId">The user ID to synchronize</param>
+            <param name="requestingUserId">The ID of the user making the request</param>
+            <param name="reason">The reason for synchronization (for audit purposes)</param>
+            <returns>The synchronized user or null if sync failed</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Services.IUserSynchronizationService.CheckUserExistenceAsync(System.Guid)">
+            <summary>
+            Checks if a user exists in both data sources
+            </summary>
+            <param name="userId">The user ID to check</param>
+            <returns>User existence status</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Services.IUserSynchronizationService.GetSyncAuditLogsAsync(System.Guid)">
+            <summary>
+            Gets synchronization audit logs for a user
+            </summary>
+            <param name="userId">The user ID to get logs for</param>
+            <returns>List of sync audit entries</returns>
+        </member>
+        <member name="T:StockFlowPro.Web.Services.UserSyncValidationResult">
+            <summary>
+            Result of user synchronization validation
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Services.UserExistenceStatus">
+            <summary>
+            Status of user existence across data sources
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Services.UserSyncAuditEntry">
+            <summary>
+            Audit entry for user synchronization operations
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Services.ISecurityAuditService">
+            <summary>
+            Service for security auditing and monitoring
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Services.SecurityAuditEvent">
+            <summary>
+            Security audit event model
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Services.SecurityMetrics">
+            <summary>
+            Security metrics model
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Services.SecurityEventType">
+            <summary>
+            Security event types for auditing
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Services.SecurityRiskLevel">
+            <summary>
+            Security risk levels
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Services.UserSecurityService">
+            <summary>
+            Implementation of user security validation service
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Services.UserSynchronizationService">
+            <summary>
+            Secure implementation of user synchronization service
+            </summary>
+        </member>
+    </members>
+</doc>

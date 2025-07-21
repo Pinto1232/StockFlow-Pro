@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "9+V8lk1IZng=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Shared\\StockFlowPro.Shared.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\pinto\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\9.0.6\\microsoft.extensions.dependencyinjection.abstractions.9.0.6.nupkg.sha512"
+  ],
+  "logs": []
+}

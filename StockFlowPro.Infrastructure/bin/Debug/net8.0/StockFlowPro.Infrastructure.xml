@@ -1,0 +1,169 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>StockFlowPro.Infrastructure</name>
+    </assembly>
+    <members>
+        <member name="T:StockFlowPro.Infrastructure.Migrations.InitialSqlServerCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.InitialSqlServerCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.InitialSqlServerCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.InitialSqlServerCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:StockFlowPro.Infrastructure.Migrations.UpdatedRoleManagement">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.UpdatedRoleManagement.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.UpdatedRoleManagement.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.UpdatedRoleManagement.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:StockFlowPro.Infrastructure.Migrations.ConvertRoleToString">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.ConvertRoleToString.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.ConvertRoleToString.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.ConvertRoleToString.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:StockFlowPro.Infrastructure.Migrations.UpdateRoleColumnLength">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.UpdateRoleColumnLength.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.UpdateRoleColumnLength.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.UpdateRoleColumnLength.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:StockFlowPro.Infrastructure.Migrations.AddProfilePhotoUrl">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.AddProfilePhotoUrl.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.AddProfilePhotoUrl.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.AddProfilePhotoUrl.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:StockFlowPro.Infrastructure.Migrations.DropSubscriptionTables">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.DropSubscriptionTables.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.DropSubscriptionTables.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.DropSubscriptionTables.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:StockFlowPro.Infrastructure.Migrations.AddSubscriptionSystem">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.AddSubscriptionSystem.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.AddSubscriptionSystem.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.AddSubscriptionSystem.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:StockFlowPro.Infrastructure.Migrations.AddImageUrlToProducts">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.AddImageUrlToProducts.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.AddImageUrlToProducts.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.AddImageUrlToProducts.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:StockFlowPro.Infrastructure.Repositories.EnhancedUserRepository">
+            <summary>
+            Enhanced user repository with improved email uniqueness validation
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Repositories.EnhancedUserRepository.GetByEmailAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets a user by email address with case-insensitive comparison
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Repositories.EnhancedUserRepository.EmailExistsAsync(System.String,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>
+            Checks if an email exists with case-insensitive comparison and proper exclusion handling
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Repositories.EnhancedUserRepository.NormalizeEmail(System.String)">
+            <summary>
+            Normalizes email address for consistent comparison
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Infrastructure.Repositories.RoleRepository">
+            <summary>
+            Repository implementation for Role entity operations.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Infrastructure.Services.EnhancedRoleService">
+            <summary>
+            Enhanced role service leveraging SQL Server capabilities
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Services.EnhancedRoleService.CreateCustomRoleAsync(System.String,System.String,System.String,System.Collections.Generic.List{System.String},System.Int32)">
+            <summary>
+            Create a new custom role with specific permissions
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Services.EnhancedRoleService.GetRolePermissionsAsync(System.Guid)">
+            <summary>
+            Get all permissions for a specific role including inherited permissions
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Services.EnhancedRoleService.UserHasPermissionAsync(System.Guid,System.String)">
+            <summary>
+            Check if a user has a specific permission (SQL Server optimized query)
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Services.EnhancedRoleService.GetRoleHierarchyAsync">
+            <summary>
+            Get role hierarchy with permission inheritance
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Services.EnhancedRoleService.BulkAssignPermissionsAsync(System.Guid,System.Collections.Generic.List{System.Guid},System.Guid)">
+            <summary>
+            Bulk assign permissions to role (SQL Server optimized)
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Services.EnhancedRoleService.GetUsersByRoleAsync(System.Guid,System.Int32,System.Int32)">
+            <summary>
+            Get users by role with pagination (SQL Server optimized)
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Services.EnhancedRoleService.GetRoleAnalyticsAsync">
+            <summary>
+            Generate role usage analytics
+            </summary>
+        </member>
+    </members>
+</doc>

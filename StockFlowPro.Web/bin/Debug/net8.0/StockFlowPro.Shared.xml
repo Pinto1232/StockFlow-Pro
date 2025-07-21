@@ -1,0 +1,435 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>StockFlowPro.Shared</name>
+    </assembly>
+    <members>
+        <member name="T:StockFlowPro.Shared.Constants.AppConstants">
+            <summary>
+            Application-wide constants for StockFlow Pro
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Shared.Constants.UserRoles">
+            <summary>
+            User roles and permissions for StockFlow Pro
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Shared.Constants.UserRoles.AllRoles">
+            <summary>
+            Get all available roles
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Shared.Constants.UserRoles.InventoryManagers">
+            <summary>
+            Roles that can manage inventory
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Shared.Constants.UserRoles.ReportViewers">
+            <summary>
+            Roles that can view reports
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Shared.Constants.UserRoles.UserManagers">
+            <summary>
+            Roles that can manage users
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Shared.Extensions.DateTimeExtensions">
+            <summary>
+            Extension methods for DateTime manipulation
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DateTimeExtensions.ToDisplayFormat(System.DateTime)">
+            <summary>
+            Formats DateTime for display in the application
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DateTimeExtensions.ToDisplayDateFormat(System.DateTime)">
+            <summary>
+            Formats DateTime for display (date only)
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DateTimeExtensions.IsToday(System.DateTime)">
+            <summary>
+            Checks if date is today
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DateTimeExtensions.IsPast(System.DateTime)">
+            <summary>
+            Checks if date is in the past
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DateTimeExtensions.IsFuture(System.DateTime)">
+            <summary>
+            Checks if date is in the future
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DateTimeExtensions.StartOfDay(System.DateTime)">
+            <summary>
+            Gets the start of the day (00:00:00)
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DateTimeExtensions.EndOfDay(System.DateTime)">
+            <summary>
+            Gets the end of the day (23:59:59.999)
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DateTimeExtensions.StartOfWeek(System.DateTime)">
+            <summary>
+            Gets the start of the week (Monday)
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DateTimeExtensions.StartOfMonth(System.DateTime)">
+            <summary>
+            Gets the start of the month
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DateTimeExtensions.EndOfMonth(System.DateTime)">
+            <summary>
+            Gets the end of the month
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DateTimeExtensions.CalculateAge(System.DateTime)">
+            <summary>
+            Calculates age from birth date
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DateTimeExtensions.ToFriendlyString(System.DateTime)">
+            <summary>
+            Gets a friendly time description (e.g., "2 hours ago", "in 3 days")
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DateTimeExtensions.IsBusinessDay(System.DateTime)">
+            <summary>
+            Checks if date is a business day (Monday-Friday)
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DateTimeExtensions.NextBusinessDay(System.DateTime)">
+            <summary>
+            Gets the next business day
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Shared.Extensions.DecimalExtensions">
+            <summary>
+            Extension methods for decimal/money operations
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DecimalExtensions.ToCurrency(System.Decimal,System.String)">
+            <summary>
+            Formats decimal as currency
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DecimalExtensions.ToCurrency(System.Decimal,System.Globalization.CultureInfo)">
+            <summary>
+            Formats decimal as currency with culture info
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DecimalExtensions.ToPercentage(System.Decimal,System.Int32)">
+            <summary>
+            Formats decimal as percentage
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DecimalExtensions.RoundTo(System.Decimal,System.Int32)">
+            <summary>
+            Rounds to specified decimal places
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DecimalExtensions.IsPositive(System.Decimal)">
+            <summary>
+            Checks if amount is positive
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DecimalExtensions.IsNegative(System.Decimal)">
+            <summary>
+            Checks if amount is negative
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DecimalExtensions.IsZero(System.Decimal)">
+            <summary>
+            Checks if amount is zero
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DecimalExtensions.PercentageOf(System.Decimal,System.Decimal)">
+            <summary>
+            Calculates percentage of total
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DecimalExtensions.CalculateDiscount(System.Decimal,System.Decimal)">
+            <summary>
+            Calculates discount amount
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DecimalExtensions.ApplyDiscount(System.Decimal,System.Decimal)">
+            <summary>
+            Applies discount and returns final amount
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DecimalExtensions.CalculateTax(System.Decimal,System.Decimal)">
+            <summary>
+            Calculates tax amount
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DecimalExtensions.ApplyTax(System.Decimal,System.Decimal)">
+            <summary>
+            Applies tax and returns total amount
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.DecimalExtensions.ToShortFormat(System.Decimal)">
+            <summary>
+            Formats large numbers with K, M, B suffixes
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Shared.Extensions.StringExtensions">
+            <summary>
+            Extension methods for string manipulation
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.StringExtensions.ToTitleCase(System.String)">
+            <summary>
+            Converts string to title case (e.g., "hello world" -> "Hello World")
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.StringExtensions.IsValidEmail(System.String)">
+            <summary>
+            Checks if string is a valid email address
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.StringExtensions.Truncate(System.String,System.Int32,System.String)">
+            <summary>
+            Truncates string to specified length and adds ellipsis if needed
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.StringExtensions.RemoveWhitespace(System.String)">
+            <summary>
+            Removes all whitespace from string
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.StringExtensions.ToSlug(System.String)">
+            <summary>
+            Converts string to slug format (URL-friendly)
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.StringExtensions.ContainsAny(System.String,System.String[])">
+            <summary>
+            Checks if string contains any of the specified values (case-insensitive)
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.StringExtensions.Mask(System.String,System.Int32,System.Char)">
+            <summary>
+            Masks sensitive information (e.g., credit card numbers, passwords)
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Extensions.StringExtensions.ToEnum``1(System.String,``0)">
+            <summary>
+            Converts string to enum value safely
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Shared.Helpers.CryptoHelper">
+            <summary>
+            Helper class for cryptographic operations
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.CryptoHelper.GenerateSalt(System.Int32)">
+            <summary>
+            Generates a random salt for password hashing
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.CryptoHelper.HashPassword(System.String,System.String,System.Int32)">
+            <summary>
+            Hashes a password with salt using PBKDF2
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.CryptoHelper.VerifyPassword(System.String,System.String,System.String,System.Int32)">
+            <summary>
+            Verifies a password against its hash
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.CryptoHelper.GenerateRandomString(System.Int32,System.Boolean)">
+            <summary>
+            Generates a secure random string
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.CryptoHelper.GenerateSecureGuid">
+            <summary>
+            Generates a cryptographically secure GUID
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.CryptoHelper.CreateMD5Hash(System.String)">
+            <summary>
+            Creates an MD5 hash of a string (for non-security purposes like ETags)
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.CryptoHelper.CreateSHA256Hash(System.String)">
+            <summary>
+            Creates a SHA256 hash of a string
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.CryptoHelper.GenerateTimeBasedToken(System.Int32)">
+            <summary>
+            Generates a time-based one-time password (TOTP) token
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.CryptoHelper.EncryptString(System.String,System.String)">
+            <summary>
+            Encrypts a string using AES encryption
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.CryptoHelper.DecryptString(System.String,System.String)">
+            <summary>
+            Decrypts a string using AES encryption
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Shared.Helpers.FileHelper">
+            <summary>
+            Helper class for file operations
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.FileHelper.GetFileSizeString(System.Int64)">
+            <summary>
+            Gets file size in human-readable format
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.FileHelper.IsValidImageFile(System.String)">
+            <summary>
+            Validates if file is an allowed image type
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.FileHelper.IsValidDocumentFile(System.String)">
+            <summary>
+            Validates if file is an allowed document type
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.FileHelper.IsValidFileExtension(System.String,System.String)">
+            <summary>
+            Validates file extension against allowed extensions
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.FileHelper.GenerateUniqueFileName(System.String)">
+            <summary>
+            Generates a unique file name to prevent conflicts
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.FileHelper.SanitizeFileName(System.String)">
+            <summary>
+            Sanitizes file name by removing invalid characters
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.FileHelper.GetMimeType(System.String)">
+            <summary>
+            Gets MIME type based on file extension
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.FileHelper.IsFileAccessible(System.String)">
+            <summary>
+            Checks if file exists and is accessible
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.FileHelper.EnsureDirectoryExists(System.String)">
+            <summary>
+            Creates directory if it doesn't exist
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.FileHelper.TryDeleteFile(System.String)">
+            <summary>
+            Safely deletes a file
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.FileHelper.GetFileInfo(System.String)">
+            <summary>
+            Gets file info as a formatted string
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Shared.Helpers.ValidationHelper">
+            <summary>
+            Helper class for common validation operations
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.ValidationHelper.IsValidEmail(System.String)">
+            <summary>
+            Validates email address format
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.ValidationHelper.IsValidPhoneNumber(System.String)">
+            <summary>
+            Validates phone number format (supports various formats)
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.ValidationHelper.IsValidPassword(System.String,System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Validates password strength
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.ValidationHelper.IsValidUrl(System.String)">
+            <summary>
+            Validates URL format
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.ValidationHelper.IsValidName(System.String)">
+            <summary>
+            Validates if string contains only letters and spaces
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.ValidationHelper.IsValidSku(System.String)">
+            <summary>
+            Validates if string is a valid SKU format
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.ValidationHelper.IsInRange(System.Decimal,System.Decimal,System.Decimal)">
+            <summary>
+            Validates if number is within specified range
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.ValidationHelper.IsDateInRange(System.DateTime,System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            Validates if date is within specified range
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.ValidationHelper.IsValidFileExtension(System.String,System.String)">
+            <summary>
+            Validates file extension
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.ValidationHelper.IsValidFileSize(System.Int64,System.Int64)">
+            <summary>
+            Validates file size
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Helpers.ValidationHelper.GetPasswordStrength(System.String)">
+            <summary>
+            Gets password strength score (0-5)
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Shared.Models.ApiResponse`1">
+            <summary>
+            Standard API response wrapper
+            </summary>
+            <typeparam name="T">Type of data being returned</typeparam>
+        </member>
+        <member name="T:StockFlowPro.Shared.Models.ApiResponse">
+            <summary>
+            API response without data
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Shared.Models.PagedResult`1">
+            <summary>
+            Represents a paged result set
+            </summary>
+            <typeparam name="T">Type of items in the result</typeparam>
+        </member>
+        <member name="M:StockFlowPro.Shared.Models.PagedResult`1.Empty(System.Int32,System.Int32)">
+            <summary>
+            Creates an empty paged result
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Models.PagedResult`1.Create(System.Collections.Generic.List{`0},System.Int32,System.Int32)">
+            <summary>
+            Creates a paged result from a full list
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Shared.Models.PaginationParams">
+            <summary>
+            Pagination parameters
+            </summary>
+        </member>
+    </members>
+</doc>
