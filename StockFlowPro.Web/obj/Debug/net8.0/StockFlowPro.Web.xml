@@ -414,6 +414,12 @@
             <param name="request">Password change details</param>
             <returns>Success message</returns>
         </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.AuthController.GetAvailableRoles">
+            <summary>
+            Get available roles for registration
+            </summary>
+            <returns>List of available roles</returns>
+        </member>
         <member name="M:StockFlowPro.Web.Controllers.Api.AuthTestController.GetPublicInfo">
             <summary>
             Test endpoint that doesn't require authentication

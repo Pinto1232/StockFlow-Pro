@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { useLogin, useRegister, useIsAuthenticated } from '../../hooks/useAuth';
 import DemoCredentials from '../../components/Auth/DemoCredentials';
+import { rolesService } from '../../services/authService';
 import type { LoginRequest, RegisterRequest } from '../../types/index';
 import './Auth.css';
 
@@ -26,6 +27,14 @@ const Login: React.FC = () => {
   const [loginErrors, setLoginErrors] = useState<Record<string, string>>({});
   const [registerErrors, setRegisterErrors] = useState<Record<string, string>>({});
   const [registerSuccess, setRegisterSuccess] = useState(false);
+
+const [roles, setRoles] = useState<{ value: string; label: string }[]>([]);
+
+useEffect(() => {
+  rolesService.getAvailableRoles()
+    .then((data) => setRoles(data))
+    .catch((error) => console.error('Failed to fetch roles:', error));
+}, []);
 
   const loginMutation = useLogin();
   const registerMutation = useRegister();
@@ -108,6 +117,10 @@ const Login: React.FC = () => {
 
     if (!registerData.dateOfBirth) {
       newErrors.dateOfBirth = 'Date of birth is required';
+    }
+
+    if (!registerData.role) {
+      newErrors.role = 'Role is required';
     }
 
     setRegisterErrors(newErrors);
@@ -465,9 +478,11 @@ const Login: React.FC = () => {
                         className={registerErrors.role ? 'input-error' : ''}
                       >
                         <option value="">Select a role...</option>
-                        <option value="User">User</option>
-                        <option value="Manager">Manager</option>
-                        <option value="Admin">Admin</option>
+                        {roles.map((role) => (
+                          <option key={role.value} value={role.value}>
+                            {role.label}
+                          </option>
+                        ))}
                       </select>
                     </div>
                     {registerErrors.role && (

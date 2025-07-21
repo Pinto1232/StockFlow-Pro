@@ -107,6 +107,30 @@ const getRoleFromString = (roleString?: string): UserRole => {
 // Simulate API delay
 const simulateDelay = (ms: number = 1000) => new Promise(resolve => setTimeout(resolve, ms));
 
+// API service for roles
+export const rolesService = {
+  // Get available roles from backend
+  getAvailableRoles: async (): Promise<{ value: string; label: string }[]> => {
+    try {
+      // Try to fetch from backend first
+      const response = await fetch('/api/auth/available-roles');
+      if (response.ok) {
+        return await response.json();
+      }
+      throw new Error('Backend not available');
+    } catch (error) {
+      console.warn('Backend not available, using fallback roles:', error);
+      // Fallback to hardcoded roles if backend is not available
+      return [
+        { value: 'User', label: 'User' },
+        { value: 'Manager', label: 'Manager' },
+        { value: 'Admin', label: 'Admin' },
+        { value: 'Supervisor', label: 'Supervisor' }
+      ];
+    }
+  },
+};
+
 export const authService = {
   // Fake login user
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {

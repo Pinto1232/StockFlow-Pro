@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using StockFlowPro.Application.Interfaces;
 using StockFlowPro.Web.Attributes;
 using StockFlowPro.Web.Configuration;
 using StockFlowPro.Web.Services;
@@ -15,11 +16,13 @@ namespace StockFlowPro.Web.Controllers.Api;
 public class AuthController : ControllerBase
 {
     private readonly IUserAuthenticationService _authenticationService;
+    private readonly IRoleService _roleService;
     private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IUserAuthenticationService authenticationService, ILogger<AuthController> logger)
+    public AuthController(IUserAuthenticationService authenticationService, IRoleService roleService, ILogger<AuthController> logger)
     {
         _authenticationService = authenticationService;
+        _roleService = roleService;
         _logger = logger;
     }
 
@@ -281,6 +284,36 @@ public class AuthController : ControllerBase
         {
             _logger.LogError(ex, "Error during password change for user");
             return StatusCode(500, new { message = "An error occurred during password change. Please try again." });
+        }
+    }
+
+    /// <summary>
+    /// Get available roles for registration
+    /// </summary>
+    /// <returns>List of available roles</returns>
+    [HttpGet("available-roles")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetAvailableRoles()
+    {
+        try
+        {
+            var roleOptions = await _roleService.GetRoleOptionsAsync();
+            var roles = roleOptions.Select(r => new { 
+                value = r.Name, 
+                label = r.DisplayName 
+            });
+
+            return Ok(roles);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving available roles from database");
+            
+            // Fallback to enum values if database query fails
+            var fallbackRoles = Enum.GetNames(typeof(Domain.Enums.UserRole))
+                .Select(r => new { value = r, label = r });
+
+            return Ok(fallbackRoles);
         }
     }
 }

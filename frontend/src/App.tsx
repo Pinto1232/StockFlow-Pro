@@ -4,8 +4,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 // Components
 import Layout from './components/Layout/Layout.tsx';
-import ProtectedRoute from './components/Auth/ProtectedRoute.tsx';
-import PermissionRoute from './components/Auth/PermissionRoute.tsx';
+import { ProtectedRoute, PermissionRoute, AuthProvider } from './components/Auth';
 import { Permissions } from './utils/permissions.ts';
 
 // Pages
@@ -20,6 +19,7 @@ import Profile from './pages/Profile/Profile.tsx';
 import Settings from './pages/Settings/Settings.tsx';
 import Invoices from './pages/Invoices/Invoices.tsx';
 import AdminPanel from './pages/Admin/AdminPanel.tsx';
+import PermissionsDemo from './pages/Admin/PermissionsDemo.tsx';
 import UserSync from './pages/Sync/UserSync.tsx';
 import NotFound from './pages/NotFound/NotFound.tsx';
 
@@ -40,8 +40,9 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <div className="min-h-screen bg-gray-50">
+      <AuthProvider>
+        <Router>
+          <div className="min-h-screen bg-gray-50">
           <Routes>
             {/* Public routes */}
             <Route path="/login" element={<Login />} />
@@ -101,6 +102,10 @@ function App() {
                 } 
               />
               <Route 
+                path="permissions-demo" 
+                element={<PermissionsDemo />} 
+              />
+              <Route 
                 path="sync" 
                 element={
                   <PermissionRoute permission={Permissions.System.SyncData}>
@@ -125,8 +130,9 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
-      </Router>
-      <ReactQueryDevtools initialIsOpen={false} />
+        </Router>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

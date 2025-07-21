@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useLogin, useRegister, useIsAuthenticated } from '../../hooks/useAuth';
+import { rolesService } from '../../services/authService';
 import type { LoginRequest, RegisterRequest } from '../../types/index';
 import './Auth.css';
 
@@ -25,6 +26,14 @@ const Register: React.FC = () => {
   const [loginErrors, setLoginErrors] = useState<Record<string, string>>({});
   const [registerErrors, setRegisterErrors] = useState<Record<string, string>>({});
   const [registerSuccess, setRegisterSuccess] = useState(false);
+
+  const [roles, setRoles] = useState<{ value: string; label: string }[]>([]);
+
+  useEffect(() => {
+    rolesService.getAvailableRoles()
+      .then((data) => setRoles(data))
+      .catch((error) => console.error('Failed to fetch roles:', error));
+  }, []);
 
   const loginMutation = useLogin();
   const registerMutation = useRegister();
@@ -439,6 +448,32 @@ const Register: React.FC = () => {
                       <div className="form-error">
                         <i className="fas fa-exclamation-circle"></i>
                         {registerErrors.dateOfBirth}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="form-group">
+                    <div className="form-select-wrapper">
+                      <label htmlFor="role">Role</label>
+                      <select
+                        id="role"
+                        name="role"
+                        value={registerData.role}
+                        onChange={handleRegisterChange}
+                        className={registerErrors.role ? 'input-error' : ''}
+                      >
+                        <option value="">Select a role...</option>
+                        {roles.map((role) => (
+                          <option key={role.value} value={role.value}>
+                            {role.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {registerErrors.role && (
+                      <div className="form-error">
+                        <i className="fas fa-exclamation-circle"></i>
+                        {registerErrors.role}
                       </div>
                     )}
                   </div>
