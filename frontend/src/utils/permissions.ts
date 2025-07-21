@@ -88,6 +88,39 @@ const rolePermissions: Record<UserRole, Set<string>> = {
     Permissions.Reports.Generate,
     Permissions.Data.Export,
   ]),
+  [UserRole.Supervisor]: new Set([
+    // Supervisor inherits all Manager permissions plus additional ones
+    Permissions.Users.View,
+    Permissions.Users.Create,
+    Permissions.Users.Edit,
+    Permissions.Users.ViewAll,
+    Permissions.Users.ViewReports,
+    
+    // Product permissions
+    Permissions.Product.ViewProducts,
+    Permissions.Product.CreateProducts,
+    Permissions.Product.EditProducts,
+    Permissions.Product.DeleteProducts,
+    Permissions.Product.UpdateStock,
+    Permissions.Product.ViewReports,
+    
+    // Invoice permissions
+    Permissions.Invoice.ViewInvoices,
+    Permissions.Invoice.CreateInvoices,
+    Permissions.Invoice.EditInvoices,
+    Permissions.Invoice.DeleteInvoices,
+    Permissions.Invoice.ViewAllInvoices,
+    Permissions.Invoice.ManageInvoiceItems,
+    
+    // Supervisor-specific permissions
+    Permissions.System.ViewStatistics,
+    Permissions.System.ViewLogs,
+    Permissions.Reports.ViewBasic,
+    Permissions.Reports.ViewAdvanced,
+    Permissions.Reports.Generate,
+    Permissions.Data.Export,
+    Permissions.Data.Import,
+  ]),
   [UserRole.Admin]: new Set([
     // Admin has all permissions
     Permissions.Users.View,

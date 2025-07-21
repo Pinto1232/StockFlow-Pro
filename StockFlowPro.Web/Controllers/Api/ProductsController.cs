@@ -250,6 +250,68 @@ public class ProductsController : ControllerBase
         return Ok(products);
     }
 
+    [HttpGet("low-stock")]
+    public async Task<ActionResult<ApiResponse<IEnumerable<EnhancedProductDto>>>> GetLowStockProducts(
+        [FromQuery] int threshold = 10)
+    {
+        try
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Getting low stock products from database - Threshold: {threshold}");
+            
+            var query = new GetAllProductsQuery 
+            { 
+                ActiveOnly = true,
+                LowStockOnly = true,
+                LowStockThreshold = threshold
+            };
+            var products = await _mediator.Send(query);
+            
+            // Transform products with enhanced formatting
+            var lowStockProducts = products.Select(p => new EnhancedProductDto
+            {
+                // Original properties
+                Id = p.Id,
+                Name = p.Name,
+                CostPerItem = p.CostPerItem,
+                NumberInStock = p.NumberInStock,
+                TotalValue = p.TotalValue,
+                IsActive = p.IsActive,
+                IsInStock = p.IsInStock,
+                IsLowStock = p.IsLowStock,
+                ImageUrl = p.ImageUrl,
+                CreatedAt = p.CreatedAt,
+                
+                // Enhanced formatted properties
+                FormattedName = p.Name.ToTitleCase(),
+                FormattedPrice = p.CostPerItem.ToCurrency(),
+                FormattedTotalValue = p.TotalValue.ToCurrency(),
+                FormattedTotalValueShort = p.TotalValue.ToShortFormat(),
+                StockDisplay = $"{p.NumberInStock} units",
+                CreatedDisplay = p.CreatedAt.ToDisplayFormat(),
+                CreatedFriendly = p.CreatedAt.ToFriendlyString(),
+                StockStatus = GetStockStatusText(p.IsInStock, p.IsLowStock),
+                StockStatusBadge = GetStockStatusBadge(p.IsInStock, p.IsLowStock),
+                ActiveStatusBadge = p.IsActive ? "Active" : "Inactive",
+                PriceRange = GetPriceRange(p.CostPerItem),
+                StockLevel = GetStockLevel(p.NumberInStock),
+                ImageDisplay = GetImageDisplay(p.ImageUrl),
+                HasImage = !string.IsNullOrEmpty(p.ImageUrl)
+            }).ToList();
+            
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Retrieved {lowStockProducts.Count} low stock products from database");
+            
+            return Ok(ApiResponse<IEnumerable<EnhancedProductDto>>.SuccessResult(
+                lowStockProducts, 
+                $"Successfully retrieved {lowStockProducts.Count} low stock products"));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Error retrieving low stock products: {ex.Message}");
+            return BadRequest(ApiResponse<IEnumerable<EnhancedProductDto>>.ErrorResult(
+                "Failed to retrieve low stock products", ex.Message));
+        }
+    }
+
     [HttpPost]
     [Authorize(Roles = "Manager,Admin")]
     public async Task<ActionResult<ProductDto>> CreateProduct([FromBody] CreateProductDto createProductDto)

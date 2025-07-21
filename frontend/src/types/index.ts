@@ -2,7 +2,8 @@
 export const UserRole = {
   Admin: 1,
   User: 2,
-  Manager: 3
+  Manager: 3,
+  Supervisor: 4
 } as const;
 
 export const PaymentStatus = {

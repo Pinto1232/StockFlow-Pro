@@ -7,6 +7,7 @@ import type {
   PaginatedResponse,
   ProductFilters,
   PaginationParams,
+  ApiResponse,
 } from '../types/index';
 
 export const productService = {
@@ -63,7 +64,8 @@ export const productService = {
 
   // Get low stock products
   getLowStockProducts: async (): Promise<ProductDto[]> => {
-    return await apiService.get<ProductDto[]>('/products/low-stock');
+    const response = await apiService.get<ApiResponse<ProductDto[]>>('/products/low-stock');
+    return response.data;
   },
 
   // Search products

@@ -57,9 +57,16 @@ public class AuthController : ControllerBase
                 user = new
                 {
                     id = user.Id,
-                    name = user.FullName,
+                    firstName = user.FirstName,
+                    lastName = user.LastName,
+                    fullName = user.FullName,
                     email = user.Email,
-                    role = user.Role.ToString()
+                    phoneNumber = user.PhoneNumber,
+                    dateOfBirth = user.DateOfBirth.ToString("yyyy-MM-dd"),
+                    role = (int)user.Role,
+                    isActive = user.IsActive,
+                    createdAt = user.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
+                    updatedAt = user.UpdatedAt?.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
                 }
             });
         }
@@ -131,8 +138,14 @@ public class AuthController : ControllerBase
                     id = user.Id,
                     firstName = user.FirstName,
                     lastName = user.LastName,
+                    fullName = user.FullName,
                     email = user.Email,
-                    role = user.Role.ToString()
+                    phoneNumber = user.PhoneNumber,
+                    dateOfBirth = user.DateOfBirth.ToString("yyyy-MM-dd"),
+                    role = (int)user.Role,
+                    isActive = user.IsActive,
+                    createdAt = user.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
+                    updatedAt = user.UpdatedAt?.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
                 }
             });
         }

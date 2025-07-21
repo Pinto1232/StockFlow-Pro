@@ -34,9 +34,10 @@ const RoleGuard: React.FC<RoleGuardProps> = ({
   if (requireExact) {
     hasAccess = allowedRoles.includes(currentUser.role);
   } else {
-    // Role hierarchy: Admin > Manager > User
+    // Role hierarchy: Admin > Supervisor > Manager > User
     const roleHierarchy = {
-      [UserRole.Admin]: 3,
+      [UserRole.Admin]: 4,
+      [UserRole.Supervisor]: 3,
       [UserRole.Manager]: 2,
       [UserRole.User]: 1,
     };

@@ -1,0 +1,7 @@
+C:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Application.Tests\bin\Debug\net8.0\CoverletSourceRootsMapping_StockFlowPro.Application.Tests
+C:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Application.Tests\obj\Debug\net8.0\StockFlowPro.Application.Tests.csproj.AssemblyReference.cache
+C:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Application.Tests\obj\Debug\net8.0\StockFlowPro.Application.Tests.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Application.Tests\obj\Debug\net8.0\StockFlowPro.Application.Tests.AssemblyInfoInputs.cache
+C:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Application.Tests\obj\Debug\net8.0\StockFlowPro.Application.Tests.AssemblyInfo.cs
+C:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Application.Tests\obj\Debug\net8.0\StockFlowPro.Application.Tests.csproj.CoreCompileInputs.cache
+C:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Application.Tests\obj\Debug\net8.0\StockFlowPro.Application.Tests.sourcelink.json

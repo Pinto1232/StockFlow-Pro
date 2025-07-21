@@ -4,20 +4,19 @@ import type { ApiResponse, PaginatedResponse } from '../types/index';
 
 // Create axios instance with base configuration
 const api: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://localhost:7001/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5131/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Include cookies for authentication
 });
 
-// Request interceptor to add auth token
+// Request interceptor (cookies are automatically included with withCredentials: true)
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // No need to add Authorization header since backend uses cookie auth
+    // Cookies are automatically included with withCredentials: true
     return config;
   },
   (error) => {
@@ -32,10 +31,14 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized access
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('refreshToken');
-      window.location.href = '/login';
+      // Only redirect to login if we're not already on the login page
+      if (!window.location.pathname.includes('/login')) {
+        console.warn('Authentication failed, redirecting to login');
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

@@ -18,6 +18,7 @@ import {
 import { useCurrentUser, useLogout } from '../../hooks/useAuth';
 import { usePermissions } from '../../hooks/usePermissions';
 import { Permissions } from '../../utils/permissions';
+import { getRoleName } from '../../services/authService';
 import ConnectionStatus from '../SignalR/ConnectionStatus';
 import '../../styles/dropdown.css';
 
@@ -271,8 +272,8 @@ const Navbar: React.FC = () => {
                   <div className="online-indicator" title="Online"></div>
                 </div>
                 <div className="user-info-wrapper">
-                  <span className="user-name">{currentUser.fullName}</span>
-                  <span className="user-role-badge">{currentUser.role.toString()}</span>
+                  <span className="user-name">{currentUser.fullName || currentUser.email || 'User'}</span>
+                  <span className="user-role-badge">{getRoleName(currentUser.role)}</span>
                 </div>
                 <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-300 ${isUserDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -286,13 +287,12 @@ const Navbar: React.FC = () => {
                       <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center">
                         <span className="text-sm font-medium text-white">
                           {currentUser.firstName?.charAt(0) || 'U'}{currentUser.lastName?.charAt(0) || 'U'}
-                        </span>
-                      </div>
+                        </span></div>
                     </div>
                     <div className="account-details">
-                      <h6 className="account-name">{currentUser.fullName}</h6>
+                      <h6 className="account-name">{currentUser.fullName || currentUser.email || 'User'}</h6>
                       <p className="account-email">{currentUser.email}</p>
-                      <span className="account-role-tag">{currentUser.role.toString()}</span>
+                      {/* <span className="account-role-tag">{getRoleName(currentUser.role)}</span> */}
                     </div>
                   </div>
 

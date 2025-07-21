@@ -30,6 +30,8 @@ export const useLogin = () => {
     onSuccess: (data) => {
       queryClient.setQueryData(authKeys.currentUser, data.user);
       queryClient.invalidateQueries({ queryKey: authKeys.currentUser });
+      // Redirect to dashboard after successful login
+      window.location.href = '/dashboard';
     },
   });
 };

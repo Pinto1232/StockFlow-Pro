@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>StockFlowPro.Web.Tests</name>
+    </assembly>
+    <members>
+        <member name="T:StockFlowPro.Web.Tests.Integration.RegistrationDataPersistenceTests">
+            <summary>
+            Integration tests to verify user registration data is properly persisted to the database
+            </summary>
+        </member>
+    </members>
+</doc>

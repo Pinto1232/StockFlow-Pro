@@ -46,6 +46,8 @@ export const useLowStockProducts = () => {
     queryKey: productKeys.lowStock(),
     queryFn: () => productService.getLowStockProducts(),
     staleTime: 1 * 60 * 1000, // 1 minute
+    retry: 1, // Only retry once on failure
+    retryDelay: 1000, // Wait 1 second before retry
   });
 };
 

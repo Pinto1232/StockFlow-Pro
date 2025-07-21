@@ -18,6 +18,7 @@ interface BackendUserResponse {
   role: number;
 }
 
+
 // Helper function to handle API responses
 const handleApiResponse = async (response: Response) => {
   if (!response.ok) {
@@ -50,18 +51,40 @@ const convertToUserRole = (roleNumber: number): UserRole => {
       return UserRoleEnum.User;
     case 3:
       return UserRoleEnum.Manager;
+    case 4:
+      return UserRoleEnum.Supervisor;
     default:
       return UserRoleEnum.User; // Default to User role
   }
 };
 
+// Helper function to convert UserRole number to role name string
+export const getRoleName = (role: UserRole): string => {
+  switch (role) {
+    case UserRoleEnum.Admin:
+      return 'Admin';
+    case UserRoleEnum.User:
+      return 'User';
+    case UserRoleEnum.Manager:
+      return 'Manager';
+    case UserRoleEnum.Supervisor:
+      return 'Supervisor';
+    default:
+      return 'User';
+  }
+};
+
 // Helper function to create UserDto from backend response
 const createUserDto = (backendUser: BackendUserResponse): UserDto => {
+  const firstName = backendUser.firstName || '';
+  const lastName = backendUser.lastName || '';
+  const fullName = `${firstName} ${lastName}`.trim() || 'User';
+  
   return {
     id: backendUser.id,
-    firstName: backendUser.firstName,
-    lastName: backendUser.lastName,
-    fullName: `${backendUser.firstName} ${backendUser.lastName}`,
+    firstName,
+    lastName,
+    fullName,
     email: backendUser.email,
     phoneNumber: backendUser.phoneNumber || '',
     dateOfBirth: backendUser.dateOfBirth,
@@ -114,9 +137,10 @@ export const authService = {
 
       const data = await handleApiResponse(response);
       
-      // Create mock tokens since backend uses cookie auth
-      const token = `session-token-${Date.now()}`;
-      const refreshToken = `refresh-token-${Date.now()}`;
+      // Since backend uses cookie auth, we'll create a session indicator
+      // The actual authentication will be handled by cookies
+      const token = `authenticated-${Date.now()}`;
+      const refreshToken = `refresh-${Date.now()}`;
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
       
       const userDto = createUserDto(data.user);
@@ -128,10 +152,11 @@ export const authService = {
         expiresAt,
       };
       
-      // Store tokens in localStorage
+      // Store authentication state in localStorage
       localStorage.setItem('authToken', loginResponse.token);
       localStorage.setItem('refreshToken', loginResponse.refreshToken);
       localStorage.setItem('user', JSON.stringify(loginResponse.user));
+      localStorage.setItem('isAuthenticated', 'true');
       
       return loginResponse;
     } catch (error) {
@@ -184,6 +209,7 @@ export const authService = {
       localStorage.removeItem('authToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
+      localStorage.removeItem('isAuthenticated');
     }
   },
 
