@@ -265,7 +265,7 @@ const Navbar: React.FC = () => {
                 <div className="user-avatar-wrapper">
                   <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center user-avatar-icon">
                     <span className="text-sm font-medium text-white">
-                      {currentUser.firstName.charAt(0)}{currentUser.lastName.charAt(0)}
+                      {currentUser.firstName?.charAt(0) || 'U'}{currentUser.lastName?.charAt(0) || 'U'}
                     </span>
                   </div>
                   <div className="online-indicator" title="Online"></div>
@@ -285,7 +285,7 @@ const Navbar: React.FC = () => {
                     <div className="account-avatar">
                       <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center">
                         <span className="text-sm font-medium text-white">
-                          {currentUser.firstName.charAt(0)}{currentUser.lastName.charAt(0)}
+                          {currentUser.firstName?.charAt(0) || 'U'}{currentUser.lastName?.charAt(0) || 'U'}
                         </span>
                       </div>
                     </div>

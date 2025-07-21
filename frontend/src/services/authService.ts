@@ -1,63 +1,31 @@
 import type { LoginRequest, LoginResponse, RegisterRequest, UserDto, UserRole } from '../types/index';
 import { UserRole as UserRoleEnum } from '../types/index';
 
-// Mock user interface
-interface MockUser {
+// API base URL - this should be configured based on environment
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5131/api';
+
+// Interface for backend user response
+interface BackendUserResponse {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
-  password: string;
-  role: UserRole;
-  phoneNumber: string;
+  phoneNumber?: string;
   dateOfBirth: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  role: number;
 }
 
-// Mock users for fake authentication
-const MOCK_USERS: MockUser[] = [
-  {
-    id: '1',
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'admin@stockflow.com',
-    password: 'admin123',
-    role: UserRoleEnum.Admin,
-    phoneNumber: '+1234567890',
-    dateOfBirth: '1990-01-01',
-    isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    firstName: 'Jane',
-    lastName: 'Smith',
-    email: 'user@stockflow.com',
-    password: 'user123',
-    role: UserRoleEnum.User,
-    phoneNumber: '+1234567891',
-    dateOfBirth: '1992-05-15',
-    isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    firstName: 'Mike',
-    lastName: 'Johnson',
-    email: 'manager@stockflow.com',
-    password: 'manager123',
-    role: UserRoleEnum.Manager,
-    phoneNumber: '+1234567892',
-    dateOfBirth: '1988-12-10',
-    isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+// Helper function to handle API responses
+const handleApiResponse = async (response: Response) => {
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: 'An error occurred' }));
+    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+  }
+  return response.json();
+};
 
 // Helper function to calculate age from date of birth
 const calculateAge = (dateOfBirth: string): number => {
@@ -73,47 +41,44 @@ const calculateAge = (dateOfBirth: string): number => {
   return age;
 };
 
-// Helper function to convert mock user to UserDto
-const mockUserToUserDto = (mockUser: Omit<MockUser, 'password'>): UserDto => {
-  return {
-    id: mockUser.id,
-    firstName: mockUser.firstName,
-    lastName: mockUser.lastName,
-    fullName: `${mockUser.firstName} ${mockUser.lastName}`,
-    email: mockUser.email,
-    phoneNumber: mockUser.phoneNumber,
-    dateOfBirth: mockUser.dateOfBirth,
-    age: calculateAge(mockUser.dateOfBirth),
-    isActive: mockUser.isActive,
-    createdAt: mockUser.createdAt,
-    updatedAt: mockUser.updatedAt,
-    role: mockUser.role,
-  };
-};
-
-// Helper function to get role from string
-const getRoleFromString = (roleString?: string): UserRole => {
-  switch (roleString) {
-    case 'Admin':
+// Helper function to convert backend role number to UserRole
+const convertToUserRole = (roleNumber: number): UserRole => {
+  switch (roleNumber) {
+    case 1:
       return UserRoleEnum.Admin;
-    case 'Manager':
-      return UserRoleEnum.Manager;
-    case 'User':
-    default:
+    case 2:
       return UserRoleEnum.User;
+    case 3:
+      return UserRoleEnum.Manager;
+    default:
+      return UserRoleEnum.User; // Default to User role
   }
 };
 
-// Simulate API delay
-const simulateDelay = (ms: number = 1000) => new Promise(resolve => setTimeout(resolve, ms));
+// Helper function to create UserDto from backend response
+const createUserDto = (backendUser: BackendUserResponse): UserDto => {
+  return {
+    id: backendUser.id,
+    firstName: backendUser.firstName,
+    lastName: backendUser.lastName,
+    fullName: `${backendUser.firstName} ${backendUser.lastName}`,
+    email: backendUser.email,
+    phoneNumber: backendUser.phoneNumber || '',
+    dateOfBirth: backendUser.dateOfBirth,
+    age: calculateAge(backendUser.dateOfBirth),
+    isActive: backendUser.isActive ?? true,
+    createdAt: backendUser.createdAt || new Date().toISOString(),
+    updatedAt: backendUser.updatedAt,
+    role: convertToUserRole(backendUser.role),
+  };
+};
 
 // API service for roles
 export const rolesService = {
   // Get available roles from backend
   getAvailableRoles: async (): Promise<{ value: string; label: string }[]> => {
     try {
-      // Try to fetch from backend first
-      const response = await fetch('/api/auth/available-roles');
+      const response = await fetch(`${API_BASE_URL}/auth/available-roles`);
       if (response.ok) {
         return await response.json();
       }
@@ -132,92 +97,98 @@ export const rolesService = {
 };
 
 export const authService = {
-  // Fake login user
+  // Login user via backend API
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
-    await simulateDelay(800); // Simulate network delay
-    
-    // Find user by email and password
-    const user = MOCK_USERS.find(
-      u => u.email === credentials.email && u.password === credentials.password
-    );
-    
-    if (!user) {
-      throw new Error('Invalid email or password');
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Include cookies for authentication
+        body: JSON.stringify({
+          username: credentials.email, // Backend expects username field
+          password: credentials.password,
+        }),
+      });
+
+      const data = await handleApiResponse(response);
+      
+      // Create mock tokens since backend uses cookie auth
+      const token = `session-token-${Date.now()}`;
+      const refreshToken = `refresh-token-${Date.now()}`;
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+      
+      const userDto = createUserDto(data.user);
+      
+      const loginResponse: LoginResponse = {
+        token,
+        refreshToken,
+        user: userDto,
+        expiresAt,
+      };
+      
+      // Store tokens in localStorage
+      localStorage.setItem('authToken', loginResponse.token);
+      localStorage.setItem('refreshToken', loginResponse.refreshToken);
+      localStorage.setItem('user', JSON.stringify(loginResponse.user));
+      
+      return loginResponse;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
     }
-    
-    // Create mock tokens
-    const token = `fake-jwt-token-${user.id}-${Date.now()}`;
-    const refreshToken = `fake-refresh-token-${user.id}-${Date.now()}`;
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours from now
-    
-    // Remove password from user object and convert to UserDto
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...userWithoutPassword } = user;
-    const userDto = mockUserToUserDto(userWithoutPassword);
-    
-    const response: LoginResponse = {
-      token,
-      refreshToken,
-      user: userDto,
-      expiresAt,
-    };
-    
-    // Store tokens in localStorage
-    localStorage.setItem('authToken', response.token);
-    localStorage.setItem('refreshToken', response.refreshToken);
-    localStorage.setItem('user', JSON.stringify(response.user));
-    
-    return response;
   },
 
-  // Fake register new user
+  // Register new user via backend API
   register: async (userData: RegisterRequest): Promise<UserDto> => {
-    await simulateDelay(1000); // Simulate network delay
-    
-    // Check if user already exists
-    const existingUser = MOCK_USERS.find(u => u.email === userData.email);
-    if (existingUser) {
-      throw new Error('User with this email already exists');
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email,
+          phoneNumber: userData.phoneNumber,
+          dateOfBirth: userData.dateOfBirth,
+          password: userData.password,
+          confirmPassword: userData.confirmPassword,
+        }),
+      });
+
+      const data = await handleApiResponse(response);
+      
+      // The backend returns the created user in the response
+      return createUserDto(data.user);
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
     }
-    
-    // Create new mock user
-    const newMockUser: MockUser = {
-      id: (MOCK_USERS.length + 1).toString(),
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      email: userData.email,
-      password: userData.password,
-      role: getRoleFromString(userData.role),
-      phoneNumber: userData.phoneNumber,
-      dateOfBirth: userData.dateOfBirth,
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    
-    // Add to mock users (in real app, this would be persisted)
-    MOCK_USERS.push(newMockUser);
-    
-    // Convert to UserDto and return
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...userWithoutPassword } = newMockUser;
-    return mockUserToUserDto(userWithoutPassword);
   },
 
-  // Fake logout user
+  // Logout user via backend API
   logout: async (): Promise<void> => {
-    await simulateDelay(300); // Simulate network delay
-    
-    // Clear local storage
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
+    try {
+      await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include', // Include cookies for authentication
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Continue with local cleanup even if backend call fails
+    } finally {
+      // Clear local storage
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+    }
   },
 
-  // Fake refresh token
+  // Refresh token (placeholder for future implementation)
   refreshToken: async (): Promise<LoginResponse> => {
-    await simulateDelay(500); // Simulate network delay
-    
     const refreshToken = localStorage.getItem('refreshToken');
     const userStr = localStorage.getItem('user');
     
@@ -227,10 +198,10 @@ export const authService = {
 
     const user = JSON.parse(userStr);
     
-    // Create new mock tokens
-    const newToken = `fake-jwt-token-${user.id}-${Date.now()}`;
-    const newRefreshToken = `fake-refresh-token-${user.id}-${Date.now()}`;
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours from now
+    // Create new mock tokens (in real implementation, this would call backend)
+    const newToken = `session-token-${Date.now()}`;
+    const newRefreshToken = `refresh-token-${Date.now()}`;
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
     
     const response: LoginResponse = {
       token: newToken,
@@ -258,46 +229,66 @@ export const authService = {
     return !!localStorage.getItem('authToken');
   },
 
-  // Fake forgot password
+  // Forgot password via backend API
   forgotPassword: async (email: string): Promise<void> => {
-    await simulateDelay(1000); // Simulate network delay
-    
-    // Check if user exists
-    const user = MOCK_USERS.find(u => u.email === email);
-    if (!user) {
-      throw new Error('User with this email does not exist');
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      await handleApiResponse(response);
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      throw error;
     }
-    
-    // In a real app, this would send an email
-    console.log(`Password reset email sent to ${email}`);
   },
 
-  // Fake reset password
+  // Reset password via backend API
   resetPassword: async (token: string, newPassword: string): Promise<void> => {
-    await simulateDelay(800); // Simulate network delay
-    
-    // In a real app, this would validate the token and update the password
-    console.log(`Password reset for token: ${token}, new password: ${newPassword}`);
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token,
+          newPassword,
+          confirmPassword: newPassword,
+        }),
+      });
+
+      await handleApiResponse(response);
+    } catch (error) {
+      console.error('Reset password error:', error);
+      throw error;
+    }
   },
 
-  // Fake change password
+  // Change password via backend API
   changePassword: async (currentPassword: string, newPassword: string): Promise<void> => {
-    await simulateDelay(800); // Simulate network delay
-    
-    const userStr = localStorage.getItem('user');
-    if (!userStr) {
-      throw new Error('User not authenticated');
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Include cookies for authentication
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+          confirmPassword: newPassword,
+        }),
+      });
+
+      await handleApiResponse(response);
+    } catch (error) {
+      console.error('Change password error:', error);
+      throw error;
     }
-    
-    const user = JSON.parse(userStr);
-    const mockUser = MOCK_USERS.find(u => u.id === user.id);
-    
-    if (!mockUser || mockUser.password !== currentPassword) {
-      throw new Error('Current password is incorrect');
-    }
-    
-    // Update password in mock data
-    mockUser.password = newPassword;
-    console.log('Password changed successfully');
   },
 };
