@@ -19,6 +19,7 @@ import { useCurrentUser, useLogout } from '../../hooks/useAuth';
 import { usePermissions } from '../../hooks/usePermissions';
 import { Permissions } from '../../utils/permissions';
 import ConnectionStatus from '../SignalR/ConnectionStatus';
+import '../../styles/dropdown.css';
 
 const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -201,7 +202,7 @@ const Navbar: React.FC = () => {
             </div>
             
             {/* Desktop Navigation */}
-            <div className="hidden md:ml-6 md:flex md:space-x-1">
+            <div className="hidden md:ml-8 md:flex md:space-x-4">
               {navigationItems.filter(item => item.show).map((item) => {
                 const Icon = item.icon;
                 const isActive = isActivePath(item.href);
@@ -240,7 +241,7 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Right side - SignalR Status, Notifications, User Menu */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-4">
             {/* SignalR Connection Status */}
             <div className="hidden md:flex">
               <ConnectionStatus />
@@ -255,49 +256,50 @@ const Navbar: React.FC = () => {
             <div className="relative" ref={userDropdownRef}>
               <button
                 onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors"
+                className="user-dropdown-trigger"
                 aria-expanded={isUserDropdownOpen}
                 aria-haspopup="true"
+                aria-label={`User account menu for ${currentUser.fullName}`}
+                title="Click to open account menu"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
+                <div className="user-avatar-wrapper">
+                  <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center user-avatar-icon">
                     <span className="text-sm font-medium text-white">
                       {currentUser.firstName.charAt(0)}{currentUser.lastName.charAt(0)}
                     </span>
                   </div>
-                  <div className="hidden md:block text-left">
-                    <p className="text-sm font-medium text-gray-900">{currentUser.fullName}</p>
-                    <p className="text-xs text-gray-500 capitalize">
-                      {currentUser.role.toString().toLowerCase()}
-                    </p>
-                  </div>
-                  <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isUserDropdownOpen ? 'rotate-180' : ''}`} />
+                  <div className="online-indicator" title="Online"></div>
                 </div>
+                <div className="user-info-wrapper">
+                  <span className="user-name">{currentUser.fullName}</span>
+                  <span className="user-role-badge">{currentUser.role.toString()}</span>
+                </div>
+                <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-300 ${isUserDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {/* User Dropdown Menu */}
               {isUserDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-[9999]">
+                <div className="user-dropdown-menu animate-dropdown-fade-in">
                   {/* User Info Header */}
-                  <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-                    <div className="flex items-center space-x-3">
+                  <div className="account-header">
+                    <div className="account-avatar">
                       <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center">
                         <span className="text-sm font-medium text-white">
                           {currentUser.firstName.charAt(0)}{currentUser.lastName.charAt(0)}
                         </span>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{currentUser.fullName}</p>
-                        <p className="text-xs text-gray-500">{currentUser.email}</p>
-                        <span className="inline-block px-2 py-1 text-xs font-medium bg-primary-100 text-primary-800 rounded-full mt-1">
-                          {currentUser.role.toString()}
-                        </span>
-                      </div>
+                    </div>
+                    <div className="account-details">
+                      <h6 className="account-name">{currentUser.fullName}</h6>
+                      <p className="account-email">{currentUser.email}</p>
+                      <span className="account-role-tag">{currentUser.role.toString()}</span>
                     </div>
                   </div>
 
+                  <hr className="modern-dropdown-divider" />
+
                   {/* Menu Items */}
-                  <div className="py-1">
+                  <div>
                     {userMenuItems.filter(item => item.show).map((item) => {
                       const Icon = item.icon;
                       return (
@@ -305,48 +307,50 @@ const Navbar: React.FC = () => {
                           key={item.name}
                           to={item.href}
                           onClick={() => setIsUserDropdownOpen(false)}
-                          className={`flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors ${
-                            item.isAdmin ? 'border-l-4 border-l-yellow-400' : ''
-                          }`}
+                          className={`user-menu-item ${item.isAdmin ? 'border-l-4 border-l-yellow-400' : ''}`}
+                          role="menuitem"
+                          tabIndex={0}
+                          aria-label={item.description}
                         >
-                          <div className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg mr-3 ${
-                            item.isAdmin 
-                              ? 'bg-yellow-100 text-yellow-600' 
-                              : 'bg-gray-100 text-gray-600'
-                          }`}>
+                          <div className={`item-icon ${item.isAdmin ? 'admin-icon' : ''}`}>
                             <Icon className="h-4 w-4" />
                           </div>
-                          <div className="flex-1">
-                            <p className="font-medium">{item.name}</p>
-                            <p className="text-xs text-gray-500">{item.description}</p>
+                          <div className="item-content">
+                            <span className="item-title">{item.name}</span>
+                            <span className="item-subtitle">{item.description}</span>
                           </div>
-                          <kbd className="hidden md:inline-block px-2 py-1 text-xs font-mono bg-gray-100 text-gray-600 rounded">
-                            {item.shortcut}
-                          </kbd>
+                          <div className="item-shortcut">
+                            <kbd>{item.shortcut}</kbd>
+                          </div>
                         </Link>
                       );
                     })}
                   </div>
 
+                  <hr className="modern-dropdown-divider" />
+
                   {/* Logout */}
-                  <div className="border-t border-gray-200 py-1">
+                  <div>
                     <button
                       onClick={handleLogout}
                       disabled={logoutMutation.isPending}
-                      className="flex items-center w-full px-4 py-3 text-sm text-red-700 hover:bg-red-50 transition-colors"
+                      className={`user-menu-item logout-item ${logoutMutation.isPending ? 'loading' : ''}`}
+                      role="menuitem"
+                      tabIndex={0}
+                      aria-label="Sign out of your account"
                     >
-                      <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-red-100 text-red-600 mr-3">
+                      <div className="item-icon logout-icon">
                         <LogOut className="h-4 w-4" />
                       </div>
-                      <div className="flex-1">
-                        <p className="font-medium">
+                      <div className="item-content">
+                        <span className="item-title">
                           {logoutMutation.isPending ? 'Signing out...' : 'Logout'}
-                        </p>
-                        <p className="text-xs text-red-500">Sign out of your account</p>
+                        </span>
+                        <span className="item-subtitle">Sign out of your account</span>
                       </div>
-                      <kbd className="hidden md:inline-block px-2 py-1 text-xs font-mono bg-gray-100 text-gray-600 rounded">
-                        Ctrl+L
-                      </kbd>
+                      <div className="item-shortcut">
+                        <kbd>Ctrl+L</kbd>
+                      </div>
                     </button>
                   </div>
                 </div>
@@ -372,7 +376,7 @@ const Navbar: React.FC = () => {
       {/* Mobile menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden" ref={mobileMenuRef}>
-          <div className="px-4 pt-4 pb-6 space-y-3 bg-white border-t border-gray-200 shadow-lg">
+          <div className="px-4 pt-4 pb-6 space-y-4 bg-white border-t border-gray-200 shadow-lg">
             {/* Mobile Search */}
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
