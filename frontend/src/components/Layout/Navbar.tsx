@@ -277,7 +277,7 @@ const Navbar: React.FC = () => {
 
               {/* User Dropdown Menu */}
               {isUserDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-[9999]">
                   {/* User Info Header */}
                   <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
                     <div className="flex items-center space-x-3">

@@ -8,6 +8,7 @@ const Layout: React.FC = () => {
   const location = useLocation();
   const isDashboard = location.pathname === '/dashboard';
   const isProducts = location.pathname.startsWith('/products');
+  const isInvoices = location.pathname.startsWith('/invoices');
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -27,7 +28,7 @@ const Layout: React.FC = () => {
           <div className={`${
             isDashboard 
               ? 'max-w-none px-6 py-8' 
-              : isProducts 
+              : (isProducts || isInvoices)
                 ? 'max-w-none px-0 py-0' 
                 : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'
           }`}>
