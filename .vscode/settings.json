@@ -9,8 +9,11 @@
     ".github/workflows/*.yaml": "plaintext"
   },
   "redhat.telemetry.enabled": false,
-  "[yaml]": {
-    "editor.defaultFormatter": "vscode.json"
-  },
-  "zencoder.enableRepoIndexing": true
+  "zencoder.enableRepoIndexing": true,
+  "css.validate": false,
+  "less.validate": false,
+  "scss.validate": false,
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "less.lint.unknownAtRules": "ignore"
 }
