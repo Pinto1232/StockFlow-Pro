@@ -119,26 +119,7 @@ const Sidebar: React.FC = () => {
         </div>
       </div>
       
-      {/* User Info */}
-      {currentUser && (
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="relative">
-              <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-white">
-                  {currentUser.firstName.charAt(0)}{currentUser.lastName.charAt(0)}
-                </span>
-              </div>
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">{currentUser.fullName}</p>
-              <p className="text-xs text-gray-500 capitalize">{currentUser.role.toString().toLowerCase()}</p>
-            </div>
-          </div>
-        </div>
-      )}
-      
+            
       {/* Sidebar Content */}
       <div className="flex-1 overflow-y-auto">
         <nav className="p-2 space-y-1">
