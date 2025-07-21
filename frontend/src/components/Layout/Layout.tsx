@@ -1,26 +1,33 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Sidebar from './Sidebar';
+import { useLocation } from 'react-router-dom';
 import Header from './Header';
+import Sidebar from './Sidebar';
 
 const Layout: React.FC = () => {
+  const location = useLocation();
+  const isDashboard = location.pathname === '/dashboard';
+
   return (
-    <div className="dashboard-layout">
-      {/* Sidebar */}
-      <Sidebar />
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Header/Navbar */}
+      <Header />
       
-      {/* Main Content */}
-      <main className="main-content-area">
-        {/* Header */}
-        <Header />
+      <div className="flex flex-1">
+        {/* Sidebar - only show on dashboard */}
+        {isDashboard && (
+          <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-16 lg:z-40">
+            <Sidebar />
+          </div>
+        )}
         
-        {/* Dashboard Content */}
-        <div className="dashboard-content">
-          <div className="content-wrapper">
+        {/* Main Content */}
+        <main className={`flex-1 ${isDashboard ? 'lg:ml-64' : ''}`}>
+          <div className={`${isDashboard ? 'max-w-none px-6' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'} py-8`}>
             <Outlet />
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 };

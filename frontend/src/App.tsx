@@ -5,6 +5,8 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 // Components
 import Layout from './components/Layout/Layout.tsx';
 import ProtectedRoute from './components/Auth/ProtectedRoute.tsx';
+import PermissionRoute from './components/Auth/PermissionRoute.tsx';
+import { Permissions } from './utils/permissions.ts';
 
 // Pages
 import Login from './pages/Auth/Login.tsx';
@@ -16,6 +18,9 @@ import Users from './pages/Users/Users.tsx';
 import UserDetail from './pages/Users/UserDetail.tsx';
 import Profile from './pages/Profile/Profile.tsx';
 import Settings from './pages/Settings/Settings.tsx';
+import Invoices from './pages/Invoices/Invoices.tsx';
+import AdminPanel from './pages/Admin/AdminPanel.tsx';
+import UserSync from './pages/Sync/UserSync.tsx';
 import NotFound from './pages/NotFound/NotFound.tsx';
 
 // Create a client
@@ -58,13 +63,62 @@ function App() {
               <Route path="products" element={<Products />} />
               <Route path="products/:id" element={<ProductDetail />} />
               
+              {/* Invoices */}
+              <Route 
+                path="invoices" 
+                element={
+                  <PermissionRoute permission={Permissions.Invoice.ViewInvoices}>
+                    <Invoices />
+                  </PermissionRoute>
+                } 
+              />
+              
               {/* Users */}
-              <Route path="users" element={<Users />} />
-              <Route path="users/:id" element={<UserDetail />} />
+              <Route 
+                path="users" 
+                element={
+                  <PermissionRoute permission={Permissions.Users.ViewAll}>
+                    <Users />
+                  </PermissionRoute>
+                } 
+              />
+              <Route 
+                path="users/:id" 
+                element={
+                  <PermissionRoute permission={Permissions.Users.ViewAll}>
+                    <UserDetail />
+                  </PermissionRoute>
+                } 
+              />
+              
+              {/* Admin */}
+              <Route 
+                path="admin" 
+                element={
+                  <PermissionRoute permission={Permissions.System.ViewAdminPanel}>
+                    <AdminPanel />
+                  </PermissionRoute>
+                } 
+              />
+              <Route 
+                path="sync" 
+                element={
+                  <PermissionRoute permission={Permissions.System.SyncData}>
+                    <UserSync />
+                  </PermissionRoute>
+                } 
+              />
               
               {/* Profile & Settings */}
               <Route path="profile" element={<Profile />} />
-              <Route path="settings" element={<Settings />} />
+              <Route 
+                path="settings" 
+                element={
+                  <PermissionRoute permission={Permissions.System.ManageSettings}>
+                    <Settings />
+                  </PermissionRoute>
+                } 
+              />
             </Route>
 
             {/* 404 route */}
