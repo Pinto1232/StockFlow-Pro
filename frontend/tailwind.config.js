@@ -6,6 +6,9 @@ export default {
   ],
   theme: {
     extend: {
+      spacing: {
+        '70': '17.5rem', // 280px - matches the sidebar width
+      },
       colors: {
         primary: {
           50: '#f4f6fb',

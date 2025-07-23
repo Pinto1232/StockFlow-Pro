@@ -1,140 +1,186 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+    Navigate,
+} from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 // Components
-import Layout from './components/Layout/Layout.tsx';
-import { ProtectedRoute, PermissionRoute, AuthProvider } from './components/Auth';
-import { Permissions } from './utils/permissions.ts';
+import Layout from "./components/Layout/Layout.tsx";
+import {
+    ProtectedRoute,
+    PermissionRoute,
+    AuthProvider,
+} from "./components/Auth";
+import { Permissions } from "./utils/permissions.ts";
 
 // Pages
-import Login from './pages/Auth/Login.tsx';
-import Register from './pages/Auth/Register.tsx';
-import Dashboard from './pages/Dashboard/Dashboard.tsx';
-import Products from './pages/Products/Products.tsx';
-import ProductDetail from './pages/Products/ProductDetail.tsx';
-import Users from './pages/Users/Users.tsx';
-import UserDetail from './pages/Users/UserDetail.tsx';
-import Profile from './pages/Profile/Profile.tsx';
-import Settings from './pages/Settings/Settings.tsx';
-import Invoices from './pages/Invoices/Invoices.tsx';
-import AdminPanel from './pages/Admin/AdminPanel.tsx';
-import PermissionsDemo from './pages/Admin/PermissionsDemo.tsx';
-import UserSync from './pages/Sync/UserSync.tsx';
-import NotFound from './pages/NotFound/NotFound.tsx';
+import Login from "./pages/Auth/Login.tsx";
+import Register from "./pages/Auth/Register.tsx";
+import Dashboard from "./pages/Dashboard/Dashboard.tsx";
+import Products from "./pages/Products/Products.tsx";
+import ProductDetail from "./pages/Products/ProductDetail.tsx";
+import Users from "./pages/Users/Users.tsx";
+import UserDetail from "./pages/Users/UserDetail.tsx";
+import Profile from "./pages/Profile/Profile.tsx";
+import Settings from "./pages/Settings/Settings.tsx";
+import Invoices from "./pages/Invoices/Invoices.tsx";
+import AdminPanel from "./pages/Admin/AdminPanel.tsx";
+import PermissionsDemo from "./pages/Admin/PermissionsDemo.tsx";
+import UserSync from "./pages/Sync/UserSync.tsx";
+import NotFound from "./pages/NotFound/NotFound.tsx";
 
 // Create a client
 const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+    defaultOptions: {
+        queries: {
+            retry: 1,
+            refetchOnWindowFocus: false,
+            staleTime: 5 * 60 * 1000, // 5 minutes
+        },
+        mutations: {
+            retry: 1,
+        },
     },
-    mutations: {
-      retry: 1,
-    },
-  },
 });
 
 function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-gray-50">
-          <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+    return (
+        <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+                <Router>
+                    <div className="min-h-screen bg-gray-50">
+                        <Routes>
+                            {/* Public routes */}
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/register" element={<Register />} />
 
-            {/* Protected routes */}
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Layout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              <Route path="dashboard" element={<Dashboard />} />
-              
-              {/* Products */}
-              <Route path="products" element={<Products />} />
-              <Route path="products/:id" element={<ProductDetail />} />
-              
-              {/* Invoices */}
-              <Route 
-                path="invoices" 
-                element={
-                  <PermissionRoute permission={Permissions.Invoice.ViewInvoices}>
-                    <Invoices />
-                  </PermissionRoute>
-                } 
-              />
-              
-              {/* Users */}
-              <Route 
-                path="users" 
-                element={
-                  <PermissionRoute permission={Permissions.Users.ViewAll}>
-                    <Users />
-                  </PermissionRoute>
-                } 
-              />
-              <Route 
-                path="users/:id" 
-                element={
-                  <PermissionRoute permission={Permissions.Users.ViewAll}>
-                    <UserDetail />
-                  </PermissionRoute>
-                } 
-              />
-              
-              {/* Admin */}
-              <Route 
-                path="admin" 
-                element={
-                  <PermissionRoute permission={Permissions.System.ViewAdminPanel}>
-                    <AdminPanel />
-                  </PermissionRoute>
-                } 
-              />
-              <Route 
-                path="permissions-demo" 
-                element={<PermissionsDemo />} 
-              />
-              <Route 
-                path="sync" 
-                element={
-                  <PermissionRoute permission={Permissions.System.SyncData}>
-                    <UserSync />
-                  </PermissionRoute>
-                } 
-              />
-              
-              {/* Profile & Settings */}
-              <Route path="profile" element={<Profile />} />
-              <Route 
-                path="settings" 
-                element={
-                  <PermissionRoute permission={Permissions.System.ManageSettings}>
-                    <Settings />
-                  </PermissionRoute>
-                } 
-              />
-            </Route>
+                            {/* Protected routes */}
+                            <Route
+                                path="/"
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout />
+                                    </ProtectedRoute>
+                                }
+                            >
+                                <Route
+                                    index
+                                    element={
+                                        <Navigate to="/dashboard" replace />
+                                    }
+                                />
+                                <Route
+                                    path="dashboard"
+                                    element={<Dashboard />}
+                                />
 
-            {/* 404 route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </div>
-        </Router>
-        <ReactQueryDevtools initialIsOpen={false} />
-      </AuthProvider>
-    </QueryClientProvider>
-  );
+                                {/* Products */}
+                                <Route path="products" element={<Products />} />
+                                <Route
+                                    path="products/:id"
+                                    element={<ProductDetail />}
+                                />
+
+                                {/* Invoices */}
+                                <Route
+                                    path="invoices"
+                                    element={
+                                        <PermissionRoute
+                                            permission={
+                                                Permissions.Invoice.ViewInvoices
+                                            }
+                                        >
+                                            <Invoices />
+                                        </PermissionRoute>
+                                    }
+                                />
+
+                                {/* Users */}
+                                <Route
+                                    path="users"
+                                    element={
+                                        <PermissionRoute
+                                            permission={
+                                                Permissions.Users.ViewAll
+                                            }
+                                        >
+                                            <Users />
+                                        </PermissionRoute>
+                                    }
+                                />
+                                <Route
+                                    path="users/:id"
+                                    element={
+                                        <PermissionRoute
+                                            permission={
+                                                Permissions.Users.ViewAll
+                                            }
+                                        >
+                                            <UserDetail />
+                                        </PermissionRoute>
+                                    }
+                                />
+
+                                {/* Admin */}
+                                <Route
+                                    path="admin"
+                                    element={
+                                        <PermissionRoute
+                                            permission={
+                                                Permissions.System
+                                                    .ViewAdminPanel
+                                            }
+                                        >
+                                            <AdminPanel />
+                                        </PermissionRoute>
+                                    }
+                                />
+                                <Route
+                                    path="permissions-demo"
+                                    element={<PermissionsDemo />}
+                                />
+                                <Route
+                                    path="sync"
+                                    element={
+                                        <PermissionRoute
+                                            permission={
+                                                Permissions.System.SyncData
+                                            }
+                                        >
+                                            <UserSync />
+                                        </PermissionRoute>
+                                    }
+                                />
+
+                                {/* Profile & Settings */}
+                                <Route path="profile" element={<Profile />} />
+                                <Route
+                                    path="settings"
+                                    element={
+                                        <PermissionRoute
+                                            permission={
+                                                Permissions.System
+                                                    .ManageSettings
+                                            }
+                                        >
+                                            <Settings />
+                                        </PermissionRoute>
+                                    }
+                                />
+                            </Route>
+
+                            {/* 404 route */}
+                            <Route path="*" element={<NotFound />} />
+                        </Routes>
+                    </div>
+                </Router>
+                <ReactQueryDevtools initialIsOpen={false} />
+            </AuthProvider>
+        </QueryClientProvider>
+    );
 }
 
 export default App;

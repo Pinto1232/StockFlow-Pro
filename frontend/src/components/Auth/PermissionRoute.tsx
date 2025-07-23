@@ -1,25 +1,25 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { usePermissions } from '../../hooks/usePermissions';
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { usePermissions } from "../../hooks/usePermissions";
 
 interface PermissionRouteProps {
-  children: React.ReactNode;
-  permission: string;
-  fallback?: string;
+    children: React.ReactNode;
+    permission: string;
+    fallback?: string;
 }
 
-const PermissionRoute: React.FC<PermissionRouteProps> = ({ 
-  children, 
-  permission, 
-  fallback = '/dashboard' 
+const PermissionRoute: React.FC<PermissionRouteProps> = ({
+    children,
+    permission,
+    fallback = "/dashboard",
 }) => {
-  const { hasPermission } = usePermissions();
+    const { hasPermission } = usePermissions();
 
-  if (!hasPermission(permission)) {
-    return <Navigate to={fallback} replace />;
-  }
+    if (!hasPermission(permission)) {
+        return <Navigate to={fallback} replace />;
+    }
 
-  return <>{children}</>;
+    return <>{children}</>;
 };
 
 export default PermissionRoute;

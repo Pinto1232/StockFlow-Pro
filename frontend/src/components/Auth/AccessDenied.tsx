@@ -1,56 +1,58 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ShieldExclamationIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import {
+    ShieldExclamationIcon,
+    ArrowLeftIcon,
+} from "@heroicons/react/24/outline";
 
 interface AccessDeniedProps {
-  message?: string;
-  showBackButton?: boolean;
-  backTo?: string;
+    message?: string;
+    showBackButton?: boolean;
+    backTo?: string;
 }
 
 /**
  * Component to display when user doesn't have access to a resource
  */
-const AccessDenied: React.FC<AccessDeniedProps> = ({ 
-  message = "You don't have permission to access this resource.",
-  showBackButton = true,
-  backTo = '/dashboard'
+const AccessDenied: React.FC<AccessDeniedProps> = ({
+    message = "You don't have permission to access this resource.",
+    showBackButton = true,
+    backTo = "/dashboard",
 }) => {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 text-center">
-        <div>
-          <ShieldExclamationIcon className="mx-auto h-24 w-24 text-red-500" />
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Access Denied
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            {message}
-          </p>
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-md w-full space-y-8 text-center">
+                <div>
+                    <ShieldExclamationIcon className="mx-auto h-24 w-24 text-red-500" />
+                    <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+                        Access Denied
+                    </h2>
+                    <p className="mt-2 text-sm text-gray-600">{message}</p>
+                </div>
+
+                {showBackButton && (
+                    <div className="mt-8">
+                        <button
+                            onClick={() => navigate(backTo)}
+                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                            <ArrowLeftIcon className="h-5 w-5 mr-2" />
+                            Go Back to Dashboard
+                        </button>
+                    </div>
+                )}
+
+                <div className="mt-6">
+                    <p className="text-xs text-gray-500">
+                        If you believe this is an error, please contact your
+                        system administrator.
+                    </p>
+                </div>
+            </div>
         </div>
-        
-        {showBackButton && (
-          <div className="mt-8">
-            <button
-              onClick={() => navigate(backTo)}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              <ArrowLeftIcon className="h-5 w-5 mr-2" />
-              Go Back to Dashboard
-            </button>
-          </div>
-        )}
-        
-        <div className="mt-6">
-          <p className="text-xs text-gray-500">
-            If you believe this is an error, please contact your system administrator.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default AccessDenied;

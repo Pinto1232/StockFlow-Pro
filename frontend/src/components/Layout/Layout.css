@@ -1,0 +1,35 @@
+/* Layout CSS overrides to fix sidebar gap */
+.sidebar-container {
+    width: 280px !important;
+    min-width: 280px !important;
+    max-width: 280px !important;
+}
+
+.sidebar-container.collapsed {
+    width: 80px !important;
+    min-width: 80px !important;
+    max-width: 80px !important;
+}
+
+.navbar-container {
+    left: 280px !important;
+}
+
+.navbar-container.collapsed {
+    left: 80px !important;
+}
+
+.main-content {
+    margin-left: 280px !important;
+}
+
+.main-content.collapsed {
+    margin-left: 80px !important;
+}
+
+/* Ensure sidebar takes full width of container */
+.sidebar-nav {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+}

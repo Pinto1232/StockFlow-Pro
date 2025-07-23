@@ -1,381 +1,542 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Package, Users, FileText, DollarSign, AlertTriangle, Home, BarChart3, RefreshCw, Settings, Zap, UserPlus, Download, FileText as FileTextIcon, Activity, Box, PieChart } from 'lucide-react';
-import { useLowStockProducts } from '../../hooks/useProducts';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import {
+    Package,
+    Users,
+    FileText,
+    DollarSign,
+    AlertTriangle,
+    Home,
+    BarChart3,
+    RefreshCw,
+    Settings,
+    Zap,
+    UserPlus,
+    Download,
+    FileText as FileTextIcon,
+    Activity,
+    Box,
+    PieChart,
+} from "lucide-react";
+import { useLowStockProducts } from "../../hooks/useProducts";
+import { formatCurrency } from "../../utils/currency";
 
 const Dashboard: React.FC = () => {
-  const navigate = useNavigate();
-  const { data: lowStockProducts = [], isLoading: isLoadingLowStock, error: lowStockError } = useLowStockProducts();
+    const navigate = useNavigate();
+    const {
+        data: lowStockProducts = [],
+        isLoading: isLoadingLowStock,
+        error: lowStockError,
+    } = useLowStockProducts();
 
-  const recentActivity = [
-    { action: 'New product added', time: '2 hours ago' },
-    { action: 'User registered', time: '4 hours ago' },
-    { action: 'Invoice generated', time: '6 hours ago' },
-    { action: 'Stock updated', time: '8 hours ago' },
-  ];
+    const recentActivity = [
+        { action: "New product added", time: "2 hours ago" },
+        { action: "User registered", time: "4 hours ago" },
+        { action: "Invoice generated", time: "6 hours ago" },
+        { action: "Stock updated", time: "8 hours ago" },
+    ];
 
-  const refreshDashboard = () => {
-    // Implement refresh functionality
-    console.log('Refreshing dashboard...');
-  };
+    const refreshDashboard = () => {
+        // Implement refresh functionality
+        console.log("Refreshing dashboard...");
+    };
 
-  const openSettings = () => {
-    // Implement settings functionality
-    console.log('Opening settings...');
-  };
+    const openSettings = () => {
+        // Implement settings functionality
+        console.log("Opening settings...");
+    };
 
-  const navigateToInvoices = () => {
-    navigate('/invoices');
-  };
+    const navigateToInvoices = () => {
+        navigate("/invoices");
+    };
 
-  const navigateToNewInvoice = () => {
-    navigate('/invoices/new');
-  };
+    const navigateToNewInvoice = () => {
+        navigate("/invoices/new");
+    };
 
-  return (
-    <div className="admin-panel-layout">
-      {/* Navigation Breadcrumb */}
-      <nav className="admin-breadcrumb" aria-label="Breadcrumb">
-        <ol className="breadcrumb-list">
-          <li className="breadcrumb-item active" aria-current="page">
-            <Home className="w-4 h-4" />
-            <span>Dashboard</span>
-          </li>
-        </ol>
-      </nav>
+    return (
+        <div className="admin-panel-layout">
+            {/* Navigation Breadcrumb */}
+            <nav className="admin-breadcrumb" aria-label="Breadcrumb">
+                <ol className="breadcrumb-list">
+                    <li className="breadcrumb-item active" aria-current="page">
+                        <Home className="w-4 h-4" />
+                        <span>Dashboard</span>
+                    </li>
+                </ol>
+            </nav>
 
-      <div className="admin-content-wrapper">
-        {/* Enhanced Header */}
-        <header className="admin-header">
-          <div className="header-main">
-            <div className="header-content">
-              <h1 className="admin-title">
-                <div className="title-icon">
-                  <BarChart3 className="w-7 h-7" />
-                </div>
-                <div className="title-text">
-                  <span className="title-main">Dashboard</span>
-                  <span className="title-sub">Business Overview</span>
-                </div>
-              </h1>
-              <p className="admin-subtitle">Welcome back! Here's what's happening with your business today.</p>
-            </div>
-            <div className="header-actions">
-              <button className="action-btn refresh-btn" onClick={refreshDashboard} title="Refresh Data">
-                <RefreshCw className="w-4 h-4" />
-                <span>Refresh</span>
-              </button>
-              <button className="action-btn settings-btn" onClick={openSettings} title="Dashboard Settings">
-                <Settings className="w-4 h-4" />
-                <span>Settings</span>
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* System Status Banner */}
-        <div className="status-banner">
-          <div className="status-indicator">
-            <div className="status-dot status-online"></div>
-            <span className="status-text">System Online</span>
-          </div>
-          <div className="status-stats">
-            <div className="stat-item">
-              <span className="stat-label">Uptime</span>
-              <span className="stat-value">99.9%</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Active Users</span>
-              <span className="stat-value">24</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Last Update</span>
-              <span className="stat-value">2 minutes ago</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Actions Bar */}
-        <div className="quick-actions">
-          <h3 className="section-title">
-            <Zap className="w-5 h-5" />
-            Quick Actions
-          </h3>
-          <div className="quick-actions-grid">
-            <button className="quick-action-btn" data-tooltip="Add New Product">
-              <Package className="w-6 h-6" />
-              <span>Add Product</span>
-            </button>
-            <button className="quick-action-btn" onClick={navigateToNewInvoice} data-tooltip="Create New Invoice">
-              <FileTextIcon className="w-6 h-6" />
-              <span>New Invoice</span>
-            </button>
-            <button className="quick-action-btn" data-tooltip="View Reports">
-              <BarChart3 className="w-6 h-6" />
-              <span>View Reports</span>
-            </button>
-            <button className="quick-action-btn" data-tooltip="System Health Check">
-              <Activity className="w-6 h-6" />
-              <span>Health Check</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Enhanced Dashboard Cards */}
-        <div className="admin-section">
-          <h3 className="section-title">
-            <BarChart3 className="w-5 h-5" />
-            Business Metrics
-          </h3>
-          <div className="admin-cards-grid">
-            {/* Products Management Card */}
-            <div className="admin-card" data-category="inventory">
-              <div className="card-header">
-                <div className="card-icon-wrapper">
-                  <Package className="card-icon w-7 h-7" />
-                </div>
-                <div className="card-badge">
-                  <span className="badge-text">Inventory</span>
-                </div>
-              </div>
-              <div className="card-body">
-                <h5 className="card-title">Product Management</h5>
-                <p className="card-text">Manage your product inventory, track stock levels, and monitor product performance across your business.</p>
-                <div className="card-stats">
-                  <div className="stat">
-                    <span className="stat-number">1,234</span>
-                    <span className="stat-label">Total Products</span>
-                  </div>
-                  <div className="stat">
-                    <span className="stat-number">87.5%</span>
-                    <span className="stat-label">In Stock</span>
-                  </div>
-                </div>
-                <div className="card-actions">
-                  <a href="/products" className="btn btn-success">
-                    <Box className="w-4 h-4" />
-                    <span>Manage Products</span>
-                  </a>
-                  <button className="btn btn-outline">
-                    <Package className="w-4 h-4" />
-                    <span>Add Product</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Users Management Card */}
-            <div className="admin-card" data-category="users">
-              <div className="card-header">
-                <div className="card-icon-wrapper">
-                  <Users className="card-icon w-7 h-7" />
-                </div>
-                <div className="card-badge">
-                  <span className="badge-text">Users</span>
-                </div>
-              </div>
-              <div className="card-body">
-                <h5 className="card-title">User Management</h5>
-                <p className="card-text">Monitor user activity, manage permissions, and track user engagement across your platform.</p>
-                <div className="card-stats">
-                  <div className="stat">
-                    <span className="stat-number">89</span>
-                    <span className="stat-label">Active Users</span>
-                  </div>
-                  <div className="stat">
-                    <span className="stat-number">+5%</span>
-                    <span className="stat-label">Growth</span>
-                  </div>
-                </div>
-                <div className="card-actions">
-                  <a href="/users" className="btn btn-primary">
-                    <Users className="w-4 h-4" />
-                    <span>Manage Users</span>
-                  </a>
-                  <button className="btn btn-outline">
-                    <UserPlus className="w-4 h-4" />
-                    <span>Add User</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Invoices & Revenue Card */}
-            <div className="admin-card" data-category="finance">
-              <div className="card-header">
-                <div className="card-icon-wrapper">
-                  <FileText className="card-icon w-7 h-7" />
-                </div>
-                <div className="card-badge">
-                  <span className="badge-text">Finance</span>
-                </div>
-              </div>
-              <div className="card-body">
-                <h5 className="card-title">Invoices & Revenue</h5>
-                <p className="card-text">Track invoices, monitor revenue streams, and analyze financial performance metrics.</p>
-                <div className="card-stats">
-                  <div className="stat">
-                    <span className="stat-number">456</span>
-                    <span className="stat-label">Total Invoices</span>
-                  </div>
-                  <div className="stat">
-                    <span className="stat-number">$12,345</span>
-                    <span className="stat-label">Revenue</span>
-                  </div>
-                </div>
-                <div className="card-actions">
-                  <button onClick={navigateToInvoices} className="btn btn-info">
-                    <FileText className="w-4 h-4" />
-                    <span>View Invoices</span>
-                  </button>
-                  <button onClick={navigateToNewInvoice} className="btn btn-outline">
-                    <DollarSign className="w-4 h-4" />
-                    <span>New Invoice</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Reports & Analytics Card */}
-            <div className="admin-card" data-category="analytics">
-              <div className="card-header">
-                <div className="card-icon-wrapper">
-                  <PieChart className="card-icon w-7 h-7" />
-                </div>
-                <div className="card-badge">
-                  <span className="badge-text">Analytics</span>
-                </div>
-              </div>
-              <div className="card-body">
-                <h5 className="card-title">Reports & Analytics</h5>
-                <p className="card-text">Generate detailed reports and gain insights into your business performance and trends.</p>
-                <div className="card-stats">
-                  <div className="stat">
-                    <span className="stat-number">15</span>
-                    <span className="stat-label">Reports</span>
-                  </div>
-                  <div className="stat">
-                    <span className="stat-number">Daily</span>
-                    <span className="stat-label">Updates</span>
-                  </div>
-                </div>
-                <div className="card-actions">
-                  <button className="btn btn-warning">
-                    <BarChart3 className="w-4 h-4" />
-                    <span>View Reports</span>
-                  </button>
-                  <button className="btn btn-outline">
-                    <Download className="w-4 h-4" />
-                    <span>Export Data</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Low Stock Alerts Card */}
-            <div className="admin-card" data-category="alerts">
-              <div className="card-header">
-                <div className="card-icon-wrapper">
-                  <AlertTriangle className="card-icon w-7 h-7" />
-                </div>
-                <div className="card-badge">
-                  <span className="badge-text">Alerts</span>
-                </div>
-              </div>
-              <div className="card-body">
-                <h5 className="card-title">Low Stock Alerts</h5>
-                <p className="card-text">Monitor products with low stock levels and receive alerts when inventory needs attention.</p>
-                <div className="space-y-3 mb-4">
-                  {isLoadingLowStock ? (
-                    <div className="flex items-center justify-center p-4">
-                      <div className="loading-spinner"></div>
-                      <span className="ml-2 text-sm text-gray-500">Loading low stock products...</span>
-                    </div>
-                  ) : lowStockError ? (
-                    <div className="p-3 bg-red-50 rounded-lg">
-                      <span className="text-sm text-red-600">Failed to load low stock products</span>
-                    </div>
-                  ) : lowStockProducts.length === 0 ? (
-                    <div className="p-3 bg-green-50 rounded-lg">
-                      <span className="text-sm text-green-600 font-medium">✓ All products are well stocked!</span>
-                    </div>
-                  ) : (
-                    lowStockProducts.slice(0, 5).map((product) => (
-                      <div key={product.id} className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium text-gray-900">{product.name}</span>
-                          <span className="text-xs text-gray-500">${product.costPerItem.toFixed(2)} per item</span>
+            <div className="admin-content-wrapper">
+                {/* Enhanced Header */}
+                <header className="admin-header">
+                    <div className="header-main">
+                        <div className="header-content">
+                            <h1 className="admin-title">
+                                <div className="title-icon">
+                                    <BarChart3 className="w-7 h-7" />
+                                </div>
+                                <div className="title-text">
+                                    <span className="title-main">
+                                        Dashboard
+                                    </span>
+                                    <span className="title-sub">
+                                        Business Overview
+                                    </span>
+                                </div>
+                            </h1>
+                            <p className="admin-subtitle">
+                                Welcome back! Here's what's happening with your
+                                business today.
+                            </p>
                         </div>
-                        <div className="flex flex-col items-end">
-                          <span className="text-sm text-orange-600 font-medium">
-                            {product.numberInStock} left
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            ${(product.numberInStock * product.costPerItem).toFixed(2)} value
-                          </span>
+                        <div className="header-actions">
+                            <button
+                                className="action-btn refresh-btn"
+                                onClick={refreshDashboard}
+                                title="Refresh Data"
+                            >
+                                <RefreshCw className="w-4 h-4" />
+                                <span>Refresh</span>
+                            </button>
+                            <button
+                                className="action-btn settings-btn"
+                                onClick={openSettings}
+                                title="Dashboard Settings"
+                            >
+                                <Settings className="w-4 h-4" />
+                                <span>Settings</span>
+                            </button>
                         </div>
-                      </div>
-                    ))
-                  )}
-                  {lowStockProducts.length > 5 && (
-                    <div className="p-2 text-center">
-                      <span className="text-xs text-gray-500">
-                        +{lowStockProducts.length - 5} more products with low stock
-                      </span>
                     </div>
-                  )}
+                </header>
+
+                {/* System Status Banner */}
+                <div className="status-banner">
+                    <div className="status-indicator">
+                        <div className="status-dot status-online"></div>
+                        <span className="status-text">System Online</span>
+                    </div>
+                    <div className="status-stats">
+                        <div className="stat-item">
+                            <span className="stat-label">Uptime</span>
+                            <span className="stat-value">99.9%</span>
+                        </div>
+                        <div className="stat-item">
+                            <span className="stat-label">Active Users</span>
+                            <span className="stat-value">24</span>
+                        </div>
+                        <div className="stat-item">
+                            <span className="stat-label">Last Update</span>
+                            <span className="stat-value">2 minutes ago</span>
+                        </div>
+                    </div>
                 </div>
-                <div className="card-actions">
-                  <button className="btn btn-secondary" onClick={() => navigate('/products?filter=lowStock')}>
-                    <AlertTriangle className="w-4 h-4" />
-                    <span>View All Alerts</span>
-                  </button>
-                  <button className="btn btn-outline" onClick={() => navigate('/products')}>
-                    <Package className="w-4 h-4" />
-                    <span>Manage Stock</span>
-                  </button>
+
+                {/* Quick Actions Bar */}
+                <div className="quick-actions">
+                    <h3 className="section-title">
+                        <Zap className="w-5 h-5" />
+                        Quick Actions
+                    </h3>
+                    <div className="quick-actions-grid">
+                        <button
+                            className="quick-action-btn"
+                            data-tooltip="Add New Product"
+                        >
+                            <Package className="w-6 h-6" />
+                            <span>Add Product</span>
+                        </button>
+                        <button
+                            className="quick-action-btn"
+                            onClick={navigateToNewInvoice}
+                            data-tooltip="Create New Invoice"
+                        >
+                            <FileTextIcon className="w-6 h-6" />
+                            <span>New Invoice</span>
+                        </button>
+                        <button
+                            className="quick-action-btn"
+                            data-tooltip="View Reports"
+                        >
+                            <BarChart3 className="w-6 h-6" />
+                            <span>View Reports</span>
+                        </button>
+                        <button
+                            className="quick-action-btn"
+                            data-tooltip="System Health Check"
+                        >
+                            <Activity className="w-6 h-6" />
+                            <span>Health Check</span>
+                        </button>
+                    </div>
                 </div>
-              </div>
+
+                {/* Enhanced Dashboard Cards */}
+                <div className="admin-section">
+                    <h3 className="section-title">
+                        <BarChart3 className="w-5 h-5" />
+                        Business Metrics
+                    </h3>
+                    <div className="admin-cards-grid">
+                        {/* Products Management Card */}
+                        <div className="admin-card" data-category="inventory">
+                            <div className="card-header">
+                                <div className="card-icon-wrapper">
+                                    <Package className="card-icon w-7 h-7" />
+                                </div>
+                                <div className="card-badge">
+                                    <span className="badge-text">
+                                        Inventory
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="card-body">
+                                <h5 className="card-title">
+                                    Product Management
+                                </h5>
+                                <p className="card-text">
+                                    Manage your product inventory, track stock
+                                    levels, and monitor product performance
+                                    across your business.
+                                </p>
+                                <div className="card-stats">
+                                    <div className="stat">
+                                        <span className="stat-number">
+                                            1,234
+                                        </span>
+                                        <span className="stat-label">
+                                            Total Products
+                                        </span>
+                                    </div>
+                                    <div className="stat">
+                                        <span className="stat-number">
+                                            87.5%
+                                        </span>
+                                        <span className="stat-label">
+                                            In Stock
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="card-actions">
+                                    <a
+                                        href="/products"
+                                        className="btn btn-success"
+                                    >
+                                        <Box className="w-4 h-4" />
+                                        <span>Manage Products</span>
+                                    </a>
+                                    <button className="btn btn-outline">
+                                        <Package className="w-4 h-4" />
+                                        <span>Add Product</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Users Management Card */}
+                        <div className="admin-card" data-category="users">
+                            <div className="card-header">
+                                <div className="card-icon-wrapper">
+                                    <Users className="card-icon w-7 h-7" />
+                                </div>
+                                <div className="card-badge">
+                                    <span className="badge-text">Users</span>
+                                </div>
+                            </div>
+                            <div className="card-body">
+                                <h5 className="card-title">User Management</h5>
+                                <p className="card-text">
+                                    Monitor user activity, manage permissions,
+                                    and track user engagement across your
+                                    platform.
+                                </p>
+                                <div className="card-stats">
+                                    <div className="stat">
+                                        <span className="stat-number">89</span>
+                                        <span className="stat-label">
+                                            Active Users
+                                        </span>
+                                    </div>
+                                    <div className="stat">
+                                        <span className="stat-number">+5%</span>
+                                        <span className="stat-label">
+                                            Growth
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="card-actions">
+                                    <a
+                                        href="/users"
+                                        className="btn btn-primary"
+                                    >
+                                        <Users className="w-4 h-4" />
+                                        <span>Manage Users</span>
+                                    </a>
+                                    <button className="btn btn-outline">
+                                        <UserPlus className="w-4 h-4" />
+                                        <span>Add User</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Invoices & Revenue Card */}
+                        <div className="admin-card" data-category="finance">
+                            <div className="card-header">
+                                <div className="card-icon-wrapper">
+                                    <FileText className="card-icon w-7 h-7" />
+                                </div>
+                                <div className="card-badge">
+                                    <span className="badge-text">Finance</span>
+                                </div>
+                            </div>
+                            <div className="card-body">
+                                <h5 className="card-title">
+                                    Invoices & Revenue
+                                </h5>
+                                <p className="card-text">
+                                    Track invoices, monitor revenue streams, and
+                                    analyze financial performance metrics.
+                                </p>
+                                <div className="card-stats">
+                                    <div className="stat">
+                                        <span className="stat-number">456</span>
+                                        <span className="stat-label">
+                                            Total Invoices
+                                        </span>
+                                    </div>
+                                    <div className="stat">
+                                        <span className="stat-number">
+                                            {formatCurrency(12345)}
+                                        </span>
+                                        <span className="stat-label">
+                                            Revenue
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="card-actions">
+                                    <button
+                                        onClick={navigateToInvoices}
+                                        className="btn btn-info"
+                                    >
+                                        <FileText className="w-4 h-4" />
+                                        <span>View Invoices</span>
+                                    </button>
+                                    <button
+                                        onClick={navigateToNewInvoice}
+                                        className="btn btn-outline"
+                                    >
+                                        <DollarSign className="w-4 h-4" />
+                                        <span>New Invoice</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Reports & Analytics Card */}
+                        <div className="admin-card" data-category="analytics">
+                            <div className="card-header">
+                                <div className="card-icon-wrapper">
+                                    <PieChart className="card-icon w-7 h-7" />
+                                </div>
+                                <div className="card-badge">
+                                    <span className="badge-text">
+                                        Analytics
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="card-body">
+                                <h5 className="card-title">
+                                    Reports & Analytics
+                                </h5>
+                                <p className="card-text">
+                                    Generate detailed reports and gain insights
+                                    into your business performance and trends.
+                                </p>
+                                <div className="card-stats">
+                                    <div className="stat">
+                                        <span className="stat-number">15</span>
+                                        <span className="stat-label">
+                                            Reports
+                                        </span>
+                                    </div>
+                                    <div className="stat">
+                                        <span className="stat-number">
+                                            Daily
+                                        </span>
+                                        <span className="stat-label">
+                                            Updates
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="card-actions">
+                                    <button className="btn btn-warning">
+                                        <BarChart3 className="w-4 h-4" />
+                                        <span>View Reports</span>
+                                    </button>
+                                    <button className="btn btn-outline">
+                                        <Download className="w-4 h-4" />
+                                        <span>Export Data</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Low Stock Alerts Card */}
+                        <div className="admin-card" data-category="alerts">
+                            <div className="card-header">
+                                <div className="card-icon-wrapper">
+                                    <AlertTriangle className="card-icon w-7 h-7" />
+                                </div>
+                                <div className="card-badge">
+                                    <span className="badge-text">Alerts</span>
+                                </div>
+                            </div>
+                            <div className="card-body">
+                                <h5 className="card-title">Low Stock Alerts</h5>
+                                <p className="card-text">
+                                    Monitor products with low stock levels and
+                                    receive alerts when inventory needs
+                                    attention.
+                                </p>
+                                <div className="space-y-3 mb-4">
+                                    {isLoadingLowStock ? (
+                                        <div className="flex items-center justify-center p-4">
+                                            <div className="loading-spinner"></div>
+                                            <span className="ml-2 text-sm text-gray-500">
+                                                Loading low stock products...
+                                            </span>
+                                        </div>
+                                    ) : lowStockError ? (
+                                        <div className="p-3 bg-red-50 rounded-lg">
+                                            <span className="text-sm text-red-600">
+                                                Failed to load low stock
+                                                products
+                                            </span>
+                                        </div>
+                                    ) : lowStockProducts.length === 0 ? (
+                                        <div className="p-3 bg-green-50 rounded-lg">
+                                            <span className="text-sm text-green-600 font-medium">
+                                                ✓ All products are well stocked!
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        lowStockProducts
+                                            .slice(0, 5)
+                                            .map((product) => (
+                                                <div
+                                                    key={product.id}
+                                                    className="flex items-center justify-between p-3 bg-orange-50 rounded-lg"
+                                                >
+                                                    <div className="flex flex-col">
+                                                        <span className="text-sm font-medium text-gray-900">
+                                                            {product.name}
+                                                        </span>
+                                                        <span className="text-xs text-gray-500">
+                                                            {formatCurrency(
+                                                                product.costPerItem,
+                                                            )}{" "}
+                                                            per item
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex flex-col items-end">
+                                                        <span className="text-sm text-orange-600 font-medium">
+                                                            {
+                                                                product.numberInStock
+                                                            }{" "}
+                                                            left
+                                                        </span>
+                                                        <span className="text-xs text-gray-500">
+                                                            {formatCurrency(
+                                                                product.numberInStock *
+                                                                    product.costPerItem,
+                                                            )}{" "}
+                                                            value
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))
+                                    )}
+                                    {lowStockProducts.length > 5 && (
+                                        <div className="p-2 text-center">
+                                            <span className="text-xs text-gray-500">
+                                                +{lowStockProducts.length - 5}{" "}
+                                                more products with low stock
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="card-actions">
+                                    <button
+                                        className="btn btn-secondary"
+                                        onClick={() =>
+                                            navigate(
+                                                "/products?filter=lowStock",
+                                            )
+                                        }
+                                    >
+                                        <AlertTriangle className="w-4 h-4" />
+                                        <span>View All Alerts</span>
+                                    </button>
+                                    <button
+                                        className="btn btn-outline"
+                                        onClick={() => navigate("/products")}
+                                    >
+                                        <Package className="w-4 h-4" />
+                                        <span>Manage Stock</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Recent Activity Card */}
+                        <div className="admin-card" data-category="activity">
+                            <div className="card-header">
+                                <div className="card-icon-wrapper">
+                                    <Activity className="card-icon w-7 h-7" />
+                                </div>
+                                <div className="card-badge">
+                                    <span className="badge-text">Activity</span>
+                                </div>
+                            </div>
+                            <div className="card-body">
+                                <h5 className="card-title">Recent Activity</h5>
+                                <p className="card-text">
+                                    Track recent system activities and monitor
+                                    user interactions across your platform.
+                                </p>
+                                <div className="space-y-3 mb-4">
+                                    {recentActivity.map((activity, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex items-center justify-between p-2 border-b border-gray-100 last:border-b-0"
+                                        >
+                                            <span className="text-sm text-gray-900">
+                                                {activity.action}
+                                            </span>
+                                            <span className="text-sm text-gray-500">
+                                                {activity.time}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="card-actions">
+                                    <button className="btn btn-primary">
+                                        <Activity className="w-4 h-4" />
+                                        <span>View All Activity</span>
+                                    </button>
+                                    <button className="btn btn-outline">
+                                        <RefreshCw className="w-4 h-4" />
+                                        <span>Refresh</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            {/* Recent Activity Card */}
-            <div className="admin-card" data-category="activity">
-              <div className="card-header">
-                <div className="card-icon-wrapper">
-                  <Activity className="card-icon w-7 h-7" />
-                </div>
-                <div className="card-badge">
-                  <span className="badge-text">Activity</span>
-                </div>
-              </div>
-              <div className="card-body">
-                <h5 className="card-title">Recent Activity</h5>
-                <p className="card-text">Track recent system activities and monitor user interactions across your platform.</p>
-                <div className="space-y-3 mb-4">
-                  {recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 border-b border-gray-100 last:border-b-0">
-                      <span className="text-sm text-gray-900">{activity.action}</span>
-                      <span className="text-sm text-gray-500">{activity.time}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="card-actions">
-                  <button className="btn btn-primary">
-                    <Activity className="w-4 h-4" />
-                    <span>View All Activity</span>
-                  </button>
-                  <button className="btn btn-outline">
-                    <RefreshCw className="w-4 h-4" />
-                    <span>Refresh</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <style>{`
+            <style>{`
         /* Admin Panel Layout and Styles */
         .admin-panel-layout {
           width: 100%;
@@ -923,8 +1084,8 @@ const Dashboard: React.FC = () => {
           }
         }
       `}</style>
-    </div>
-  );
+        </div>
+    );
 };
 
 export default Dashboard;
