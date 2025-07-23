@@ -26,7 +26,11 @@ type NavigationItem = {
   roles: UserRole[];
 };
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  isCollapsed?: boolean;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
   const { data: currentUser } = useCurrentUser();
   const logoutMutation = useLogout();
 
@@ -108,21 +112,34 @@ const Sidebar: React.FC = () => {
   );
 
   return (
-    <nav className="h-full bg-white border-r border-gray-200 flex flex-col" aria-label="Dashboard navigation" role="navigation">
+    <nav 
+      className="h-full flex flex-col bg-gradient-to-br from-primary-600 to-secondary-600 text-white shadow-2xl" 
+      style={{
+        background: 'linear-gradient(135deg, #5a5cdb 0%, #7f53ac 100%)'
+      }}
+      aria-label="Dashboard navigation" 
+      role="navigation"
+    >
       {/* Sidebar Header */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">SF</span>
+      <div className={`p-6 border-b border-white/10 bg-white/5 ${isCollapsed ? 'px-4' : ''}`}>
+        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
+          <div className="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg">
+            <span className="text-white font-bold text-lg">SF</span>
           </div>
-          <h5 className="font-semibold text-gray-900">Dashboard</h5>
+          {!isCollapsed && (
+            <div>
+              <h5 className="font-bold text-white text-lg tracking-wide">StockFlow</h5>
+              <p className="text-white/70 text-xs font-medium">Pro Dashboard</p>
+            </div>
+          )}
         </div>
       </div>
+
       
             
       {/* Sidebar Content */}
-      <div className="flex-1 overflow-y-auto">
-        <nav className="p-2 space-y-1">
+      <div className={`flex-1 overflow-y-auto py-2 scrollbar-hide ${isCollapsed ? 'px-2' : 'px-4'}`}>
+        <nav className="space-y-1">
           {filteredNavigation.map((item) => {
             const Icon = item.icon;
             return (
@@ -130,31 +147,62 @@ const Sidebar: React.FC = () => {
                 key={item.name}
                 to={item.href}
                 className={({ isActive }) =>
-                  `flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  `group flex items-center ${isCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'} text-sm font-medium transition-all duration-300 relative overflow-hidden ${
                     isActive
-                      ? 'bg-primary-100 text-primary-700 border-r-2 border-primary-600'
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                      ? 'bg-white/15 text-white font-semibold shadow-lg transform translate-x-1'
+                      : 'text-white/85 hover:bg-white/10 hover:text-white hover:transform hover:translate-x-1'
                   }`
                 }
+                title={isCollapsed ? item.name : undefined}
               >
-                <Icon className="h-5 w-5 mr-3 flex-shrink-0" />
-                <span className="truncate">{item.name}</span>
+                {({ isActive }) => (
+                  <>
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isCollapsed ? '' : 'mr-3'} transition-all duration-300 ${
+                      isActive 
+                        ? 'bg-white/20 shadow-md transform scale-110' 
+                        : 'bg-white/10 group-hover:bg-white/20 group-hover:scale-105'
+                    }`}>
+                      <Icon className="h-5 w-5 flex-shrink-0" />
+                    </div>
+                    {!isCollapsed && <span className="truncate">{item.name}</span>}
+                    {isActive && (
+                      <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-white"></div>
+                    )}
+                  </>
+                )}
               </NavLink>
             );
           })}
           
           {/* Reports Submenu */}
-          {currentUser && (currentUser.role === UserRole.Admin || currentUser.role === UserRole.Manager) && (
-            <div className="pt-2">
-              <div className="px-3 py-2">
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Reports</p>
+          {currentUser && (currentUser.role === UserRole.Admin || currentUser.role === UserRole.Manager) && !isCollapsed && (
+            <div className="pt-6">
+              <div className="px-4 py-2">
+                <p className="text-xs font-semibold text-white/60 uppercase tracking-wider">Reports & Analytics</p>
               </div>
               <button
                 type="button"
-                className="flex items-center w-full px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                className="group flex items-center w-full px-4 py-3 text-sm font-medium text-white/85 hover:bg-white/10 hover:text-white transition-all duration-300 hover:transform hover:translate-x-1"
               >
-                <BarChart3 className="h-5 w-5 mr-3 flex-shrink-0" />
+                <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center mr-3 group-hover:bg-white/20 group-hover:scale-105 transition-all duration-300">
+                  <BarChart3 className="h-5 w-5 flex-shrink-0" />
+                </div>
                 <span className="truncate">Analytics</span>
+              </button>
+            </div>
+          )}
+
+          {/* Collapsed Analytics Button */}
+          {currentUser && (currentUser.role === UserRole.Admin || currentUser.role === UserRole.Manager) && isCollapsed && (
+            <div className="pt-6">
+              <button
+                type="button"
+                className="group flex items-center justify-center w-full px-3 py-3 text-sm font-medium text-white/85 hover:bg-white/10 hover:text-white transition-all duration-300"
+                title="Analytics"
+              >
+                <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center group-hover:bg-white/20 group-hover:scale-105 transition-all duration-300">
+                  <BarChart3 className="h-5 w-5 flex-shrink-0" />
+                </div>
               </button>
             </div>
           )}
@@ -162,19 +210,27 @@ const Sidebar: React.FC = () => {
       </div>
       
       {/* Sidebar Footer */}
-      <div className="p-4 border-t border-gray-200 space-y-2">
-        <button className="flex items-center w-full px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors">
-          <HelpCircle className="h-5 w-5 mr-3 flex-shrink-0" />
-          <span>Help & Support</span>
+      <div className={`p-4 border-t border-white/10 space-y-2 bg-white/5 ${isCollapsed ? 'px-2' : ''}`}>
+        <button 
+          className={`group flex items-center w-full ${isCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'} text-sm font-medium text-white/85 hover:bg-white/10 hover:text-white transition-all duration-300 hover:transform hover:translate-x-1`}
+          title={isCollapsed ? "Help & Support" : undefined}
+        >
+          <div className={`w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center ${isCollapsed ? '' : 'mr-3'} group-hover:bg-white/20 group-hover:scale-105 transition-all duration-300`}>
+            <HelpCircle className="h-5 w-5 flex-shrink-0" />
+          </div>
+          {!isCollapsed && <span>Help & Support</span>}
         </button>
         
         <button
           onClick={handleLogout}
           disabled={logoutMutation.isPending}
-          className="flex items-center w-full px-3 py-2 text-sm font-medium text-red-700 rounded-lg hover:bg-red-50 hover:text-red-900 transition-colors disabled:opacity-50"
+          className={`group flex items-center w-full ${isCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'} text-sm font-medium text-red-200 hover:bg-red-500/20 hover:text-red-100 transition-all duration-300 disabled:opacity-50 hover:transform hover:translate-x-1`}
+          title={isCollapsed ? (logoutMutation.isPending ? 'Signing out...' : 'Logout') : undefined}
         >
-          <LogOut className="h-5 w-5 mr-3 flex-shrink-0" />
-          <span>{logoutMutation.isPending ? 'Signing out...' : 'Logout'}</span>
+          <div className={`w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center ${isCollapsed ? '' : 'mr-3'} group-hover:bg-red-500/30 group-hover:scale-105 transition-all duration-300`}>
+            <LogOut className="h-5 w-5 flex-shrink-0" />
+          </div>
+          {!isCollapsed && <span>{logoutMutation.isPending ? 'Signing out...' : 'Logout'}</span>}
         </button>
       </div>
     </nav>
