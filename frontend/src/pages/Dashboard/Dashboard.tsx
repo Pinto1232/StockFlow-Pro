@@ -19,10 +19,12 @@ import {
     PieChart,
 } from "lucide-react";
 import { useLowStockProducts } from "../../hooks/useProducts";
+import { useCurrentUser } from "../../hooks/useAuth";
 import { formatCurrency } from "../../utils/currency";
 
 const Dashboard: React.FC = () => {
     const navigate = useNavigate();
+    const { data: currentUser } = useCurrentUser();
     const {
         data: lowStockProducts = [],
         isLoading: isLoadingLowStock,
@@ -52,6 +54,29 @@ const Dashboard: React.FC = () => {
 
     const navigateToNewInvoice = () => {
         navigate("/invoices/new");
+    };
+
+    // Get user's display name
+    const getUserDisplayName = () => {
+        if (!currentUser) return "";
+        
+        if (currentUser.fullName) {
+            return currentUser.fullName;
+        }
+        
+        if (currentUser.firstName && currentUser.lastName) {
+            return `${currentUser.firstName} ${currentUser.lastName}`;
+        }
+        
+        if (currentUser.firstName) {
+            return currentUser.firstName;
+        }
+        
+        if (currentUser.email) {
+            return currentUser.email.split('@')[0];
+        }
+        
+        return "User";
     };
 
     return (
@@ -85,7 +110,11 @@ const Dashboard: React.FC = () => {
                                 </div>
                             </h1>
                             <p className="admin-subtitle">
-                                Welcome back! Here's what's happening with your
+                                Welcome back{currentUser ? (
+                                    <>
+                                        , <strong>{getUserDisplayName()}</strong>
+                                    </>
+                                ) : ""}! Here's what's happening with your
                                 business today.
                             </p>
                         </div>
