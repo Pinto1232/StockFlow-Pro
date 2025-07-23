@@ -71,6 +71,7 @@ public class DatabaseSeeder
                 await SeedRolesAsync();
                 await SeedProductsAsync();
                 await SeedSubscriptionSystemAsync();
+                await SeedNotificationSystemAsync();
                 return;
             }
 
@@ -141,6 +142,9 @@ public class DatabaseSeeder
 
             // Seed Subscription System
             await SeedSubscriptionSystemAsync();
+
+            // Seed Notification System
+            await SeedNotificationSystemAsync();
         }
         catch (Exception ex)
         {
@@ -610,5 +614,631 @@ public class DatabaseSeeder
             _logger.LogError(ex, "An error occurred while seeding sample subscriptions: {ErrorMessage}", ex.Message);
             throw;
         }
+    }
+
+    private async Task SeedNotificationSystemAsync()
+    {
+        try
+        {
+            _logger.LogInformation("Starting notification system seeding...");
+
+            // Seed Notification Templates
+            await SeedNotificationTemplatesAsync();
+
+            // Seed Notification Preferences for existing users
+            await SeedNotificationPreferencesAsync();
+
+            // Seed Sample Notifications
+            await SeedSampleNotificationsAsync();
+
+            _logger.LogInformation("Notification system seeding completed successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while seeding notification system: {ErrorMessage}", ex.Message);
+            throw new InvalidOperationException("Failed to seed notification system data", ex);
+        }
+    }
+
+    private async Task SeedNotificationTemplatesAsync()
+    {
+        try
+        {
+            if (await _context.NotificationTemplates.AnyAsync())
+            {
+                _logger.LogInformation("Notification templates already exist. Skipping template seeding.");
+                return;
+            }
+
+            _logger.LogInformation("Seeding notification templates...");
+
+            var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.Role == UserRole.Admin);
+            if (adminUser == null)
+            {
+                _logger.LogWarning("No admin user found. Skipping notification template seeding.");
+                return;
+            }
+
+            var templates = new List<NotificationTemplate>
+            {
+                // Stock Alert Templates
+                new NotificationTemplate(
+                    "LowStockAlert",
+                    "Alert when product stock is running low",
+                    "Low Stock Alert: {ProductName}",
+                    "Product '{ProductName}' is running low on stock. Current quantity: {CurrentStock}. Minimum threshold: {MinimumStock}.",
+                    NotificationType.StockAlert,
+                    adminUser.Id,
+                    NotificationPriority.High,
+                    NotificationChannel.InApp | NotificationChannel.Email,
+                    true,
+                    true
+                ),
+                new NotificationTemplate(
+                    "OutOfStockAlert",
+                    "Alert when product is out of stock",
+                    "Out of Stock: {ProductName}",
+                    "Product '{ProductName}' is now out of stock. Immediate restocking required.",
+                    NotificationType.StockAlert,
+                    adminUser.Id,
+                    NotificationPriority.Critical,
+                    NotificationChannel.InApp | NotificationChannel.Email | NotificationChannel.SMS,
+                    true,
+                    true
+                ),
+                new NotificationTemplate(
+                    "StockRestocked",
+                    "Notification when stock is replenished",
+                    "Stock Replenished: {ProductName}",
+                    "Product '{ProductName}' has been restocked. New quantity: {NewStock}.",
+                    NotificationType.StockAlert,
+                    adminUser.Id,
+                    NotificationPriority.Normal,
+                    NotificationChannel.InApp,
+                    true,
+                    true
+                ),
+
+                // Account Templates
+                new NotificationTemplate(
+                    "WelcomeUser",
+                    "Welcome message for new users",
+                    "Welcome to StockFlow Pro!",
+                    "Welcome {UserName}! Your account has been successfully created. Start managing your inventory efficiently with StockFlow Pro.",
+                    NotificationType.Account,
+                    adminUser.Id,
+                    NotificationPriority.Normal,
+                    NotificationChannel.InApp | NotificationChannel.Email,
+                    true,
+                    true
+                ),
+                new NotificationTemplate(
+                    "PasswordChanged",
+                    "Notification when password is changed",
+                    "Password Changed",
+                    "Your password has been successfully changed on {ChangeDate}. If you didn't make this change, please contact support immediately.",
+                    NotificationType.Security,
+                    adminUser.Id,
+                    NotificationPriority.High,
+                    NotificationChannel.InApp | NotificationChannel.Email,
+                    true,
+                    false
+                ),
+                new NotificationTemplate(
+                    "LoginAlert",
+                    "Security alert for new login",
+                    "New Login Detected",
+                    "A new login was detected on your account from {Location} at {LoginTime}. If this wasn't you, please secure your account immediately.",
+                    NotificationType.Security,
+                    adminUser.Id,
+                    NotificationPriority.High,
+                    NotificationChannel.InApp | NotificationChannel.Email,
+                    true,
+                    false
+                ),
+
+                // System Templates
+                new NotificationTemplate(
+                    "SystemMaintenance",
+                    "System maintenance notification",
+                    "Scheduled Maintenance: {MaintenanceDate}",
+                    "System maintenance is scheduled for {MaintenanceDate} from {StartTime} to {EndTime}. Some features may be temporarily unavailable.",
+                    NotificationType.System,
+                    adminUser.Id,
+                    NotificationPriority.High,
+                    NotificationChannel.InApp | NotificationChannel.Email,
+                    true,
+                    false
+                ),
+                new NotificationTemplate(
+                    "SystemUpdate",
+                    "System update notification",
+                    "System Update Available",
+                    "A new system update is available with exciting features and improvements. Update will be applied during the next maintenance window.",
+                    NotificationType.System,
+                    adminUser.Id,
+                    NotificationPriority.Normal,
+                    NotificationChannel.InApp,
+                    true,
+                    true
+                ),
+
+                // Subscription Templates
+                new NotificationTemplate(
+                    "SubscriptionExpiring",
+                    "Subscription expiration warning",
+                    "Subscription Expiring Soon",
+                    "Your {PlanName} subscription will expire on {ExpirationDate}. Renew now to continue enjoying all features.",
+                    NotificationType.Subscription,
+                    adminUser.Id,
+                    NotificationPriority.High,
+                    NotificationChannel.InApp | NotificationChannel.Email,
+                    true,
+                    false
+                ),
+                new NotificationTemplate(
+                    "PaymentSuccessful",
+                    "Successful payment notification",
+                    "Payment Successful",
+                    "Your payment of {Amount} for {PlanName} has been processed successfully. Thank you for your continued subscription.",
+                    NotificationType.Payment,
+                    adminUser.Id,
+                    NotificationPriority.Normal,
+                    NotificationChannel.InApp | NotificationChannel.Email,
+                    true,
+                    true
+                ),
+                new NotificationTemplate(
+                    "PaymentFailed",
+                    "Failed payment notification",
+                    "Payment Failed",
+                    "We couldn't process your payment of {Amount} for {PlanName}. Please update your payment method to avoid service interruption.",
+                    NotificationType.Payment,
+                    adminUser.Id,
+                    NotificationPriority.Critical,
+                    NotificationChannel.InApp | NotificationChannel.Email,
+                    true,
+                    false
+                ),
+
+                // Report Templates
+                new NotificationTemplate(
+                    "ReportGenerated",
+                    "Report generation completion",
+                    "Report Ready: {ReportName}",
+                    "Your requested report '{ReportName}' has been generated and is ready for download.",
+                    NotificationType.Report,
+                    adminUser.Id,
+                    NotificationPriority.Normal,
+                    NotificationChannel.InApp | NotificationChannel.Email,
+                    true,
+                    true
+                ),
+
+                // Product Templates
+                new NotificationTemplate(
+                    "ProductAdded",
+                    "New product added notification",
+                    "New Product Added: {ProductName}",
+                    "A new product '{ProductName}' has been added to the inventory with initial stock of {InitialStock} units.",
+                    NotificationType.Product,
+                    adminUser.Id,
+                    NotificationPriority.Low,
+                    NotificationChannel.InApp,
+                    true,
+                    true
+                ),
+                new NotificationTemplate(
+                    "ProductUpdated",
+                    "Product update notification",
+                    "Product Updated: {ProductName}",
+                    "Product '{ProductName}' has been updated. {UpdateDetails}",
+                    NotificationType.Product,
+                    adminUser.Id,
+                    NotificationPriority.Low,
+                    NotificationChannel.InApp,
+                    true,
+                    true
+                )
+            };
+
+            // Set action URLs for templates
+            templates.First(t => t.Name == "LowStockAlert").SetActionUrl("/products/{ProductId}");
+            templates.First(t => t.Name == "OutOfStockAlert").SetActionUrl("/products/{ProductId}");
+            templates.First(t => t.Name == "StockRestocked").SetActionUrl("/products/{ProductId}");
+            templates.First(t => t.Name == "ReportGenerated").SetActionUrl("/reports/{ReportId}");
+            templates.First(t => t.Name == "ProductAdded").SetActionUrl("/products/{ProductId}");
+            templates.First(t => t.Name == "ProductUpdated").SetActionUrl("/products/{ProductId}");
+
+            // Set expiration for time-sensitive templates
+            templates.First(t => t.Name == "SystemMaintenance").SetExpiration(48); // 48 hours
+            templates.First(t => t.Name == "SubscriptionExpiring").SetExpiration(72); // 72 hours
+            templates.First(t => t.Name == "PaymentFailed").SetExpiration(168); // 1 week
+
+            await _context.NotificationTemplates.AddRangeAsync(templates);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Successfully seeded {Count} notification templates", templates.Count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while seeding notification templates: {ErrorMessage}", ex.Message);
+            throw;
+        }
+    }
+
+    private async Task SeedNotificationPreferencesAsync()
+    {
+        try
+        {
+            if (await _context.NotificationPreferences.AnyAsync())
+            {
+                _logger.LogInformation("Notification preferences already exist. Skipping preference seeding.");
+                return;
+            }
+
+            _logger.LogInformation("Seeding notification preferences...");
+
+            var users = await _context.Users.ToListAsync();
+            if (!users.Any())
+            {
+                _logger.LogWarning("No users found. Skipping notification preference seeding.");
+                return;
+            }
+
+            var preferences = new List<NotificationPreference>();
+
+            foreach (var user in users)
+            {
+                // Create preferences for each notification type based on user role
+                foreach (NotificationType notificationType in Enum.GetValues<NotificationType>())
+                {
+                    var channels = GetDefaultChannelsForUserRole(user.Role, notificationType);
+                    var minimumPriority = GetDefaultMinimumPriorityForUserRole(user.Role, notificationType);
+                    var isEnabled = GetDefaultEnabledStateForUserRole(user.Role, notificationType);
+
+                    var preference = new NotificationPreference(
+                        user.Id,
+                        notificationType,
+                        channels,
+                        isEnabled,
+                        minimumPriority
+                    );
+
+                    // Set quiet hours (10 PM to 7 AM) for non-admin users
+                    if (user.Role != UserRole.Admin)
+                    {
+                        preference.SetQuietHours(new TimeSpan(22, 0, 0), new TimeSpan(7, 0, 0));
+                    }
+
+                    // Set batching for low-priority notifications
+                    if (notificationType == NotificationType.Info || notificationType == NotificationType.Product)
+                    {
+                        preference.SetBatching(60); // 1 hour batching
+                    }
+
+                    preferences.Add(preference);
+                }
+            }
+
+            await _context.NotificationPreferences.AddRangeAsync(preferences);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Successfully seeded {Count} notification preferences for {UserCount} users", 
+                preferences.Count, users.Count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while seeding notification preferences: {ErrorMessage}", ex.Message);
+            throw;
+        }
+    }
+
+    private async Task SeedSampleNotificationsAsync()
+    {
+        try
+        {
+            if (await _context.Notifications.AnyAsync())
+            {
+                _logger.LogInformation("Notifications already exist. Skipping sample notification seeding.");
+                return;
+            }
+
+            _logger.LogInformation("Seeding sample notifications...");
+
+            var users = await _context.Users.ToListAsync();
+            var products = await _context.Products.ToListAsync();
+
+            if (!users.Any())
+            {
+                _logger.LogWarning("No users found. Skipping sample notification seeding.");
+                return;
+            }
+
+            var notifications = new List<Notification>();
+            var adminUser = users.FirstOrDefault(u => u.Role == UserRole.Admin);
+            var managerUser = users.FirstOrDefault(u => u.Role == UserRole.Manager);
+            var regularUsers = users.Where(u => u.Role == UserRole.User).ToList();
+
+            // Welcome notifications for all users
+            foreach (var user in users)
+            {
+                var welcomeNotification = new Notification(
+                    "Welcome to StockFlow Pro!",
+                    $"Welcome {user.FirstName}! Your account has been successfully created. Start managing your inventory efficiently with StockFlow Pro.",
+                    NotificationType.Account,
+                    user.Id,
+                    adminUser?.Id,
+                    NotificationPriority.Normal,
+                    NotificationChannel.InApp | NotificationChannel.Email,
+                    true,
+                    true
+                );
+                welcomeNotification.MarkAsDelivered();
+                if (user.Role == UserRole.User) // Regular users have read their welcome message
+                {
+                    welcomeNotification.MarkAsRead();
+                }
+                notifications.Add(welcomeNotification);
+            }
+
+            // Stock alerts for managers and admins
+            if (products.Any())
+            {
+                var lowStockProduct = products.FirstOrDefault(p => p.NumberInStock <= 10);
+                var outOfStockProduct = products.FirstOrDefault(p => p.NumberInStock == 0);
+
+                if (lowStockProduct != null)
+                {
+                    foreach (var user in users.Where(u => u.Role == UserRole.Admin || u.Role == UserRole.Manager))
+                    {
+                        var lowStockAlert = new Notification(
+                            $"Low Stock Alert: {lowStockProduct.Name}",
+                            $"Product '{lowStockProduct.Name}' is running low on stock. Current quantity: {lowStockProduct.NumberInStock}. Consider restocking soon.",
+                            NotificationType.StockAlert,
+                            user.Id,
+                            adminUser?.Id,
+                            NotificationPriority.High,
+                            NotificationChannel.InApp | NotificationChannel.Email,
+                            true,
+                            true
+                        );
+                        lowStockAlert.SetRelatedEntity(lowStockProduct.Id, "Product");
+                        lowStockAlert.SetActionUrl($"/products/{lowStockProduct.Id}");
+                        lowStockAlert.MarkAsDelivered();
+                        notifications.Add(lowStockAlert);
+                    }
+                }
+
+                if (outOfStockProduct != null)
+                {
+                    foreach (var user in users.Where(u => u.Role == UserRole.Admin || u.Role == UserRole.Manager))
+                    {
+                        var outOfStockAlert = new Notification(
+                            $"Out of Stock: {outOfStockProduct.Name}",
+                            $"Product '{outOfStockProduct.Name}' is now out of stock. Immediate restocking required.",
+                            NotificationType.StockAlert,
+                            user.Id,
+                            adminUser?.Id,
+                            NotificationPriority.Critical,
+                            NotificationChannel.InApp | NotificationChannel.Email | NotificationChannel.SMS,
+                            true,
+                            true
+                        );
+                        outOfStockAlert.SetRelatedEntity(outOfStockProduct.Id, "Product");
+                        outOfStockAlert.SetActionUrl($"/products/{outOfStockProduct.Id}");
+                        outOfStockAlert.MarkAsDelivered();
+                        notifications.Add(outOfStockAlert);
+                    }
+                }
+            }
+
+            // System notifications for all users
+            var systemNotification = new Notification(
+                "System Update Completed",
+                "StockFlow Pro has been updated with new features and improvements. Check out the latest enhancements in your dashboard.",
+                NotificationType.System,
+                null, // System-wide notification
+                adminUser?.Id,
+                NotificationPriority.Normal,
+                NotificationChannel.InApp,
+                true,
+                true
+            );
+            systemNotification.MarkAsDelivered();
+            notifications.Add(systemNotification);
+
+            // Subscription notifications for users with subscriptions
+            var subscriptionUsers = await _context.Subscriptions
+                .Select(s => s.UserId)
+                .Distinct()
+                .ToListAsync();
+
+            foreach (var userId in subscriptionUsers)
+            {
+                var subscriptionNotification = new Notification(
+                    "Payment Successful",
+                    "Your subscription payment has been processed successfully. Thank you for your continued subscription to StockFlow Pro.",
+                    NotificationType.Payment,
+                    userId,
+                    adminUser?.Id,
+                    NotificationPriority.Normal,
+                    NotificationChannel.InApp | NotificationChannel.Email,
+                    true,
+                    true
+                );
+                subscriptionNotification.MarkAsDelivered();
+                subscriptionNotification.MarkAsRead(); // Users have seen their payment confirmations
+                notifications.Add(subscriptionNotification);
+            }
+
+            // Product update notifications
+            if (products.Any())
+            {
+                var sampleProduct = products.First();
+                foreach (var user in users.Where(u => u.Role == UserRole.Admin || u.Role == UserRole.Manager))
+                {
+                    var productUpdateNotification = new Notification(
+                        $"Product Updated: {sampleProduct.Name}",
+                        $"Product '{sampleProduct.Name}' has been updated with new pricing and stock information.",
+                        NotificationType.Product,
+                        user.Id,
+                        adminUser?.Id,
+                        NotificationPriority.Low,
+                        NotificationChannel.InApp,
+                        true,
+                        true
+                    );
+                    productUpdateNotification.SetRelatedEntity(sampleProduct.Id, "Product");
+                    productUpdateNotification.SetActionUrl($"/products/{sampleProduct.Id}");
+                    productUpdateNotification.MarkAsDelivered();
+                    productUpdateNotification.MarkAsRead();
+                    notifications.Add(productUpdateNotification);
+                }
+            }
+
+            // Security notifications for admin users
+            if (adminUser != null)
+            {
+                var securityNotification = new Notification(
+                    "New Login Detected",
+                    $"A new login was detected on your account from Unknown Location at {DateTime.UtcNow.AddHours(-2):yyyy-MM-dd HH:mm} UTC. If this wasn't you, please secure your account immediately.",
+                    NotificationType.Security,
+                    adminUser.Id,
+                    null,
+                    NotificationPriority.High,
+                    NotificationChannel.InApp | NotificationChannel.Email,
+                    true,
+                    false
+                );
+                securityNotification.MarkAsDelivered();
+                notifications.Add(securityNotification);
+            }
+
+            // Report notifications for managers and admins
+            foreach (var user in users.Where(u => u.Role == UserRole.Admin || u.Role == UserRole.Manager))
+            {
+                var reportNotification = new Notification(
+                    "Report Ready: Monthly Inventory Summary",
+                    "Your requested report 'Monthly Inventory Summary' has been generated and is ready for download.",
+                    NotificationType.Report,
+                    user.Id,
+                    adminUser?.Id,
+                    NotificationPriority.Normal,
+                    NotificationChannel.InApp | NotificationChannel.Email,
+                    true,
+                    true
+                );
+                reportNotification.SetActionUrl("/reports/monthly-summary");
+                reportNotification.MarkAsDelivered();
+                if (user.Role == UserRole.Manager)
+                {
+                    reportNotification.MarkAsRead();
+                }
+                notifications.Add(reportNotification);
+            }
+
+            // Add some older notifications with different statuses
+            var olderNotification = new Notification(
+                "Maintenance Complete",
+                "Scheduled system maintenance has been completed successfully. All systems are now fully operational.",
+                NotificationType.System,
+                null,
+                adminUser?.Id,
+                NotificationPriority.Normal,
+                NotificationChannel.InApp,
+                true,
+                true
+            );
+            // Make it older
+            var olderNotificationField = typeof(Notification).GetField("CreatedAt", 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            olderNotificationField?.SetValue(olderNotification, DateTime.UtcNow.AddDays(-7));
+            
+            olderNotification.MarkAsDelivered();
+            olderNotification.MarkAsRead();
+            notifications.Add(olderNotification);
+
+            await _context.Notifications.AddRangeAsync(notifications);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Successfully seeded {Count} sample notifications", notifications.Count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while seeding sample notifications: {ErrorMessage}", ex.Message);
+            throw;
+        }
+    }
+
+    private static NotificationChannel GetDefaultChannelsForUserRole(UserRole role, NotificationType type)
+    {
+        return role switch
+        {
+            UserRole.Admin => type switch
+            {
+                NotificationType.StockAlert => NotificationChannel.InApp | NotificationChannel.Email | NotificationChannel.SMS,
+                NotificationType.Security => NotificationChannel.InApp | NotificationChannel.Email,
+                NotificationType.System => NotificationChannel.InApp | NotificationChannel.Email,
+                NotificationType.Payment => NotificationChannel.InApp | NotificationChannel.Email,
+                _ => NotificationChannel.InApp | NotificationChannel.Email
+            },
+            UserRole.Manager => type switch
+            {
+                NotificationType.StockAlert => NotificationChannel.InApp | NotificationChannel.Email,
+                NotificationType.Security => NotificationChannel.InApp | NotificationChannel.Email,
+                NotificationType.Report => NotificationChannel.InApp | NotificationChannel.Email,
+                _ => NotificationChannel.InApp
+            },
+            _ => type switch
+            {
+                NotificationType.Account => NotificationChannel.InApp | NotificationChannel.Email,
+                NotificationType.Security => NotificationChannel.InApp | NotificationChannel.Email,
+                NotificationType.Payment => NotificationChannel.InApp | NotificationChannel.Email,
+                NotificationType.Subscription => NotificationChannel.InApp | NotificationChannel.Email,
+                _ => NotificationChannel.InApp
+            }
+        };
+    }
+
+    private static NotificationPriority GetDefaultMinimumPriorityForUserRole(UserRole role, NotificationType type)
+    {
+        return role switch
+        {
+            UserRole.Admin => NotificationPriority.Low,
+            UserRole.Manager => type switch
+            {
+                NotificationType.StockAlert => NotificationPriority.Normal,
+                NotificationType.Security => NotificationPriority.Normal,
+                _ => NotificationPriority.Normal
+            },
+            _ => NotificationPriority.Normal
+        };
+    }
+
+    private static bool GetDefaultEnabledStateForUserRole(UserRole role, NotificationType type)
+    {
+        return role switch
+        {
+            UserRole.Admin => true,
+            UserRole.Manager => type switch
+            {
+                NotificationType.StockAlert => true,
+                NotificationType.Product => true,
+                NotificationType.Report => true,
+                NotificationType.System => true,
+                NotificationType.Security => true,
+                _ => false
+            },
+            _ => type switch
+            {
+                NotificationType.Account => true,
+                NotificationType.Security => true,
+                NotificationType.Payment => true,
+                NotificationType.Subscription => true,
+                NotificationType.System => true,
+                _ => false
+            }
+        };
     }
 }
