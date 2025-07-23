@@ -721,6 +721,116 @@
             Request model for self-synchronization
             </summary>
         </member>
+        <member name="T:StockFlowPro.Web.Controllers.NotificationsController">
+            <summary>
+            Controller for managing notifications and user preferences.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.GetNotifications(System.Int32,System.Int32,System.Nullable{StockFlowPro.Domain.Enums.NotificationStatus},System.Nullable{StockFlowPro.Domain.Enums.NotificationType})">
+            <summary>
+            Gets notifications for the current user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.GetUnreadCount">
+            <summary>
+            Gets the count of unread notifications for the current user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.GetNotificationStats(System.Nullable{System.DateTime})">
+            <summary>
+            Gets notification statistics for the current user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.MarkAsRead(System.Guid)">
+            <summary>
+            Marks a notification as read.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.MarkMultipleAsRead(System.Collections.Generic.IEnumerable{System.Guid})">
+            <summary>
+            Marks multiple notifications as read.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.MarkAllAsRead">
+            <summary>
+            Marks all notifications as read for the current user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.GetPreferences">
+            <summary>
+            Gets notification preferences for the current user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.UpdatePreferences(System.Collections.Generic.IEnumerable{StockFlowPro.Application.DTOs.UpdateNotificationPreferenceDto})">
+            <summary>
+            Updates notification preferences for the current user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.SetQuietHours(StockFlowPro.Web.Controllers.QuietHoursDto)">
+            <summary>
+            Sets quiet hours for the current user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.DisableQuietHours">
+            <summary>
+            Disables quiet hours for the current user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.ResetPreferences">
+            <summary>
+            Resets preferences to default values.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.SendNotification(StockFlowPro.Application.DTOs.CreateNotificationDto)">
+            <summary>
+            Sends a direct notification (Admin only).
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.SendBulkNotification(StockFlowPro.Application.DTOs.BulkNotificationDto)">
+            <summary>
+            Sends a bulk notification (Admin only).
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.SendToRoles(StockFlowPro.Application.DTOs.RoleNotificationDto)">
+            <summary>
+            Sends a role-based notification (Admin only).
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.SendSystemNotification(StockFlowPro.Web.Controllers.SystemNotificationDto)">
+            <summary>
+            Sends a system-wide notification (Admin only).
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.SendEmergencyNotification(StockFlowPro.Web.Controllers.EmergencyNotificationDto)">
+            <summary>
+            Sends an emergency notification (Admin only).
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.SendFromTemplate(StockFlowPro.Application.DTOs.CreateTemplateNotificationDto)">
+            <summary>
+            Sends a template-based notification (Admin only).
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.RetryFailedNotifications">
+            <summary>
+            Retries failed notifications (Admin only).
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.GetTemplates">
+            <summary>
+            Gets all notification templates (Admin only).
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.CreateTemplate(StockFlowPro.Application.DTOs.CreateNotificationTemplateDto)">
+            <summary>
+            Creates a new notification template (Admin only).
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.NotificationsController.PreviewTemplate(StockFlowPro.Application.DTOs.TemplatePreviewDto)">
+            <summary>
+            Previews a notification template.
+            </summary>
+        </member>
         <member name="T:StockFlowPro.Web.Extensions.ClaimsPrincipalExtensions">
             <summary>
             Extension methods for ClaimsPrincipal to check permissions
@@ -965,6 +1075,11 @@
         <member name="T:StockFlowPro.Web.Services.UserSyncAuditEntry">
             <summary>
             Audit entry for user synchronization operations
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Services.NotificationBackgroundService">
+            <summary>
+            Background service for processing notifications and maintenance tasks.
             </summary>
         </member>
         <member name="T:StockFlowPro.Web.Services.ISecurityAuditService">

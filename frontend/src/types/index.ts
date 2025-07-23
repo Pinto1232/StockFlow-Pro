@@ -225,3 +225,6 @@ export interface PaginationParams {
     pageNumber: number;
     pageSize: number;
 }
+
+// Re-export notification types
+export * from './notification';

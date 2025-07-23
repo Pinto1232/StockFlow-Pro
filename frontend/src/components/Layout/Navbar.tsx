@@ -21,6 +21,8 @@ import { usePermissions } from "../../hooks/usePermissions";
 import { Permissions } from "../../utils/permissions";
 import { getRoleName } from "../../services/authService";
 import ConnectionStatus from "../SignalR/ConnectionStatus";
+import NotificationDropdown from "./NotificationDropdown";
+import { useUnreadCount } from "../../hooks/useNotifications";
 import "../../styles/dropdown.css";
 
 interface NavbarProps {
@@ -35,6 +37,7 @@ const Navbar: React.FC<NavbarProps> = ({
     isSidebarCollapsed = false,
 }) => {
     const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+    const [isNotificationDropdownOpen, setIsNotificationDropdownOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
 
     const { data: currentUser } = useCurrentUser();
@@ -42,8 +45,10 @@ const Navbar: React.FC<NavbarProps> = ({
     const logoutMutation = useLogout();
     const location = useLocation();
     const navigate = useNavigate();
+    const { data: unreadCount } = useUnreadCount();
 
     const userDropdownRef = useRef<HTMLDivElement>(null);
+    const notificationDropdownRef = useRef<HTMLDivElement>(null);
 
     // Memoize handleLogout to prevent unnecessary re-renders
     const handleLogout = useCallback(() => {
@@ -104,6 +109,7 @@ const Navbar: React.FC<NavbarProps> = ({
             // Close dropdowns with Escape
             if (event.key === "Escape") {
                 setIsUserDropdownOpen(false);
+                setIsNotificationDropdownOpen(false);
             }
         };
 
@@ -291,11 +297,29 @@ const Navbar: React.FC<NavbarProps> = ({
                         </div>
 
                         {/* Notifications */}
-                        <button className="group flex items-center justify-center p-2 text-white/70 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/30 rounded-xl transition-all duration-300 hover:bg-white/10">
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center group-hover:bg-white/20 group-hover:scale-105 transition-all duration-300">
-                                <Bell className="h-5 w-5" />
-                            </div>
-                        </button>
+                        <div className="relative" ref={notificationDropdownRef}>
+                            <button
+                                onClick={() => setIsNotificationDropdownOpen(!isNotificationDropdownOpen)}
+                                className="group flex items-center justify-center p-2 text-white/70 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/30 rounded-xl transition-all duration-300 hover:bg-white/10"
+                                aria-label="Notifications"
+                                title="View notifications"
+                            >
+                                <div className="relative w-8 h-8 rounded-lg flex items-center justify-center group-hover:bg-white/20 group-hover:scale-105 transition-all duration-300">
+                                    <Bell className="h-5 w-5" />
+                                    {unreadCount && unreadCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full min-w-[18px] h-[18px]">
+                                            {unreadCount > 99 ? '99+' : unreadCount}
+                                        </span>
+                                    )}
+                                </div>
+                            </button>
+
+                            {/* Notification Dropdown */}
+                            <NotificationDropdown
+                                isOpen={isNotificationDropdownOpen}
+                                onClose={() => setIsNotificationDropdownOpen(false)}
+                            />
+                        </div>
 
                         {/* User Dropdown */}
                         <div className="relative" ref={userDropdownRef}>

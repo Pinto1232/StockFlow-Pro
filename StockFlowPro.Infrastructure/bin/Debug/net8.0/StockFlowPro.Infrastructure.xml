@@ -100,6 +100,18 @@
         <member name="M:StockFlowPro.Infrastructure.Migrations.AddImageUrlToProducts.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:StockFlowPro.Infrastructure.Migrations.AddNotificationSystem">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.AddNotificationSystem.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.AddNotificationSystem.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:StockFlowPro.Infrastructure.Migrations.AddNotificationSystem.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:StockFlowPro.Infrastructure.Repositories.EnhancedUserRepository">
             <summary>
             Enhanced user repository with improved email uniqueness validation
@@ -118,6 +130,21 @@
         <member name="M:StockFlowPro.Infrastructure.Repositories.EnhancedUserRepository.NormalizeEmail(System.String)">
             <summary>
             Normalizes email address for consistent comparison
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Infrastructure.Repositories.NotificationPreferenceRepository">
+            <summary>
+            Repository implementation for managing notification preferences.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Infrastructure.Repositories.NotificationRepository">
+            <summary>
+            Repository implementation for managing notifications.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Infrastructure.Repositories.NotificationTemplateRepository">
+            <summary>
+            Repository implementation for managing notification templates.
             </summary>
         </member>
         <member name="T:StockFlowPro.Infrastructure.Repositories.RoleRepository">

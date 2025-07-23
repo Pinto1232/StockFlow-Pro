@@ -31,6 +31,11 @@ namespace StockFlowPro.Infrastructure.Data
         public DbSet<PlanFeature> PlanFeatures { get; set; }
         public DbSet<SubscriptionPlanFeature> SubscriptionPlanFeatures { get; set; }
         public DbSet<PaymentMethodEntity> PaymentMethods { get; set; }
+        
+        // Enhanced notification system entities
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<NotificationTemplate> NotificationTemplates { get; set; }
+        public DbSet<NotificationPreference> NotificationPreferences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -55,6 +60,11 @@ namespace StockFlowPro.Infrastructure.Data
             modelBuilder.ApplyConfiguration(new PlanFeatureConfiguration());
             modelBuilder.ApplyConfiguration(new SubscriptionPlanFeatureConfiguration());
             modelBuilder.ApplyConfiguration(new PaymentMethodEntityConfiguration());
+            
+            // Enhanced notification system configurations
+            modelBuilder.ApplyConfiguration(new NotificationConfiguration());
+            modelBuilder.ApplyConfiguration(new NotificationTemplateConfiguration());
+            modelBuilder.ApplyConfiguration(new NotificationPreferenceConfiguration());
         }
     }
 }

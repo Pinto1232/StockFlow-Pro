@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using StockFlowPro.Domain.Entities;
 using StockFlowPro.Domain.Repositories;
+using StockFlowPro.Domain.Utilities;
 using StockFlowPro.Infrastructure.Data;
 
 namespace StockFlowPro.Infrastructure.Repositories;
@@ -44,8 +45,9 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
+        var normalizedEmail = EmailNormalizer.Normalize(email);
         return await _context.Users
-            .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+            .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail, cancellationToken);
     }
 
     public async Task<IEnumerable<User>> GetActiveUsersAsync(CancellationToken cancellationToken = default)
@@ -57,7 +59,8 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> EmailExistsAsync(string email, Guid? excludeUserId = null, CancellationToken cancellationToken = default)
     {
-        var query = _context.Users.Where(u => u.Email == email);
+        var normalizedEmail = EmailNormalizer.Normalize(email);
+        var query = _context.Users.Where(u => u.Email.ToLower() == normalizedEmail);
         
         if (excludeUserId.HasValue)
         {

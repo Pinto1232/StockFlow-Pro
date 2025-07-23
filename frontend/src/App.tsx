@@ -30,6 +30,7 @@ import Invoices from "./pages/Invoices/Invoices.tsx";
 import AdminPanel from "./pages/Admin/AdminPanel.tsx";
 import PermissionsDemo from "./pages/Admin/PermissionsDemo.tsx";
 import UserSync from "./pages/Sync/UserSync.tsx";
+import NotificationsPage from "./pages/NotificationsPage.tsx";
 import NotFound from "./pages/NotFound/NotFound.tsx";
 
 // Create a client
@@ -154,6 +155,9 @@ function App() {
                                         </PermissionRoute>
                                     }
                                 />
+
+                                {/* Notifications */}
+                                <Route path="notifications" element={<NotificationsPage />} />
 
                                 {/* Profile & Settings */}
                                 <Route path="profile" element={<Profile />} />

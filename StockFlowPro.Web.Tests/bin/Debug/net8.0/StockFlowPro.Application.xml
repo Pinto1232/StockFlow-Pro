@@ -4,6 +4,81 @@
         <name>StockFlowPro.Application</name>
     </assembly>
     <members>
+        <member name="T:StockFlowPro.Application.DTOs.NotificationDto">
+            <summary>
+            Data transfer object for notifications.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.CreateNotificationDto">
+            <summary>
+            Data transfer object for creating notifications.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.CreateTemplateNotificationDto">
+            <summary>
+            Data transfer object for template-based notifications.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.BulkNotificationDto">
+            <summary>
+            Data transfer object for bulk notifications.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.RoleNotificationDto">
+            <summary>
+            Data transfer object for role-based notifications.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.NotificationStatsDto">
+            <summary>
+            Data transfer object for notification statistics.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.NotificationPreferenceDto">
+            <summary>
+            Data transfer object for notification preferences.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.UpdateNotificationPreferenceDto">
+            <summary>
+            Data transfer object for updating notification preferences.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.BulkPreferenceUpdateDto">
+            <summary>
+            Data transfer object for bulk preference updates.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.NotificationPreferenceSummaryDto">
+            <summary>
+            Data transfer object for notification preference summary.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.NotificationTemplateDto">
+            <summary>
+            Data transfer object for notification templates.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.CreateNotificationTemplateDto">
+            <summary>
+            Data transfer object for creating notification templates.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.UpdateNotificationTemplateDto">
+            <summary>
+            Data transfer object for updating notification templates.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.TemplatePreviewDto">
+            <summary>
+            Data transfer object for template preview.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.TemplatePreviewResultDto">
+            <summary>
+            Data transfer object for template preview result.
+            </summary>
+        </member>
         <member name="T:StockFlowPro.Application.DTOs.RoleDto">
             <summary>
             Data transfer object for role information.
@@ -199,9 +274,259 @@
             Indicates if this plan has a trial period
             </summary>
         </member>
+        <member name="T:StockFlowPro.Application.Interfaces.IEnhancedNotificationService">
+            <summary>
+            Enhanced notification service with template support, persistence, and delivery tracking.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IEnhancedNotificationService.SendFromTemplateAsync(System.String,System.Collections.Generic.Dictionary{System.String,System.Object},System.Nullable{System.Guid},System.Nullable{System.Guid},System.Nullable{StockFlowPro.Domain.Enums.NotificationPriority},System.Nullable{StockFlowPro.Domain.Enums.NotificationChannel},System.Threading.CancellationToken)">
+            <summary>
+            Sends a notification using a template.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IEnhancedNotificationService.SendBulkFromTemplateAsync(System.String,System.Collections.Generic.Dictionary{System.String,System.Object},System.Collections.Generic.IEnumerable{System.Guid},System.Nullable{System.Guid},System.Nullable{StockFlowPro.Domain.Enums.NotificationPriority},System.Nullable{StockFlowPro.Domain.Enums.NotificationChannel},System.Threading.CancellationToken)">
+            <summary>
+            Sends notifications to multiple recipients using a template.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IEnhancedNotificationService.SendDirectAsync(System.String,System.String,StockFlowPro.Domain.Enums.NotificationType,System.Nullable{System.Guid},System.Nullable{System.Guid},StockFlowPro.Domain.Enums.NotificationPriority,StockFlowPro.Domain.Enums.NotificationChannel,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Sends a direct notification without using a template.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IEnhancedNotificationService.SendBulkDirectAsync(System.String,System.String,StockFlowPro.Domain.Enums.NotificationType,System.Collections.Generic.IEnumerable{System.Guid},System.Nullable{System.Guid},StockFlowPro.Domain.Enums.NotificationPriority,StockFlowPro.Domain.Enums.NotificationChannel,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Sends notifications to multiple recipients.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IEnhancedNotificationService.SendToRolesAsync(System.String,System.String,StockFlowPro.Domain.Enums.NotificationType,System.Collections.Generic.IEnumerable{StockFlowPro.Domain.Enums.UserRole},System.Nullable{System.Guid},StockFlowPro.Domain.Enums.NotificationPriority,StockFlowPro.Domain.Enums.NotificationChannel,System.Threading.CancellationToken)">
+            <summary>
+            Sends a notification to all users with specific roles.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IEnhancedNotificationService.SendTemplateToRolesAsync(System.String,System.Collections.Generic.Dictionary{System.String,System.Object},System.Collections.Generic.IEnumerable{StockFlowPro.Domain.Enums.UserRole},System.Nullable{System.Guid},System.Nullable{StockFlowPro.Domain.Enums.NotificationPriority},System.Nullable{StockFlowPro.Domain.Enums.NotificationChannel},System.Threading.CancellationToken)">
+            <summary>
+            Sends a template-based notification to all users with specific roles.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IEnhancedNotificationService.SendSystemNotificationAsync(System.String,System.String,StockFlowPro.Domain.Enums.NotificationPriority,StockFlowPro.Domain.Enums.NotificationChannel,System.Threading.CancellationToken)">
+            <summary>
+            Sends a system-wide notification to all users.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IEnhancedNotificationService.SendEmergencyNotificationAsync(System.String,System.String,System.Collections.Generic.IEnumerable{System.Guid},System.Threading.CancellationToken)">
+            <summary>
+            Sends an emergency notification that bypasses user preferences.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IEnhancedNotificationService.MarkAsReadAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Marks a notification as read.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IEnhancedNotificationService.MarkAsReadAsync(System.Collections.Generic.IEnumerable{System.Guid},System.Threading.CancellationToken)">
+            <summary>
+            Marks multiple notifications as read.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IEnhancedNotificationService.MarkAllAsReadAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Marks all notifications for a user as read.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IEnhancedNotificationService.CancelNotificationAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Cancels a pending notification.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IEnhancedNotificationService.RetryFailedNotificationsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Retries failed notifications.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IEnhancedNotificationService.GetUserNotificationsAsync(System.Guid,System.Int32,System.Int32,System.Nullable{StockFlowPro.Domain.Enums.NotificationStatus},System.Nullable{StockFlowPro.Domain.Enums.NotificationType},System.Threading.CancellationToken)">
+            <summary>
+            Gets notifications for a specific user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IEnhancedNotificationService.GetUnreadCountAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets unread notification count for a user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IEnhancedNotificationService.GetNotificationStatsAsync(System.Guid,System.Nullable{System.DateTime},System.Threading.CancellationToken)">
+            <summary>
+            Gets notification statistics for a user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IEnhancedNotificationService.ProcessPendingNotificationsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Processes pending notifications for delivery.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IEnhancedNotificationService.CleanupNotificationsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Cleans up expired and old notifications.
+            </summary>
+        </member>
         <member name="T:StockFlowPro.Application.Interfaces.IEnhancedRoleService">
             <summary>
             Interface for enhanced role management service
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.Interfaces.INotificationPreferenceService">
+            <summary>
+            Service for managing user notification preferences.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationPreferenceService.GetUserPreferencesAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets all notification preferences for a user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationPreferenceService.GetPreferenceAsync(System.Guid,StockFlowPro.Domain.Enums.NotificationType,System.Threading.CancellationToken)">
+            <summary>
+            Gets a specific notification preference for a user and type.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationPreferenceService.UpdatePreferenceAsync(System.Guid,StockFlowPro.Domain.Enums.NotificationType,StockFlowPro.Domain.Enums.NotificationChannel,System.Boolean,StockFlowPro.Domain.Enums.NotificationPriority,System.Threading.CancellationToken)">
+            <summary>
+            Updates or creates a notification preference.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationPreferenceService.SetQuietHoursAsync(System.Guid,System.TimeSpan,System.TimeSpan,System.Collections.Generic.IEnumerable{StockFlowPro.Domain.Enums.NotificationType},System.Threading.CancellationToken)">
+            <summary>
+            Sets quiet hours for a user's notification preferences.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationPreferenceService.DisableQuietHoursAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Disables quiet hours for a user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationPreferenceService.SetBatchingAsync(System.Guid,System.Int32,System.Collections.Generic.IEnumerable{StockFlowPro.Domain.Enums.NotificationType},System.Threading.CancellationToken)">
+            <summary>
+            Sets notification batching for a user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationPreferenceService.DisableBatchingAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Disables notification batching for a user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationPreferenceService.EnableNotificationTypeAsync(System.Guid,StockFlowPro.Domain.Enums.NotificationType,StockFlowPro.Domain.Enums.NotificationChannel,System.Threading.CancellationToken)">
+            <summary>
+            Enables a notification type for a user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationPreferenceService.DisableNotificationTypeAsync(System.Guid,StockFlowPro.Domain.Enums.NotificationType,System.Threading.CancellationToken)">
+            <summary>
+            Disables a notification type for a user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationPreferenceService.AddChannelAsync(System.Guid,StockFlowPro.Domain.Enums.NotificationType,StockFlowPro.Domain.Enums.NotificationChannel,System.Threading.CancellationToken)">
+            <summary>
+            Adds a notification channel to a user's preferences.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationPreferenceService.RemoveChannelAsync(System.Guid,StockFlowPro.Domain.Enums.NotificationType,StockFlowPro.Domain.Enums.NotificationChannel,System.Threading.CancellationToken)">
+            <summary>
+            Removes a notification channel from a user's preferences.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationPreferenceService.CreateDefaultPreferencesAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Creates default notification preferences for a new user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationPreferenceService.ResetToDefaultsAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Resets user preferences to default values.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationPreferenceService.ShouldReceiveNotificationAsync(System.Guid,StockFlowPro.Domain.Enums.NotificationType,StockFlowPro.Domain.Enums.NotificationPriority,StockFlowPro.Domain.Enums.NotificationChannel,System.Threading.CancellationToken)">
+            <summary>
+            Checks if a user should receive a notification based on their preferences.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationPreferenceService.GetEffectiveChannelsAsync(System.Guid,StockFlowPro.Domain.Enums.NotificationType,StockFlowPro.Domain.Enums.NotificationPriority,System.Threading.CancellationToken)">
+            <summary>
+            Gets the effective notification channels for a user and notification type.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationPreferenceService.ExportPreferencesAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Exports user notification preferences.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationPreferenceService.ImportPreferencesAsync(System.Guid,System.Collections.Generic.Dictionary{System.String,System.Object},System.Threading.CancellationToken)">
+            <summary>
+            Imports user notification preferences.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.Interfaces.INotificationTemplateService">
+            <summary>
+            Service for managing notification templates.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationTemplateService.CreateTemplateAsync(System.String,System.String,System.String,System.String,StockFlowPro.Domain.Enums.NotificationType,System.Guid,StockFlowPro.Domain.Enums.NotificationPriority,StockFlowPro.Domain.Enums.NotificationChannel,System.Boolean,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new notification template.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationTemplateService.UpdateTemplateAsync(System.Guid,System.String,System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Updates an existing notification template.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationTemplateService.DeleteTemplateAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Deletes a notification template.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationTemplateService.GetTemplateAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets a notification template by ID.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationTemplateService.GetTemplateByNameAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets a notification template by name.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationTemplateService.GetActiveTemplatesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Gets all active notification templates.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationTemplateService.GetTemplatesByTypeAsync(StockFlowPro.Domain.Enums.NotificationType,System.Threading.CancellationToken)">
+            <summary>
+            Gets notification templates by type.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationTemplateService.ActivateTemplateAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Activates a notification template.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationTemplateService.DeactivateTemplateAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Deactivates a notification template.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationTemplateService.ValidateTemplateAsync(System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.Object},System.Threading.CancellationToken)">
+            <summary>
+            Validates template syntax and parameters.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationTemplateService.PreviewTemplateAsync(System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.Object},System.Threading.CancellationToken)">
+            <summary>
+            Previews a template with sample parameters.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.INotificationTemplateService.CreateDefaultTemplatesAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Creates default system templates.
             </summary>
         </member>
         <member name="T:StockFlowPro.Application.Interfaces.IRoleService">
@@ -460,6 +785,21 @@
             </summary>
             <param name="userId">User ID</param>
             <returns>True if user exists, false otherwise</returns>
+        </member>
+        <member name="T:StockFlowPro.Application.Services.EnhancedNotificationService">
+            <summary>
+            Enhanced notification service with template support, persistence, and delivery tracking.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.Services.NotificationPreferenceService">
+            <summary>
+            Service for managing user notification preferences.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.Services.NotificationTemplateService">
+            <summary>
+            Service for managing notification templates.
+            </summary>
         </member>
         <member name="T:StockFlowPro.Application.Services.RoleService">
             <summary>

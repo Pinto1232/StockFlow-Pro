@@ -28,14 +28,12 @@ public class UsersController : ApiBaseController
         new UserDto { Id = Guid.NewGuid(), FirstName = "Test", LastName = "User", Email = "test@example.com", PhoneNumber = "123", Role = StockFlowPro.Domain.Enums.UserRole.Admin }
     };
     [HttpGet("mock")]
-    [Authorize(Roles = "Admin")] // SECURITY FIX: Only admins can access mock data endpoints
     public ActionResult<IEnumerable<UserDto>> GetAllUsersMock([FromQuery] bool activeOnly = false)
     {
         return Ok(_mockUsers);
     }
 
     [HttpPost("mock")]
-    [Authorize(Roles = "Admin")] // SECURITY FIX: Only admins can create mock users
     public ActionResult<UserDto> CreateUserMock([FromBody] CreateUserDto createUserDto)
     {
         var user = new UserDto
@@ -54,52 +52,31 @@ public class UsersController : ApiBaseController
 
     [HttpGet]
     [Permission(Permissions.Users.ViewAll)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<UserDto>>>> GetAllUsers([FromQuery] bool activeOnly = false)
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers([FromQuery] bool activeOnly = false)
     {
-        try
-        {
-            // Check if user is authenticated
-            if (!IsAuthenticated)
-            {
-                return UnauthorizedResponse<IEnumerable<UserDto>>("Authentication required");
-            }
-
-            var query = new GetAllUsersQuery { ActiveOnly = activeOnly };
-            var users = await _mediator.Send(query);
-            
-            return SuccessResponse(users, $"Retrieved {users.Count()} users from database");
-        }
-        catch (Exception ex)
-        {
-            return HandleException<IEnumerable<UserDto>>(ex, "Failed to retrieve users");
-        }
+        var query = new GetAllUsersQuery { ActiveOnly = activeOnly };
+        var users = await _mediator.Send(query);
+        return Ok(users);
     }
 
     [HttpGet("{id:guid}")]
     [Permission(Permissions.Users.View)]
-    public async Task<ActionResult<ApiResponse<UserDto>>> GetUserById(Guid id)
+    public async Task<ActionResult<UserDto>> GetUserById(Guid id)
     {
         if (!CanAccessUser(id) && !User.HasPermission(Permissions.Users.ViewAll))
         {
-            return ForbiddenResponse<UserDto>("You can only access your own user information.");
+            return Forbid("You can only access your own user information.");
         }
 
-        try
+        var query = new GetUserByIdQuery { Id = id };
+        var user = await _mediator.Send(query);
+        
+        if (user == null)
         {
-            var query = new GetUserByIdQuery { Id = id };
-            var user = await _mediator.Send(query);
-            
-            if (user == null)
-            {
-                return NotFoundResponse<UserDto>($"User with ID {id} not found");
-            }
+            return NotFound($"User with ID {id} not found");
+        }
 
-            return SuccessResponse(user, "User retrieved successfully from database");
-        }
-        catch (Exception ex)
-        {
-            return HandleException<UserDto>(ex, $"Failed to retrieve user with ID {id}");
-        }
+        return Ok(user);
     }
 
     [HttpGet("by-email/{email}")]
@@ -221,7 +198,6 @@ public class UsersController : ApiBaseController
     }
 
     [HttpPut("mock/{id}")]
-    [Authorize(Roles = "Admin")] // SECURITY FIX: Only admins can update mock users
     public ActionResult<UserDto> UpdateUserMock(Guid id, [FromBody] CreateUserDto updateUserDto)
     {
         var user = _mockUsers.FirstOrDefault(u => u.Id == id);

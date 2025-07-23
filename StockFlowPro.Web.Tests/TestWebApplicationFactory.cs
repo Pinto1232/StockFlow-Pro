@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using StockFlowPro.Web.Configuration;
 
 namespace StockFlowPro.Web.Tests;
 
@@ -16,19 +17,58 @@ public class TestWebApplicationFactory<TStartup> : WebApplicationFactory<TStartu
     {
         builder.ConfigureServices(services =>
         {
-            // Remove existing authentication services
-            var authenticationService = services.FirstOrDefault(d => d.ServiceType == typeof(IAuthenticationService));
-            if (authenticationService != null)
+            // Remove specific authentication handlers but keep core authorization services
+            var authHandlers = services.Where(d => 
+                d.ServiceType.Name.Contains("AuthenticationHandler") ||
+                d.ServiceType.Name.Contains("CookieAuthentication")).ToList();
+            
+            foreach (var service in authHandlers)
             {
-                services.Remove(authenticationService);
+                services.Remove(service);
             }
 
-            // Add test authentication
-            services.AddAuthentication("Test")
-                .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>("Test", options => { });
+            // Add authorization services if not already present
+            services.AddAuthorization(options =>
+            {
+                // Create a permissive default policy for testing
+                options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                    .RequireAssertion(_ => true)
+                    .Build();
+                
+                // Override all existing policies to be permissive
+                options.AddPolicy("AdminOnly", policy => policy.RequireAssertion(_ => true));
+                options.AddPolicy("ManagerOrAdmin", policy => policy.RequireAssertion(_ => true));
+                options.AddPolicy("AllRoles", policy => policy.RequireAssertion(_ => true));
+            });
 
-            // Replace authorization with a permissive one for testing
+            // Add test authentication with default scheme
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "Test";
+                options.DefaultChallengeScheme = "Test";
+                options.DefaultScheme = "Test";
+                options.DefaultSignInScheme = "Test";
+                options.DefaultSignOutScheme = "Test";
+            })
+            .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>("Test", options => { });
+
+            // Add a permissive authorization handler for testing
             services.AddSingleton<IAuthorizationHandler, AllowAnonymousAuthorizationHandler>();
+
+            // Configure API security options for testing - disable strict requirements
+            services.Configure<ApiSecurityOptions>(options =>
+            {
+                options.RequireUserAgent = false;
+                options.RequireApiKey = false;
+                options.EnableBotDetection = false;
+                options.EnableThreatDetection = false;
+                options.EnableInputValidation = false;
+                options.AllowedIps = new List<string> { "127.0.0.1", "::1", "localhost" };
+                options.DefaultRateLimit = 10000; // Very high limit for tests
+                options.RateLimitWindowMinutes = 60;
+                options.BlockBots = false;
+                options.AutoBlockSuspiciousIps = false;
+            });
         });
 
         builder.UseEnvironment("Testing");

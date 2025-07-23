@@ -9,8 +9,10 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
-  <ItemGroup>    <PackageReference Include="coverlet.collector" />
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
     <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Moq" />
     <PackageReference Include="xunit" />
@@ -23,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\StockFlowPro.Application\StockFlowPro.Application.csproj" />
+    <ProjectReference Include="..\StockFlowPro.Infrastructure\StockFlowPro.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

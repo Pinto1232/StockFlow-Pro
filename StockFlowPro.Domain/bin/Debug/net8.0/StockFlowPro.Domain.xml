@@ -4,6 +4,106 @@
         <name>StockFlowPro.Domain</name>
     </assembly>
     <members>
+        <member name="T:StockFlowPro.Domain.Entities.Notification">
+            <summary>
+            Represents a system notification that can be sent to users through various channels.
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Notification.RecipientId">
+            <summary>
+            The user who will receive this notification
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Notification.SenderId">
+            <summary>
+            The user who triggered this notification (optional)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Notification.RelatedEntityId">
+            <summary>
+            Related entity ID (e.g., ProductId for stock alerts, InvoiceId for invoice notifications)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Notification.RelatedEntityType">
+            <summary>
+            Type of the related entity (e.g., "Product", "Invoice", "User")
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Notification.Metadata">
+            <summary>
+            Additional metadata as JSON
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Notification.ActionUrl">
+            <summary>
+            URL to navigate to when notification is clicked
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Notification.TemplateId">
+            <summary>
+            Template used to generate this notification
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Notification.CreatedAt">
+            <summary>
+            When the notification was created
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Notification.SentAt">
+            <summary>
+            When the notification was sent
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Notification.DeliveredAt">
+            <summary>
+            When the notification was delivered
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Notification.ReadAt">
+            <summary>
+            When the notification was read
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Notification.ExpiresAt">
+            <summary>
+            When the notification expires (optional)
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Notification.DeliveryAttempts">
+            <summary>
+            Number of delivery attempts
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Notification.LastError">
+            <summary>
+            Last error message if delivery failed
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Notification.IsPersistent">
+            <summary>
+            Whether this notification should be persisted in the database
+            </summary>
+        </member>
+        <member name="P:StockFlowPro.Domain.Entities.Notification.IsDismissible">
+            <summary>
+            Whether this notification can be dismissed by the user
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Entities.NotificationPreference">
+            <summary>
+            Represents user preferences for receiving notifications.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Entities.NotificationTemplate">
+            <summary>
+            Represents a template for generating consistent notifications.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Entities.NotificationTemplate.GenerateNotification(System.Collections.Generic.Dictionary{System.String,System.Object},System.Nullable{System.Guid},System.Nullable{System.Guid},System.Nullable{StockFlowPro.Domain.Enums.NotificationPriority},System.Nullable{StockFlowPro.Domain.Enums.NotificationChannel})">
+            <summary>
+            Generates a notification from this template with the provided parameters.
+            </summary>
+        </member>
         <member name="T:StockFlowPro.Domain.Entities.Payment">
             <summary>
             Represents a payment transaction for a subscription.
@@ -152,6 +252,191 @@
         <member name="F:StockFlowPro.Domain.Enums.BillingInterval.OneTime">
             <summary>
             One-time payment (no recurring billing).
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Enums.NotificationChannel">
+            <summary>
+            Defines the delivery channels for notifications.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationChannel.None">
+            <summary>
+            No delivery channel specified
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationChannel.InApp">
+            <summary>
+            In-app real-time notifications via SignalR
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationChannel.Email">
+            <summary>
+            Email notifications
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationChannel.SMS">
+            <summary>
+            SMS notifications
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationChannel.Push">
+            <summary>
+            Push notifications (for mobile apps)
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationChannel.Browser">
+            <summary>
+            Browser notifications
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationChannel.Webhook">
+            <summary>
+            Webhook notifications for external systems
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationChannel.All">
+            <summary>
+            All available channels
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Enums.NotificationPriority">
+            <summary>
+            Defines the priority levels for notifications.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationPriority.Low">
+            <summary>
+            Low priority notifications (can be batched or delayed)
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationPriority.Normal">
+            <summary>
+            Normal priority notifications (standard delivery)
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationPriority.High">
+            <summary>
+            High priority notifications (immediate delivery preferred)
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationPriority.Critical">
+            <summary>
+            Critical notifications (must be delivered immediately)
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationPriority.Emergency">
+            <summary>
+            Emergency notifications (highest priority, bypass user preferences)
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Enums.NotificationStatus">
+            <summary>
+            Defines the delivery status of notifications.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationStatus.Pending">
+            <summary>
+            Notification has been created but not yet sent
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationStatus.Sent">
+            <summary>
+            Notification has been successfully sent
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationStatus.Delivered">
+            <summary>
+            Notification has been delivered to the recipient
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationStatus.Read">
+            <summary>
+            Notification has been read by the recipient
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationStatus.Failed">
+            <summary>
+            Notification delivery failed
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationStatus.Cancelled">
+            <summary>
+            Notification was cancelled before sending
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationStatus.Expired">
+            <summary>
+            Notification expired before being read
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Enums.NotificationType">
+            <summary>
+            Defines the types of notifications that can be sent in the system.
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationType.Info">
+            <summary>
+            General informational notifications
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationType.Success">
+            <summary>
+            Success notifications for completed actions
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationType.Warning">
+            <summary>
+            Warning notifications for potential issues
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationType.Error">
+            <summary>
+            Error notifications for failures or critical issues
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationType.StockAlert">
+            <summary>
+            Stock level alerts (low stock, out of stock)
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationType.Invoice">
+            <summary>
+            Invoice-related notifications
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationType.Payment">
+            <summary>
+            Payment-related notifications
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationType.Account">
+            <summary>
+            User account notifications (login, security, etc.)
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationType.System">
+            <summary>
+            System maintenance and updates
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationType.Security">
+            <summary>
+            Role and permission changes
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationType.Subscription">
+            <summary>
+            Subscription and billing notifications
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationType.Product">
+            <summary>
+            Product-related notifications
+            </summary>
+        </member>
+        <member name="F:StockFlowPro.Domain.Enums.NotificationType.Report">
+            <summary>
+            Report generation and availability
             </summary>
         </member>
         <member name="T:StockFlowPro.Domain.Enums.PaymentMethod">
@@ -426,6 +711,146 @@
             <param name="entity">The entity to delete.</param>
             <param name="cancellationToken">A cancellation token to cancel the operation.</param>
             <returns>A task representing the asynchronous operation.</returns>
+        </member>
+        <member name="T:StockFlowPro.Domain.Repositories.INotificationPreferenceRepository">
+            <summary>
+            Repository interface for managing notification preferences.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationPreferenceRepository.GetByUserIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets all notification preferences for a specific user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationPreferenceRepository.GetByUserAndTypeAsync(System.Guid,StockFlowPro.Domain.Enums.NotificationType,System.Threading.CancellationToken)">
+            <summary>
+            Gets a specific notification preference for a user and notification type.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationPreferenceRepository.GetUsersWithEnabledNotificationAsync(StockFlowPro.Domain.Enums.NotificationType,StockFlowPro.Domain.Enums.NotificationChannel,System.Threading.CancellationToken)">
+            <summary>
+            Gets users who have enabled a specific notification type and channel.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationPreferenceRepository.CreateDefaultPreferencesAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Creates default notification preferences for a new user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationPreferenceRepository.UpsertPreferenceAsync(StockFlowPro.Domain.Entities.NotificationPreference,System.Threading.CancellationToken)">
+            <summary>
+            Updates or creates a notification preference.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationPreferenceRepository.DeleteByUserIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Deletes all preferences for a user.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Repositories.INotificationRepository">
+            <summary>
+            Repository interface for managing notifications.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationRepository.GetByUserIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets notifications for a specific user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationRepository.GetUnreadByUserIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets unread notifications for a specific user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationRepository.GetByStatusAsync(StockFlowPro.Domain.Enums.NotificationStatus,System.Threading.CancellationToken)">
+            <summary>
+            Gets notifications by status.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationRepository.GetByTypeAsync(StockFlowPro.Domain.Enums.NotificationType,System.Threading.CancellationToken)">
+            <summary>
+            Gets notifications by type.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationRepository.GetByPriorityAsync(StockFlowPro.Domain.Enums.NotificationPriority,System.Threading.CancellationToken)">
+            <summary>
+            Gets notifications by priority.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationRepository.GetExpiredAsync(System.Threading.CancellationToken)">
+            <summary>
+            Gets expired notifications.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationRepository.GetRetryableFailedAsync(System.Threading.CancellationToken)">
+            <summary>
+            Gets failed notifications that can be retried.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationRepository.GetByDateRangeAsync(System.DateTime,System.DateTime,System.Threading.CancellationToken)">
+            <summary>
+            Gets notifications created within a date range.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationRepository.GetByRelatedEntityAsync(System.Guid,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets notifications related to a specific entity.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationRepository.GetUnreadCountAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets the count of unread notifications for a user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationRepository.MarkAsReadAsync(System.Collections.Generic.IEnumerable{System.Guid},System.Threading.CancellationToken)">
+            <summary>
+            Marks multiple notifications as read.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationRepository.MarkAllAsReadAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Marks all notifications for a user as read.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationRepository.DeleteOldNotificationsAsync(System.DateTime,System.Threading.CancellationToken)">
+            <summary>
+            Deletes old notifications based on retention policy.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationRepository.GetNotificationStatsAsync(System.Guid,System.Nullable{System.DateTime},System.Threading.CancellationToken)">
+            <summary>
+            Gets notification statistics for a user.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Domain.Repositories.INotificationTemplateRepository">
+            <summary>
+            Repository interface for managing notification templates.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationTemplateRepository.GetActiveAsync(System.Threading.CancellationToken)">
+            <summary>
+            Gets all active notification templates.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationTemplateRepository.GetByTypeAsync(StockFlowPro.Domain.Enums.NotificationType,System.Threading.CancellationToken)">
+            <summary>
+            Gets notification templates by type.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationTemplateRepository.GetByNameAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets a notification template by name.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationTemplateRepository.GetByCreatorAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets notification templates created by a specific user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.INotificationTemplateRepository.ExistsByNameAsync(System.String,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>
+            Checks if a template name already exists.
+            </summary>
         </member>
         <member name="T:StockFlowPro.Domain.Repositories.IPaymentRepository">
             <summary>

@@ -243,7 +243,16 @@ builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IUserService, Sto
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IRoleUpgradeRequestService, StockFlowPro.Application.Services.RoleUpgradeRequestService>();
 builder.Services.AddScoped<StockFlowPro.Application.Services.ProductNotificationService>();
 builder.Services.AddScoped<ISecurityAuditService, SecurityAuditService>();
+
+// Enhanced notification system services
+builder.Services.AddScoped<StockFlowPro.Domain.Repositories.INotificationRepository, StockFlowPro.Infrastructure.Repositories.NotificationRepository>();
+builder.Services.AddScoped<StockFlowPro.Domain.Repositories.INotificationTemplateRepository, StockFlowPro.Infrastructure.Repositories.NotificationTemplateRepository>();
+builder.Services.AddScoped<StockFlowPro.Domain.Repositories.INotificationPreferenceRepository, StockFlowPro.Infrastructure.Repositories.NotificationPreferenceRepository>();
+builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IEnhancedNotificationService, StockFlowPro.Application.Services.EnhancedNotificationService>();
+builder.Services.AddScoped<StockFlowPro.Application.Interfaces.INotificationTemplateService, StockFlowPro.Application.Services.NotificationTemplateService>();
+builder.Services.AddScoped<StockFlowPro.Application.Interfaces.INotificationPreferenceService, StockFlowPro.Application.Services.NotificationPreferenceService>();
 builder.Services.AddHostedService<DatabaseInitializationService>();
+builder.Services.AddHostedService<StockFlowPro.Web.Services.NotificationBackgroundService>();
 
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 

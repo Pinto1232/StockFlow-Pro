@@ -1,4 +1,4 @@
-using FluentValidation.TestHelper;
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using StockFlowPro.Application.Commands.Users;
 using StockFlowPro.Application.Validators;
@@ -46,10 +46,11 @@ public class EmailUniquenessValidationTests : IDisposable
         };
 
         // Act
-        var result = await _validator.TestValidateAsync(command);
+        var result = await _validator.ValidateAsync(command);
 
         // Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.Email);
+        result.IsValid.Should().BeTrue();
+        result.Errors.Should().NotContain(e => e.PropertyName == nameof(command.Email));
     }
 
     [Fact]
@@ -70,11 +71,11 @@ public class EmailUniquenessValidationTests : IDisposable
         };
 
         // Act
-        var result = await _validator.TestValidateAsync(command);
+        var result = await _validator.ValidateAsync(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Email)
-            .WithErrorMessage("Email already exists");
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(command.Email) && e.ErrorMessage == "Email already exists");
     }
 
     [Theory]
@@ -98,11 +99,11 @@ public class EmailUniquenessValidationTests : IDisposable
         };
 
         // Act
-        var result = await _validator.TestValidateAsync(command);
+        var result = await _validator.ValidateAsync(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Email)
-            .WithErrorMessage("Email already exists");
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(command.Email) && e.ErrorMessage == "Email already exists");
     }
 
     [Theory]
@@ -126,10 +127,11 @@ public class EmailUniquenessValidationTests : IDisposable
         };
 
         // Act
-        var result = await _validator.TestValidateAsync(command);
+        var result = await _validator.ValidateAsync(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Email);
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(command.Email));
     }
 
     [Theory]
@@ -151,15 +153,15 @@ public class EmailUniquenessValidationTests : IDisposable
         };
 
         // Act
-        var result = await enhancedValidator.TestValidateAsync(command);
+        var result = await enhancedValidator.ValidateAsync(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Email)
-            .WithErrorMessage("Email domain is not allowed");
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(command.Email) && e.ErrorMessage == "Email domain is not allowed");
     }
 
     [Fact]
-    public async Task EmailNormalizer_ShouldNormalizeEmailCorrectly()
+    public void EmailNormalizer_ShouldNormalizeEmailCorrectly()
     {
         // Arrange & Act
         var normalized1 = EmailNormalizer.Normalize("  TEST@EXAMPLE.COM  ");
@@ -181,7 +183,6 @@ public class EmailUniquenessValidationTests : IDisposable
     [InlineData("@example.com", false)]
     [InlineData("test@", false)]
     [InlineData("", false)]
-    [InlineData(null, false)]
     public void EmailNormalizer_IsValidFormat_ShouldValidateCorrectly(string email, bool expected)
     {
         // Act
@@ -189,6 +190,16 @@ public class EmailUniquenessValidationTests : IDisposable
 
         // Assert
         Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void EmailNormalizer_IsValidFormat_WithNull_ShouldReturnFalse()
+    {
+        // Act
+        var result = EmailNormalizer.IsValidFormat(null!);
+
+        // Assert
+        Assert.False(result);
     }
 
     [Fact]

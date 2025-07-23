@@ -16,12 +16,12 @@ namespace StockFlowPro.Web.Tests.Integration;
 /// <summary>
 /// Integration tests to verify user registration data is properly persisted to the database
 /// </summary>
-public class RegistrationDataPersistenceTests : IClassFixture<WebApplicationFactory<Program>>
+public class RegistrationDataPersistenceTests : IClassFixture<TestWebApplicationFactory<Program>>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly TestWebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
 
-    public RegistrationDataPersistenceTests(WebApplicationFactory<Program> factory)
+    public RegistrationDataPersistenceTests(TestWebApplicationFactory<Program> factory)
     {
         _factory = factory;
         _client = _factory.CreateClient();
@@ -45,6 +45,13 @@ public class RegistrationDataPersistenceTests : IClassFixture<WebApplicationFact
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/enhanced-auth/register", registerRequest);
+
+        // Debug: If not Created, log the response content
+        if (response.StatusCode != HttpStatusCode.Created)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new Exception($"Expected Created but got {response.StatusCode}. Response: {errorContent}");
+        }
 
         // Assert
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -111,6 +118,14 @@ public class RegistrationDataPersistenceTests : IClassFixture<WebApplicationFact
         };
 
         var firstResponse = await _client.PostAsJsonAsync("/api/enhanced-auth/register", firstRequest);
+        
+        // Debug: If not Created, log the response content
+        if (firstResponse.StatusCode != HttpStatusCode.Created)
+        {
+            var errorContent = await firstResponse.Content.ReadAsStringAsync();
+            throw new Exception($"Expected Created but got {firstResponse.StatusCode}. Response: {errorContent}");
+        }
+        
         Assert.Equal(HttpStatusCode.Created, firstResponse.StatusCode);
 
         // Second registration with same email
@@ -165,6 +180,14 @@ public class RegistrationDataPersistenceTests : IClassFixture<WebApplicationFact
         };
 
         var registerResponse = await _client.PostAsJsonAsync("/api/enhanced-auth/register", registerRequest);
+        
+        // Debug: If not Created, log the response content
+        if (registerResponse.StatusCode != HttpStatusCode.Created)
+        {
+            var errorContent = await registerResponse.Content.ReadAsStringAsync();
+            throw new Exception($"Expected Created but got {registerResponse.StatusCode}. Response: {errorContent}");
+        }
+        
         Assert.Equal(HttpStatusCode.Created, registerResponse.StatusCode);
 
         // Act
@@ -223,7 +246,7 @@ public class RegistrationDataPersistenceTests : IClassFixture<WebApplicationFact
             new EnhancedRegisterRequest
             {
                 FirstName = "Stats",
-                LastName = "User1",
+                LastName = "UserOne",
                 Email = $"stats1.{Guid.NewGuid():N}@example.com",
                 PhoneNumber = "+1234567890",
                 DateOfBirth = new DateTime(1990, 1, 1),
@@ -233,7 +256,7 @@ public class RegistrationDataPersistenceTests : IClassFixture<WebApplicationFact
             new EnhancedRegisterRequest
             {
                 FirstName = "Stats",
-                LastName = "User2",
+                LastName = "UserTwo",
                 Email = $"stats2.{Guid.NewGuid():N}@example.com",
                 PhoneNumber = "+1234567891",
                 DateOfBirth = new DateTime(1985, 1, 1),
@@ -245,6 +268,14 @@ public class RegistrationDataPersistenceTests : IClassFixture<WebApplicationFact
         foreach (var user in testUsers)
         {
             var response = await _client.PostAsJsonAsync("/api/enhanced-auth/register", user);
+            
+            // Debug: If not Created, log the response content
+            if (response.StatusCode != HttpStatusCode.Created)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Expected Created but got {response.StatusCode}. Response: {errorContent}");
+            }
+            
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         }
 
@@ -289,6 +320,13 @@ public class RegistrationDataPersistenceTests : IClassFixture<WebApplicationFact
         // Act
         var response = await _client.PostAsJsonAsync("/api/enhanced-auth/register", registerRequest);
         var afterRegistration = DateTime.UtcNow;
+
+        // Debug: If not Created, log the response content
+        if (response.StatusCode != HttpStatusCode.Created)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new Exception($"Expected Created but got {response.StatusCode}. Response: {errorContent}");
+        }
 
         // Assert
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);

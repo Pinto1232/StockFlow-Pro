@@ -1,6 +1,7 @@
 using FluentValidation;
 using StockFlowPro.Application.Commands.Users;
 using StockFlowPro.Domain.Repositories;
+using StockFlowPro.Domain.Utilities;
 
 namespace StockFlowPro.Application.Validators;
 
@@ -37,7 +38,8 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
 
     private async Task<bool> BeUniqueEmail(string email, CancellationToken cancellationToken)
     {
-        return !await _userRepository.EmailExistsAsync(email, cancellationToken: cancellationToken);
+        var normalizedEmail = EmailNormalizer.Normalize(email);
+        return !await _userRepository.EmailExistsAsync(normalizedEmail, cancellationToken: cancellationToken);
     }
 
     private static bool BeValidAge(DateTime dateOfBirth)

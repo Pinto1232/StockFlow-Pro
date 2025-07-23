@@ -95,6 +95,298 @@ namespace StockFlowPro.Infrastructure.Migrations
                     b.ToTable("InvoiceItems");
                 });
 
+            modelBuilder.Entity("StockFlowPro.Domain.Entities.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ActionUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Channels")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<DateTime?>("DeliveredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DeliveryAttempts")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDismissible")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsPersistent")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("RecipientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("RelatedEntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RelatedEntityType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid?>("SenderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("TemplateId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_Notifications_CreatedAt");
+
+                    b.HasIndex("ExpiresAt")
+                        .HasDatabaseName("IX_Notifications_ExpiresAt")
+                        .HasFilter("[ExpiresAt] IS NOT NULL");
+
+                    b.HasIndex("Priority")
+                        .HasDatabaseName("IX_Notifications_Priority");
+
+                    b.HasIndex("RecipientId")
+                        .HasDatabaseName("IX_Notifications_RecipientId");
+
+                    b.HasIndex("SenderId");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_Notifications_Status");
+
+                    b.HasIndex("Type")
+                        .HasDatabaseName("IX_Notifications_Type");
+
+                    b.HasIndex("RecipientId", "Status")
+                        .HasDatabaseName("IX_Notifications_Recipient_Status");
+
+                    b.HasIndex("RelatedEntityId", "RelatedEntityType")
+                        .HasDatabaseName("IX_Notifications_RelatedEntity");
+
+                    b.HasIndex("Type", "Status")
+                        .HasDatabaseName("IX_Notifications_Type_Status");
+
+                    b.ToTable("Notifications", (string)null);
+                });
+
+            modelBuilder.Entity("StockFlowPro.Domain.Entities.NotificationPreference", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("BatchingIntervalMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<int>("EnabledChannels")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("MinimumPriority")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("NotificationType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<TimeSpan?>("QuietHoursEnd")
+                        .HasColumnType("time");
+
+                    b.Property<TimeSpan?>("QuietHoursStart")
+                        .HasColumnType("time");
+
+                    b.Property<bool>("RespectQuietHours")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsEnabled")
+                        .HasDatabaseName("IX_NotificationPreferences_IsEnabled");
+
+                    b.HasIndex("NotificationType")
+                        .HasDatabaseName("IX_NotificationPreferences_Type");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_NotificationPreferences_UserId");
+
+                    b.HasIndex("NotificationType", "IsEnabled")
+                        .HasDatabaseName("IX_NotificationPreferences_Type_Enabled");
+
+                    b.HasIndex("UserId", "NotificationType")
+                        .IsUnique()
+                        .HasDatabaseName("IX_NotificationPreferences_User_Type");
+
+                    b.ToTable("NotificationPreferences", (string)null);
+                });
+
+            modelBuilder.Entity("StockFlowPro.Domain.Entities.NotificationTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DefaultActionUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("DefaultChannels")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DefaultPriority")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("ExpirationHours")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDismissible")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsPersistent")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("MessageTemplate")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("TitleTemplate")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy")
+                        .HasDatabaseName("IX_NotificationTemplates_CreatedBy");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("IX_NotificationTemplates_IsActive");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("IX_NotificationTemplates_Name");
+
+                    b.HasIndex("Type")
+                        .HasDatabaseName("IX_NotificationTemplates_Type");
+
+                    b.HasIndex("Type", "IsActive")
+                        .HasDatabaseName("IX_NotificationTemplates_Type_IsActive");
+
+                    b.ToTable("NotificationTemplates", (string)null);
+                });
+
             modelBuilder.Entity("StockFlowPro.Domain.Entities.Payment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1122,6 +1414,45 @@ namespace StockFlowPro.Infrastructure.Migrations
                     b.Navigation("Invoice");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("StockFlowPro.Domain.Entities.Notification", b =>
+                {
+                    b.HasOne("StockFlowPro.Domain.Entities.User", "Recipient")
+                        .WithMany()
+                        .HasForeignKey("RecipientId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("StockFlowPro.Domain.Entities.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Recipient");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("StockFlowPro.Domain.Entities.NotificationPreference", b =>
+                {
+                    b.HasOne("StockFlowPro.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("StockFlowPro.Domain.Entities.NotificationTemplate", b =>
+                {
+                    b.HasOne("StockFlowPro.Domain.Entities.User", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Creator");
                 });
 
             modelBuilder.Entity("StockFlowPro.Domain.Entities.Payment", b =>
