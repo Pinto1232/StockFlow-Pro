@@ -211,6 +211,7 @@ export interface ProductFilters {
     search?: string;
     isActive?: boolean;
     isLowStock?: boolean;
+    inStockOnly?: boolean;
     minPrice?: number;
     maxPrice?: number;
 }

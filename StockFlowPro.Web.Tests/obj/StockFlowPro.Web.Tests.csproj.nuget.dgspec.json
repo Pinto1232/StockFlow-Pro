@@ -37,6 +37,9 @@
             "projectReferences": {
               "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Domain\\StockFlowPro.Domain.csproj": {
                 "projectPath": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Domain\\StockFlowPro.Domain.csproj"
+              },
+              "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Shared\\StockFlowPro.Shared.csproj": {
+                "projectPath": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Shared\\StockFlowPro.Shared.csproj"
               }
             }
           }

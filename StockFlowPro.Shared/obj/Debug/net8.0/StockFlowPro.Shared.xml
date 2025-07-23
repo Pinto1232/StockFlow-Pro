@@ -431,5 +431,21 @@
             Pagination parameters
             </summary>
         </member>
+        <member name="T:StockFlowPro.Shared.Models.PaginatedResponse`1">
+            <summary>
+            Represents a paginated response that matches frontend expectations
+            </summary>
+            <typeparam name="T">Type of items in the response</typeparam>
+        </member>
+        <member name="M:StockFlowPro.Shared.Models.PaginatedResponse`1.FromPagedResult(StockFlowPro.Shared.Models.PagedResult{`0})">
+            <summary>
+            Creates a PaginatedResponse from a PagedResult
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Shared.Models.PaginatedResponse`1.Empty(System.Int32,System.Int32)">
+            <summary>
+            Creates an empty paginated response
+            </summary>
+        </member>
     </members>
 </doc>

@@ -35,14 +35,18 @@ class SignalRServiceImpl implements SignalRService {
     private initializeConnection(): void {
         // Get the base URL from environment or default to localhost
         // Remove /api suffix if present since SignalR hub is at root level
-        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7001/api';
+        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5131/api';
         const baseUrl = apiBaseUrl.replace('/api', '');
         const hubUrl = `${baseUrl}/stockflowhub`;
+
+        console.log('Initializing SignalR connection to:', hubUrl);
 
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl(hubUrl, {
                 withCredentials: true,
-                transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling
+                transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling,
+                // Skip negotiation for better performance if using WebSockets only
+                skipNegotiation: false
             })
             .withAutomaticReconnect({
                 nextRetryDelayInMilliseconds: (retryContext) => {
@@ -143,6 +147,7 @@ class SignalRServiceImpl implements SignalRService {
         
         // If already connected, return immediately
         if (currentState === signalR.HubConnectionState.Connected) {
+            console.log('SignalR already connected');
             return;
         }
 
@@ -166,8 +171,17 @@ class SignalRServiceImpl implements SignalRService {
         }
 
         try {
+            console.log('Starting SignalR connection with cookie authentication...');
             this.updateConnectionState(ConnectionState.Connecting);
-            await this.connection!.start();
+            
+            // Add timeout to prevent hanging connections
+            const connectionPromise = this.connection!.start();
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Connection timeout')), 15000);
+            });
+            
+            await Promise.race([connectionPromise, timeoutPromise]);
+            
             this.updateConnectionState(ConnectionState.Connected);
             this.reconnectAttempts = 0;
             console.log('SignalR connection started successfully');
@@ -180,6 +194,15 @@ class SignalRServiceImpl implements SignalRService {
             console.error('Error starting SignalR connection:', error);
             this.updateConnectionState(ConnectionState.Disconnected);
             
+            // Log additional debug information
+            if (error instanceof Error) {
+                console.error('Error details:', {
+                    name: error.name,
+                    message: error.message,
+                    stack: error.stack
+                });
+            }
+            
             // Attempt to reconnect if we haven't exceeded max attempts
             if (this.reconnectAttempts < this.maxReconnectAttempts) {
                 this.reconnectAttempts++;
@@ -190,6 +213,8 @@ class SignalRServiceImpl implements SignalRService {
                         console.error('Reconnection attempt failed:', err);
                     });
                 }, this.reconnectDelay);
+            } else {
+                console.error('Max reconnection attempts reached. SignalR connection failed permanently.');
             }
             
             throw error;

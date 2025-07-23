@@ -91,8 +91,8 @@ const Dashboard: React.FC = () => {
             </nav>
 
             <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
-                {/* Enhanced Header */}
-                <header className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
+                {/* Header */}
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                         <div className="flex-1">
                             <div className="flex items-center gap-6 mb-3">
@@ -129,7 +129,7 @@ const Dashboard: React.FC = () => {
                             </button>
                         </div>
                     </div>
-                </header>
+                </div>
 
                 {/* System Status Banner */}
                 <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-2xl mb-8 shadow-lg">

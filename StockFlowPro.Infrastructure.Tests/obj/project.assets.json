@@ -1868,7 +1868,8 @@
           "MediatR": "11.1.0",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.6",
           "Microsoft.Extensions.Logging.Abstractions": "9.0.6",
-          "StockFlowPro.Domain": "1.0.0"
+          "StockFlowPro.Domain": "1.0.0",
+          "StockFlowPro.Shared": "1.0.0"
         },
         "compile": {
           "bin/placeholder/StockFlowPro.Application.dll": {}
@@ -1902,6 +1903,19 @@
         },
         "runtime": {
           "bin/placeholder/StockFlowPro.Infrastructure.dll": {}
+        }
+      },
+      "StockFlowPro.Shared/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.6"
+        },
+        "compile": {
+          "bin/placeholder/StockFlowPro.Shared.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/StockFlowPro.Shared.dll": {}
         }
       }
     }
@@ -4694,6 +4708,11 @@
       "type": "project",
       "path": "../StockFlowPro.Infrastructure/StockFlowPro.Infrastructure.csproj",
       "msbuildProject": "../StockFlowPro.Infrastructure/StockFlowPro.Infrastructure.csproj"
+    },
+    "StockFlowPro.Shared/1.0.0": {
+      "type": "project",
+      "path": "../StockFlowPro.Shared/StockFlowPro.Shared.csproj",
+      "msbuildProject": "../StockFlowPro.Shared/StockFlowPro.Shared.csproj"
     }
   },
   "projectFileDependencyGroups": {

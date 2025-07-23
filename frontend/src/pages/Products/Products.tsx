@@ -14,22 +14,23 @@ import {
     Trash2,
     Terminal,
     EyeOff,
+    Loader2,
 } from "lucide-react";
 import { formatCurrency, formatCurrencyCompact } from "../../utils/currency";
+import { useProducts } from "../../hooks/useProducts";
+import type { ProductFilters, PaginationParams } from "../../types/index";
 
-interface Product {
-    id: number;
-    name: string;
-    costPerItem: number;
-    stock: number;
+// Define ProductStats interface
+interface ProductStats {
+    totalProducts: number;
     totalValue: number;
-    status: "Active" | "Inactive";
-    createdAt: string;
+    lowStockCount: number;
+    outOfStockCount: number;
+    activeProducts: number;
+    inactiveProducts: number;
 }
 
 const Products: React.FC = () => {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeOnlyFilter, setActiveOnlyFilter] = useState(false);
     const [inStockOnlyFilter, setInStockOnlyFilter] = useState(false);
@@ -52,56 +53,39 @@ const Products: React.FC = () => {
         },
     ]);
 
-    // Mock data for demonstration
-    useEffect(() => {
-        const mockProducts: Product[] = [
-            {
-                id: 1,
-                name: "Wireless Headphones",
-                costPerItem: 99.99,
-                stock: 150,
-                totalValue: 14998.5,
-                status: "Active",
-                createdAt: "2024-01-15",
-            },
-            {
-                id: 2,
-                name: "Smartphone Case",
-                costPerItem: 24.99,
-                stock: 5,
-                totalValue: 124.95,
-                status: "Active",
-                createdAt: "2024-01-10",
-            },
-            {
-                id: 3,
-                name: "USB Cable",
-                costPerItem: 12.99,
-                stock: 0,
-                totalValue: 0,
-                status: "Active",
-                createdAt: "2024-01-08",
-            },
-            {
-                id: 4,
-                name: "Laptop Stand",
-                costPerItem: 45.99,
-                stock: 75,
-                totalValue: 3449.25,
-                status: "Inactive",
-                createdAt: "2024-01-05",
-            },
-        ];
+    // Prepare filters for API call
+    const filters: ProductFilters = {
+        search: searchQuery || undefined,
+        isActive: activeOnlyFilter || undefined,
+        isLowStock: lowStockOnlyFilter || undefined,
+        inStockOnly: inStockOnlyFilter || undefined,
+    };
 
-        setTimeout(() => {
-            setProducts(mockProducts);
-            setLoading(false);
+    // Prepare pagination for API call
+    const pagination: PaginationParams = {
+        pageNumber: currentPage,
+        pageSize: pageSize,
+    };
+
+    // Fetch products from API
+    const { data: productsResponse, isLoading, error } = useProducts(pagination, filters);
+    // Note: Stats endpoint is not available (404), so we'll calculate stats from products data
+    // const { data: statsData } = useProductStats();
+    const statsData: ProductStats | undefined = undefined; // Disable stats API call for now
+
+    // Log API calls to console
+    useEffect(() => {
+        if (isLoading) {
+            addConsoleEntry(`Fetching products from API with pageSize: ${pageSize}, pageNumber: ${currentPage}`, "api");
+        } else if (error) {
+            addConsoleEntry(`API Error: ${error.message}`, "error");
+        } else if (productsResponse) {
             addConsoleEntry(
-                "Database connection established - Products loaded successfully",
-                "database",
+                `API Success: Requested pageSize: ${pageSize}, Received ${productsResponse.data.length} products (Page ${productsResponse.pageNumber} of ${productsResponse.totalPages}, Total: ${productsResponse.totalCount})`,
+                "api"
             );
-        }, 1000);
-    }, []);
+        }
+    }, [isLoading, error, productsResponse, pageSize, currentPage]);
 
     const addConsoleEntry = (
         message: string,
@@ -136,49 +120,34 @@ const Products: React.FC = () => {
         setSearchQuery("");
     };
 
-    // Calculate stats
-    const totalProducts = products.length;
-    const totalValue = products.reduce(
-        (sum, product) => sum + product.totalValue,
-        0,
-    );
-    const lowStockCount = products.filter(
-        (product) => product.stock > 0 && product.stock <= 10,
-    ).length;
-    const outOfStockCount = products.filter(
-        (product) => product.stock === 0,
-    ).length;
+    // Get data from API responses
+    const products = productsResponse?.data || [];
+    const totalPages = productsResponse?.totalPages || 1;
+    const totalCount = productsResponse?.totalCount || 0;
 
-    // Filter products
-    const filteredProducts = products.filter((product) => {
-        if (
-            searchQuery &&
-            !product.name.toLowerCase().includes(searchQuery.toLowerCase())
-        ) {
-            return false;
-        }
-        if (activeOnlyFilter && product.status !== "Active") {
-            return false;
-        }
-        if (inStockOnlyFilter && product.stock === 0) {
-            return false;
-        }
-        if (lowStockOnlyFilter && (product.stock === 0 || product.stock > 10)) {
-            return false;
-        }
-        return true;
-    });
+    // Calculate stats from API data or use stats endpoint
+    const statsTyped = statsData as ProductStats | undefined;
+    const totalProducts = statsTyped?.totalProducts || totalCount;
+    const totalValue = statsTyped?.totalValue || products.reduce((sum, product) => sum + product.totalValue, 0);
+    const lowStockCount = statsTyped?.lowStockCount || products.filter(product => product.isLowStock).length;
+    const outOfStockCount = statsTyped?.outOfStockCount || products.filter(product => !product.isInStock).length;
 
-    // Pagination
-    const totalPages = Math.ceil(filteredProducts.length / pageSize);
-    const startIndex = (currentPage - 1) * pageSize;
-    const paginatedProducts = filteredProducts.slice(
-        startIndex,
-        startIndex + pageSize,
-    );
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, activeOnlyFilter, inStockOnlyFilter, lowStockOnlyFilter]);
 
-    const getStatusBadgeClasses = (status: string) => {
-        return status === "Active"
+    // Reset to page 1 when page size changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [pageSize]);
+
+    // All filtering is now handled by the backend API
+    const filteredProducts = products;
+
+    
+    const getStatusBadgeClasses = (isActive: boolean) => {
+        return isActive
             ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-[0_2px_8px_rgba(16,185,129,0.3)]"
             : "bg-[#e2e8f0] text-[#64748b]";
     };
@@ -190,6 +159,11 @@ const Products: React.FC = () => {
             return "bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-[0_2px_8px_rgba(245,158,11,0.3)]";
         }
         return "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-[0_2px_8px_rgba(16,185,129,0.3)]";
+    };
+
+    // Format date helper
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString();
     };
 
     return (
@@ -488,14 +462,24 @@ const Products: React.FC = () => {
                 <div className="bg-white border-0 rounded-2xl shadow-[0_8px_25px_rgba(0,0,0,0.08)] mx-6 overflow-hidden">
                     <div className="p-0">
                         <div className="rounded-2xl overflow-hidden">
-                            {loading ? (
+                            {isLoading ? (
                                 <div className="flex flex-col items-center justify-center py-12">
-                                    <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                                    <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-4" />
                                     <p className="text-gray-500 font-medium">
                                         Loading products...
                                     </p>
                                 </div>
-                            ) : paginatedProducts.length === 0 ? (
+                            ) : error ? (
+                                <div className="flex flex-col items-center justify-center py-12">
+                                    <XCircle className="h-12 w-12 text-red-400 mb-4" />
+                                    <h5 className="text-lg font-semibold text-gray-600 mb-2">
+                                        Error loading products
+                                    </h5>
+                                    <p className="text-gray-500 text-center">
+                                        {error.message || "Failed to load products from the server"}
+                                    </p>
+                                </div>
+                            ) : filteredProducts.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12">
                                     <Package className="h-12 w-12 text-gray-300 mb-4" />
                                     <h5 className="text-lg font-semibold text-gray-600 mb-2">
@@ -533,56 +517,56 @@ const Products: React.FC = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {paginatedProducts.map(
+                                        {filteredProducts.map(
                                             (product, index) => (
                                                 <tr
                                                     key={product.id}
                                                     className="hover:bg-[#f8fafc] transition-colors duration-200"
                                                 >
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== paginatedProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""} font-medium text-gray-900`}
+                                                        className={`align-middle text-sm p-4 ${index !== filteredProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""} font-medium text-gray-900`}
                                                     >
                                                         {product.name}
                                                     </td>
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== paginatedProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
+                                                        className={`align-middle text-sm p-4 ${index !== filteredProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
                                                     >
                                                         {formatCurrency(
                                                             product.costPerItem,
                                                         )}
                                                     </td>
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== paginatedProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""}`}
+                                                        className={`align-middle text-sm p-4 ${index !== filteredProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""}`}
                                                     >
                                                         <span
-                                                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium ${getStockBadgeClasses(product.stock)}`}
+                                                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium ${getStockBadgeClasses(product.numberInStock)}`}
                                                         >
-                                                            {product.stock}
+                                                            {product.numberInStock}
                                                         </span>
                                                     </td>
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== paginatedProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
+                                                        className={`align-middle text-sm p-4 ${index !== filteredProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
                                                     >
                                                         {formatCurrency(
                                                             product.totalValue,
                                                         )}
                                                     </td>
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== paginatedProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""}`}
+                                                        className={`align-middle text-sm p-4 ${index !== filteredProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""}`}
                                                     >
                                                         <span
-                                                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium ${getStatusBadgeClasses(product.status)}`}
+                                                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium ${getStatusBadgeClasses(product.isActive)}`}
                                                         >
-                                                            {product.status}
+                                                            {product.isActive ? "Active" : "Inactive"}
                                                         </span>
                                                     </td>
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== paginatedProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
+                                                        className={`align-middle text-sm p-4 ${index !== filteredProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
                                                     >
-                                                        {product.createdAt}
+                                                        {formatDate(product.createdAt)}
                                                     </td>
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== paginatedProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-right`}
+                                                        className={`align-middle text-sm p-4 ${index !== filteredProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-right`}
                                                     >
                                                         <div className="flex justify-end gap-2">
                                                             <button
@@ -623,11 +607,11 @@ const Products: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Footer with pagination - Matching Razor View */}
+                    {/* Footer with pagination - Matching Invoices Style */}
                     <div className="bg-[#f8fafc] border-t border-[#e2e8f0] px-6 py-4 flex justify-between items-center">
                         <span className="text-sm text-gray-600 font-medium flex items-center gap-2">
                             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                            {filteredProducts.length} products
+                            {totalCount} product{totalCount !== 1 ? "s" : ""}
                         </span>
                         {totalPages > 1 && (
                             <nav aria-label="Product pagination">

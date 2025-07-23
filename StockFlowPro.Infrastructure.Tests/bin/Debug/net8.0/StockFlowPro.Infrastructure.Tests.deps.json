@@ -1296,7 +1296,8 @@
           "MediatR": "11.1.0",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.6",
           "Microsoft.Extensions.Logging.Abstractions": "9.0.6",
-          "StockFlowPro.Domain": "1.0.0"
+          "StockFlowPro.Domain": "1.0.0",
+          "StockFlowPro.Shared": "1.0.0"
         },
         "runtime": {
           "StockFlowPro.Application.dll": {}
@@ -1317,6 +1318,14 @@
         },
         "runtime": {
           "StockFlowPro.Infrastructure.dll": {}
+        }
+      },
+      "StockFlowPro.Shared/1.0.0": {
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.6"
+        },
+        "runtime": {
+          "StockFlowPro.Shared.dll": {}
         }
       }
     }
@@ -1982,6 +1991,11 @@
       "sha512": ""
     },
     "StockFlowPro.Infrastructure/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "StockFlowPro.Shared/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

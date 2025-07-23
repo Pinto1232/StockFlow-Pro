@@ -26,6 +26,44 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
+    public async Task<ActionResult<PaginatedResponse<ProductDto>>> GetProductsPaged(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? search = null,
+        [FromQuery] bool? isActive = null,
+        [FromQuery] bool? isLowStock = null,
+        [FromQuery] bool? inStockOnly = null,
+        [FromQuery] int lowStockThreshold = 10)
+    {
+        try
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Getting paginated products from database - Page: {pageNumber}, Size: {pageSize}, Search: '{search}', IsActive: {isActive}, IsLowStock: {isLowStock}, InStockOnly: {inStockOnly}");
+            
+            var query = new GetProductsPagedQuery 
+            { 
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                Search = search,
+                IsActive = isActive,
+                IsLowStock = isLowStock,
+                InStockOnly = inStockOnly,
+                LowStockThreshold = lowStockThreshold
+            };
+            
+            var result = await _mediator.Send(query);
+            
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Successfully retrieved paginated products - Page {result.PageNumber} of {result.TotalPages}, Total: {result.TotalCount}");
+            
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Error retrieving paginated products: {ex.Message}");
+            return BadRequest(new { message = "Failed to retrieve products", error = ex.Message });
+        }
+    }
+
+    [HttpGet("all")]
     public async Task<ActionResult<ApiResponse<IEnumerable<EnhancedProductDto>>>> GetAllProducts(
         [FromQuery] bool activeOnly = false,
         [FromQuery] bool inStockOnly = false,

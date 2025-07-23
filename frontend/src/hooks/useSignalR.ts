@@ -45,19 +45,23 @@ export const useSignalR = (): UseSignalRReturn => {
                 hasAttemptedConnection.current = true;
                 userIdRef.current = currentUser.id;
                 
-                try {
-                    await signalRService.start();
-                    
-                    // Join user-specific group after connection
-                    if (signalRService.connectionState === ConnectionState.Connected) {
-                        await signalRService.joinGroup(`User_${currentUser.id}`);
-                        console.log(`Joined user group: User_${currentUser.id}`);
+                // Add a small delay to ensure authentication token is properly set
+                setTimeout(async () => {
+                    try {
+                        console.log('Attempting to connect to SignalR for user:', currentUser.id);
+                        await signalRService.start();
+                        
+                        // Join user-specific group after connection
+                        if (signalRService.connectionState === ConnectionState.Connected) {
+                            await signalRService.joinGroup(`User_${currentUser.id}`);
+                            console.log(`Joined user group: User_${currentUser.id}`);
+                        }
+                    } catch (error) {
+                        console.error('Failed to connect to SignalR:', error);
+                        // Reset the flag so we can try again later
+                        hasAttemptedConnection.current = false;
                     }
-                } catch (error) {
-                    console.error('Failed to connect to SignalR:', error);
-                    // Reset the flag so we can try again later
-                    hasAttemptedConnection.current = false;
-                }
+                }, 100); // Small delay to ensure token is available
             }
         };
 

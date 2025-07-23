@@ -16,11 +16,25 @@ export const productService = {
         pagination: PaginationParams,
         filters?: ProductFilters,
     ): Promise<PaginatedResponse<ProductDto>> => {
-        const params = {
+        const params: Record<string, string | number | boolean> = {
             pageNumber: pagination.pageNumber,
             pageSize: pagination.pageSize,
-            ...filters,
         };
+
+        // Map frontend filters to backend parameters
+        if (filters?.search) {
+            params.search = filters.search;
+        }
+        if (filters?.isActive !== undefined) {
+            params.isActive = filters.isActive;
+        }
+        if (filters?.isLowStock !== undefined) {
+            params.isLowStock = filters.isLowStock;
+        }
+        if (filters?.inStockOnly !== undefined) {
+            params.inStockOnly = filters.inStockOnly;
+        }
+
         return await apiService.get<PaginatedResponse<ProductDto>>(
             "/products",
             params,
