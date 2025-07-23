@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
     FileText,
     Plus,
@@ -190,30 +191,19 @@ const Invoices: React.FC = () => {
     const endIndex = startIndex + itemsPerPage;
     const currentInvoices = filteredInvoices.slice(startIndex, endIndex);
 
-    if (loading) {
-        return (
-            <div className="manage-invoices-container container-fluid">
-                <div className="loading-container">
-                    <div className="loading-spinner"></div>
-                    <div className="loading-text">Loading invoices...</div>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="min-h-screen bg-gray-50 w-full">
             {/* Navigation Breadcrumb */}
-            <nav className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50 w-full px-4 sm:px-6 lg:px-8 py-4">
+            <nav className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-16 z-30 w-full px-4 sm:px-6 lg:px-8 py-4">
                 <ol className="flex items-center gap-2 text-sm">
                     <li className="flex items-center gap-2">
-                        <a
-                            href="/dashboard"
+                        <Link
+                            to="/dashboard"
                             className="flex items-center gap-2 text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors font-medium"
                         >
                             <Home className="h-4 w-4" />
                             <span>Dashboard</span>
-                        </a>
+                        </Link>
                     </li>
                     <span className="text-gray-400">/</span>
                     <li className="flex items-center gap-2 text-gray-900 font-semibold">
@@ -385,7 +375,14 @@ const Invoices: React.FC = () => {
                 <div className="bg-white border-0 rounded-2xl shadow-[0_8px_25px_rgba(0,0,0,0.08)] overflow-hidden w-full">
                     <div className="p-0">
                         <div className="rounded-2xl overflow-hidden">
-                            {filteredInvoices.length === 0 ? (
+                            {loading ? (
+                                <div className="flex flex-col items-center justify-center py-12">
+                                    <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                                    <p className="text-gray-500 font-medium">
+                                        Loading invoices...
+                                    </p>
+                                </div>
+                            ) : filteredInvoices.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12">
                                     <FileText className="h-12 w-12 text-gray-300 mb-4" />
                                     <h5 className="text-lg font-semibold text-gray-600 mb-2">

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "5ocg342w9SCEHny/u+G27eF82+mcXOZw6TH9JJEH9dnloFNe217GDbAN7EHCpt8yIhvgIXom3Qzvn5EnxfeIyg==",
+  "dgSpecHash": "x47KCB5myg3EyWfhrloty7unq4Zsqh11Qsl3kiTQ36YSua5JQ+sYnlGdkfp8OpVrKeBlRO0YExuRNGMDBytbKg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockFlowPro.Web\\StockFlowPro.Web.csproj",
+  "projectFilePath": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\StockFlowPro.Web.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\pinto\\.nuget\\packages\\automapper\\12.0.1\\automapper.12.0.1.nupkg.sha512",
     "C:\\Users\\pinto\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\12.0.1\\automapper.extensions.microsoft.dependencyinjection.12.0.1.nupkg.sha512",

@@ -195,7 +195,7 @@ const Products: React.FC = () => {
     return (
         <div className="min-h-screen bg-gray-50 w-full">
             {/* Navigation Breadcrumb */}
-            <nav className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50 w-full px-4 sm:px-6 lg:px-8 py-4">
+            <nav className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-16 z-30 w-full px-4 sm:px-6 lg:px-8 py-4">
                 <ol className="flex items-center gap-2 text-sm">
                     <li className="flex items-center gap-2">
                         <Link

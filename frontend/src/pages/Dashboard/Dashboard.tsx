@@ -12,11 +12,10 @@ import {
     Settings,
     Zap,
     UserPlus,
-    Download,
     FileText as FileTextIcon,
     Activity,
     Box,
-    PieChart,
+    Cog,
 } from "lucide-react";
 import { useLowStockProducts } from "../../hooks/useProducts";
 import { useCurrentUser } from "../../hooks/useAuth";
@@ -80,36 +79,29 @@ const Dashboard: React.FC = () => {
     };
 
     return (
-        <div className="admin-panel-layout">
+        <div className="min-h-screen bg-gray-50 w-full">
             {/* Navigation Breadcrumb */}
-            <nav className="admin-breadcrumb" aria-label="Breadcrumb">
-                <ol className="breadcrumb-list">
-                    <li className="breadcrumb-item active" aria-current="page">
-                        <Home className="w-4 h-4" />
+            <nav className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-16 z-30 w-full px-4 sm:px-6 lg:px-8 py-4">
+                <ol className="flex items-center gap-2 text-sm">
+                    <li className="flex items-center gap-2 text-gray-900 font-semibold">
+                        <Home className="h-4 w-4" />
                         <span>Dashboard</span>
                     </li>
                 </ol>
             </nav>
 
-            <div className="admin-content-wrapper">
+            <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
                 {/* Enhanced Header */}
-                <header className="admin-header">
-                    <div className="header-main">
-                        <div className="header-content">
-                            <h1 className="admin-title">
-                                <div className="title-icon">
-                                    <BarChart3 className="w-7 h-7" />
-                                </div>
-                                <div className="title-text">
-                                    <span className="title-main">
-                                        Dashboard
-                                    </span>
-                                    <span className="title-sub">
-                                        Business Overview
-                                    </span>
-                                </div>
-                            </h1>
-                            <p className="admin-subtitle">
+                <header className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                        <div className="flex-1">
+                            <div className="flex items-center gap-6 mb-3">
+                                <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></div>
+                                <h1 className="text-3xl font-bold text-gray-900">
+                                    Dashboard
+                                </h1>
+                            </div>
+                            <p className="text-lg text-gray-600">
                                 Welcome back{currentUser ? (
                                     <>
                                         , <strong>{getUserDisplayName()}</strong>
@@ -118,9 +110,9 @@ const Dashboard: React.FC = () => {
                                 business today.
                             </p>
                         </div>
-                        <div className="header-actions">
+                        <div className="flex flex-wrap gap-3">
                             <button
-                                className="action-btn refresh-btn"
+                                className="flex items-center gap-2 px-4 py-2 border-2 border-gray-400 text-gray-600 rounded-lg hover:bg-gray-400 hover:text-white transition-all duration-200 font-medium"
                                 onClick={refreshDashboard}
                                 title="Refresh Data"
                             >
@@ -128,7 +120,7 @@ const Dashboard: React.FC = () => {
                                 <span>Refresh</span>
                             </button>
                             <button
-                                className="action-btn settings-btn"
+                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium shadow-lg"
                                 onClick={openSettings}
                                 title="Dashboard Settings"
                             >
@@ -140,298 +132,276 @@ const Dashboard: React.FC = () => {
                 </header>
 
                 {/* System Status Banner */}
-                <div className="status-banner">
-                    <div className="status-indicator">
-                        <div className="status-dot status-online"></div>
-                        <span className="status-text">System Online</span>
-                    </div>
-                    <div className="status-stats">
-                        <div className="stat-item">
-                            <span className="stat-label">Uptime</span>
-                            <span className="stat-value">99.9%</span>
+                <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-2xl mb-8 shadow-lg">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                            <span className="text-lg font-semibold">System Online</span>
                         </div>
-                        <div className="stat-item">
-                            <span className="stat-label">Active Users</span>
-                            <span className="stat-value">24</span>
-                        </div>
-                        <div className="stat-item">
-                            <span className="stat-label">Last Update</span>
-                            <span className="stat-value">2 minutes ago</span>
+                        <div className="flex flex-wrap gap-6 text-sm">
+                            <div className="text-center">
+                                <div className="font-bold">99.9%</div>
+                                <div className="opacity-90">Uptime</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="font-bold">24</div>
+                                <div className="opacity-90">Active Users</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="font-bold">2 min ago</div>
+                                <div className="opacity-90">Last Update</div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Quick Actions Bar */}
-                <div className="quick-actions">
-                    <h3 className="section-title">
-                        <Zap className="w-5 h-5" />
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-8">
+                    <h3 className="flex items-center gap-3 text-xl font-bold text-gray-900 mb-6">
+                        <Zap className="w-6 h-6 text-blue-500" />
                         Quick Actions
                     </h3>
-                    <div className="quick-actions-grid">
-                        <button
-                            className="quick-action-btn"
-                            data-tooltip="Add New Product"
-                        >
-                            <Package className="w-6 h-6" />
-                            <span>Add Product</span>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <button className="flex flex-col items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
+                            <Package className="w-8 h-8 text-blue-500" />
+                            <span className="font-medium text-gray-700">Add Product</span>
                         </button>
-                        <button
-                            className="quick-action-btn"
+                        <button 
+                            className="flex flex-col items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200"
                             onClick={navigateToNewInvoice}
-                            data-tooltip="Create New Invoice"
                         >
-                            <FileTextIcon className="w-6 h-6" />
-                            <span>New Invoice</span>
+                            <FileTextIcon className="w-8 h-8 text-blue-500" />
+                            <span className="font-medium text-gray-700">New Invoice</span>
                         </button>
-                        <button
-                            className="quick-action-btn"
-                            data-tooltip="View Reports"
-                        >
-                            <BarChart3 className="w-6 h-6" />
-                            <span>View Reports</span>
+                        <button className="flex flex-col items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
+                            <BarChart3 className="w-8 h-8 text-blue-500" />
+                            <span className="font-medium text-gray-700">View Reports</span>
                         </button>
-                        <button
-                            className="quick-action-btn"
-                            data-tooltip="System Health Check"
-                        >
-                            <Activity className="w-6 h-6" />
-                            <span>Health Check</span>
+                        <button className="flex flex-col items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
+                            <Activity className="w-8 h-8 text-blue-500" />
+                            <span className="font-medium text-gray-700">Health Check</span>
                         </button>
                     </div>
                 </div>
 
                 {/* Enhanced Dashboard Cards */}
-                <div className="admin-section">
-                    <h3 className="section-title">
-                        <BarChart3 className="w-5 h-5" />
+                <div className="mb-8">
+                    <h3 className="flex items-center gap-3 text-xl font-bold text-gray-900 mb-6">
+                        <BarChart3 className="w-6 h-6 text-blue-500" />
                         Business Metrics
                     </h3>
-                    <div className="admin-cards-grid">
-                        {/* Products Management Card */}
-                        <div className="admin-card" data-category="inventory">
-                            <div className="card-header">
-                                <div className="card-icon-wrapper">
-                                    <Package className="card-icon w-7 h-7" />
-                                </div>
-                                <div className="card-badge">
-                                    <span className="badge-text">
-                                        Inventory
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                        {/* Admin Panel Card */}
+                        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col">
+                            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 border-b border-gray-200">
+                                <div className="flex items-center justify-between">
+                                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                                        <Cog className="w-6 h-6 text-white" />
+                                    </div>
+                                    <span className="bg-purple-100 text-purple-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                        ADMIN
                                     </span>
                                 </div>
                             </div>
-                            <div className="card-body">
-                                <h5 className="card-title">
+                            <div className="p-6 flex flex-col flex-1">
+                                <h5 className="text-lg font-bold text-gray-900 mb-2">Admin Panel</h5>
+                                <p className="text-gray-600 text-sm mb-4">
+                                    Access system settings, advanced configuration,
+                                    and administrative tools for managing your
+                                    StockFlow Pro instance.
+                                </p>
+                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                                        <div className="text-xl font-bold text-purple-600">12</div>
+                                        <div className="text-xs text-gray-500 font-medium">ADMIN TOOLS</div>
+                                    </div>
+                                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                                        <div className="text-xl font-bold text-purple-600">Active</div>
+                                        <div className="text-xs text-gray-500 font-medium">STATUS</div>
+                                    </div>
+                                </div>
+                                <div className="flex gap-2 mt-auto">
+                                    <button
+                                        onClick={() => navigate("/admin")}
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium text-sm"
+                                    >
+                                        <Cog className="w-4 h-4" />
+                                        <span>Open Panel</span>
+                                    </button>
+                                    <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium text-sm">
+                                        <Settings className="w-4 h-4" />
+                                        <span>Settings</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Products Management Card */}
+                        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col">
+                            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 border-b border-gray-200">
+                                <div className="flex items-center justify-between">
+                                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                                        <Package className="w-6 h-6 text-white" />
+                                    </div>
+                                    <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                        INVENTORY
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="p-6 flex flex-col flex-1">
+                                <h5 className="text-lg font-bold text-gray-900 mb-2">
                                     Product Management
                                 </h5>
-                                <p className="card-text">
+                                <p className="text-gray-600 text-sm mb-4">
                                     Manage your product inventory, track stock
                                     levels, and monitor product performance
                                     across your business.
                                 </p>
-                                <div className="card-stats">
-                                    <div className="stat">
-                                        <span className="stat-number">
-                                            1,234
-                                        </span>
-                                        <span className="stat-label">
-                                            Total Products
-                                        </span>
+                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                                        <div className="text-xl font-bold text-blue-600">1,234</div>
+                                        <div className="text-xs text-gray-500 font-medium">TOTAL PRODUCTS</div>
                                     </div>
-                                    <div className="stat">
-                                        <span className="stat-number">
-                                            87.5%
-                                        </span>
-                                        <span className="stat-label">
-                                            In Stock
-                                        </span>
+                                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                                        <div className="text-xl font-bold text-blue-600">87.5%</div>
+                                        <div className="text-xs text-gray-500 font-medium">IN STOCK</div>
                                     </div>
                                 </div>
-                                <div className="card-actions">
+                                <div className="flex gap-2 mt-auto">
                                     <a
                                         href="/products"
-                                        className="btn btn-success"
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-medium text-sm"
                                     >
                                         <Box className="w-4 h-4" />
-                                        <span>Manage Products</span>
+                                        <span>Manage</span>
                                     </a>
-                                    <button className="btn btn-outline">
+                                    <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium text-sm">
                                         <Package className="w-4 h-4" />
-                                        <span>Add Product</span>
+                                        <span>Add</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
 
                         {/* Users Management Card */}
-                        <div className="admin-card" data-category="users">
-                            <div className="card-header">
-                                <div className="card-icon-wrapper">
-                                    <Users className="card-icon w-7 h-7" />
-                                </div>
-                                <div className="card-badge">
-                                    <span className="badge-text">Users</span>
+                        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col">
+                            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 border-b border-gray-200">
+                                <div className="flex items-center justify-between">
+                                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                                        <Users className="w-6 h-6 text-white" />
+                                    </div>
+                                    <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                        USERS
+                                    </span>
                                 </div>
                             </div>
-                            <div className="card-body">
-                                <h5 className="card-title">User Management</h5>
-                                <p className="card-text">
+                            <div className="p-6 flex flex-col flex-1">
+                                <h5 className="text-lg font-bold text-gray-900 mb-2">User Management</h5>
+                                <p className="text-gray-600 text-sm mb-4">
                                     Monitor user activity, manage permissions,
                                     and track user engagement across your
                                     platform.
                                 </p>
-                                <div className="card-stats">
-                                    <div className="stat">
-                                        <span className="stat-number">89</span>
-                                        <span className="stat-label">
-                                            Active Users
-                                        </span>
+                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                                        <div className="text-xl font-bold text-blue-600">89</div>
+                                        <div className="text-xs text-gray-500 font-medium">ACTIVE USERS</div>
                                     </div>
-                                    <div className="stat">
-                                        <span className="stat-number">+5%</span>
-                                        <span className="stat-label">
-                                            Growth
-                                        </span>
+                                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                                        <div className="text-xl font-bold text-blue-600">+5%</div>
+                                        <div className="text-xs text-gray-500 font-medium">GROWTH</div>
                                     </div>
                                 </div>
-                                <div className="card-actions">
+                                <div className="flex gap-2 mt-auto">
                                     <a
                                         href="/users"
-                                        className="btn btn-primary"
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium text-sm"
                                     >
                                         <Users className="w-4 h-4" />
-                                        <span>Manage Users</span>
+                                        <span>Manage</span>
                                     </a>
-                                    <button className="btn btn-outline">
+                                    <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium text-sm">
                                         <UserPlus className="w-4 h-4" />
-                                        <span>Add User</span>
+                                        <span>Add</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
 
                         {/* Invoices & Revenue Card */}
-                        <div className="admin-card" data-category="finance">
-                            <div className="card-header">
-                                <div className="card-icon-wrapper">
-                                    <FileText className="card-icon w-7 h-7" />
-                                </div>
-                                <div className="card-badge">
-                                    <span className="badge-text">Finance</span>
-                                </div>
-                            </div>
-                            <div className="card-body">
-                                <h5 className="card-title">
-                                    Invoices & Revenue
-                                </h5>
-                                <p className="card-text">
-                                    Track invoices, monitor revenue streams, and
-                                    analyze financial performance metrics.
-                                </p>
-                                <div className="card-stats">
-                                    <div className="stat">
-                                        <span className="stat-number">456</span>
-                                        <span className="stat-label">
-                                            Total Invoices
-                                        </span>
+                        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col">
+                            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 border-b border-gray-200">
+                                <div className="flex items-center justify-between">
+                                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                                        <FileText className="w-6 h-6 text-white" />
                                     </div>
-                                    <div className="stat">
-                                        <span className="stat-number">
-                                            {formatCurrency(12345)}
-                                        </span>
-                                        <span className="stat-label">
-                                            Revenue
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="card-actions">
-                                    <button
-                                        onClick={navigateToInvoices}
-                                        className="btn btn-info"
-                                    >
-                                        <FileText className="w-4 h-4" />
-                                        <span>View Invoices</span>
-                                    </button>
-                                    <button
-                                        onClick={navigateToNewInvoice}
-                                        className="btn btn-outline"
-                                    >
-                                        <DollarSign className="w-4 h-4" />
-                                        <span>New Invoice</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Reports & Analytics Card */}
-                        <div className="admin-card" data-category="analytics">
-                            <div className="card-header">
-                                <div className="card-icon-wrapper">
-                                    <PieChart className="card-icon w-7 h-7" />
-                                </div>
-                                <div className="card-badge">
-                                    <span className="badge-text">
-                                        Analytics
+                                    <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                        FINANCE
                                     </span>
                                 </div>
                             </div>
-                            <div className="card-body">
-                                <h5 className="card-title">
-                                    Reports & Analytics
+                            <div className="p-6 flex flex-col flex-1">
+                                <h5 className="text-lg font-bold text-gray-900 mb-2">
+                                    Invoices & Revenue
                                 </h5>
-                                <p className="card-text">
-                                    Generate detailed reports and gain insights
-                                    into your business performance and trends.
+                                <p className="text-gray-600 text-sm mb-4">
+                                    Track invoices, monitor revenue streams, and
+                                    analyze financial performance metrics.
                                 </p>
-                                <div className="card-stats">
-                                    <div className="stat">
-                                        <span className="stat-number">15</span>
-                                        <span className="stat-label">
-                                            Reports
-                                        </span>
+                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                                        <div className="text-xl font-bold text-blue-600">456</div>
+                                        <div className="text-xs text-gray-500 font-medium">TOTAL INVOICES</div>
                                     </div>
-                                    <div className="stat">
-                                        <span className="stat-number">
-                                            Daily
-                                        </span>
-                                        <span className="stat-label">
-                                            Updates
-                                        </span>
+                                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                                        <div className="text-xl font-bold text-blue-600">
+                                            {formatCurrency(12345)}
+                                        </div>
+                                        <div className="text-xs text-gray-500 font-medium">REVENUE</div>
                                     </div>
                                 </div>
-                                <div className="card-actions">
-                                    <button className="btn btn-warning">
-                                        <BarChart3 className="w-4 h-4" />
-                                        <span>View Reports</span>
+                                <div className="flex gap-2 mt-auto">
+                                    <button
+                                        onClick={navigateToInvoices}
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-lg hover:from-cyan-600 hover:to-cyan-700 transition-all duration-200 font-medium text-sm"
+                                    >
+                                        <FileText className="w-4 h-4" />
+                                        <span>View</span>
                                     </button>
-                                    <button className="btn btn-outline">
-                                        <Download className="w-4 h-4" />
-                                        <span>Export Data</span>
+                                    <button
+                                        onClick={navigateToNewInvoice}
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium text-sm"
+                                    >
+                                        <DollarSign className="w-4 h-4" />
+                                        <span>New</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
 
                         {/* Low Stock Alerts Card */}
-                        <div className="admin-card" data-category="alerts">
-                            <div className="card-header">
-                                <div className="card-icon-wrapper">
-                                    <AlertTriangle className="card-icon w-7 h-7" />
-                                </div>
-                                <div className="card-badge">
-                                    <span className="badge-text">Alerts</span>
+                        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col">
+                            <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 border-b border-gray-200">
+                                <div className="flex items-center justify-between">
+                                    <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
+                                        <AlertTriangle className="w-6 h-6 text-white" />
+                                    </div>
+                                    <span className="bg-orange-100 text-orange-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                        ALERTS
+                                    </span>
                                 </div>
                             </div>
-                            <div className="card-body">
-                                <h5 className="card-title">Low Stock Alerts</h5>
-                                <p className="card-text">
+                            <div className="p-6 flex flex-col flex-1">
+                                <h5 className="text-lg font-bold text-gray-900 mb-2">Low Stock Alerts</h5>
+                                <p className="text-gray-600 text-sm mb-4">
                                     Monitor products with low stock levels and
                                     receive alerts when inventory needs
                                     attention.
                                 </p>
-                                <div className="space-y-3 mb-4">
+                                <div className="space-y-3 mb-4 flex-1">
                                     {isLoadingLowStock ? (
                                         <div className="flex items-center justify-center p-4">
-                                            <div className="loading-spinner"></div>
+                                            <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                                             <span className="ml-2 text-sm text-gray-500">
                                                 Loading low stock products...
                                             </span>
@@ -451,7 +421,7 @@ const Dashboard: React.FC = () => {
                                         </div>
                                     ) : (
                                         lowStockProducts
-                                            .slice(0, 5)
+                                            .slice(0, 3)
                                             .map((product) => (
                                                 <div
                                                     key={product.id}
@@ -475,29 +445,22 @@ const Dashboard: React.FC = () => {
                                                             }{" "}
                                                             left
                                                         </span>
-                                                        <span className="text-xs text-gray-500">
-                                                            {formatCurrency(
-                                                                product.numberInStock *
-                                                                    product.costPerItem,
-                                                            )}{" "}
-                                                            value
-                                                        </span>
                                                     </div>
                                                 </div>
                                             ))
                                     )}
-                                    {lowStockProducts.length > 5 && (
+                                    {lowStockProducts.length > 3 && (
                                         <div className="p-2 text-center">
                                             <span className="text-xs text-gray-500">
-                                                +{lowStockProducts.length - 5}{" "}
+                                                +{lowStockProducts.length - 3}{" "}
                                                 more products with low stock
                                             </span>
                                         </div>
                                     )}
                                 </div>
-                                <div className="card-actions">
+                                <div className="flex gap-2 mt-auto">
                                     <button
-                                        className="btn btn-secondary"
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 font-medium text-sm"
                                         onClick={() =>
                                             navigate(
                                                 "/products?filter=lowStock",
@@ -505,36 +468,38 @@ const Dashboard: React.FC = () => {
                                         }
                                     >
                                         <AlertTriangle className="w-4 h-4" />
-                                        <span>View All Alerts</span>
+                                        <span>View All</span>
                                     </button>
                                     <button
-                                        className="btn btn-outline"
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium text-sm"
                                         onClick={() => navigate("/products")}
                                     >
                                         <Package className="w-4 h-4" />
-                                        <span>Manage Stock</span>
+                                        <span>Manage</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
 
                         {/* Recent Activity Card */}
-                        <div className="admin-card" data-category="activity">
-                            <div className="card-header">
-                                <div className="card-icon-wrapper">
-                                    <Activity className="card-icon w-7 h-7" />
-                                </div>
-                                <div className="card-badge">
-                                    <span className="badge-text">Activity</span>
+                        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col">
+                            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 border-b border-gray-200">
+                                <div className="flex items-center justify-between">
+                                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                                        <Activity className="w-6 h-6 text-white" />
+                                    </div>
+                                    <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                        ACTIVITY
+                                    </span>
                                 </div>
                             </div>
-                            <div className="card-body">
-                                <h5 className="card-title">Recent Activity</h5>
-                                <p className="card-text">
+                            <div className="p-6 flex flex-col flex-1">
+                                <h5 className="text-lg font-bold text-gray-900 mb-2">Recent Activity</h5>
+                                <p className="text-gray-600 text-sm mb-4">
                                     Track recent system activities and monitor
                                     user interactions across your platform.
                                 </p>
-                                <div className="space-y-3 mb-4">
+                                <div className="space-y-3 mb-4 flex-1">
                                     {recentActivity.map((activity, index) => (
                                         <div
                                             key={index}
@@ -549,12 +514,12 @@ const Dashboard: React.FC = () => {
                                         </div>
                                     ))}
                                 </div>
-                                <div className="card-actions">
-                                    <button className="btn btn-primary">
+                                <div className="flex gap-2 mt-auto">
+                                    <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium text-sm">
                                         <Activity className="w-4 h-4" />
-                                        <span>View All Activity</span>
+                                        <span>View All</span>
                                     </button>
-                                    <button className="btn btn-outline">
+                                    <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium text-sm">
                                         <RefreshCw className="w-4 h-4" />
                                         <span>Refresh</span>
                                     </button>
@@ -564,555 +529,6 @@ const Dashboard: React.FC = () => {
                     </div>
                 </div>
             </div>
-
-            <style>{`
-        /* Admin Panel Layout and Styles */
-        .admin-panel-layout {
-          width: 100%;
-          background: linear-gradient(135deg, #f4f6fb 0%, #e8ecf4 100%);
-          min-height: 100vh;
-          overflow-x: hidden;
-          font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-          margin: 0;
-          padding: 0;
-        }
-
-        /* Breadcrumb Navigation */
-        .admin-breadcrumb {
-          background: rgba(255,255,255,0.9);
-          backdrop-filter: blur(10px);
-          padding: 1rem 2rem;
-          border-bottom: 1px solid rgba(90,92,219,0.1);
-          position: sticky;
-          top: 0;
-          z-index: 10;
-        }
-
-        .breadcrumb-list {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          margin: 0;
-          padding: 0;
-          list-style: none;
-        }
-
-        .breadcrumb-item {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          color: #232946;
-          font-weight: 600;
-        }
-
-        .admin-content-wrapper {
-          padding: 2rem 3rem;
-          max-width: 100%;
-          overflow-x: hidden;
-        }
-
-        /* Enhanced Header */
-        .admin-header {
-          background: #fff;
-          border-radius: 20px;
-          box-shadow: 0 8px 32px rgba(90,92,219,0.08);
-          border: 1px solid rgba(90,92,219,0.1);
-          margin-bottom: 2rem;
-          overflow: hidden;
-        }
-
-        .header-main {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 2.5rem;
-          background: linear-gradient(135deg, #fff 0%, #f8f9fb 100%);
-        }
-
-        .header-content {
-          flex: 1;
-        }
-
-        .admin-title {
-          display: flex;
-          align-items: center;
-          gap: 1.5rem;
-          margin-bottom: 0.75rem;
-        }
-
-        .title-icon {
-          width: 60px;
-          height: 60px;
-          background: linear-gradient(135deg, #5a5cdb 0%, #7f53ac 100%);
-          border-radius: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #fff;
-          box-shadow: 0 4px 16px rgba(90,92,219,0.3);
-        }
-
-        .title-text {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .title-main {
-          font-size: 2.5rem;
-          font-weight: 800;
-          color: #232946;
-          line-height: 1.2;
-          margin: 0;
-        }
-
-        .title-sub {
-          font-size: 1rem;
-          color: #6c7a89;
-          font-weight: 500;
-          margin-top: 0.25rem;
-        }
-
-        .admin-subtitle {
-          font-size: 1.1rem;
-          color: #6c7a89;
-          margin: 0;
-          line-height: 1.5;
-        }
-
-        .header-actions {
-          display: flex;
-          gap: 1rem;
-        }
-
-        .action-btn {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          background: #fff;
-          border: 2px solid #e5e7ef;
-          color: #5a5cdb;
-          padding: 0.75rem 1.25rem;
-          border-radius: 12px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          text-decoration: none;
-        }
-
-        .action-btn:hover {
-          background: #5a5cdb;
-          color: #fff;
-          border-color: #5a5cdb;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 16px rgba(90,92,219,0.3);
-        }
-
-        /* System Status Banner */
-        .status-banner {
-          background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-          color: #fff;
-          padding: 1.5rem 2rem;
-          border-radius: 16px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 2rem;
-          box-shadow: 0 4px 20px rgba(40,167,69,0.2);
-        }
-
-        .status-indicator {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-        }
-
-        .status-dot {
-          width: 12px;
-          height: 12px;
-          border-radius: 50%;
-          animation: pulse-status 2s infinite;
-        }
-
-        .status-online {
-          background: #fff;
-        }
-
-        .status-text {
-          font-weight: 600;
-          font-size: 1.1rem;
-        }
-
-        .status-stats {
-          display: flex;
-          gap: 2rem;
-        }
-
-        .stat-item {
-          text-align: center;
-        }
-
-        .stat-label {
-          display: block;
-          font-size: 0.85rem;
-          opacity: 0.9;
-          margin-bottom: 0.25rem;
-        }
-
-        .stat-value {
-          display: block;
-          font-size: 1.1rem;
-          font-weight: 700;
-        }
-
-        /* Quick Actions */
-        .quick-actions {
-          margin-bottom: 2.5rem;
-        }
-
-        .section-title {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          font-size: 1.4rem;
-          font-weight: 700;
-          color: #232946;
-          margin-bottom: 1.5rem;
-        }
-
-        .quick-actions-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 1rem;
-        }
-
-        .quick-action-btn {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0.5rem;
-          background: #fff;
-          border: 2px solid #e5e7ef;
-          padding: 1.5rem 1rem;
-          border-radius: 12px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          text-decoration: none;
-          color: #5a5cdb;
-          font-weight: 600;
-        }
-
-        .quick-action-btn:hover {
-          background: #5a5cdb;
-          color: #fff;
-          border-color: #5a5cdb;
-          transform: translateY(-4px);
-          box-shadow: 0 8px 24px rgba(90,92,219,0.2);
-        }
-
-        /* Enhanced Admin Cards */
-        .admin-section {
-          margin-bottom: 3rem;
-        }
-
-        .admin-cards-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-          gap: 2rem;
-          margin-bottom: 2rem;
-        }
-
-        .admin-card {
-          background: #fff;
-          border-radius: 20px;
-          box-shadow: 0 8px 32px rgba(90,92,219,0.08);
-          border: 1px solid rgba(90,92,219,0.1);
-          transition: all 0.4s cubic-bezier(.4,0,.2,1);
-          overflow: hidden;
-          height: 100%;
-          position: relative;
-        }
-
-        .admin-card:hover {
-          transform: translateY(-8px) scale(1.02);
-          box-shadow: 0 16px 48px rgba(90,92,219,0.15);
-        }
-
-        .card-header {
-          background: linear-gradient(135deg, #f8f9fb 0%, #e8ecf4 100%);
-          padding: 2rem;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          border-bottom: 1px solid rgba(90,92,219,0.1);
-        }
-
-        .card-icon-wrapper {
-          width: 60px;
-          height: 60px;
-          background: linear-gradient(135deg, #5a5cdb 0%, #7f53ac 100%);
-          border-radius: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 4px 16px rgba(90,92,219,0.3);
-        }
-
-        .card-icon {
-          color: #fff;
-        }
-
-        .card-badge {
-          background: rgba(90,92,219,0.1);
-          color: #5a5cdb;
-          padding: 0.5rem 1rem;
-          border-radius: 20px;
-          font-size: 0.8rem;
-          font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .card-body {
-          padding: 2rem;
-          display: flex;
-          flex-direction: column;
-          height: calc(100% - 140px);
-        }
-
-        .card-title {
-          font-size: 1.3rem;
-          font-weight: 700;
-          color: #232946;
-          margin-bottom: 0.75rem;
-        }
-
-        .card-text {
-          color: #6c7a89;
-          font-size: 0.95rem;
-          line-height: 1.6;
-          margin-bottom: 1.5rem;
-          flex-grow: 1;
-        }
-
-        .card-stats {
-          display: flex;
-          gap: 1.5rem;
-          margin-bottom: 1.5rem;
-          padding: 1rem;
-          background: #f8f9fb;
-          border-radius: 12px;
-        }
-
-        .stat {
-          text-align: center;
-          flex: 1;
-        }
-
-        .stat-number {
-          display: block;
-          font-size: 1.4rem;
-          font-weight: 700;
-          color: #5a5cdb;
-          margin-bottom: 0.25rem;
-        }
-
-        .stat-label {
-          font-size: 0.8rem;
-          color: #000000;
-          font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .card-actions {
-          display: flex;
-          gap: 0.75rem;
-        }
-
-        .btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.5rem;
-          padding: 0.75rem 1.25rem;
-          border-radius: 10px;
-          font-weight: 600;
-          text-decoration: none;
-          transition: all 0.3s ease;
-          border: none;
-          cursor: pointer;
-          flex: 1;
-          font-size: 0.9rem;
-          white-space: nowrap;
-        }
-
-        .btn-primary {
-          background: linear-gradient(135deg, #5a5cdb 0%, #7f53ac 100%);
-          color: #fff;
-          box-shadow: 0 2px 8px rgba(90,92,219,0.3);
-        }
-
-        .btn-success {
-          background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-          color: #fff;
-          box-shadow: 0 2px 8px rgba(40,167,69,0.3);
-        }
-
-        .btn-info {
-          background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
-          color: #fff;
-          box-shadow: 0 2px 8px rgba(23,162,184,0.3);
-        }
-
-        .btn-warning {
-          background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
-          color: #fff;
-          box-shadow: 0 2px 8px rgba(255,193,7,0.3);
-        }
-
-        .btn-secondary {
-          background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-          color: #fff;
-          box-shadow: 0 2px 8px rgba(108,117,125,0.3);
-        }
-
-        .btn-outline {
-          background: transparent;
-          color: #5a5cdb;
-          border: 2px solid #e5e7ef;
-        }
-
-        .btn:hover {
-          transform: translateY(-2px);
-          text-decoration: none;
-          color: #fff;
-        }
-
-        .btn-outline:hover {
-          background: #5a5cdb;
-          border-color: #5a5cdb;
-          color: #fff;
-        }
-
-        /* Loading Spinner */
-        .loading-spinner {
-          width: 20px;
-          height: 20px;
-          border: 2px solid #e5e7ef;
-          border-top: 2px solid #5a5cdb;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        /* Animations */
-        @keyframes pulse-status {
-          0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.7); }
-          70% { box-shadow: 0 0 0 6px rgba(255,255,255,0); }
-          100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
-        }
-
-        /* Tooltips */
-        [data-tooltip] {
-          position: relative;
-        }
-
-        [data-tooltip]:hover::after {
-          content: attr(data-tooltip);
-          position: absolute;
-          bottom: 100%;
-          left: 50%;
-          transform: translateX(-50%);
-          background: rgba(0,0,0,0.9);
-          color: #fff;
-          padding: 0.5rem 0.75rem;
-          border-radius: 6px;
-          font-size: 0.8rem;
-          white-space: nowrap;
-          z-index: 1000;
-          margin-bottom: 0.5rem;
-          opacity: 0;
-          animation: fadeInTooltip 0.3s ease forwards;
-        }
-
-        @keyframes fadeInTooltip {
-          from { opacity: 0; transform: translateX(-50%) translateY(5px); }
-          to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 991.98px) {
-          .admin-content-wrapper {
-            padding: 1.5rem 2rem;
-          }
-          
-          .title-main {
-            font-size: 2rem;
-          }
-          
-          .admin-cards-grid {
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 1.5rem;
-          }
-
-          .header-main {
-            flex-direction: column;
-            gap: 1.5rem;
-            text-align: center;
-          }
-
-          .status-banner {
-            flex-direction: column;
-            gap: 1rem;
-            text-align: center;
-          }
-
-          .status-stats {
-            justify-content: center;
-          }
-        }
-
-        @media (max-width: 576px) {
-          .admin-content-wrapper {
-            padding: 1rem;
-          }
-
-          .admin-title {
-            flex-direction: column;
-            text-align: center;
-            gap: 1rem;
-          }
-
-          .title-main {
-            font-size: 1.8rem;
-          }
-
-          .admin-cards-grid {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-          }
-
-          .header-main {
-            padding: 1.5rem;
-          }
-
-          .quick-actions-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-
-          .card-actions {
-            flex-direction: column;
-          }
-
-          .status-stats {
-            gap: 1rem;
-          }
-        }
-      `}</style>
         </div>
     );
 };
