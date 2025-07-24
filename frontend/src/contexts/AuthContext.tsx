@@ -7,12 +7,20 @@ import {
     hasAllPermissions,
 } from "../utils/permissions";
 import { AuthContext, type AuthContextType } from "../hooks/useAuthContext";
+import { ArchitectureAuthProvider } from "./ArchitectureAuthProvider";
 
 interface AuthProviderProps {
     children: React.ReactNode;
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+    // Use new architecture-based authentication
+    return <ArchitectureAuthProvider>{children}</ArchitectureAuthProvider>;
+};
+
+// Legacy Auth Provider (original implementation) - kept for reference
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const LegacyAuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<UserDto | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 

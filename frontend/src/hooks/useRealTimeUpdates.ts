@@ -10,7 +10,7 @@ export interface RealTimeEvent {
           'InvoiceCreated' | 'InvoiceUpdated' | 'InvoiceDeleted' |
           'StockUpdated' | 'LowStockAlert';
     entityId: string;
-    data?: any;
+    data?: unknown;
     timestamp: string;
     userId?: string;
 }
@@ -105,7 +105,7 @@ export const useRealTimeUpdates = () => {
         };
 
         // Handler for dashboard updates
-        const handleDashboardUpdate = (event: CustomEvent<any>) => {
+        const handleDashboardUpdate = (event: CustomEvent<unknown>) => {
             console.log('Received dashboard update:', event.detail);
             
             // Invalidate dashboard-related queries
@@ -146,12 +146,13 @@ export const useOptimisticUpdates = () => {
         // Update the product in any list queries
         queryClient.setQueriesData(
             { queryKey: productKeys.lists() },
-            (oldData: any) => {
-                if (!oldData?.data) return oldData;
+            (oldData: unknown) => {
+                const typedOldData = oldData as { data?: ProductDto[] } | undefined;
+                if (!typedOldData?.data) return oldData;
                 
                 return {
-                    ...oldData,
-                    data: oldData.data.map((product: ProductDto) =>
+                    ...typedOldData,
+                    data: typedOldData.data.map((product: ProductDto) =>
                         product.id === productId ? { ...product, ...updatedData } : product
                     ),
                 };
@@ -169,12 +170,13 @@ export const useOptimisticUpdates = () => {
         // Update the invoice in any list queries
         queryClient.setQueriesData(
             { queryKey: invoiceKeys.lists() },
-            (oldData: any) => {
-                if (!oldData?.data) return oldData;
+            (oldData: unknown) => {
+                const typedOldData = oldData as { data?: InvoiceDto[] } | undefined;
+                if (!typedOldData?.data) return oldData;
                 
                 return {
-                    ...oldData,
-                    data: oldData.data.map((invoice: InvoiceDto) =>
+                    ...typedOldData,
+                    data: typedOldData.data.map((invoice: InvoiceDto) =>
                         invoice.id === invoiceId ? { ...invoice, ...updatedData } : invoice
                     ),
                 };

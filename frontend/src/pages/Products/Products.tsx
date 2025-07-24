@@ -17,19 +17,13 @@ import {
     Loader2,
 } from "lucide-react";
 import { formatCurrency, formatCurrencyCompact } from "../../utils/currency";
-import { useProducts } from "../../hooks/useProducts";
+import { useProducts as useArchitectureProducts } from "../../architecture/adapters/primary/hooks";
 import { useRealTimeUpdates } from "../../hooks/useRealTimeUpdates";
-import type { ProductFilters, PaginationParams } from "../../types/index";
-
-// Define ProductStats interface
-interface ProductStats {
-    totalProducts: number;
-    totalValue: number;
-    lowStockCount: number;
-    outOfStockCount: number;
-    activeProducts: number;
-    inactiveProducts: number;
-}
+import { CreateProductRequest, UpdateProductRequest, StockAdjustmentRequest } from "../../architecture/ports/primary/ProductManagementPort";
+import { ProductEntity } from "../../architecture/domain/entities/Product";
+import ProductForm from "../../components/Products/ProductForm";
+import StockAdjustmentModal from "../../components/Products/StockAdjustmentModal";
+import DeleteProductModal from "../../components/Products/DeleteProductModal";
 
 const Products: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -54,28 +48,54 @@ const Products: React.FC = () => {
         },
     ]);
 
-    // Prepare filters for API call
-    const filters: ProductFilters = {
-        search: searchQuery || undefined,
-        isActive: activeOnlyFilter || undefined,
-        isLowStock: lowStockOnlyFilter || undefined,
-        inStockOnly: inStockOnlyFilter || undefined,
-    };
+    // Modal states
+    const [showProductForm, setShowProductForm] = useState(false);
+    const [showStockModal, setShowStockModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<ProductEntity | null>(null);
+    const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
 
-    // Prepare pagination for API call
-    const pagination: PaginationParams = {
-        pageNumber: currentPage,
-        pageSize: pageSize,
-    };
+    // Use hexagonal architecture hooks
+    const productManagement = useArchitectureProducts();
 
-    // Fetch products from API
-    const { data: productsResponse, isLoading, error } = useProducts(pagination, filters);
-    // Note: Stats endpoint is not available (404), so we'll calculate stats from products data
-    // const { data: statsData } = useProductStats();
-    const statsData: ProductStats | undefined = undefined; // Disable stats API call for now
+    // Extract stable function to avoid infinite re-renders
+    const { updateFilters } = productManagement;
+
+    // Update filters when they change
+    useEffect(() => {
+        const filters = {
+            search: searchQuery || undefined,
+            isActive: activeOnlyFilter || undefined,
+            stockStatus: lowStockOnlyFilter ? 'low' as const : undefined,
+            page: currentPage,
+            pageSize: pageSize,
+        };
+        updateFilters(filters);
+    }, [
+        searchQuery, 
+        activeOnlyFilter, 
+        lowStockOnlyFilter, 
+        currentPage, 
+        pageSize,
+        updateFilters
+    ]);
 
     // Enable real-time updates
     useRealTimeUpdates();
+
+    // Get data from architecture hooks
+    const products = productManagement.products;
+    const totalPages = productManagement.totalPages;
+    const totalCount = productManagement.totalProducts;
+    const isLoading = productManagement.isLoading;
+    const error = productManagement.error;
+    const categories = productManagement.categories;
+
+    // Calculate stats from API data
+    const totalProducts = totalCount;
+    const totalValue = productManagement.inventoryValueReport?.totalValue || products.reduce((sum, product) => sum + (product.totalValue || product.calculatedTotalValue), 0);
+    const lowStockCount = products.filter(product => product.isLowStock).length;
+    const outOfStockCount = products.filter(product => product.isOutOfStock).length;
 
     // Log API calls to console
     useEffect(() => {
@@ -83,13 +103,13 @@ const Products: React.FC = () => {
             addConsoleEntry(`Fetching products from API with pageSize: ${pageSize}, pageNumber: ${currentPage}`, "api");
         } else if (error) {
             addConsoleEntry(`API Error: ${error.message}`, "error");
-        } else if (productsResponse) {
+        } else if (products.length > 0) {
             addConsoleEntry(
-                `API Success: Requested pageSize: ${pageSize}, Received ${productsResponse.data.length} products (Page ${productsResponse.pageNumber} of ${productsResponse.totalPages}, Total: ${productsResponse.totalCount})`,
+                `API Success: Requested pageSize: ${pageSize}, Received ${products.length} products (Page ${currentPage} of ${totalPages}, Total: ${totalProducts})`,
                 "api"
             );
         }
-    }, [isLoading, error, productsResponse, pageSize, currentPage]);
+    }, [isLoading, error, products, pageSize, currentPage, totalPages, totalProducts]);
 
     const addConsoleEntry = (
         message: string,
@@ -117,24 +137,13 @@ const Products: React.FC = () => {
         setInStockOnlyFilter(false);
         setLowStockOnlyFilter(false);
         setSearchQuery("");
+        productManagement.clearFilters();
         addConsoleEntry("All filters cleared", "system");
     };
 
     const clearSearch = () => {
         setSearchQuery("");
     };
-
-    // Get data from API responses
-    const products = productsResponse?.data || [];
-    const totalPages = productsResponse?.totalPages || 1;
-    const totalCount = productsResponse?.totalCount || 0;
-
-    // Calculate stats from API data or use stats endpoint
-    const statsTyped = statsData as ProductStats | undefined;
-    const totalProducts = statsTyped?.totalProducts || totalCount;
-    const totalValue = statsTyped?.totalValue || products.reduce((sum, product) => sum + product.totalValue, 0);
-    const lowStockCount = statsTyped?.lowStockCount || products.filter(product => product.isLowStock).length;
-    const outOfStockCount = statsTyped?.outOfStockCount || products.filter(product => !product.isInStock).length;
 
     // Reset to page 1 when filters change
     useEffect(() => {
@@ -146,10 +155,73 @@ const Products: React.FC = () => {
         setCurrentPage(1);
     }, [pageSize]);
 
-    // All filtering is now handled by the backend API
-    const filteredProducts = products;
+    // CRUD handlers
+    const handleCreateProduct = () => {
+        setFormMode('create');
+        setSelectedProduct(null);
+        setShowProductForm(true);
+        addConsoleEntry("Opening create product form", "system");
+    };
 
-    
+    const handleEditProduct = (product: ProductEntity) => {
+        setFormMode('edit');
+        setSelectedProduct(product);
+        setShowProductForm(true);
+        addConsoleEntry(`Opening edit form for product: ${product.name}`, "system");
+    };
+
+    const handleStockAdjustment = (product: ProductEntity) => {
+        setSelectedProduct(product);
+        setShowStockModal(true);
+        addConsoleEntry(`Opening stock adjustment for product: ${product.name}`, "system");
+    };
+
+    const handleDeleteProduct = (product: ProductEntity) => {
+        setSelectedProduct(product);
+        setShowDeleteModal(true);
+        addConsoleEntry(`Opening delete confirmation for product: ${product.name}`, "system");
+    };
+
+    const handleProductSubmit = async (data: CreateProductRequest | UpdateProductRequest) => {
+        try {
+            if (formMode === 'create') {
+                await productManagement.createProduct(data as CreateProductRequest);
+                addConsoleEntry(`Product created successfully: ${data.name}`, "database");
+            } else {
+                await productManagement.updateProduct(data as UpdateProductRequest);
+                addConsoleEntry(`Product updated successfully: ${data.name}`, "database");
+            }
+            setShowProductForm(false);
+            setSelectedProduct(null);
+        } catch (error) {
+            addConsoleEntry(`Failed to ${formMode} product: ${error}`, "error");
+        }
+    };
+
+    const handleStockSubmit = async (request: StockAdjustmentRequest) => {
+        try {
+            await productManagement.adjustStock(request);
+            addConsoleEntry(`Stock adjusted for product ID ${request.productId}: ${request.adjustment > 0 ? '+' : ''}${request.adjustment}`, "database");
+            setShowStockModal(false);
+            setSelectedProduct(null);
+        } catch (error) {
+            addConsoleEntry(`Failed to adjust stock: ${error}`, "error");
+        }
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!selectedProduct) return;
+        
+        try {
+            await productManagement.deleteProduct(Number(selectedProduct.id));
+            addConsoleEntry(`Product deleted successfully: ${selectedProduct.name}`, "database");
+            setShowDeleteModal(false);
+            setSelectedProduct(null);
+        } catch (error) {
+            addConsoleEntry(`Failed to delete product: ${error}`, "error");
+        }
+    };
+
     const getStatusBadgeClasses = (isActive: boolean) => {
         return isActive
             ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-[0_2px_8px_rgba(16,185,129,0.3)]"
@@ -166,8 +238,8 @@ const Products: React.FC = () => {
     };
 
     // Format date helper
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString();
+    const formatDate = (date: Date) => {
+        return date.toLocaleDateString();
     };
 
     return (
@@ -212,8 +284,16 @@ const Products: React.FC = () => {
                                 <ArrowLeft className="h-4 w-4" />
                                 Back to Dashboard
                             </Link>
-                            <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium shadow-lg">
-                                <Plus className="h-4 w-4" />
+                            <button 
+                                onClick={handleCreateProduct}
+                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium shadow-lg"
+                                disabled={productManagement.isCreatingProduct}
+                            >
+                                {productManagement.isCreatingProduct ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Plus className="h-4 w-4" />
+                                )}
                                 Add New Product
                             </button>
                         </div>
@@ -462,7 +542,7 @@ const Products: React.FC = () => {
                     </div>
                 )}
 
-                {/* Products Table - Matching Razor View Exactly */}
+                {/* Products Table */}
                 <div className="bg-white border-0 rounded-2xl shadow-[0_8px_25px_rgba(0,0,0,0.08)] mx-6 overflow-hidden">
                     <div className="p-0">
                         <div className="rounded-2xl overflow-hidden">
@@ -483,7 +563,7 @@ const Products: React.FC = () => {
                                         {error.message || "Failed to load products from the server"}
                                     </p>
                                 </div>
-                            ) : filteredProducts.length === 0 ? (
+                            ) : products.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12">
                                     <Package className="h-12 w-12 text-gray-300 mb-4" />
                                     <h5 className="text-lg font-semibold text-gray-600 mb-2">
@@ -521,42 +601,38 @@ const Products: React.FC = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filteredProducts.map(
+                                        {products.map(
                                             (product, index) => (
                                                 <tr
                                                     key={product.id}
                                                     className="hover:bg-[#f8fafc] transition-colors duration-200"
                                                 >
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== filteredProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""} font-medium text-gray-900`}
+                                                        className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""} font-medium text-gray-900`}
                                                     >
                                                         {product.name}
                                                     </td>
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== filteredProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
+                                                        className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
                                                     >
-                                                        {formatCurrency(
-                                                            product.costPerItem,
-                                                        )}
+                                                        {formatCurrency(product.cost)}
                                                     </td>
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== filteredProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""}`}
+                                                        className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""}`}
                                                     >
                                                         <span
-                                                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium ${getStockBadgeClasses(product.numberInStock)}`}
+                                                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium ${getStockBadgeClasses(product.quantity)}`}
                                                         >
-                                                            {product.numberInStock}
+                                                            {product.quantity}
                                                         </span>
                                                     </td>
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== filteredProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
+                                                        className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
                                                     >
-                                                        {formatCurrency(
-                                                            product.totalValue,
-                                                        )}
+                                                        {formatCurrency(product.totalValue || product.calculatedTotalValue)}
                                                     </td>
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== filteredProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""}`}
+                                                        className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""}`}
                                                     >
                                                         <span
                                                             className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium ${getStatusBadgeClasses(product.isActive)}`}
@@ -565,40 +641,52 @@ const Products: React.FC = () => {
                                                         </span>
                                                     </td>
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== filteredProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
+                                                        className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
                                                     >
                                                         {formatDate(product.createdAt)}
                                                     </td>
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== filteredProducts.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-right`}
+                                                        className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-right`}
                                                     >
                                                         <div className="flex justify-end gap-2">
                                                             <button
+                                                                onClick={() => handleEditProduct(product)}
                                                                 className="inline-flex items-center gap-1 px-3 py-2 text-xs bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(59,130,246,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(59,130,246,0.4)] border-0 min-w-[70px]"
                                                                 title="Edit Product"
+                                                                disabled={productManagement.isUpdatingProduct}
                                                             >
-                                                                <Edit className="h-3 w-3" />
-                                                                <span>
-                                                                    Edit
-                                                                </span>
+                                                                {productManagement.isUpdatingProduct ? (
+                                                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                                                ) : (
+                                                                    <Edit className="h-3 w-3" />
+                                                                )}
+                                                                <span>Edit</span>
                                                             </button>
                                                             <button
+                                                                onClick={() => handleStockAdjustment(product)}
                                                                 className="inline-flex items-center gap-1 px-3 py-2 text-xs bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(245,158,11,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(245,158,11,0.4)] border-0 min-w-[70px]"
                                                                 title="Update Stock"
+                                                                disabled={productManagement.isAdjustingStock}
                                                             >
-                                                                <Package className="h-3 w-3" />
-                                                                <span>
-                                                                    Stock
-                                                                </span>
+                                                                {productManagement.isAdjustingStock ? (
+                                                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                                                ) : (
+                                                                    <Package className="h-3 w-3" />
+                                                                )}
+                                                                <span>Stock</span>
                                                             </button>
                                                             <button
+                                                                onClick={() => handleDeleteProduct(product)}
                                                                 className="inline-flex items-center gap-1 px-3 py-2 text-xs bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(239,68,68,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(239,68,68,0.4)] border-0 min-w-[70px]"
                                                                 title="Delete Product"
+                                                                disabled={productManagement.isDeletingProduct}
                                                             >
-                                                                <Trash2 className="h-3 w-3" />
-                                                                <span>
-                                                                    Delete
-                                                                </span>
+                                                                {productManagement.isDeletingProduct ? (
+                                                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                                                ) : (
+                                                                    <Trash2 className="h-3 w-3" />
+                                                                )}
+                                                                <span>Delete</span>
                                                             </button>
                                                         </div>
                                                     </td>
@@ -611,7 +699,7 @@ const Products: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Footer with pagination - Matching Invoices Style */}
+                    {/* Footer with pagination */}
                     <div className="bg-[#f8fafc] border-t border-[#e2e8f0] px-6 py-4 flex justify-between items-center">
                         <span className="text-sm text-gray-600 font-medium flex items-center gap-2">
                             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -627,7 +715,7 @@ const Products: React.FC = () => {
                                         <li key={page}>
                                             <button
                                                 onClick={() =>
-                                                    setCurrentPage(page)
+                                                    setCurrentPage(Number(page))
                                                 }
                                                 className={`px-3 py-1 rounded transition-colors ${
                                                     currentPage === page
@@ -645,6 +733,46 @@ const Products: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Modals */}
+            <ProductForm
+                product={selectedProduct}
+                categories={categories}
+                isOpen={showProductForm}
+                onClose={() => {
+                    setShowProductForm(false);
+                    setSelectedProduct(null);
+                }}
+                onSubmit={handleProductSubmit}
+                isLoading={productManagement.isCreatingProduct || productManagement.isUpdatingProduct}
+                mode={formMode}
+            />
+
+            {selectedProduct && (
+                <StockAdjustmentModal
+                    product={selectedProduct}
+                    isOpen={showStockModal}
+                    onClose={() => {
+                        setShowStockModal(false);
+                        setSelectedProduct(null);
+                    }}
+                    onSubmit={handleStockSubmit}
+                    isLoading={productManagement.isAdjustingStock}
+                />
+            )}
+
+            {selectedProduct && (
+                <DeleteProductModal
+                    product={selectedProduct}
+                    isOpen={showDeleteModal}
+                    onClose={() => {
+                        setShowDeleteModal(false);
+                        setSelectedProduct(null);
+                    }}
+                    onConfirm={handleDeleteConfirm}
+                    isLoading={productManagement.isDeletingProduct}
+                />
+            )}
         </div>
     );
 };

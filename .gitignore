@@ -22,3 +22,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.vs/
+.qodo/
+
+# Build artifacts
+bin/
+obj/
+
+# Temporary files
+*.tmp
+*.cache
+*.bak
+cookies.txt

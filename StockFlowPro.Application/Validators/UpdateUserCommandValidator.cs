@@ -24,7 +24,8 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
 
         RuleFor(x => x.DateOfBirth)
             .NotEmpty().WithMessage("Date of birth is required")
-            .Must(BeValidAge).WithMessage("User must be at least 13 years old and not more than 120 years old");
+            .Must(dateOfBirth => dateOfBirth.HasValue && BeValidAge(dateOfBirth.Value))
+            .WithMessage("User must be at least 13 years old and not more than 120 years old");
     }
 
     private static bool BeValidAge(DateTime dateOfBirth)

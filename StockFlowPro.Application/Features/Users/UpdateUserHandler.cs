@@ -28,12 +28,18 @@ public class UpdateUserHandler : IRequestHandler<UpdateUserCommand, UserDto>
             throw new KeyNotFoundException($"User with ID {request.Id} not found");
         }
 
-        user.UpdatePersonalInfo(
-            request.FirstName,
-            request.LastName,
-            request.PhoneNumber,
-            request.DateOfBirth
-        );
+        if (request.DateOfBirth.HasValue && 
+            !string.IsNullOrEmpty(request.FirstName) && 
+            !string.IsNullOrEmpty(request.LastName) && 
+            !string.IsNullOrEmpty(request.PhoneNumber))
+        {
+            user.UpdatePersonalInfo(
+                request.FirstName,
+                request.LastName,
+                request.PhoneNumber,
+                request.DateOfBirth.Value
+            );
+        }
 
         if (request.Role.HasValue)
         {

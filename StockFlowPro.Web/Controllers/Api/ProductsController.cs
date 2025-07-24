@@ -350,6 +350,175 @@ public class ProductsController : ControllerBase
         }
     }
 
+    [HttpGet("categories")]
+    public Task<ActionResult<ApiResponse<IEnumerable<ProductCategoryDto>>>> GetCategories()
+    {
+        try
+        {
+            Console.WriteLine("[PRODUCT MANAGEMENT] Getting product categories from database");
+            
+            // For now, return a static list of categories
+            // In a real application, this would come from a database
+            var categories = new List<ProductCategoryDto>
+            {
+                new ProductCategoryDto { Id = 1, Name = "Electronics", Description = "Electronic devices and accessories" },
+                new ProductCategoryDto { Id = 2, Name = "Clothing", Description = "Apparel and fashion items" },
+                new ProductCategoryDto { Id = 3, Name = "Home & Garden", Description = "Home improvement and garden supplies" },
+                new ProductCategoryDto { Id = 4, Name = "Sports & Outdoors", Description = "Sports equipment and outdoor gear" },
+                new ProductCategoryDto { Id = 5, Name = "Books", Description = "Books and educational materials" },
+                new ProductCategoryDto { Id = 6, Name = "Health & Beauty", Description = "Health and beauty products" },
+                new ProductCategoryDto { Id = 7, Name = "Automotive", Description = "Car parts and automotive accessories" },
+                new ProductCategoryDto { Id = 8, Name = "Food & Beverages", Description = "Food items and beverages" }
+            };
+            
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Retrieved {categories.Count} product categories");
+            
+            return Task.FromResult<ActionResult<ApiResponse<IEnumerable<ProductCategoryDto>>>>(
+                Ok(ApiResponse<IEnumerable<ProductCategoryDto>>.SuccessResult(
+                    categories, 
+                    $"Successfully retrieved {categories.Count} product categories")));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Error retrieving categories: {ex.Message}");
+            return Task.FromResult<ActionResult<ApiResponse<IEnumerable<ProductCategoryDto>>>>(
+                BadRequest(ApiResponse<IEnumerable<ProductCategoryDto>>.ErrorResult(
+                    "Failed to retrieve categories", ex.Message)));
+        }
+    }
+
+    [HttpGet("reports/low-stock")]
+    public async Task<ActionResult<ApiResponse<IEnumerable<EnhancedProductDto>>>> GetLowStockReport(
+        [FromQuery] int threshold = 10)
+    {
+        try
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Getting low stock report from database - Threshold: {threshold}");
+            
+            var query = new GetAllProductsQuery 
+            { 
+                ActiveOnly = true,
+                LowStockOnly = true,
+                LowStockThreshold = threshold
+            };
+            var products = await _mediator.Send(query);
+            
+            // Transform products with enhanced formatting
+            var lowStockProducts = products.Select(p => new EnhancedProductDto
+            {
+                // Original properties
+                Id = p.Id,
+                Name = p.Name,
+                CostPerItem = p.CostPerItem,
+                NumberInStock = p.NumberInStock,
+                TotalValue = p.TotalValue,
+                IsActive = p.IsActive,
+                IsInStock = p.IsInStock,
+                IsLowStock = p.IsLowStock,
+                ImageUrl = p.ImageUrl,
+                CreatedAt = p.CreatedAt,
+                
+                // Enhanced formatted properties
+                FormattedName = p.Name.ToTitleCase(),
+                FormattedPrice = p.CostPerItem.ToCurrency(),
+                FormattedTotalValue = p.TotalValue.ToCurrency(),
+                FormattedTotalValueShort = p.TotalValue.ToShortFormat(),
+                StockDisplay = $"{p.NumberInStock} units",
+                CreatedDisplay = p.CreatedAt.ToDisplayFormat(),
+                CreatedFriendly = p.CreatedAt.ToFriendlyString(),
+                StockStatus = GetStockStatusText(p.IsInStock, p.IsLowStock),
+                StockStatusBadge = GetStockStatusBadge(p.IsInStock, p.IsLowStock),
+                ActiveStatusBadge = p.IsActive ? "Active" : "Inactive",
+                PriceRange = GetPriceRange(p.CostPerItem),
+                StockLevel = GetStockLevel(p.NumberInStock),
+                ImageDisplay = GetImageDisplay(p.ImageUrl),
+                HasImage = !string.IsNullOrEmpty(p.ImageUrl)
+            }).ToList();
+            
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Retrieved {lowStockProducts.Count} products for low stock report");
+            
+            return Ok(ApiResponse<IEnumerable<EnhancedProductDto>>.SuccessResult(
+                lowStockProducts, 
+                $"Successfully retrieved low stock report with {lowStockProducts.Count} products"));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Error retrieving low stock report: {ex.Message}");
+            return BadRequest(ApiResponse<IEnumerable<EnhancedProductDto>>.ErrorResult(
+                "Failed to retrieve low stock report", ex.Message));
+        }
+    }
+
+    [HttpGet("reports/inventory-value")]
+    public async Task<ActionResult<ApiResponse<InventoryValueReportDto>>> GetInventoryValueReport()
+    {
+        try
+        {
+            Console.WriteLine("[PRODUCT MANAGEMENT] Getting inventory value report from database");
+            
+            var query = new GetAllProductsQuery { ActiveOnly = true };
+            var products = await _mediator.Send(query);
+            
+            var totalValue = products.Sum(p => p.TotalValue);
+            var totalProducts = products.Count();
+            var totalQuantity = products.Sum(p => p.NumberInStock);
+            
+            var report = new InventoryValueReportDto
+            {
+                TotalValue = totalValue,
+                TotalProducts = totalProducts,
+                TotalQuantity = totalQuantity,
+                FormattedTotalValue = totalValue.ToCurrency(),
+                FormattedTotalValueShort = totalValue.ToShortFormat(),
+                AverageValuePerProduct = totalProducts > 0 ? (totalValue / totalProducts).ToCurrency() : "R0.00",
+                GeneratedAt = DateTime.Now,
+                GeneratedAtFormatted = DateTime.Now.ToDisplayFormat(),
+                Products = products.Select(p => new EnhancedProductDto
+                {
+                    // Original properties
+                    Id = p.Id,
+                    Name = p.Name,
+                    CostPerItem = p.CostPerItem,
+                    NumberInStock = p.NumberInStock,
+                    TotalValue = p.TotalValue,
+                    IsActive = p.IsActive,
+                    IsInStock = p.IsInStock,
+                    IsLowStock = p.IsLowStock,
+                    ImageUrl = p.ImageUrl,
+                    CreatedAt = p.CreatedAt,
+                    
+                    // Enhanced formatted properties
+                    FormattedName = p.Name.ToTitleCase(),
+                    FormattedPrice = p.CostPerItem.ToCurrency(),
+                    FormattedTotalValue = p.TotalValue.ToCurrency(),
+                    FormattedTotalValueShort = p.TotalValue.ToShortFormat(),
+                    StockDisplay = $"{p.NumberInStock} units",
+                    CreatedDisplay = p.CreatedAt.ToDisplayFormat(),
+                    CreatedFriendly = p.CreatedAt.ToFriendlyString(),
+                    StockStatus = GetStockStatusText(p.IsInStock, p.IsLowStock),
+                    StockStatusBadge = GetStockStatusBadge(p.IsInStock, p.IsLowStock),
+                    ActiveStatusBadge = p.IsActive ? "Active" : "Inactive",
+                    PriceRange = GetPriceRange(p.CostPerItem),
+                    StockLevel = GetStockLevel(p.NumberInStock),
+                    ImageDisplay = GetImageDisplay(p.ImageUrl),
+                    HasImage = !string.IsNullOrEmpty(p.ImageUrl)
+                }).ToList()
+            };
+            
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Generated inventory value report - Total Value: {report.FormattedTotalValue}, Products: {report.TotalProducts}");
+            
+            return Ok(ApiResponse<InventoryValueReportDto>.SuccessResult(
+                report, 
+                "Successfully generated inventory value report"));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Error generating inventory value report: {ex.Message}");
+            return BadRequest(ApiResponse<InventoryValueReportDto>.ErrorResult(
+                "Failed to generate inventory value report", ex.Message));
+        }
+    }
+
     [HttpPost]
     [Authorize(Roles = "Manager,Admin")]
     public async Task<ActionResult<ProductDto>> CreateProduct([FromBody] CreateProductDto createProductDto)
@@ -602,4 +771,24 @@ public class EnhancedDashboardStats
     public string AverageProductValue { get; set; } = string.Empty;
     public int HealthScore { get; set; }
     public string StatusSummary { get; set; } = string.Empty;
+}
+
+public class ProductCategoryDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+}
+
+public class InventoryValueReportDto
+{
+    public decimal TotalValue { get; set; }
+    public int TotalProducts { get; set; }
+    public int TotalQuantity { get; set; }
+    public string FormattedTotalValue { get; set; } = string.Empty;
+    public string FormattedTotalValueShort { get; set; } = string.Empty;
+    public string AverageValuePerProduct { get; set; } = string.Empty;
+    public DateTime GeneratedAt { get; set; }
+    public string GeneratedAtFormatted { get; set; } = string.Empty;
+    public List<EnhancedProductDto> Products { get; set; } = new();
 }

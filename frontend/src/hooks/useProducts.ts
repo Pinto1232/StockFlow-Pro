@@ -26,6 +26,7 @@ export const useProducts = (
     pagination: PaginationParams,
     filters?: ProductFilters,
 ) => {
+    // Use legacy implementation for now
     return useQuery({
         queryKey: productKeys.list(pagination, filters),
         queryFn: () => productService.getProducts(pagination, filters),

@@ -6,7 +6,6 @@ using System.Collections.Concurrent;
 
 namespace StockFlowPro.Web.Hubs;
 
-[Authorize]
 public class StockFlowHub : Hub
 {
     private readonly IRealTimeService _realTimeService;
@@ -72,18 +71,21 @@ public class StockFlowHub : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
+    [Authorize]
     public async Task JoinGroup(string groupName)
     {
         await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
         _logger.LogInformation("Connection {ConnectionId} joined group {GroupName}", Context.ConnectionId, groupName);
     }
 
+    [Authorize]
     public async Task LeaveGroup(string groupName)
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
         _logger.LogInformation("Connection {ConnectionId} left group {GroupName}", Context.ConnectionId, groupName);
     }
 
+    [Authorize]
     public async Task SendMessageToGroup(string groupName, string message)
     {
         var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -133,6 +135,7 @@ public class StockFlowHub : Hub
     /// <summary>
     /// Send real-time notification to specific user
     /// </summary>
+    [Authorize]
     public async Task SendNotificationToUser(string targetUserId, string title, string message, string type = "info")
     {
         var senderId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;

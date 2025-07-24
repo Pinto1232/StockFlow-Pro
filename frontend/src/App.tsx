@@ -4,8 +4,9 @@ import {
     Route,
     Navigate,
 } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
+// Hexagonal Architecture Provider
+import { ArchitectureProvider } from "./architecture/adapters/primary/ArchitectureProvider";
 
 // Components
 import Layout from "./components/Layout/Layout.tsx";
@@ -31,25 +32,12 @@ import AdminPanel from "./pages/Admin/AdminPanel.tsx";
 import PermissionsDemo from "./pages/Admin/PermissionsDemo.tsx";
 import UserSync from "./pages/Sync/UserSync.tsx";
 import NotificationsPage from "./pages/NotificationsPage.tsx";
+import ArchitectureTestPage from "./pages/Debug/ArchitectureTestPage.tsx";
 import NotFound from "./pages/NotFound/NotFound.tsx";
-
-// Create a client
-const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            retry: 1,
-            refetchOnWindowFocus: false,
-            staleTime: 5 * 60 * 1000, // 5 minutes
-        },
-        mutations: {
-            retry: 1,
-        },
-    },
-});
 
 function App() {
     return (
-        <QueryClientProvider client={queryClient}>
+        <ArchitectureProvider>
             <AuthProvider>
                 <Router>
                     <div className="min-h-screen bg-gray-50">
@@ -159,6 +147,9 @@ function App() {
                                 {/* Notifications */}
                                 <Route path="notifications" element={<NotificationsPage />} />
 
+                                {/* Debug/Testing */}
+                                <Route path="architecture-test" element={<ArchitectureTestPage />} />
+
                                 {/* Profile & Settings */}
                                 <Route path="profile" element={<Profile />} />
                                 <Route
@@ -181,9 +172,8 @@ function App() {
                         </Routes>
                     </div>
                 </Router>
-                <ReactQueryDevtools initialIsOpen={false} />
             </AuthProvider>
-        </QueryClientProvider>
+        </ArchitectureProvider>
     );
 }
 

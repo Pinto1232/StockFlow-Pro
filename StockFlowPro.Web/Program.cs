@@ -16,6 +16,7 @@ using DotNetEnv;
 using StockFlowPro.Web.Configuration;
 using Microsoft.OpenApi.Models;
 using System.Text.Json;
+using StockFlowPro.Web.Hubs;
 
 // Load environment variables from .env file
 Env.Load();
@@ -26,6 +27,14 @@ EnvironmentConfig.ValidateConfiguration();
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
+
+// Add SignalR with detailed logging and configuration
+builder.Services.AddSignalR(options => 
+{
+    options.EnableDetailedErrors = true;
+    options.HandshakeTimeout = TimeSpan.FromSeconds(15);
+    options.KeepAliveInterval = TimeSpan.FromSeconds(10);
+});
 
 // Configure JSON options for API responses
 builder.Services.AddControllers()
@@ -296,10 +305,25 @@ builder.Services.AddAuthentication(EnvironmentConfig.CookieAuthName)
         };
     });
 
+// Configure CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("SignalRPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
 // Security middleware should be added early in the pipeline
 app.UseSecurityHeaders();
+
+// Use CORS before SignalR
+app.UseCors("SignalRPolicy");
 
 if (!app.Environment.IsDevelopment())
 {
@@ -370,6 +394,9 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 app.MapControllers();
+
+// Map SignalR hub
+app.MapHub<StockFlowHub>("/hubs/stockflowhub");
 app.MapHub<StockFlowPro.Web.Hubs.StockFlowHub>("/stockflowhub");
 
 await app.RunAsync();
