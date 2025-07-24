@@ -172,43 +172,7 @@
         </script>
     }
 
-    @if (currentPage == "/Invoices")
-    {
-        <script>
-            // Invoices page-specific SignalR handlers
-            document.addEventListener('DOMContentLoaded', function() {
-                const initializeInvoices = () => {
-                    if (window.stockFlowSignalR && window.stockFlowSignalR.isConnected) {
-                        // Join invoices group for real-time updates
-                        window.stockFlowSignalR.joinGroup('Invoices');
-                        
-                        // Override invoice update handler
-                        window.stockFlowSignalR.handleInvoiceUpdate = function(data) {
-                            console.log('Invoice Update on Invoices Page:', data);
-                            
-                            // Update invoice status display
-                            const invoiceRow = document.querySelector(`tr[data-invoice-id="${data.InvoiceId}"]`);
-                            if (invoiceRow) {
-                                const statusCell = invoiceRow.querySelector('.invoice-status');
-                                if (statusCell) {
-                                    statusCell.textContent = data.Status;
-                                    statusCell.className = `invoice-status status-${data.Status.toLowerCase()}`;
-                                    statusCell.classList.add('updated');
-                                    setTimeout(() => statusCell.classList.remove('updated'), 2000);
-                                }
-                            }
-                        };
-                    } else {
-                        // Wait for SignalR to be ready
-                        setTimeout(initializeInvoices, 100);
-                    }
-                };
-                
-                initializeInvoices();
-            });
-        </script>
-    }
-
+    
     @if (currentPage == "/AdminPanel" && User.IsInRole("Admin"))
     {
         <script>

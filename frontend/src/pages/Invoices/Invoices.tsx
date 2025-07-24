@@ -256,6 +256,8 @@ const Invoices: React.FC = () => {
         setIsFormOpen(false);
         setEditingInvoice(null);
         setSelectedInvoiceId(null);
+        // Show success message
+        showSnackbar("Invoice saved successfully!", "success");
     };
 
     const handleFormClose = () => {

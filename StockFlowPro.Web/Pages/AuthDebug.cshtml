@@ -91,8 +91,7 @@ async function checkAuthStatus() {
                     <strong>Authentication Status:</strong> ${authStatus.IsAuthenticated ? 'Authenticated' : 'Not Authenticated'}
                 </div>
                 <div class="alert ${authStatus.Roles && (authStatus.Roles.includes('Admin') || authStatus.Roles.includes('Manager')) ? 'alert-success' : 'alert-danger'}">
-                    <strong>Invoice Permission Check:</strong> 
-                    ${authStatus.Roles && (authStatus.Roles.includes('Admin') || authStatus.Roles.includes('Manager')) ? 'ALLOWED' : 'DENIED'}
+                    
                     <br>
                     <small>Roles: ${authStatus.Roles ? authStatus.Roles.join(', ') : 'None'}</small>
                 </div>
