@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockFlowPro.Application.DTOs;
 using StockFlowPro.Application.Interfaces;
+using StockFlowPro.Shared.Models;
 using StockFlowPro.Web.Services;
 using System.Security.Claims;
 
@@ -33,6 +34,87 @@ public class InvoicesController : ControllerBase
     }
 
     [HttpGet]
+    public async Task<ActionResult<PaginatedResponse<InvoiceDto>>> GetInvoices(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? search = null,
+        [FromQuery] string? status = null,
+        [FromQuery] string? customerId = null,
+        [FromQuery] string? dateFrom = null,
+        [FromQuery] string? dateTo = null)
+    {
+        try
+        {
+            _logger.LogInformation("Getting invoices with pagination - Page: {PageNumber}, Size: {PageSize}, Search: '{Search}', Status: '{Status}'", 
+                pageNumber, pageSize, search, status);
+
+            // Validate pagination parameters
+            if (pageNumber < 1) {pageNumber = 1;}
+            if (pageSize < 1 || pageSize > 100) {pageSize = 10;}
+
+            // Get all invoices first (in a real application, this should be done at the database level)
+            var allInvoices = await _invoiceService.GetAllAsync();
+            
+            // Apply filters
+            var filteredInvoices = allInvoices.AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                filteredInvoices = filteredInvoices.Where(i => 
+                    i.InvoiceNumber.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                    i.CustomerName.Contains(search, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                filteredInvoices = filteredInvoices.Where(i => 
+                    i.Status.Equals(status, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrEmpty(customerId) && Guid.TryParse(customerId, out var customerGuid))
+            {
+                filteredInvoices = filteredInvoices.Where(i => i.CustomerId == customerGuid);
+            }
+
+            if (!string.IsNullOrEmpty(dateFrom) && DateTime.TryParse(dateFrom, out var fromDate))
+            {
+                filteredInvoices = filteredInvoices.Where(i => i.IssueDate >= fromDate);
+            }
+
+            if (!string.IsNullOrEmpty(dateTo) && DateTime.TryParse(dateTo, out var toDate))
+            {
+                filteredInvoices = filteredInvoices.Where(i => i.IssueDate <= toDate);
+            }
+
+            // Get total count after filtering
+            var totalCount = filteredInvoices.Count();
+
+            // Apply pagination
+            var paginatedInvoices = filteredInvoices
+                .OrderByDescending(i => i.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var response = new PaginatedResponse<InvoiceDto>(
+                paginatedInvoices,
+                totalCount,
+                pageNumber,
+                pageSize);
+
+            _logger.LogInformation("Successfully retrieved {Count} invoices out of {Total} total", 
+                paginatedInvoices.Count, totalCount);
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting paginated invoices");
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    [HttpGet("all")]
     public async Task<ActionResult<IEnumerable<InvoiceDto>>> GetAllInvoices()
     {
         try

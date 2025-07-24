@@ -8,38 +8,12 @@ let filteredInvoices = [];
 let currentPage = 1;
 let itemsPerPage = 5;
 
-// EMERGENCY SAFETY CHECK - Ensure ALL arrays are properly initialized
-console.log('🚀 === INVOICE SCRIPT INITIALIZATION ===');
-console.log('🚀 Initial products:', products, 'Type:', typeof products, 'IsArray:', Array.isArray(products));
-console.log('🚀 Initial allInvoices:', allInvoices, 'Type:', typeof allInvoices, 'IsArray:', Array.isArray(allInvoices));
-console.log('🚀 Initial filteredInvoices:', filteredInvoices, 'Type:', typeof filteredInvoices, 'IsArray:', Array.isArray(filteredInvoices));
-
-// Force all arrays to be arrays
+// EMERGENCY SAFETY CHECK - Ensure products is always an array
 if (!Array.isArray(products)) {
     console.error('GLOBAL FIX: Products was not an array at startup:', typeof products, products);
     products = [];
 }
-if (!Array.isArray(allInvoices)) {
-    console.error('GLOBAL FIX: allInvoices was not an array at startup:', typeof allInvoices, allInvoices);
-    allInvoices = [];
-}
-if (!Array.isArray(filteredInvoices)) {
-    console.error('GLOBAL FIX: filteredInvoices was not an array at startup:', typeof filteredInvoices, filteredInvoices);
-    filteredInvoices = [];
-}
-if (!Array.isArray(newInvoiceItems)) {
-    console.error('GLOBAL FIX: newInvoiceItems was not an array at startup:', typeof newInvoiceItems, newInvoiceItems);
-    newInvoiceItems = [];
-}
-
-// Set on window for debugging
-window.products = products;
-window.allInvoices = allInvoices;
-window.filteredInvoices = filteredInvoices;
-window.newInvoiceItems = newInvoiceItems;
-
-console.log('🚀 ✅ All arrays initialized successfully');
-console.log('🚀 === INITIALIZATION COMPLETE ==='); 
+window.products = products; // Also set on window for debugging 
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
@@ -256,94 +230,40 @@ async function loadInvoices() {
         if (response.ok) {
             const invoicesResponse = await response.json();
             console.log('Invoices API response:', invoicesResponse);
-            console.log('Invoices API response type:', typeof invoicesResponse);
-            console.log('Is invoicesResponse an array?', Array.isArray(invoicesResponse));
             
-            // SAFETY CHECK - Ensure we always have arrays
-            let invoicesArray = [];
-            
-            // Handle different possible API response structures
-            if (Array.isArray(invoicesResponse)) {
-                // Direct array response
-                invoicesArray = invoicesResponse;
-                console.log('Using direct array response:', invoicesArray.length);
-            } else if (invoicesResponse && Array.isArray(invoicesResponse.data)) {
-                // Paginated response with data property
-                invoicesArray = invoicesResponse.data;
-                console.log('Using paginated response data:', invoicesArray.length);
+            // Handle paginated response
+            if (invoicesResponse.data && Array.isArray(invoicesResponse.data)) {
+                allInvoices = invoicesResponse.data;
+                filteredInvoices = [...invoicesResponse.data];
                 
                 // Update pagination info
                 const totalPages = invoicesResponse.totalPages || 1;
                 const totalCount = invoicesResponse.totalCount || 0;
-                console.log(`Loaded ${invoicesArray.length} invoices (page ${currentPage} of ${totalPages}, total: ${totalCount})`);
-            } else if (invoicesResponse && Array.isArray(invoicesResponse.items)) {
-                // Response with items property
-                invoicesArray = invoicesResponse.items;
-                console.log('Using items response:', invoicesArray.length);
-            } else if (invoicesResponse && typeof invoicesResponse === 'object') {
-                // Try to find array in common property names
-                const possibleArrays = ['data', 'items', 'invoices', 'result', 'results'];
-                for (const prop of possibleArrays) {
-                    if (invoicesResponse[prop] && Array.isArray(invoicesResponse[prop])) {
-                        invoicesArray = invoicesResponse[prop];
-                        console.log(`Using ${prop} property:`, invoicesArray.length);
-                        break;
-                    }
-                }
                 
-                if (invoicesArray.length === 0) {
-                    console.error('Could not find array in API response. Available properties:', Object.keys(invoicesResponse));
-                    console.error('Full response:', invoicesResponse);
-                    showAlert('Invoices API returned unexpected data structure. Using empty list.', 'warning');
-                }
+                console.log(`Loaded ${invoicesResponse.data.length} invoices (page ${currentPage} of ${totalPages}, total: ${totalCount})`);
             } else {
-                console.error('API returned unexpected data type:', typeof invoicesResponse, invoicesResponse);
-                showAlert('Invoices API returned invalid data. Using empty list.', 'warning');
+                // Fallback for non-paginated response
+                allInvoices = Array.isArray(invoicesResponse) ? invoicesResponse : [];
+                filteredInvoices = [...allInvoices];
             }
-            
-            // FINAL SAFETY CHECK - Ensure we have a valid array
-            if (!Array.isArray(invoicesArray)) {
-                console.error('EMERGENCY FIX - invoicesArray is not array:', typeof invoicesArray, invoicesArray);
-                invoicesArray = [];
-            }
-            
-            // Set the global arrays
-            allInvoices = [...invoicesArray];
-            filteredInvoices = [...invoicesArray];
-            
-            console.log('Final allInvoices:', allInvoices.length, 'items');
-            console.log('Final filteredInvoices:', filteredInvoices.length, 'items');
             
             displayInvoices();
         } else {
-            console.error('Failed to load invoices, status:', response.status);
-            const errorText = await response.text();
-            console.error('Error response:', errorText);
-            showAlert('Failed to load invoices: ' + errorText, 'danger');
+            console.error('Failed to load invoices');
+            showAlert('Failed to load invoices', 'danger');
             showErrorState('Failed to load invoices');
         }
     } catch (error) {
         console.error('Error loading invoices:', error);
-        console.error('Error stack:', error.stack);
-        showAlert('Error loading invoices: ' + error.message, 'danger');
+        showAlert('Error loading invoices', 'danger');
         showErrorState('Error loading invoices');
     }
 }
 
 // Display invoices in the table
 function displayInvoices() {
-    console.log('=== DISPLAY INVOICES START ===');
-    console.log('filteredInvoices:', filteredInvoices, 'Type:', typeof filteredInvoices, 'IsArray:', Array.isArray(filteredInvoices));
-    
     const container = document.getElementById('invoice-table-section');
     const countElement = document.getElementById('invoiceCount');
-    
-    // EMERGENCY SAFETY CHECK - Ensure filteredInvoices is always an array
-    if (!Array.isArray(filteredInvoices)) {
-        console.error('EMERGENCY FIX - filteredInvoices is not array:', typeof filteredInvoices, filteredInvoices);
-        filteredInvoices = [];
-        allInvoices = [];
-    }
     
     // Update count
     if (countElement) {
@@ -352,7 +272,6 @@ function displayInvoices() {
     }
 
     if (filteredInvoices.length === 0) {
-        console.log('No invoices to display, showing empty state');
         container.innerHTML = getEmptyStateHTML();
         const paginationContainer = document.getElementById('pagination');
         if (paginationContainer) {
@@ -364,48 +283,7 @@ function displayInvoices() {
     // Calculate pagination
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    
-    console.log('Pagination calculation:', {
-        currentPage,
-        itemsPerPage,
-        startIndex,
-        endIndex,
-        totalInvoices: filteredInvoices.length
-    });
-    
-    // SAFETY CHECK - Ensure slice operation is safe
-    let pageInvoices = [];
-    try {
-        pageInvoices = filteredInvoices.slice(startIndex, endIndex);
-        console.log('Page invoices:', pageInvoices, 'Length:', pageInvoices.length, 'IsArray:', Array.isArray(pageInvoices));
-    } catch (error) {
-        console.error('Error slicing filteredInvoices:', error);
-        pageInvoices = [];
-    }
-    
-    // FINAL SAFETY CHECK - Ensure pageInvoices is an array before mapping
-    if (!Array.isArray(pageInvoices)) {
-        console.error('EMERGENCY FIX - pageInvoices is not array:', typeof pageInvoices, pageInvoices);
-        pageInvoices = [];
-    }
-
-    let tableBodyHTML = '';
-    try {
-        if (pageInvoices.length > 0) {
-            tableBodyHTML = pageInvoices.map(invoice => {
-                if (!invoice || typeof invoice !== 'object') {
-                    console.warn('Invalid invoice object:', invoice);
-                    return '';
-                }
-                return createInvoiceRowHTML(invoice);
-            }).join('');
-        } else {
-            tableBodyHTML = '<tr><td colspan="8" class="text-center text-muted">No invoices to display</td></tr>';
-        }
-    } catch (error) {
-        console.error('Error creating table rows:', error);
-        tableBodyHTML = '<tr><td colspan="8" class="text-center text-danger">Error displaying invoices</td></tr>';
-    }
+    const pageInvoices = filteredInvoices.slice(startIndex, endIndex);
 
     const tableHTML = `
         <div class="table-responsive-wrapper">
@@ -423,7 +301,7 @@ function displayInvoices() {
                     </tr>
                 </thead>
                 <tbody>
-                    ${tableBodyHTML}
+                    ${pageInvoices.map(invoice => createInvoiceRowHTML(invoice)).join('')}
                 </tbody>
             </table>
         </div>
@@ -431,7 +309,6 @@ function displayInvoices() {
 
     container.innerHTML = tableHTML;
     renderPagination();
-    console.log('=== DISPLAY INVOICES END ===');
 }
 
 // Create invoice row HTML

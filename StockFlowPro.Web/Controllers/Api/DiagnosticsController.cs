@@ -393,10 +393,15 @@ public class DiagnosticsController : ControllerBase
             {
                 timestamp = DateTime.UtcNow,
                 isAuthenticated = User.Identity?.IsAuthenticated ?? false,
-                userId = User.Identity?.IsAuthenticated == true ? User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value : null,
+                userId = User.Identity?.IsAuthenticated == true ? 
+                    User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? 
+                    User.FindFirst("sub")?.Value ?? 
+                    User.FindFirst("id")?.Value : null,
                 userName = User.Identity?.Name,
                 roles = User.Identity?.IsAuthenticated == true ? User.Claims
-                    .Where(c => c.Type == "role" || c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")
+                    .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role || 
+                               c.Type == "role" || 
+                               c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")
                     .Select(c => c.Value)
                     .ToList() : new List<string>(),
                 claims = User.Identity?.IsAuthenticated == true ? User.Claims

@@ -10603,11 +10603,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\StockFlowPro.Web.csproj",
+      "projectUniqueName": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\StockFlowPro.Web.csproj",
       "projectName": "StockFlowPro.Web",
-      "projectPath": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\StockFlowPro.Web.csproj",
+      "projectPath": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\StockFlowPro.Web.csproj",
       "packagesPath": "C:\\Users\\pinto\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\obj\\",
+      "outputPath": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\obj\\",
       "projectStyle": "PackageReference",
       "centralPackageVersionsManagementEnabled": true,
       "CentralPackageTransitivePinningEnabled": true,

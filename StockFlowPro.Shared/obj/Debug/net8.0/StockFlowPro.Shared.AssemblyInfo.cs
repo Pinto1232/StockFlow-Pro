@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyDescriptionAttribute("Shared utilities, constants, extensions, and helpers for StockFlow Pro applicatio" +
     "ns")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ac3d2acdbdef745c79b6f6b9c7a93de68d728b44")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1ec6ceb91388dde76ba344ed122e8d652dc2c30d")]
 [assembly: System.Reflection.AssemblyProductAttribute("StockFlowPro.Shared")]
 [assembly: System.Reflection.AssemblyTitleAttribute("StockFlow Pro Shared Library")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
