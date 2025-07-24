@@ -32,6 +32,13 @@ public class RateLimitingMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        // Skip rate limiting for CORS preflight requests
+        if (context.Request.Method.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
+        {
+            await _next(context);
+            return;
+        }
+
         var clientIp = GetClientIpAddress(context);
         var path = context.Request.Path.Value?.ToLowerInvariant() ?? "";
 

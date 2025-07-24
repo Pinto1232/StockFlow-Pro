@@ -54,6 +54,13 @@ public class EnhancedApiSecurityMiddleware
             return;
         }
 
+        // Skip security checks for CORS preflight requests
+        if (context.Request.Method.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
+        {
+            await _next(context);
+            return;
+        }
+
         var clientIp = GetClientIpAddress(context);
         var userAgent = context.Request.Headers["User-Agent"].ToString();
         var requestId = Guid.NewGuid().ToString("N")[..8];

@@ -215,6 +215,20 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .WithExposedHeaders("X-Total-Count", "X-Page-Count", "X-Current-Page", "X-API-Version", "X-Rate-Limit-Remaining");
     });
+
+    // SignalR CORS policy
+    options.AddPolicy("SignalRPolicy", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:8081", 
+                "http://localhost:3000", 
+                "http://localhost:5173",
+                "https://localhost:5173"
+              )
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
 });
 
 
@@ -223,15 +237,17 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         b => b.MigrationsAssembly("StockFlowPro.Infrastructure")));
 
 builder.Services.AddMediatR(typeof(StockFlowPro.Application.Commands.Users.CreateUserCommand).Assembly);
-builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(StockFlowPro.Application.Mappings.ProductMappingProfile), typeof(StockFlowPro.Application.Mappings.SubscriptionPlanMappingProfile));
+builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(StockFlowPro.Application.Mappings.ProductMappingProfile), typeof(StockFlowPro.Application.Mappings.SubscriptionPlanMappingProfile), typeof(StockFlowPro.Application.Mappings.PermissionMappingProfile));
 builder.Services.AddValidatorsFromAssembly(typeof(StockFlowPro.Application.Validators.CreateUserCommandValidator).Assembly);
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 builder.Services.AddScoped<StockFlowPro.Domain.Repositories.IInvoiceRepository, StockFlowPro.Infrastructure.Repositories.InvoiceRepository>();
 builder.Services.AddScoped<StockFlowPro.Domain.Repositories.ISubscriptionPlanRepository, StockFlowPro.Infrastructure.Repositories.SubscriptionPlanRepository>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.ISubscriptionPlanService, StockFlowPro.Application.Services.SubscriptionPlanService>();
 builder.Services.AddScoped<IMockDataStorageService, JsonMockDataStorageService>();
 // Use database-first approach - prioritizes database over mock data
@@ -305,25 +321,8 @@ builder.Services.AddAuthentication(EnvironmentConfig.CookieAuthName)
         };
     });
 
-// Configure CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("SignalRPolicy", policy =>
-    {
-        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
-    });
-});
 
 var app = builder.Build();
-
-// Security middleware should be added early in the pipeline
-app.UseSecurityHeaders();
-
-// Use CORS before SignalR
-app.UseCors("SignalRPolicy");
 
 if (!app.Environment.IsDevelopment())
 {
@@ -349,16 +348,6 @@ else
 }
 
 app.UseHttpsRedirection();
-
-// Add enhanced API security middleware (before other auth middleware)
-app.UseEnhancedApiSecurity();
-
-// Add API key authentication middleware (before other auth middleware)
-app.UseApiKeyAuthentication();
-
-// Add input validation and rate limiting middleware
-app.UseInputValidation();
-app.UseRateLimiting();
 
 app.UseStaticFiles(new StaticFileOptions
 {
@@ -388,6 +377,19 @@ else
 {
     app.UseCors("AllowFrontend");
 }
+
+// Security middleware should be added after CORS
+app.UseSecurityHeaders();
+
+// Add enhanced API security middleware (before other auth middleware)
+app.UseEnhancedApiSecurity();
+
+// Add API key authentication middleware (before other auth middleware)
+app.UseApiKeyAuthentication();
+
+// Add input validation and rate limiting middleware
+app.UseInputValidation();
+app.UseRateLimiting();
 
 app.UseAuthentication();
 app.UseAuthorization();
