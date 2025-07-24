@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using StockFlowPro.Application.Commands.Users;
 using StockFlowPro.Application.DTOs;
 using StockFlowPro.Application.Queries.Users;
+using StockFlowPro.Application.Interfaces;
 using StockFlowPro.Shared.Models;
 using StockFlowPro.Web.Authorization;
 using StockFlowPro.Web.Extensions;
@@ -16,11 +17,13 @@ public class UsersController : ApiBaseController
 {
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
+    private readonly IPermissionService _permissionService;
 
-    public UsersController(IMediator mediator, IMapper mapper)
+    public UsersController(IMediator mediator, IMapper mapper, IPermissionService permissionService)
     {
         _mediator = mediator;
         _mapper = mapper;
+        _permissionService = permissionService;
     }
 
     private static List<UserDto> _mockUsers = new List<UserDto>
@@ -228,5 +231,53 @@ public class UsersController : ApiBaseController
         
         _mockUsers.Remove(user);
         return NoContent();
+    }
+
+    /// <summary>
+    /// Gets permissions for a specific user.
+    /// </summary>
+    [HttpGet("{id:guid}/permissions")]
+    [Authorize]
+    public async Task<ActionResult<UserPermissionsDto>> GetUserPermissions(Guid id)
+    {
+        try
+        {
+            // Check if user can access this information
+            if (!User.CanAccessUser(id) && !User.HasPermission(Permissions.Users.ViewAll))
+            {
+                return Forbid("You can only access your own permissions.");
+            }
+
+            var permissions = await _permissionService.GetUserPermissionsAsync(id);
+            return Ok(permissions);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Failed to retrieve user permissions", error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Gets permissions for the current user.
+    /// </summary>
+    [HttpGet("me/permissions")]
+    [Authorize]
+    public async Task<ActionResult<UserPermissionsDto>> GetCurrentUserPermissions()
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            if (userId == null)
+            {
+                return Unauthorized("User ID not found in token");
+            }
+
+            var permissions = await _permissionService.GetUserPermissionsAsync(userId.Value);
+            return Ok(permissions);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Failed to retrieve current user permissions", error = ex.Message });
+        }
     }
 }

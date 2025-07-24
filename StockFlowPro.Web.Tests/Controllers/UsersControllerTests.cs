@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using StockFlowPro.Application.Commands.Users;
 using StockFlowPro.Application.DTOs;
+using StockFlowPro.Application.Interfaces;
 using StockFlowPro.Application.Queries.Users;
 using StockFlowPro.Domain.Enums;
 using StockFlowPro.Web.Controllers.Api;
@@ -17,13 +18,15 @@ public class UsersControllerTests
 {
     private readonly Mock<IMediator> _mockMediator;
     private readonly Mock<IMapper> _mockMapper;
+    private readonly Mock<IPermissionService> _mockPermissionService;
     private readonly UsersController _controller;
 
     public UsersControllerTests()
     {
         _mockMediator = new Mock<IMediator>();
         _mockMapper = new Mock<IMapper>();
-        _controller = new UsersController(_mockMediator.Object, _mockMapper.Object);
+        _mockPermissionService = new Mock<IPermissionService>();
+        _controller = new UsersController(_mockMediator.Object, _mockMapper.Object, _mockPermissionService.Object);
         
         // Setup mock user context for authorization tests
         SetupMockUser(Guid.NewGuid(), UserRole.Admin);

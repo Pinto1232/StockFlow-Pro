@@ -8,6 +8,7 @@ export { default as PermissionButton } from "./PermissionButton";
 export { default as RoleBasedNavigation } from "./RoleBasedNavigation";
 export { default as UserRoleBadge } from "./UserRoleBadge";
 export { default as PermissionTable } from "./PermissionTable";
+export { default as PermissionsManager } from "./PermissionsManager";
 export { default as DemoCredentials } from "./DemoCredentials";
 
 // Auth Context

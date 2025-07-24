@@ -11,10 +11,12 @@ namespace StockFlowPro.Application.Services;
 public class RoleService : IRoleService
 {
     private readonly IRoleRepository _roleRepository;
+    private readonly IPermissionRepository _permissionRepository;
 
-    public RoleService(IRoleRepository roleRepository)
+    public RoleService(IRoleRepository roleRepository, IPermissionRepository permissionRepository)
     {
         _roleRepository = roleRepository;
+        _permissionRepository = permissionRepository;
     }
 
     public async Task<IEnumerable<RoleDto>> GetAllRolesAsync(bool activeOnly = true)
@@ -170,5 +172,39 @@ public class RoleService : IRoleService
             Priority = role.Priority,
             KeyPermissions = keyPermissions
         };
+    }
+
+    public async Task UpdateRolePermissionsAsync(Guid roleId, List<Guid> permissionIds)
+    {
+        var role = await _roleRepository.GetByIdAsync(roleId);
+        if (role == null)
+        {
+            throw new ArgumentException($"Role with ID {roleId} not found");
+        }
+
+        if (role.IsSystemRole)
+        {
+            throw new InvalidOperationException("System roles cannot be modified");
+        }
+
+        // Get current role permissions
+        var currentPermissions = await _permissionRepository.GetRolePermissionsAsync(roleId);
+        var currentPermissionIds = currentPermissions.Select(p => p.Id).ToList();
+
+        // Determine permissions to add and remove
+        var permissionsToAdd = permissionIds.Except(currentPermissionIds).ToList();
+        var permissionsToRemove = currentPermissionIds.Except(permissionIds).ToList();
+
+        // Remove permissions
+        foreach (var permissionId in permissionsToRemove)
+        {
+            await _permissionRepository.RevokePermissionFromRoleAsync(roleId, permissionId);
+        }
+
+        // Add permissions
+        foreach (var permissionId in permissionsToAdd)
+        {
+            await _permissionRepository.GrantPermissionToRoleAsync(roleId, permissionId);
+        }
     }
 }

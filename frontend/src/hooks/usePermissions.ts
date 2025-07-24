@@ -1,4 +1,5 @@
 import { useCurrentUser } from "./useAuth";
+import { useDynamicPermissions } from "./useDynamicPermissions";
 import {
     hasPermission,
     hasAnyPermission,
@@ -8,11 +9,41 @@ import {
 import { UserRole } from "../types/index";
 
 /**
+ * Configuration for permissions mode
+ */
+const USE_DYNAMIC_PERMISSIONS = import.meta.env.VITE_USE_DYNAMIC_PERMISSIONS === "true";
+
+/**
  * Hook for checking user permissions
+ * Supports both static (hardcoded) and dynamic (backend-driven) permissions
  */
 export const usePermissions = () => {
     const { data: currentUser } = useCurrentUser();
+    const dynamicPermissions = useDynamicPermissions();
 
+    // Use dynamic permissions if enabled, otherwise fall back to static
+    if (USE_DYNAMIC_PERMISSIONS) {
+        return {
+            hasPermission: dynamicPermissions.hasPermission,
+            hasAnyPermission: dynamicPermissions.hasAnyPermission,
+            hasAllPermissions: dynamicPermissions.hasAllPermissions,
+            hasRole: dynamicPermissions.hasRole,
+            hasAnyRole: dynamicPermissions.hasAnyRole,
+            getUserPermissions: () => new Set(dynamicPermissions.userPermissions),
+            userRole: dynamicPermissions.userRole,
+            user: dynamicPermissions.user,
+            isAdmin: dynamicPermissions.isAdmin,
+            isManager: dynamicPermissions.isManager,
+            isUser: dynamicPermissions.isUser,
+            canManageUsers: dynamicPermissions.canManageUsers,
+            canAccessAdminPanel: dynamicPermissions.canAccessAdminPanel,
+            loading: dynamicPermissions.loading,
+            error: dynamicPermissions.error,
+            refreshPermissions: dynamicPermissions.refreshPermissions,
+        };
+    }
+
+    // Static permissions (original implementation)
     const checkPermission = (permission: string): boolean => {
         if (!currentUser) return false;
         return hasPermission(currentUser.role, permission);
@@ -77,5 +108,8 @@ export const usePermissions = () => {
         isUser,
         canManageUsers,
         canAccessAdminPanel,
+        loading: false,
+        error: null,
+        refreshPermissions: () => Promise.resolve(),
     };
 };

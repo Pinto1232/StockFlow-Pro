@@ -2,6 +2,7 @@ import { UserRole } from "../types/index";
 
 /**
  * Defines all permissions available in the StockFlow Pro system.
+ * These match the backend permission names exactly.
  */
 export const Permissions = {
     Users: {
@@ -48,6 +49,18 @@ export const Permissions = {
         Generate: "reports.generate",
         Schedule: "reports.schedule",
     },
+} as const;
+
+/**
+ * Permission categories for organization
+ */
+export const PermissionCategories = {
+    USER_MANAGEMENT: "User Management",
+    SYSTEM_ADMINISTRATION: "System Administration", 
+    DATA_MANAGEMENT: "Data Management",
+    INVOICE_MANAGEMENT: "Invoice Management",
+    PRODUCT_MANAGEMENT: "Product Management",
+    REPORTING: "Reporting",
 } as const;
 
 /**

@@ -69,6 +69,7 @@ public class DatabaseSeeder
                 
                 // Check and seed products separately
                 await SeedRolesAsync();
+                await SeedPermissionsAsync();
                 await SeedProductsAsync();
                 await SeedSubscriptionSystemAsync();
                 await SeedNotificationSystemAsync();
@@ -136,6 +137,9 @@ public class DatabaseSeeder
 
             // Seed Roles
             await SeedRolesAsync();
+
+            // Seed Permissions and Role Permissions
+            await SeedPermissionsAsync();
 
             // Seed Products
             await SeedProductsAsync();
@@ -250,6 +254,179 @@ public class DatabaseSeeder
         {
             _logger.LogError(ex, "An error occurred while seeding roles: {ErrorMessage}", ex.Message);
             throw new InvalidOperationException("Failed to seed roles data", ex);
+        }
+    }
+
+    private async Task SeedPermissionsAsync()
+    {
+        try
+        {
+            // Seed Permissions if none exist
+            if (!await _context.Permissions.AnyAsync())
+            {
+                _logger.LogInformation("Seeding database with permissions...");
+
+                var permissions = new List<Permission>
+                {
+                    // User Management Permissions
+                    new Permission("users.view", "View Users", "View user profiles and basic information", "User Management"),
+                    new Permission("users.create", "Create Users", "Create new user accounts", "User Management"),
+                    new Permission("users.edit", "Edit Users", "Edit user profiles and information", "User Management"),
+                    new Permission("users.delete", "Delete Users", "Delete user accounts", "User Management"),
+                    new Permission("users.view_all", "View All Users", "View all users in the system", "User Management"),
+                    new Permission("users.manage_roles", "Manage User Roles", "Assign and modify user roles", "User Management"),
+                    new Permission("users.view_reports", "View User Reports", "Access user-related reports", "User Management"),
+
+                    // System Administration Permissions
+                    new Permission("system.view_admin_panel", "View Admin Panel", "Access the administrative dashboard", "System Administration"),
+                    new Permission("system.manage_settings", "Manage Settings", "Configure system settings", "System Administration"),
+                    new Permission("system.view_logs", "View System Logs", "Access system logs and audit trails", "System Administration"),
+                    new Permission("system.sync_data", "Sync Data", "Perform data synchronization operations", "System Administration"),
+                    new Permission("system.view_statistics", "View Statistics", "Access system statistics and metrics", "System Administration"),
+
+                    // Data Management Permissions
+                    new Permission("data.export", "Export Data", "Export data in various formats", "Data Management"),
+                    new Permission("data.import", "Import Data", "Import data from external sources", "Data Management"),
+                    new Permission("data.backup", "Backup Data", "Create system backups", "Data Management"),
+                    new Permission("data.restore", "Restore Data", "Restore data from backups", "Data Management"),
+
+                    // Invoice Management Permissions
+                    new Permission("invoice.view", "View Invoices", "View invoice information", "Invoice Management"),
+                    new Permission("invoice.create", "Create Invoices", "Create new invoices", "Invoice Management"),
+                    new Permission("invoice.edit", "Edit Invoices", "Modify existing invoices", "Invoice Management"),
+                    new Permission("invoice.delete", "Delete Invoices", "Delete invoices", "Invoice Management"),
+                    new Permission("invoice.view_all", "View All Invoices", "Access all invoices in the system", "Invoice Management"),
+                    new Permission("invoice.manage_items", "Manage Invoice Items", "Add, edit, and remove invoice items", "Invoice Management"),
+
+                    // Product Management Permissions
+                    new Permission("product.view", "View Products", "View product information and catalog", "Product Management"),
+                    new Permission("product.create", "Create Products", "Add new products to inventory", "Product Management"),
+                    new Permission("product.edit", "Edit Products", "Modify product information", "Product Management"),
+                    new Permission("product.delete", "Delete Products", "Remove products from inventory", "Product Management"),
+                    new Permission("product.update_stock", "Update Stock", "Modify product stock levels", "Product Management"),
+                    new Permission("product.view_reports", "View Product Reports", "Access product-related reports", "Product Management"),
+
+                    // Reporting Permissions
+                    new Permission("reports.view_basic", "View Basic Reports", "Access basic reporting features", "Reporting"),
+                    new Permission("reports.view_advanced", "View Advanced Reports", "Access advanced reporting and analytics", "Reporting"),
+                    new Permission("reports.generate", "Generate Reports", "Create custom reports", "Reporting"),
+                    new Permission("reports.schedule", "Schedule Reports", "Set up automated report generation", "Reporting")
+                };
+
+                await _context.Permissions.AddRangeAsync(permissions);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Successfully seeded {Count} permissions", permissions.Count);
+
+                // Now seed role permissions
+                await SeedRolePermissionsAsync();
+            }
+            else
+            {
+                _logger.LogInformation("Permissions already exist in database. Checking role permissions...");
+                await SeedRolePermissionsAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while seeding permissions: {ErrorMessage}", ex.Message);
+            throw new InvalidOperationException("Failed to seed permissions data", ex);
+        }
+    }
+
+    private async Task SeedRolePermissionsAsync()
+    {
+        try
+        {
+            // Check if role permissions already exist
+            if (await _context.RolePermissions.AnyAsync())
+            {
+                _logger.LogInformation("Role permissions already exist in database. Skipping role permission seed.");
+                return;
+            }
+
+            _logger.LogInformation("Seeding role permissions...");
+
+            var roles = await _context.Roles.ToListAsync();
+            var permissions = await _context.Permissions.ToListAsync();
+
+            if (!roles.Any() || !permissions.Any())
+            {
+                _logger.LogWarning("No roles or permissions found. Skipping role permission seeding.");
+                return;
+            }
+
+            var rolePermissions = new List<RolePermission>();
+            var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.Role == UserRole.Admin);
+            var grantedBy = adminUser?.Id ?? Guid.NewGuid();
+
+            // Admin Role - Gets all permissions
+            var adminRole = roles.FirstOrDefault(r => r.Name == "Admin");
+            if (adminRole != null)
+            {
+                foreach (var permission in permissions)
+                {
+                    rolePermissions.Add(new RolePermission(adminRole.Id, permission.Id, grantedBy));
+                }
+            }
+
+            // Manager Role - Gets specific permissions
+            var managerRole = roles.FirstOrDefault(r => r.Name == "Manager");
+            if (managerRole != null)
+            {
+                var managerPermissionNames = new[]
+                {
+                    "users.view", "users.edit", "users.view_all", "users.view_reports",
+                    "product.view", "product.create", "product.edit", "product.update_stock", "product.view_reports",
+                    "invoice.view", "invoice.create", "invoice.edit", "invoice.view_all", "invoice.manage_items",
+                    "system.view_statistics",
+                    "reports.view_basic", "reports.view_advanced", "reports.generate",
+                    "data.export"
+                };
+
+                foreach (var permissionName in managerPermissionNames)
+                {
+                    var permission = permissions.FirstOrDefault(p => p.Name == permissionName);
+                    if (permission != null)
+                    {
+                        rolePermissions.Add(new RolePermission(managerRole.Id, permission.Id, grantedBy));
+                    }
+                }
+            }
+
+            // User Role - Gets basic permissions
+            var userRole = roles.FirstOrDefault(r => r.Name == "User");
+            if (userRole != null)
+            {
+                var userPermissionNames = new[]
+                {
+                    "users.view", "users.edit",
+                    "product.view",
+                    "reports.view_basic"
+                };
+
+                foreach (var permissionName in userPermissionNames)
+                {
+                    var permission = permissions.FirstOrDefault(p => p.Name == permissionName);
+                    if (permission != null)
+                    {
+                        rolePermissions.Add(new RolePermission(userRole.Id, permission.Id, grantedBy));
+                    }
+                }
+            }
+
+            if (rolePermissions.Any())
+            {
+                await _context.RolePermissions.AddRangeAsync(rolePermissions);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Successfully seeded {Count} role permissions", rolePermissions.Count);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while seeding role permissions: {ErrorMessage}", ex.Message);
+            throw new InvalidOperationException("Failed to seed role permissions data", ex);
         }
     }
 

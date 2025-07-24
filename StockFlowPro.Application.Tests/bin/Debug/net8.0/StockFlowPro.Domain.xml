@@ -857,6 +857,96 @@
             Repository interface for payment management operations.
             </summary>
         </member>
+        <member name="T:StockFlowPro.Domain.Repositories.IPermissionRepository">
+            <summary>
+            Repository interface for Permission entity operations.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IPermissionRepository.GetAllAsync">
+            <summary>
+            Gets all permissions from the database.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IPermissionRepository.GetActivePermissionsAsync">
+            <summary>
+            Gets active permissions only.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IPermissionRepository.GetPermissionsByCategoryAsync">
+            <summary>
+            Gets permissions grouped by category.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IPermissionRepository.GetByIdAsync(System.Guid)">
+            <summary>
+            Gets a permission by its unique identifier.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IPermissionRepository.GetByNameAsync(System.String)">
+            <summary>
+            Gets a permission by its name.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IPermissionRepository.CreateAsync(StockFlowPro.Domain.Entities.Permission)">
+            <summary>
+            Creates a new permission in the database.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IPermissionRepository.UpdateAsync(StockFlowPro.Domain.Entities.Permission)">
+            <summary>
+            Updates an existing permission in the database.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IPermissionRepository.DeleteAsync(System.Guid)">
+            <summary>
+            Deletes a permission from the database.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IPermissionRepository.ExistsAsync(System.String)">
+            <summary>
+            Checks if a permission with the given name already exists.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IPermissionRepository.IsUsedByRolesAsync(System.Guid)">
+            <summary>
+            Checks if a permission is used by any roles.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IPermissionRepository.ActivateAsync(System.Guid)">
+            <summary>
+            Activates a permission.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IPermissionRepository.DeactivateAsync(System.Guid)">
+            <summary>
+            Deactivates a permission.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IPermissionRepository.GetRolePermissionsAsync(System.Guid)">
+            <summary>
+            Gets permissions for a specific role.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IPermissionRepository.GetRolePermissionMappingsAsync(System.Nullable{System.Guid})">
+            <summary>
+            Gets role permission mappings.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IPermissionRepository.GetRolePermissionAsync(System.Guid,System.Guid)">
+            <summary>
+            Gets a specific role permission mapping.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IPermissionRepository.GrantPermissionToRoleAsync(System.Guid,System.Guid)">
+            <summary>
+            Grants a permission to a role.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IPermissionRepository.RevokePermissionFromRoleAsync(System.Guid,System.Guid)">
+            <summary>
+            Revokes a permission from a role.
+            </summary>
+        </member>
         <member name="T:StockFlowPro.Domain.Repositories.IProductRepository">
             <summary>
             Defines the contract for product-specific repository operations.
@@ -957,6 +1047,11 @@
         <member name="M:StockFlowPro.Domain.Repositories.IRoleRepository.GetOrderedByPriorityAsync">
             <summary>
             Gets roles ordered by priority (highest first).
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Domain.Repositories.IRoleRepository.GetUserRolesAsync(System.Guid)">
+            <summary>
+            Gets roles assigned to a specific user.
             </summary>
         </member>
         <member name="T:StockFlowPro.Domain.Repositories.ISubscriptionPlanRepository">

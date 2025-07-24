@@ -486,6 +486,31 @@
             Enhanced registration request with additional validation
             </summary>
         </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.PermissionsController.GetAllPermissions">
+            <summary>
+            Gets all permissions in the system.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.PermissionsController.GetPermissionById(System.Guid)">
+            <summary>
+            Gets a specific permission by ID.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.PermissionsController.CreatePermission(StockFlowPro.Application.DTOs.CreatePermissionDto)">
+            <summary>
+            Creates a new permission.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.PermissionsController.UpdatePermission(System.Guid,StockFlowPro.Application.DTOs.UpdatePermissionDto)">
+            <summary>
+            Updates an existing permission.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.PermissionsController.DeletePermission(System.Guid)">
+            <summary>
+            Deletes a permission.
+            </summary>
+        </member>
         <member name="M:StockFlowPro.Web.Controllers.Api.ProfileController.GetProfile">
             <summary>
             Get current user's profile
@@ -621,6 +646,56 @@
             Gets available permissions that can be assigned to roles.
             </summary>
         </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RolesController.GetAllRoles(System.Boolean)">
+            <summary>
+            Gets all roles in the system.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RolesController.GetAvailableRoles">
+            <summary>
+            Gets available roles for assignment.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RolesController.GetRoleById(System.Guid)">
+            <summary>
+            Gets a specific role by ID.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RolesController.GetRoleWithPermissions(System.Guid)">
+            <summary>
+            Gets a role with its permissions.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RolesController.CreateRole(StockFlowPro.Application.DTOs.CreateRoleDto)">
+            <summary>
+            Creates a new role.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RolesController.UpdateRole(System.Guid,StockFlowPro.Application.DTOs.UpdateRoleDto)">
+            <summary>
+            Updates an existing role.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RolesController.UpdateRolePermissions(System.Guid,StockFlowPro.Web.Controllers.Api.UpdateRolePermissionsDto)">
+            <summary>
+            Updates role permissions.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RolesController.DeleteRole(System.Guid)">
+            <summary>
+            Deletes a role.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RolesController.ActivateRole(System.Guid)">
+            <summary>
+            Activates a role.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.RolesController.DeactivateRole(System.Guid)">
+            <summary>
+            Deactivates a role.
+            </summary>
+        </member>
         <member name="T:StockFlowPro.Web.Controllers.Api.RoleUpgradeRequestController">
             <summary>
             API controller for managing role upgrade requests
@@ -679,6 +754,16 @@
         <member name="M:StockFlowPro.Web.Controllers.Api.RoleUpgradeRequestController.GetAvailableRoles">
             <summary>
             Gets available roles that the current user can request
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.UsersController.GetUserPermissions(System.Guid)">
+            <summary>
+            Gets permissions for a specific user.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.UsersController.GetCurrentUserPermissions">
+            <summary>
+            Gets permissions for the current user.
             </summary>
         </member>
         <member name="T:StockFlowPro.Web.Controllers.Api.UserSynchronizationController">

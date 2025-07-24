@@ -79,6 +79,41 @@
             Data transfer object for template preview result.
             </summary>
         </member>
+        <member name="T:StockFlowPro.Application.DTOs.PermissionDto">
+            <summary>
+            Data transfer object for permission information
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.CreatePermissionDto">
+            <summary>
+            Data transfer object for creating a new permission
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.UpdatePermissionDto">
+            <summary>
+            Data transfer object for updating an existing permission
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.RolePermissionDto">
+            <summary>
+            Data transfer object for role permission relationship
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.CreateRolePermissionDto">
+            <summary>
+            Data transfer object for creating a role permission relationship
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.UserPermissionsDto">
+            <summary>
+            Data transfer object for user permissions
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.DTOs.PermissionCategory">
+            <summary>
+            Data transfer object for permission categories
+            </summary>
+        </member>
         <member name="T:StockFlowPro.Application.DTOs.RoleDto">
             <summary>
             Data transfer object for role information.
@@ -529,6 +564,126 @@
             Creates default system templates.
             </summary>
         </member>
+        <member name="T:StockFlowPro.Application.Interfaces.IPermissionService">
+            <summary>
+            Service interface for managing permissions
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IPermissionService.GetAllPermissionsAsync">
+            <summary>
+            Gets all permissions in the system
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IPermissionService.GetPermissionsByCategoryAsync">
+            <summary>
+            Gets permissions grouped by category
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IPermissionService.GetPermissionByIdAsync(System.Guid)">
+            <summary>
+            Gets a permission by ID
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IPermissionService.GetPermissionByNameAsync(System.String)">
+            <summary>
+            Gets a permission by name
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IPermissionService.CreatePermissionAsync(StockFlowPro.Application.DTOs.CreatePermissionDto)">
+            <summary>
+            Creates a new permission
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IPermissionService.UpdatePermissionAsync(System.Guid,StockFlowPro.Application.DTOs.UpdatePermissionDto)">
+            <summary>
+            Updates an existing permission
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IPermissionService.DeletePermissionAsync(System.Guid)">
+            <summary>
+            Deletes a permission
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IPermissionService.ActivatePermissionAsync(System.Guid)">
+            <summary>
+            Activates a permission
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IPermissionService.DeactivatePermissionAsync(System.Guid)">
+            <summary>
+            Deactivates a permission
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IPermissionService.GetUserPermissionsAsync(System.Guid)">
+            <summary>
+            Gets user permissions
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IPermissionService.GetRolePermissionsAsync(System.Nullable{System.Guid})">
+            <summary>
+            Gets role permissions
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IPermissionService.GrantPermissionToRoleAsync(StockFlowPro.Application.DTOs.CreateRolePermissionDto)">
+            <summary>
+            Grants permission to role
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IPermissionService.RevokePermissionFromRoleAsync(System.Guid,System.Guid)">
+            <summary>
+            Revokes permission from role
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.Interfaces.IRolePermissionService">
+            <summary>
+            Service interface for managing role permissions
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IRolePermissionService.GetAllRolePermissionsAsync">
+            <summary>
+            Gets all role permissions
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IRolePermissionService.GetRolePermissionsAsync(System.Guid)">
+            <summary>
+            Gets role permissions for a specific role
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IRolePermissionService.GetPermissionsForRoleAsync(System.Guid)">
+            <summary>
+            Gets permissions for a specific role
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IRolePermissionService.GetUserPermissionsAsync(System.Guid)">
+            <summary>
+            Gets user permissions based on their role
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IRolePermissionService.GrantPermissionToRoleAsync(System.Guid,System.Guid,System.Guid)">
+            <summary>
+            Grants a permission to a role
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IRolePermissionService.RevokePermissionFromRoleAsync(System.Guid,System.Guid)">
+            <summary>
+            Revokes a permission from a role
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IRolePermissionService.UpdateRolePermissionsAsync(System.Guid,System.Collections.Generic.IEnumerable{System.Guid},System.Guid)">
+            <summary>
+            Updates all permissions for a role (bulk operation)
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IRolePermissionService.UserHasPermissionAsync(System.Guid,System.String)">
+            <summary>
+            Checks if a user has a specific permission
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IRolePermissionService.RoleHasPermissionAsync(System.Guid,System.String)">
+            <summary>
+            Checks if a role has a specific permission
+            </summary>
+        </member>
         <member name="T:StockFlowPro.Application.Interfaces.IRoleService">
             <summary>
             Service interface for role management operations.
@@ -567,6 +722,11 @@
         <member name="M:StockFlowPro.Application.Interfaces.IRoleService.GetAvailablePermissionsAsync">
             <summary>
             Gets available permissions for role assignment.
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Application.Interfaces.IRoleService.UpdateRolePermissionsAsync(System.Guid,System.Collections.Generic.List{System.Guid})">
+            <summary>
+            Updates role permissions.
             </summary>
         </member>
         <member name="T:StockFlowPro.Application.Interfaces.IRoleUpgradeRequestService">
@@ -786,6 +946,11 @@
             <param name="userId">User ID</param>
             <returns>True if user exists, false otherwise</returns>
         </member>
+        <member name="T:StockFlowPro.Application.Mappings.PermissionMappingProfile">
+            <summary>
+            AutoMapper profile for Permission entity mappings.
+            </summary>
+        </member>
         <member name="T:StockFlowPro.Application.Services.EnhancedNotificationService">
             <summary>
             Enhanced notification service with template support, persistence, and delivery tracking.
@@ -799,6 +964,11 @@
         <member name="T:StockFlowPro.Application.Services.NotificationTemplateService">
             <summary>
             Service for managing notification templates.
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Application.Services.PermissionService">
+            <summary>
+            Service for managing permissions
             </summary>
         </member>
         <member name="T:StockFlowPro.Application.Services.RoleService">

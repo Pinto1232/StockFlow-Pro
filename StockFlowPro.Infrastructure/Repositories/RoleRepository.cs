@@ -84,4 +84,24 @@ public class RoleRepository : IRoleRepository
             .ThenBy(r => r.Name)
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<Role>> GetUserRolesAsync(Guid userId)
+    {
+        // For now, we'll get the user's role from the User entity
+        // In a more complex system, you might have a UserRoles table
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user == null)
+        {
+            return Enumerable.Empty<Role>();
+        }
+
+        // Convert the user's role enum to a role entity
+        var roleName = user.Role.ToString();
+        var role = await _context.Roles
+            .FirstOrDefaultAsync(r => r.Name == roleName);
+
+        return role != null ? new[] { role } : Enumerable.Empty<Role>();
+    }
 }

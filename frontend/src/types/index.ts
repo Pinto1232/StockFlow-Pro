@@ -126,12 +126,92 @@ export interface InvoiceItemDto {
     totalPrice: number;
 }
 
+// Permission DTOs
+export interface PermissionDto {
+    id: string;
+    name: string;
+    displayName: string;
+    description: string;
+    category: string;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt?: string;
+}
+
+export interface CreatePermissionDto {
+    name: string;
+    displayName: string;
+    description: string;
+    category: string;
+}
+
+export interface UpdatePermissionDto {
+    displayName: string;
+    description: string;
+    category: string;
+}
+
+// Role Permission DTOs
+export interface RolePermissionDto {
+    id: string;
+    roleId: string;
+    permissionId: string;
+    grantedAt: string;
+    grantedBy: string;
+    role?: RoleDto;
+    permission?: PermissionDto;
+}
+
+export interface CreateRolePermissionDto {
+    roleId: string;
+    permissionId: string;
+    grantedBy: string;
+}
+
 // Role DTOs
 export interface RoleDto {
     id: string;
     name: string;
+    displayName: string;
     description: string;
     permissions: string[];
+    isActive: boolean;
+    isSystemRole: boolean;
+    priority: number;
+    createdAt: string;
+    updatedAt?: string;
+    users?: UserDto[];
+    rolePermissions?: RolePermissionDto[];
+}
+
+export interface CreateRoleDto {
+    name: string;
+    displayName?: string;
+    description?: string;
+    permissions?: string[];
+    priority?: number;
+    isSystemRole?: boolean;
+}
+
+export interface UpdateRoleDto {
+    displayName: string;
+    description: string;
+    permissions: string[];
+    priority: number;
+}
+
+// Permission Category for grouping
+export interface PermissionCategory {
+    category: string;
+    permissions: PermissionDto[];
+}
+
+// User permissions response
+export interface UserPermissionsDto {
+    userId: string;
+    userRole: string;
+    permissions: string[];
+    rolePermissions: RolePermissionDto[];
 }
 
 // Subscription DTOs

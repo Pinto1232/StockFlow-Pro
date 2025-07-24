@@ -41,4 +41,9 @@ public interface IRoleService
     /// Gets available permissions for role assignment.
     /// </summary>
     Task<IEnumerable<object>> GetAvailablePermissionsAsync();
+
+    /// <summary>
+    /// Updates role permissions.
+    /// </summary>
+    Task UpdateRolePermissionsAsync(Guid roleId, List<Guid> permissionIds);
 }

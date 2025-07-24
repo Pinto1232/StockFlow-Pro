@@ -147,6 +147,11 @@
             Repository implementation for managing notification templates.
             </summary>
         </member>
+        <member name="T:StockFlowPro.Infrastructure.Repositories.PermissionRepository">
+            <summary>
+            Repository implementation for Permission entity operations.
+            </summary>
+        </member>
         <member name="T:StockFlowPro.Infrastructure.Repositories.RoleRepository">
             <summary>
             Repository implementation for Role entity operations.

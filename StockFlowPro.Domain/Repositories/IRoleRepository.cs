@@ -51,4 +51,9 @@ public interface IRoleRepository
     /// Gets roles ordered by priority (highest first).
     /// </summary>
     Task<IEnumerable<Role>> GetOrderedByPriorityAsync();
+
+    /// <summary>
+    /// Gets roles assigned to a specific user.
+    /// </summary>
+    Task<IEnumerable<Role>> GetUserRolesAsync(Guid userId);
 }
