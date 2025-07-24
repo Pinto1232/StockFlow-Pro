@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import {
     FileText,
     Plus,
-    Filter,
     Eye,
     Edit,
     Trash2,
@@ -11,185 +10,238 @@ import {
     ChevronDown,
     Home,
     ArrowLeft,
+    Loader2,
+    XCircle,
 } from "lucide-react";
 import { formatCurrency } from "../../utils/currency";
+import { useInvoices, useDeleteInvoice, useInvoice, useDownloadInvoice } from "../../hooks/useInvoices";
+import { useRealTimeUpdates } from "../../hooks/useRealTimeUpdates";
+import InvoiceForm from "../../components/Invoices/InvoiceForm";
+import InvoiceDetail from "../../components/Invoices/InvoiceDetail";
+import Snackbar from "../../components/ui/Snackbar";
+import ConfirmDialog from "../../components/ui/ConfirmDialog";
+import type { PaginationParams, InvoiceDto } from "../../types/index";
+import type { InvoiceFilters } from "../../services/invoiceService";
 import "./Invoices.css";
 
-interface Invoice {
-    id: string;
-    createdDate: string;
-    createdByUserName: string;
-    totalItemCount: number;
-    total: number;
-    isActive: boolean;
-}
-
 const Invoices: React.FC = () => {
-    const [filteredInvoices, setFilteredInvoices] = useState<Invoice[]>([]);
-    const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [userFilter, setUserFilter] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
 
-    // Mock data for demonstration
+    // Modal states
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [isDetailOpen, setIsDetailOpen] = useState(false);
+    const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
+    const [editingInvoice, setEditingInvoice] = useState<InvoiceDto | null>(null);
+
+    // Snackbar and confirmation states
+    const [snackbar, setSnackbar] = useState<{
+        isOpen: boolean;
+        message: string;
+        type: 'success' | 'error' | 'warning' | 'info';
+    }>({
+        isOpen: false,
+        message: '',
+        type: 'info',
+    });
+
+    const [confirmDialog, setConfirmDialog] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => {},
+    });
+
+    // Prepare filters for API call
+    const filters: InvoiceFilters = {
+        search: searchQuery || undefined,
+        dateFrom: startDate || undefined,
+        dateTo: endDate || undefined,
+        // Note: userFilter would need to be mapped to customerId or similar field
+    };
+
+    // Prepare pagination for API call
+    const pagination: PaginationParams = {
+        pageNumber: currentPage,
+        pageSize: itemsPerPage,
+    };
+
+    // Fetch invoices from API
+    const { data: invoicesResponse, isLoading, error } = useInvoices(pagination, filters);
+    
+    // Fetch selected invoice for viewing/editing
+    const { data: selectedInvoice } = useInvoice(selectedInvoiceId || "");
+    
+    // Download invoice mutation
+    const downloadInvoiceMutation = useDownloadInvoice();
+    
+    // Enable real-time updates
+    useRealTimeUpdates();
+
+    // Delete invoice mutation
+    const deleteInvoiceMutation = useDeleteInvoice();
+
+    // Get data from API responses
+    const invoices = invoicesResponse?.data || [];
+    const totalPages = invoicesResponse?.totalPages || 1;
+    const totalCount = invoicesResponse?.totalCount || 0;
+
+    // Reset to page 1 when filters change
     useEffect(() => {
-        const mockInvoices: Invoice[] = [
-            {
-                id: "inv-001-2024-001",
-                createdDate: "2024-01-15",
-                createdByUserName: "John Smith",
-                totalItemCount: 5,
-                total: 2450.75,
-                isActive: true,
-            },
-            {
-                id: "inv-002-2024-002",
-                createdDate: "2024-01-14",
-                createdByUserName: "Sarah Johnson",
-                totalItemCount: 12,
-                total: 5890.25,
-                isActive: true,
-            },
-            {
-                id: "inv-003-2024-003",
-                createdDate: "2024-01-13",
-                createdByUserName: "Mike Davis",
-                totalItemCount: 3,
-                total: 1275.5,
-                isActive: false,
-            },
-            {
-                id: "inv-004-2024-004",
-                createdDate: "2024-01-12",
-                createdByUserName: "Emily Wilson",
-                totalItemCount: 8,
-                total: 3420.0,
-                isActive: true,
-            },
-            {
-                id: "inv-005-2024-005",
-                createdDate: "2024-01-11",
-                createdByUserName: "David Brown",
-                totalItemCount: 15,
-                total: 7850.9,
-                isActive: true,
-            },
-            {
-                id: "inv-006-2024-006",
-                createdDate: "2024-01-10",
-                createdByUserName: "Lisa Anderson",
-                totalItemCount: 6,
-                total: 2100.25,
-                isActive: false,
-            },
-            {
-                id: "inv-007-2024-007",
-                createdDate: "2024-01-09",
-                createdByUserName: "Robert Taylor",
-                totalItemCount: 9,
-                total: 4567.8,
-                isActive: true,
-            },
-            {
-                id: "inv-008-2024-008",
-                createdDate: "2024-01-08",
-                createdByUserName: "Jennifer Martinez",
-                totalItemCount: 4,
-                total: 1890.45,
-                isActive: true,
-            },
-            {
-                id: "inv-009-2024-009",
-                createdDate: "2024-01-07",
-                createdByUserName: "Christopher Lee",
-                totalItemCount: 11,
-                total: 6234.7,
-                isActive: false,
-            },
-            {
-                id: "inv-010-2024-010",
-                createdDate: "2024-01-06",
-                createdByUserName: "Amanda White",
-                totalItemCount: 7,
-                total: 3156.85,
-                isActive: true,
-            },
-            {
-                id: "inv-011-2024-011",
-                createdDate: "2024-01-05",
-                createdByUserName: "Kevin Garcia",
-                totalItemCount: 13,
-                total: 8945.6,
-                isActive: true,
-            },
-            {
-                id: "inv-012-2024-012",
-                createdDate: "2024-01-04",
-                createdByUserName: "Michelle Rodriguez",
-                totalItemCount: 2,
-                total: 875.3,
-                isActive: false,
-            },
-        ];
+        setCurrentPage(1);
+    }, [searchQuery, startDate, endDate, userFilter]);
 
-        // Simulate loading
-        setTimeout(() => {
-            setFilteredInvoices(mockInvoices);
-            setLoading(false);
-        }, 1000);
-    }, []);
+    // Reset to page 1 when page size changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [itemsPerPage]);
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString();
     };
 
-    const getInvoiceNumber = (id: string) => {
-        return id.substring(0, 8).toUpperCase();
+    const getInvoiceNumber = (invoiceNumber: string) => {
+        return invoiceNumber || "N/A";
     };
 
     const handleCreateInvoice = () => {
-        console.log("Create invoice clicked");
+        setEditingInvoice(null);
+        setIsFormOpen(true);
     };
 
     const handleEditInvoice = (id: string) => {
-        console.log("Edit invoice:", id);
+        setSelectedInvoiceId(id);
+        setEditingInvoice(invoices.find(inv => inv.id === id) || null);
+        setIsFormOpen(true);
     };
 
     const handleViewInvoice = (id: string) => {
-        console.log("View invoice:", id);
+        setSelectedInvoiceId(id);
+        setIsDetailOpen(true);
+    };
+
+    const showSnackbar = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
+        setSnackbar({
+            isOpen: true,
+            message,
+            type,
+        });
+    };
+
+    const hideSnackbar = () => {
+        setSnackbar(prev => ({ ...prev, isOpen: false }));
+    };
+
+    const showConfirmDialog = (title: string, message: string, onConfirm: () => void) => {
+        setConfirmDialog({
+            isOpen: true,
+            title,
+            message,
+            onConfirm,
+        });
+    };
+
+    const hideConfirmDialog = () => {
+        setConfirmDialog(prev => ({ ...prev, isOpen: false }));
     };
 
     const handleDeleteInvoice = (id: string) => {
-        if (
-            window.confirm(
-                "Are you sure you want to delete this invoice? This action cannot be undone.",
-            )
-        ) {
-            console.log("Delete invoice:", id);
+        const invoice = invoices.find(inv => inv.id === id);
+        const invoiceNumber = invoice?.invoiceNumber || id;
+        
+        showConfirmDialog(
+            "Delete Invoice",
+            `Are you sure you want to delete invoice #${invoiceNumber}? This action cannot be undone.`,
+            async () => {
+                try {
+                    await deleteInvoiceMutation.mutateAsync(id);
+                    showSnackbar("Invoice deleted successfully", "success");
+                    hideConfirmDialog();
+                } catch (error) {
+                    console.error("Failed to delete invoice:", error);
+                    showSnackbar("Failed to delete invoice. Please try again.", "error");
+                    hideConfirmDialog();
+                }
+            }
+        );
+    };
+
+    const handleDownload = async (id: string, format: string) => {
+        const invoice = invoices.find(inv => inv.id === id);
+        const invoiceNumber = invoice?.invoiceNumber || id;
+
+        try {
+            showSnackbar(`Generating ${format.toUpperCase()}...`, "info");
+            
+            // Use the backend for all formats
+            const blob = await downloadInvoiceMutation.mutateAsync({ id, format });
+            
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            
+            // Set appropriate file extension
+            const extensions: Record<string, string> = {
+                pdf: 'pdf',
+                excel: 'xlsx',
+                csv: 'csv',
+                json: 'json'
+            };
+            
+            const extension = extensions[format] || format;
+            link.download = `invoice-${invoiceNumber}.${extension}`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            showSnackbar(`${format.toUpperCase()} downloaded successfully`, "success");
+        } catch (error) {
+            console.error(`Failed to download ${format}:`, error);
+            showSnackbar(`Failed to download ${format.toUpperCase()}. Please try again.`, "error");
         }
     };
 
-    const handleDownload = (id: string, format: string) => {
-        console.log("Download invoice:", id, "as", format);
+    const handleFormSuccess = () => {
+        setIsFormOpen(false);
+        setEditingInvoice(null);
+        setSelectedInvoiceId(null);
     };
 
-    const handleFilter = () => {
-        console.log("Filter invoices");
+    const handleFormClose = () => {
+        setIsFormOpen(false);
+        setEditingInvoice(null);
+        setSelectedInvoiceId(null);
+    };
+
+    const handleDetailClose = () => {
+        setIsDetailOpen(false);
+        setSelectedInvoiceId(null);
+    };
+
+    const handleDetailEdit = () => {
+        setIsDetailOpen(false);
+        setEditingInvoice(selectedInvoice || null);
+        setIsFormOpen(true);
     };
 
     const clearFilters = () => {
         setStartDate("");
         setEndDate("");
         setUserFilter("");
-        setFilteredInvoices([]);
+        setSearchQuery("");
     };
-
-    const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const currentInvoices = filteredInvoices.slice(startIndex, endIndex);
 
     return (
         <div className="min-h-screen bg-gray-50 w-full">
@@ -226,13 +278,13 @@ const Invoices: React.FC = () => {
                             </div>
                         </div>
                         <div className="flex flex-wrap gap-3">
-                            <a
-                                href="/admin"
+                            <Link
+                                to="/dashboard"
                                 className="flex items-center gap-2 px-4 py-2 border-2 border-gray-400 text-gray-600 rounded-lg hover:bg-gray-400 hover:text-white transition-all duration-200 font-medium"
                             >
                                 <ArrowLeft className="h-4 w-4" />
-                                Back to Admin Panel
-                            </a>
+                                Back to Dashboard
+                            </Link>
                             <button
                                 className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium shadow-lg"
                                 onClick={handleCreateInvoice}
@@ -247,7 +299,23 @@ const Invoices: React.FC = () => {
                 {/* Search and Filters */}
                 <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-6">
                     <div className="flex flex-col lg:flex-row gap-4">
-                        <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label
+                                    htmlFor="searchQuery"
+                                    className="block text-sm font-medium text-gray-700 mb-2"
+                                >
+                                    Search
+                                </label>
+                                <input
+                                    type="text"
+                                    className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-200"
+                                    id="searchQuery"
+                                    placeholder="Search invoices..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
                             <div>
                                 <label
                                     htmlFor="startDate"
@@ -285,65 +353,19 @@ const Invoices: React.FC = () => {
                                     htmlFor="userFilter"
                                     className="block text-sm font-medium text-gray-700 mb-2"
                                 >
-                                    Created By
+                                    Customer
                                 </label>
-                                <select
+                                <input
+                                    type="text"
                                     className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-200"
                                     id="userFilter"
+                                    placeholder="Filter by customer..."
                                     value={userFilter}
-                                    onChange={(e) =>
-                                        setUserFilter(e.target.value)
-                                    }
-                                >
-                                    <option value="">All Users</option>
-                                    <option value="John Smith">
-                                        John Smith
-                                    </option>
-                                    <option value="Sarah Johnson">
-                                        Sarah Johnson
-                                    </option>
-                                    <option value="Mike Davis">
-                                        Mike Davis
-                                    </option>
-                                    <option value="Emily Wilson">
-                                        Emily Wilson
-                                    </option>
-                                    <option value="David Brown">
-                                        David Brown
-                                    </option>
-                                    <option value="Lisa Anderson">
-                                        Lisa Anderson
-                                    </option>
-                                    <option value="Robert Taylor">
-                                        Robert Taylor
-                                    </option>
-                                    <option value="Jennifer Martinez">
-                                        Jennifer Martinez
-                                    </option>
-                                    <option value="Christopher Lee">
-                                        Christopher Lee
-                                    </option>
-                                    <option value="Amanda White">
-                                        Amanda White
-                                    </option>
-                                    <option value="Kevin Garcia">
-                                        Kevin Garcia
-                                    </option>
-                                    <option value="Michelle Rodriguez">
-                                        Michelle Rodriguez
-                                    </option>
-                                </select>
+                                    onChange={(e) => setUserFilter(e.target.value)}
+                                />
                             </div>
                         </div>
                         <div className="flex flex-wrap items-end gap-3">
-                            <button
-                                type="button"
-                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium"
-                                onClick={handleFilter}
-                            >
-                                <Filter className="h-4 w-4" />
-                                Filter
-                            </button>
                             <button
                                 type="button"
                                 className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
@@ -375,22 +397,51 @@ const Invoices: React.FC = () => {
                 <div className="bg-white border-0 rounded-2xl shadow-[0_8px_25px_rgba(0,0,0,0.08)] overflow-hidden w-full">
                     <div className="p-0">
                         <div className="rounded-2xl overflow-hidden">
-                            {loading ? (
+                            {isLoading ? (
                                 <div className="flex flex-col items-center justify-center py-12">
-                                    <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                                    <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-4" />
                                     <p className="text-gray-500 font-medium">
                                         Loading invoices...
                                     </p>
                                 </div>
-                            ) : filteredInvoices.length === 0 ? (
+                            ) : error ? (
+                                <div className="flex flex-col items-center justify-center py-12">
+                                    <XCircle className="h-12 w-12 text-red-400 mb-4" />
+                                    <h5 className="text-lg font-semibold text-gray-600 mb-2">
+                                        Error loading invoices
+                                    </h5>
+                                    <p className="text-gray-500 text-center mb-4">
+                                        {error.message || "Failed to load invoices from the server"}
+                                    </p>
+                                    {error.message?.includes('401') || error.message?.includes('Unauthorized') ? (
+                                        <div className="text-center">
+                                            <p className="text-sm text-gray-600 mb-3">
+                                                You may need to log in again to access this data.
+                                            </p>
+                                            <Link
+                                                to="/login"
+                                                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                                            >
+                                                Go to Login
+                                            </Link>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => window.location.reload()}
+                                            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"
+                                        >
+                                            Try Again
+                                        </button>
+                                    )}
+                                </div>
+                            ) : invoices.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12">
                                     <FileText className="h-12 w-12 text-gray-300 mb-4" />
                                     <h5 className="text-lg font-semibold text-gray-600 mb-2">
                                         No invoices found
                                     </h5>
                                     <p className="text-gray-500">
-                                        Create your first invoice to get
-                                        started.
+                                        Create your first invoice to get started.
                                     </p>
                                 </div>
                             ) : (
@@ -401,10 +452,13 @@ const Invoices: React.FC = () => {
                                                 Invoice #
                                             </th>
                                             <th className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] font-semibold text-xs uppercase tracking-[0.5px] text-[#475569] p-4 sticky top-0 z-10 text-left">
-                                                Date Created
+                                                Customer
                                             </th>
                                             <th className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] font-semibold text-xs uppercase tracking-[0.5px] text-[#475569] p-4 sticky top-0 z-10 text-left">
-                                                Created By
+                                                Issue Date
+                                            </th>
+                                            <th className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] font-semibold text-xs uppercase tracking-[0.5px] text-[#475569] p-4 sticky top-0 z-10 text-left">
+                                                Due Date
                                             </th>
                                             <th className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] font-semibold text-xs uppercase tracking-[0.5px] text-[#475569] p-4 sticky top-0 z-10 text-left">
                                                 Items
@@ -421,63 +475,65 @@ const Invoices: React.FC = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {currentInvoices.map(
+                                        {invoices.map(
                                             (invoice, index) => (
                                                 <tr
                                                     key={invoice.id}
                                                     className="hover:bg-[#f8fafc] transition-colors duration-200"
                                                 >
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== currentInvoices.length - 1 ? "border-b border-[#f1f5f9]" : ""} font-medium text-gray-900`}
+                                                        className={`align-middle text-sm p-4 ${index !== invoices.length - 1 ? "border-b border-[#f1f5f9]" : ""} font-medium text-gray-900`}
                                                     >
                                                         <span className="invoice-number">
                                                             {getInvoiceNumber(
-                                                                invoice.id,
+                                                                invoice.invoiceNumber,
                                                             )}
                                                         </span>
                                                     </td>
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== currentInvoices.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
+                                                        className={`align-middle text-sm p-4 ${index !== invoices.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
                                                     >
-                                                        {formatDate(
-                                                            invoice.createdDate,
-                                                        )}
+                                                        {invoice.customerName || "Unknown Customer"}
                                                     </td>
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== currentInvoices.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
+                                                        className={`align-middle text-sm p-4 ${index !== invoices.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
                                                     >
-                                                        {invoice.createdByUserName ||
-                                                            "Unknown User"}
+                                                        {formatDate(invoice.issueDate)}
                                                     </td>
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== currentInvoices.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
+                                                        className={`align-middle text-sm p-4 ${index !== invoices.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
                                                     >
-                                                        {invoice.totalItemCount ||
-                                                            0}
+                                                        {formatDate(invoice.dueDate)}
                                                     </td>
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== currentInvoices.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
+                                                        className={`align-middle text-sm p-4 ${index !== invoices.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
+                                                    >
+                                                        {invoice.items?.length || 0}
+                                                    </td>
+                                                    <td
+                                                        className={`align-middle text-sm p-4 ${index !== invoices.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
                                                     >
                                                         <span className="invoice-total">
-                                                            {formatCurrency(
-                                                                invoice.total ||
-                                                                    0,
-                                                            )}
+                                                            {formatCurrency(invoice.totalAmount)}
                                                         </span>
                                                     </td>
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== currentInvoices.length - 1 ? "border-b border-[#f1f5f9]" : ""}`}
+                                                        className={`align-middle text-sm p-4 ${index !== invoices.length - 1 ? "border-b border-[#f1f5f9]" : ""}`}
                                                     >
                                                         <span
-                                                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium ${invoice.isActive ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-[0_2px_8px_rgba(16,185,129,0.3)]" : "bg-[#e2e8f0] text-[#64748b]"}`}
+                                                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
+                                                                invoice.status === 'Paid' 
+                                                                    ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-[0_2px_8px_rgba(16,185,129,0.3)]" 
+                                                                    : invoice.status === 'Pending'
+                                                                    ? "bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-[0_2px_8px_rgba(245,158,11,0.3)]"
+                                                                    : "bg-[#e2e8f0] text-[#64748b]"
+                                                            }`}
                                                         >
-                                                            {invoice.isActive
-                                                                ? "Active"
-                                                                : "Inactive"}
+                                                            {invoice.status || "Draft"}
                                                         </span>
                                                     </td>
                                                     <td
-                                                        className={`align-middle text-sm p-4 ${index !== currentInvoices.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-right`}
+                                                        className={`align-middle text-sm p-4 ${index !== invoices.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-right`}
                                                     >
                                                         <div className="flex justify-end gap-2">
                                                             <button
@@ -577,10 +633,11 @@ const Invoices: React.FC = () => {
                                                                     )
                                                                 }
                                                                 title="Delete"
+                                                                disabled={deleteInvoiceMutation.isPending}
                                                             >
                                                                 <Trash2 className="h-3 w-3" />
                                                                 <span>
-                                                                    Delete
+                                                                    {deleteInvoiceMutation.isPending ? "..." : "Delete"}
                                                                 </span>
                                                             </button>
                                                         </div>
@@ -598,8 +655,7 @@ const Invoices: React.FC = () => {
                     <div className="bg-[#f8fafc] border-t border-[#e2e8f0] px-6 py-4 flex justify-between items-center">
                         <span className="text-sm text-gray-600 font-medium flex items-center gap-2">
                             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                            {filteredInvoices.length} invoice
-                            {filteredInvoices.length !== 1 ? "s" : ""}
+                            {totalCount} invoice{totalCount !== 1 ? "s" : ""}
                         </span>
                         {totalPages > 1 && (
                             <nav aria-label="Invoice pagination">
@@ -629,6 +685,44 @@ const Invoices: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Invoice Form Modal */}
+            <InvoiceForm
+                invoice={editingInvoice || undefined}
+                isOpen={isFormOpen}
+                onClose={handleFormClose}
+                onSuccess={handleFormSuccess}
+            />
+
+            {/* Invoice Detail Modal */}
+            {selectedInvoice && (
+                <InvoiceDetail
+                    invoice={selectedInvoice}
+                    isOpen={isDetailOpen}
+                    onClose={handleDetailClose}
+                    onEdit={handleDetailEdit}
+                />
+            )}
+
+            {/* Snackbar */}
+            <Snackbar
+                isOpen={snackbar.isOpen}
+                message={snackbar.message}
+                type={snackbar.type}
+                onClose={hideSnackbar}
+            />
+
+            {/* Confirmation Dialog */}
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+                confirmLabel="Delete"
+                cancelLabel="Cancel"
+                type="danger"
+                onConfirm={confirmDialog.onConfirm}
+                onCancel={hideConfirmDialog}
+            />
         </div>
     );
 };

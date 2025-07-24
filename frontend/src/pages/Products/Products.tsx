@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { formatCurrency, formatCurrencyCompact } from "../../utils/currency";
 import { useProducts } from "../../hooks/useProducts";
+import { useRealTimeUpdates } from "../../hooks/useRealTimeUpdates";
 import type { ProductFilters, PaginationParams } from "../../types/index";
 
 // Define ProductStats interface
@@ -72,6 +73,9 @@ const Products: React.FC = () => {
     // Note: Stats endpoint is not available (404), so we'll calculate stats from products data
     // const { data: statsData } = useProductStats();
     const statsData: ProductStats | undefined = undefined; // Disable stats API call for now
+
+    // Enable real-time updates
+    useRealTimeUpdates();
 
     // Log API calls to console
     useEffect(() => {

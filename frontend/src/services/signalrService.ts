@@ -122,6 +122,102 @@ class SignalRServiceImpl implements SignalRService {
                 detail: data 
             }));
         });
+
+        // Handle product-specific events
+        this.connection.on('ProductCreated', (data) => {
+            console.log('Received ProductCreated event:', data);
+            window.dispatchEvent(new CustomEvent('signalr-product-event', {
+                detail: {
+                    type: 'ProductCreated',
+                    entityId: data.id,
+                    data: data,
+                    timestamp: new Date().toISOString()
+                }
+            }));
+        });
+
+        this.connection.on('ProductUpdated', (data) => {
+            console.log('Received ProductUpdated event:', data);
+            window.dispatchEvent(new CustomEvent('signalr-product-event', {
+                detail: {
+                    type: 'ProductUpdated',
+                    entityId: data.id,
+                    data: data,
+                    timestamp: new Date().toISOString()
+                }
+            }));
+        });
+
+        this.connection.on('ProductDeleted', (data) => {
+            console.log('Received ProductDeleted event:', data);
+            window.dispatchEvent(new CustomEvent('signalr-product-event', {
+                detail: {
+                    type: 'ProductDeleted',
+                    entityId: data.id || data.productId,
+                    timestamp: new Date().toISOString()
+                }
+            }));
+        });
+
+        this.connection.on('StockUpdated', (data) => {
+            console.log('Received StockUpdated event:', data);
+            window.dispatchEvent(new CustomEvent('signalr-product-event', {
+                detail: {
+                    type: 'StockUpdated',
+                    entityId: data.id || data.productId,
+                    data: data,
+                    timestamp: new Date().toISOString()
+                }
+            }));
+        });
+
+        this.connection.on('LowStockAlert', (data) => {
+            console.log('Received LowStockAlert event:', data);
+            window.dispatchEvent(new CustomEvent('signalr-product-event', {
+                detail: {
+                    type: 'LowStockAlert',
+                    entityId: data.id || data.productId,
+                    data: data,
+                    timestamp: new Date().toISOString()
+                }
+            }));
+        });
+
+        // Handle invoice-specific events
+        this.connection.on('InvoiceCreated', (data) => {
+            console.log('Received InvoiceCreated event:', data);
+            window.dispatchEvent(new CustomEvent('signalr-invoice-event', {
+                detail: {
+                    type: 'InvoiceCreated',
+                    entityId: data.id,
+                    data: data,
+                    timestamp: new Date().toISOString()
+                }
+            }));
+        });
+
+        this.connection.on('InvoiceUpdated', (data) => {
+            console.log('Received InvoiceUpdated event:', data);
+            window.dispatchEvent(new CustomEvent('signalr-invoice-event', {
+                detail: {
+                    type: 'InvoiceUpdated',
+                    entityId: data.id,
+                    data: data,
+                    timestamp: new Date().toISOString()
+                }
+            }));
+        });
+
+        this.connection.on('InvoiceDeleted', (data) => {
+            console.log('Received InvoiceDeleted event:', data);
+            window.dispatchEvent(new CustomEvent('signalr-invoice-event', {
+                detail: {
+                    type: 'InvoiceDeleted',
+                    entityId: data.id || data.invoiceId,
+                    timestamp: new Date().toISOString()
+                }
+            }));
+        });
     }
 
     private updateConnectionState(state: ConnectionState): void {
