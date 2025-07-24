@@ -721,6 +721,84 @@
             Request model for self-synchronization
             </summary>
         </member>
+        <member name="T:StockFlowPro.Web.Controllers.Api.V2.UsersController">
+            <summary>
+            Enhanced Users API Controller for Hexagonal Architecture integration
+            Provides comprehensive user management endpoints with improved error handling and validation
+            </summary>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.V2.UsersController.GetUsers(System.String,System.Nullable{System.Int32},System.Nullable{System.Boolean},System.Int32,System.Int32,System.String,System.String)">
+            <summary>
+            Get paginated list of users with filtering and sorting
+            </summary>
+            <param name="search">Search term for username, email, first name, or last name</param>
+            <param name="roleId">Filter by role ID</param>
+            <param name="isActive">Filter by active status</param>
+            <param name="page">Page number (1-based)</param>
+            <param name="pageSize">Number of items per page (max 100)</param>
+            <param name="sortBy">Sort field (username, email, firstName, lastName, createdAt)</param>
+            <param name="sortOrder">Sort order (asc, desc)</param>
+            <returns>Paginated list of users</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.V2.UsersController.GetUser(System.Guid)">
+            <summary>
+            Get user by ID
+            </summary>
+            <param name="id">User ID</param>
+            <returns>User details</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.V2.UsersController.GetCurrentUser">
+            <summary>
+            Get current authenticated user
+            </summary>
+            <returns>Current user details</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.V2.UsersController.CreateUser(StockFlowPro.Web.Controllers.Api.V2.CreateUserRequest)">
+            <summary>
+            Create a new user
+            </summary>
+            <param name="request">User creation request</param>
+            <returns>Created user</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.V2.UsersController.UpdateUser(System.Guid,StockFlowPro.Web.Controllers.Api.V2.UpdateUserRequest)">
+            <summary>
+            Update an existing user
+            </summary>
+            <param name="id">User ID</param>
+            <param name="request">User update request</param>
+            <returns>Updated user</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.V2.UsersController.DeleteUser(System.Guid)">
+            <summary>
+            Delete a user
+            </summary>
+            <param name="id">User ID</param>
+            <returns>No content</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.V2.UsersController.ActivateUser(System.Guid)">
+            <summary>
+            Activate a user
+            </summary>
+            <param name="id">User ID</param>
+            <returns>No content</returns>
+        </member>
+        <member name="M:StockFlowPro.Web.Controllers.Api.V2.UsersController.DeactivateUser(System.Guid)">
+            <summary>
+            Deactivate a user
+            </summary>
+            <param name="id">User ID</param>
+            <returns>No content</returns>
+        </member>
+        <member name="T:StockFlowPro.Web.Controllers.Api.V2.CreateUserRequest">
+            <summary>
+            Request model for creating a user
+            </summary>
+        </member>
+        <member name="T:StockFlowPro.Web.Controllers.Api.V2.UpdateUserRequest">
+            <summary>
+            Request model for updating a user
+            </summary>
+        </member>
         <member name="T:StockFlowPro.Web.Controllers.NotificationsController">
             <summary>
             Controller for managing notifications and user preferences.

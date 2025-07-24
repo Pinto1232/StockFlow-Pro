@@ -25,10 +25,6 @@
       "PackagePath": "staticwebassets\\css\\features.css"
     },
     {
-      "Id": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\css\\invoices.css",
-      "PackagePath": "staticwebassets\\css\\invoices.css"
-    },
-    {
       "Id": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\css\\layout.css",
       "PackagePath": "staticwebassets\\css\\layout.css"
     },
@@ -87,14 +83,6 @@
     {
       "Id": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\js\\edit-profile.js",
       "PackagePath": "staticwebassets\\js\\edit-profile.js"
-    },
-    {
-      "Id": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\js\\invoices.js",
-      "PackagePath": "staticwebassets\\js\\invoices.js"
-    },
-    {
-      "Id": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\js\\invoices_backup.js",
-      "PackagePath": "staticwebassets\\js\\invoices_backup.js"
     },
     {
       "Id": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\js\\login.js",
