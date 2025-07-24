@@ -120,4 +120,34 @@ export const invoiceService = {
     sendInvoiceEmail: async (id: string, email: string): Promise<void> => {
         await apiService.post(`/invoices/${id}/send`, { email });
     },
+
+    // Download all invoices in bulk
+    downloadAllInvoices: async (format: string, filters?: InvoiceFilters): Promise<Blob> => {
+        const params: Record<string, string> = {};
+
+        // Add filters as query parameters
+        if (filters?.search) {
+            params.search = filters.search;
+        }
+        if (filters?.status) {
+            params.status = filters.status;
+        }
+        if (filters?.customerId) {
+            params.customerId = filters.customerId;
+        }
+        if (filters?.dateFrom) {
+            params.dateFrom = filters.dateFrom;
+        }
+        if (filters?.dateTo) {
+            params.dateTo = filters.dateTo;
+        }
+
+        const queryString = new URLSearchParams(params).toString();
+        const url = `/invoices/download/bulk/${format}${queryString ? `?${queryString}` : ''}`;
+        
+        const response = await api.get(url, {
+            responseType: 'blob'
+        });
+        return response.data;
+    },
 };

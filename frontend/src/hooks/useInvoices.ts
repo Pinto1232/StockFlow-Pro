@@ -110,3 +110,11 @@ export const useSendInvoiceEmail = () => {
             invoiceService.sendInvoiceEmail(id, email),
     });
 };
+
+// Download all invoices in bulk mutation
+export const useDownloadAllInvoices = () => {
+    return useMutation({
+        mutationFn: ({ format, filters }: { format: string; filters?: InvoiceFilters }) =>
+            invoiceService.downloadAllInvoices(format, filters),
+    });
+};

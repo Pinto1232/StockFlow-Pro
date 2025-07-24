@@ -14,7 +14,7 @@ import {
     XCircle,
 } from "lucide-react";
 import { formatCurrency } from "../../utils/currency";
-import { useInvoices, useDeleteInvoice, useInvoice, useDownloadInvoice } from "../../hooks/useInvoices";
+import { useInvoices, useDeleteInvoice, useInvoice, useDownloadInvoice, useDownloadAllInvoices } from "../../hooks/useInvoices";
 import { useRealTimeUpdates } from "../../hooks/useRealTimeUpdates";
 import InvoiceForm from "../../components/Invoices/InvoiceForm";
 import InvoiceDetail from "../../components/Invoices/InvoiceDetail";
@@ -83,6 +83,9 @@ const Invoices: React.FC = () => {
     
     // Download invoice mutation
     const downloadInvoiceMutation = useDownloadInvoice();
+    
+    // Download all invoices mutation
+    const downloadAllInvoicesMutation = useDownloadAllInvoices();
     
     // Enable real-time updates
     useRealTimeUpdates();
@@ -210,6 +213,42 @@ const Invoices: React.FC = () => {
         } catch (error) {
             console.error(`Failed to download ${format}:`, error);
             showSnackbar(`Failed to download ${format.toUpperCase()}. Please try again.`, "error");
+        }
+    };
+
+    const handleDownloadAll = async (format: string) => {
+        try {
+            showSnackbar(`Generating bulk ${format.toUpperCase()}...`, "info");
+            
+            // Use current filters for bulk download
+            const blob = await downloadAllInvoicesMutation.mutateAsync({ format, filters });
+            
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            
+            // Set appropriate file extension
+            const extensions: Record<string, string> = {
+                pdf: 'pdf',
+                excel: 'xlsx',
+                csv: 'csv',
+                json: 'json'
+            };
+            
+            const extension = extensions[format] || format;
+            const date = new Date().toISOString().split('T')[0];
+            link.download = `All_Invoices_${date}.${extension}`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            showSnackbar(`Bulk ${format.toUpperCase()} downloaded successfully`, "success");
+        } catch (error) {
+            console.error(`Failed to download bulk ${format}:`, error);
+            showSnackbar(`Failed to download bulk ${format.toUpperCase()}. Please try again.`, "error");
         }
     };
 
@@ -651,12 +690,62 @@ const Invoices: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Footer with pagination - Matching Product Management Style */}
+                    {/* Footer with pagination and bulk download - Matching Product Management Style */}
                     <div className="bg-[#f8fafc] border-t border-[#e2e8f0] px-6 py-4 flex justify-between items-center">
-                        <span className="text-sm text-gray-600 font-medium flex items-center gap-2">
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                            {totalCount} invoice{totalCount !== 1 ? "s" : ""}
-                        </span>
+                        <div className="flex items-center gap-4">
+                            <span className="text-sm text-gray-600 font-medium flex items-center gap-2">
+                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                {totalCount} invoice{totalCount !== 1 ? "s" : ""}
+                            </span>
+                            {totalCount > 0 && (
+                                <div className="relative group z-[70]">
+                                    <button
+                                        className="flex items-center gap-2 px-3 py-2 text-xs bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(147,51,234,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(147,51,234,0.4)] border-0"
+                                        title="Download All Invoices"
+                                        disabled={downloadAllInvoicesMutation.isPending}
+                                    >
+                                        <Download className="h-3 w-3" />
+                                        <span>
+                                            {downloadAllInvoicesMutation.isPending ? "Generating..." : "Download All"}
+                                        </span>
+                                    </button>
+                                    <div className="absolute left-0 bottom-full mb-1 bg-white border border-gray-200 rounded-lg shadow-xl p-2 min-w-[120px] z-[80] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                        <button
+                                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                                            onClick={() => handleDownloadAll("pdf")}
+                                            disabled={downloadAllInvoicesMutation.isPending}
+                                        >
+                                            <FileText className="h-4 w-4 text-red-600" />
+                                            PDF
+                                        </button>
+                                        <button
+                                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                                            onClick={() => handleDownloadAll("excel")}
+                                            disabled={downloadAllInvoicesMutation.isPending}
+                                        >
+                                            <FileText className="h-4 w-4 text-green-600" />
+                                            Excel
+                                        </button>
+                                        <button
+                                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                                            onClick={() => handleDownloadAll("csv")}
+                                            disabled={downloadAllInvoicesMutation.isPending}
+                                        >
+                                            <FileText className="h-4 w-4 text-blue-600" />
+                                            CSV
+                                        </button>
+                                        <button
+                                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                                            onClick={() => handleDownloadAll("json")}
+                                            disabled={downloadAllInvoicesMutation.isPending}
+                                        >
+                                            <FileText className="h-4 w-4 text-yellow-600" />
+                                            JSON
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                         {totalPages > 1 && (
                             <nav aria-label="Invoice pagination">
                                 <ul className="flex gap-1 justify-end mb-0 text-sm">

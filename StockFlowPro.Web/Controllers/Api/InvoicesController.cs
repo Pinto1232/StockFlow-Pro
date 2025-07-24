@@ -421,4 +421,105 @@ public class InvoicesController : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+
+    [HttpGet("download/bulk/{format}")]
+    public async Task<IActionResult> DownloadAllInvoices(
+        string format,
+        [FromQuery] string? search = null,
+        [FromQuery] string? status = null,
+        [FromQuery] string? customerId = null,
+        [FromQuery] string? dateFrom = null,
+        [FromQuery] string? dateTo = null)
+    {
+        try
+        {
+            // Validate format
+            var validFormats = new[] { "pdf", "excel", "csv", "json" };
+            if (!validFormats.Contains(format.ToLower()))
+            {
+                return BadRequest($"Invalid format for bulk export. Supported formats: {string.Join(", ", validFormats)}");
+            }
+
+            _logger.LogInformation("Bulk download requested for format: {Format}, Search: '{Search}', Status: '{Status}'", 
+                format, search, status);
+
+            // Get all invoices first
+            var allInvoices = await _invoiceService.GetAllAsync();
+            
+            // Apply the same filters as the main GetInvoices endpoint
+            var filteredInvoices = allInvoices.AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                filteredInvoices = filteredInvoices.Where(i => 
+                    i.InvoiceNumber.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                    i.CustomerName.Contains(search, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                filteredInvoices = filteredInvoices.Where(i => 
+                    i.Status.Equals(status, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrEmpty(customerId) && Guid.TryParse(customerId, out var customerGuid))
+            {
+                filteredInvoices = filteredInvoices.Where(i => i.CustomerId == customerGuid);
+            }
+
+            if (!string.IsNullOrEmpty(dateFrom) && DateTime.TryParse(dateFrom, out var fromDate))
+            {
+                filteredInvoices = filteredInvoices.Where(i => i.IssueDate >= fromDate);
+            }
+
+            if (!string.IsNullOrEmpty(dateTo) && DateTime.TryParse(dateTo, out var toDate))
+            {
+                filteredInvoices = filteredInvoices.Where(i => i.IssueDate <= toDate);
+            }
+
+            var invoicesToExport = filteredInvoices
+                .OrderByDescending(i => i.CreatedAt)
+                .ToList();
+
+            if (!invoicesToExport.Any())
+            {
+                return BadRequest("No invoices found matching the specified criteria.");
+            }
+
+            _logger.LogInformation("Exporting {Count} invoices in {Format} format", invoicesToExport.Count, format);
+
+            // Generate file based on format
+            byte[] fileBytes;
+            switch (format.ToLower())
+            {
+                case "pdf":
+                    fileBytes = await _exportService.ExportBulkToPdfAsync(invoicesToExport);
+                    break;
+                case "excel":
+                    fileBytes = await _exportService.ExportBulkToExcelAsync(invoicesToExport);
+                    break;
+                case "csv":
+                    fileBytes = await _exportService.ExportBulkToCsvAsync(invoicesToExport);
+                    break;
+                case "json":
+                    fileBytes = await _exportService.ExportBulkToJsonAsync(invoicesToExport);
+                    break;
+                default:
+                    return BadRequest("Invalid format");
+            }
+
+            var contentType = _exportService.GetContentType(format);
+            var fileName = _exportService.GetBulkFileName(format);
+
+            _logger.LogInformation("Successfully generated bulk export file: {FileName} ({Size} bytes)", 
+                fileName, fileBytes.Length);
+
+            return File(fileBytes, contentType, fileName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during bulk download in format {Format}", format);
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
 }
