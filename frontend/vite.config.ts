@@ -7,8 +7,13 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
+      '/api': {
+        target: 'http://localhost:5131',
+        secure: false,
+        changeOrigin: true
+      },
       '/stockflowhub': {
-        target: 'https://localhost:7046',
+        target: 'http://localhost:5131',
         secure: false,
         ws: true,
         changeOrigin: true,

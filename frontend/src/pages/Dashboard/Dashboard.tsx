@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Package,
@@ -19,7 +19,9 @@ import {
 } from "lucide-react";
 import { useLowStockProducts } from "../../hooks/useProducts";
 import { useCurrentUser } from "../../hooks/useAuth";
+import { useRealTimeUpdates } from "../../hooks/useRealTimeUpdates";
 import { formatCurrency } from "../../utils/currency";
+import Snackbar from "../../components/ui/Snackbar";
 
 const Dashboard: React.FC = () => {
     const navigate = useNavigate();
@@ -30,6 +32,28 @@ const Dashboard: React.FC = () => {
         error: lowStockError,
     } = useLowStockProducts();
 
+    // User Management state
+    const [userStats, setUserStats] = useState({
+        activeUsers: 0,
+        totalRoles: 0,
+        isLoading: true,
+    });
+    const [showAddRoleModal, setShowAddRoleModal] = useState(false);
+
+    // Snackbar state
+    const [snackbar, setSnackbar] = useState<{
+        isOpen: boolean;
+        message: string;
+        type: 'success' | 'error' | 'warning' | 'info';
+    }>({
+        isOpen: false,
+        message: '',
+        type: 'info',
+    });
+
+    // Enable real-time updates for SignalR connection and sound notifications
+    useRealTimeUpdates();
+
     const recentActivity = [
         { action: "New product added", time: "2 hours ago" },
         { action: "User registered", time: "4 hours ago" },
@@ -37,14 +61,83 @@ const Dashboard: React.FC = () => {
         { action: "Stock updated", time: "8 hours ago" },
     ];
 
+    // Fetch user statistics
+    useEffect(() => {
+        const fetchUserStats = async () => {
+            try {
+                setUserStats(prev => ({ ...prev, isLoading: true }));
+                
+                // Fetch user statistics
+                const statsResponse = await fetch('/api/user-management/statistics');
+                
+                // Check if response is actually JSON
+                const contentType = statsResponse.headers.get('content-type');
+                if (statsResponse.ok && contentType && contentType.includes('application/json')) {
+                    const stats = await statsResponse.json();
+                    setUserStats({
+                        activeUsers: stats.ActiveUsers || 0,
+                        totalRoles: Object.keys(stats.UsersByRole || {}).length || 0,
+                        isLoading: false,
+                    });
+                } else {
+                    console.warn('User statistics API not available or returned non-JSON response');
+                    // Fallback to default values if API fails
+                    setUserStats({
+                        activeUsers: 89,
+                        totalRoles: 3,
+                        isLoading: false,
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching user statistics:', error);
+                // Fallback to default values
+                setUserStats({
+                    activeUsers: 89,
+                    totalRoles: 3,
+                    isLoading: false,
+                });
+            }
+        };
+
+        fetchUserStats();
+    }, []);
+
+    // Handle Add Role functionality
+    const handleAddRole = () => {
+        setShowAddRoleModal(true);
+    };
+
+    // Snackbar helper functions
+    const showSnackbar = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
+        setSnackbar({
+            isOpen: true,
+            message,
+            type,
+        });
+    };
+
+    const hideSnackbar = () => {
+        setSnackbar(prev => ({ ...prev, isOpen: false }));
+    };
+
     const refreshDashboard = () => {
-        // Implement refresh functionality
-        console.log("Refreshing dashboard...");
+        // Show snackbar notification
+        showSnackbar("Dashboard will be refreshed...", "info");
+        
+        // Refresh the entire dashboard page after a short delay
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
     };
 
     const openSettings = () => {
-        // Implement settings functionality
-        console.log("Opening settings...");
+        // Navigate to Settings management section
+        navigate("/settings");
+    };
+
+    const navigateToProducts = () => {
+        // Navigate to Product Management section
+        navigate("/products");
     };
 
     const navigateToInvoices = () => {
@@ -52,7 +145,17 @@ const Dashboard: React.FC = () => {
     };
 
     const navigateToNewInvoice = () => {
-        navigate("/invoices/new");
+        navigate("/invoices");
+    };
+
+    const navigateToReports = () => {
+        // Navigate to Reports section (admin panel for analytics)
+        navigate("/admin");
+    };
+
+    const navigateToHealthCheck = () => {
+        // Navigate to Health Check section (admin panel for system monitoring)
+        navigate("/admin");
     };
 
     // Get user's display name
@@ -80,6 +183,17 @@ const Dashboard: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 w-full">
+            <style>{`
+                @keyframes lightning-flash {
+                    0% { color: #ef4444; }
+                    50% { color: #fbbf24; }
+                    100% { color: #ef4444; }
+                }
+                .lightning-flash {
+                    animation: lightning-flash 2s ease-in-out infinite;
+                }
+            `}</style>
+            
             {/* Navigation Breadcrumb */}
             <nav className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-16 z-30 w-full px-4 sm:px-6 lg:px-8 py-4">
                 <ol className="flex items-center gap-2 text-sm">
@@ -135,21 +249,21 @@ const Dashboard: React.FC = () => {
                 <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-2xl mb-8 shadow-lg">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                         <div className="flex items-center gap-4">
-                            <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                            <Zap className="w-5 h-5 lightning-flash fill-current" />
                             <span className="text-lg font-semibold">System Online</span>
                         </div>
-                        <div className="flex flex-wrap gap-6 text-sm">
+                        <div className="flex flex-wrap gap-8 text-base">
                             <div className="text-center">
-                                <div className="font-bold">99.9%</div>
-                                <div className="opacity-90">Uptime</div>
+                                <div className="text-2xl font-bold text-white">99.9%</div>
+                                <div className="text-green-100 font-medium text-sm">Uptime</div>
                             </div>
                             <div className="text-center">
-                                <div className="font-bold">24</div>
-                                <div className="opacity-90">Active Users</div>
+                                <div className="text-2xl font-bold text-white">24</div>
+                                <div className="text-green-100 font-medium text-sm">Active Users</div>
                             </div>
                             <div className="text-center">
-                                <div className="font-bold">2 min ago</div>
-                                <div className="opacity-90">Last Update</div>
+                                <div className="text-2xl font-bold text-white">2 min ago</div>
+                                <div className="text-green-100 font-medium text-sm">Last Update</div>
                             </div>
                         </div>
                     </div>
@@ -162,7 +276,10 @@ const Dashboard: React.FC = () => {
                         Quick Actions
                     </h3>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        <button className="flex flex-col items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
+                        <button 
+                            className="flex flex-col items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200"
+                            onClick={navigateToProducts}
+                        >
                             <Package className="w-8 h-8 text-blue-500" />
                             <span className="font-medium text-gray-700">Add Product</span>
                         </button>
@@ -173,11 +290,17 @@ const Dashboard: React.FC = () => {
                             <FileTextIcon className="w-8 h-8 text-blue-500" />
                             <span className="font-medium text-gray-700">New Invoice</span>
                         </button>
-                        <button className="flex flex-col items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
+                        <button 
+                            className="flex flex-col items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200"
+                            onClick={navigateToReports}
+                        >
                             <BarChart3 className="w-8 h-8 text-blue-500" />
                             <span className="font-medium text-gray-700">View Reports</span>
                         </button>
-                        <button className="flex flex-col items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
+                        <button 
+                            className="flex flex-col items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200"
+                            onClick={navigateToHealthCheck}
+                        >
                             <Activity className="w-8 h-8 text-blue-500" />
                             <span className="font-medium text-gray-700">Health Check</span>
                         </button>
@@ -228,7 +351,10 @@ const Dashboard: React.FC = () => {
                                         <Cog className="w-4 h-4" />
                                         <span>Open Panel</span>
                                     </button>
-                                    <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium text-sm">
+                                    <button 
+                                        onClick={openSettings}
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium text-sm"
+                                    >
                                         <Settings className="w-4 h-4" />
                                         <span>Settings</span>
                                     </button>
@@ -304,25 +430,40 @@ const Dashboard: React.FC = () => {
                                 </p>
                                 <div className="grid grid-cols-2 gap-4 mb-6">
                                     <div className="text-center p-3 bg-gray-50 rounded-lg">
-                                        <div className="text-xl font-bold text-blue-600">89</div>
+                                        {userStats.isLoading ? (
+                                            <div className="text-xl font-bold text-blue-600">
+                                                <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                                            </div>
+                                        ) : (
+                                            <div className="text-xl font-bold text-blue-600">{userStats.activeUsers}</div>
+                                        )}
                                         <div className="text-xs text-gray-500 font-medium">ACTIVE USERS</div>
                                     </div>
                                     <div className="text-center p-3 bg-gray-50 rounded-lg">
-                                        <div className="text-xl font-bold text-blue-600">+5%</div>
-                                        <div className="text-xs text-gray-500 font-medium">GROWTH</div>
+                                        {userStats.isLoading ? (
+                                            <div className="text-xl font-bold text-blue-600">
+                                                <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                                            </div>
+                                        ) : (
+                                            <div className="text-xl font-bold text-blue-600">{userStats.totalRoles}</div>
+                                        )}
+                                        <div className="text-xs text-gray-500 font-medium">ROLES</div>
                                     </div>
                                 </div>
                                 <div className="flex gap-2 mt-auto">
-                                    <a
-                                        href="/users"
+                                    <button
+                                        onClick={() => navigate("/users")}
                                         className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium text-sm"
                                     >
                                         <Users className="w-4 h-4" />
                                         <span>Manage</span>
-                                    </a>
-                                    <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium text-sm">
+                                    </button>
+                                    <button 
+                                        onClick={handleAddRole}
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium text-sm"
+                                    >
                                         <UserPlus className="w-4 h-4" />
-                                        <span>Add</span>
+                                        <span>Add Role</span>
                                     </button>
                                 </div>
                             </div>
@@ -529,6 +670,693 @@ const Dashboard: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Snackbar */}
+            <Snackbar
+                isOpen={snackbar.isOpen}
+                message={snackbar.message}
+                type={snackbar.type}
+                onClose={hideSnackbar}
+            />
+
+            {/* Add Role Modal */}
+            {showAddRoleModal && (
+                <AddRoleModal
+                    onClose={() => setShowAddRoleModal(false)}
+                    onSuccess={(message) => {
+                        setShowAddRoleModal(false);
+                        showSnackbar(message, 'success');
+                        // Refresh user stats to update role count
+                        const fetchUserStats = async () => {
+                            try {
+                                const statsResponse = await fetch('/api/user-management/statistics');
+                                if (statsResponse.ok) {
+                                    const stats = await statsResponse.json();
+                                    setUserStats({
+                                        activeUsers: stats.ActiveUsers || 0,
+                                        totalRoles: Object.keys(stats.UsersByRole || {}).length || 0,
+                                        isLoading: false,
+                                    });
+                                }
+                            } catch (error) {
+                                console.error('Error refreshing user statistics:', error);
+                            }
+                        };
+                        fetchUserStats();
+                    }}
+                    onError={(message) => {
+                        showSnackbar(message, 'error');
+                    }}
+                />
+            )}
+        </div>
+    );
+};
+
+// Permission interfaces for type safety
+interface PermissionDto {
+    id: string;
+    name: string;
+    displayName: string;
+    description: string;
+    category: string;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt?: string;
+}
+
+interface PermissionCategory {
+    category: string;
+    permissions: string[];
+}
+
+interface RoleOption {
+    id: string;
+    name: string;
+    displayName: string;
+    description: string;
+    iconClass: string;
+    priority: number;
+    keyPermissions: string[];
+}
+
+
+// Add Role Modal Component
+interface AddRoleModalProps {
+    onClose: () => void;
+    onSuccess: (message: string) => void;
+    onError: (message: string) => void;
+}
+
+const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onSuccess, onError }) => {
+    // Role creation form data
+    const [roleFormData, setRoleFormData] = useState({
+        name: '',
+        displayName: '',
+        description: '',
+        priority: 25,
+        permissions: [] as string[],
+    });
+    
+    const [permissionCategories, setPermissionCategories] = useState<PermissionCategory[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingPermissions, setIsLoadingPermissions] = useState(false);
+    const [permissionsError, setPermissionsError] = useState<string | null>(null);
+    const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
+
+    // Transform permission data into categorized structure
+    const transformPermissionsToCategories = (permissions: (PermissionDto | string)[]): PermissionCategory[] => {
+        const categoryMap = new Map<string, string[]>();
+        
+        permissions.forEach((permission) => {
+            // Handle both PermissionDto objects and simple strings
+            let category: string;
+            let permissionName: string;
+            
+            if (typeof permission === 'string') {
+                // Handle simple string permissions like "Users.ViewAll"
+                const parts = permission.split('.');
+                category = parts.length > 1 ? parts[0] : 'Other';
+                permissionName = permission;
+            } else if (permission && typeof permission === 'object') {
+                // Handle PermissionDto objects
+                category = permission.category || 'Other';
+                permissionName = permission.name || permission.displayName || '';
+            } else {
+                return; // Skip invalid entries
+            }
+            
+            if (!categoryMap.has(category)) {
+                categoryMap.set(category, []);
+            }
+            
+            if (permissionName) {
+                categoryMap.get(category)!.push(permissionName);
+            }
+        });
+        
+        return Array.from(categoryMap.entries()).map(([category, perms]) => ({
+            category,
+            permissions: perms.sort()
+        })).sort((a, b) => a.category.localeCompare(b.category));
+    };
+
+    // Fallback permissions when API is not available
+    const getFallbackPermissions = (): PermissionCategory[] => {
+        return [
+            {
+                category: "Users",
+                permissions: ["Users.ViewAll", "Users.ViewTeam", "Users.Create", "Users.Update", "Users.Delete"]
+            },
+            {
+                category: "Products", 
+                permissions: ["Products.View", "Products.Create", "Products.Update", "Products.Delete", "Products.Manage"]
+            },
+            {
+                category: "Inventory",
+                permissions: ["Inventory.View", "Inventory.Update", "Inventory.Manage", "Inventory.Reports"]
+            },
+            {
+                category: "Reports",
+                permissions: ["Reports.ViewBasic", "Reports.ViewAdvanced", "Reports.ViewAll", "Reports.Create", "Reports.Export"]
+            },
+            {
+                category: "System",
+                permissions: ["System.ViewAdminPanel", "System.ManageSettings", "System.ViewLogs", "System.Backup"]
+            },
+            {
+                category: "Profile",
+                permissions: ["Profile.View", "Profile.Update", "Profile.ChangePassword"]
+            }
+        ];
+    };
+
+    // Fetch available permissions from existing roles
+    useEffect(() => {
+        const fetchPermissionsFromRoles = async () => {
+            try {
+                setIsLoadingPermissions(true);
+                setPermissionsError(null);
+                
+                console.log('🔄 Fetching permissions from existing roles...');
+                
+                const response = await fetch("/api/role-management/roles/options", {
+                    credentials: "include", // Include cookies for authentication
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    }
+                });
+                
+                if (response.ok) {
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const roles = await response.json();
+                        console.log('🔄 Successfully loaded roles:', roles);
+                        
+                        // Extract all permissions from all roles
+                        const allPermissions = new Set<string>();
+                        roles.forEach((role: RoleOption) => {
+                            if (role.keyPermissions && Array.isArray(role.keyPermissions)) {
+                                role.keyPermissions.forEach((permission: string) => {
+                                    allPermissions.add(permission);
+                                });
+                            }
+                        });
+                        
+                        const permissionsArray = Array.from(allPermissions);
+                        console.log('🔄 Extracted permissions:', permissionsArray);
+                        
+                        // Transform permissions into categorized structure
+                        const categorizedPermissions = transformPermissionsToCategories(permissionsArray);
+                        setPermissionCategories(categorizedPermissions);
+                        
+                        console.log('✅ Successfully categorized permissions:', categorizedPermissions);
+                        
+                    } else {
+                        throw new Error('Invalid response format');
+                    }
+                } else if (response.status === 401) {
+                    console.warn('User not authenticated for roles API');
+                    setPermissionsError('Authentication required to load permissions. Please ensure you are logged in.');
+                    setPermissionCategories(getFallbackPermissions());
+                } else if (response.status === 403) {
+                    console.warn('User not authorized for roles API');
+                    setPermissionsError('Insufficient permissions to load role data. Using basic permissions.');
+                    setPermissionCategories(getFallbackPermissions());
+                } else if (response.status === 404) {
+                    console.warn('Roles endpoint not found');
+                    setPermissionsError('Roles endpoint not available. Using fallback permissions.');
+                    setPermissionCategories(getFallbackPermissions());
+                } else {
+                    throw new Error(`API returned status ${response.status}`);
+                }
+                
+            } catch (error) {
+                console.error("Error fetching permissions from roles:", error);
+                setPermissionsError('Failed to load permissions from roles. Using fallback permissions.');
+                setPermissionCategories(getFallbackPermissions());
+            } finally {
+                setIsLoadingPermissions(false);
+            }
+        };
+
+        fetchPermissionsFromRoles();
+    }, []);
+
+    const validateInput = (field: string, value: string | number) => {
+        const errors = { ...validationErrors };
+        
+        switch (field) {
+            case 'name':
+                if (!value || (typeof value === 'string' && value.trim().length < 2)) {
+                    errors.name = 'Role name must be at least 2 characters';
+                } else {
+                    delete errors.name;
+                }
+                break;
+            case 'priority':
+                if (typeof value === 'number' && (value < 0 || value > 100)) {
+                    errors.priority = 'Priority must be between 0 and 100';
+                } else {
+                    delete errors.priority;
+                }
+                break;
+        }
+        
+        setValidationErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
+    const handleInputChange = (field: string, value: string | number) => {
+        setRoleFormData(prev => ({ ...prev, [field]: value }));
+        validateInput(field, value);
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        // Validate all fields
+        const nameValid = validateInput('name', roleFormData.name);
+        const priorityValid = validateInput('priority', roleFormData.priority);
+        
+        if (!nameValid || !priorityValid) {
+            onError('Please fix the validation errors before submitting');
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            console.log('🔄 Creating role with data:', {
+                name: roleFormData.name.trim(),
+                displayName: roleFormData.displayName.trim() || roleFormData.name.trim(),
+                description: roleFormData.description.trim(),
+                priority: roleFormData.priority,
+                permissions: roleFormData.permissions,
+            });
+
+            const response = await fetch('/api/role-management/roles', {
+                method: 'POST',
+                credentials: 'include', // Include cookies for authentication
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: roleFormData.name.trim(),
+                    displayName: roleFormData.displayName.trim() || roleFormData.name.trim(),
+                    description: roleFormData.description.trim(),
+                    priority: roleFormData.priority,
+                    permissions: roleFormData.permissions,
+                }),
+            });
+
+            console.log('🔄 Response status:', response.status);
+            console.log('🔄 Response headers:', response.headers);
+
+            if (response.ok) {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const newRole = await response.json();
+                    console.log('✅ Role created successfully:', newRole);
+                    onSuccess(`Role "${newRole.displayName || newRole.name}" created successfully!`);
+                } else {
+                    console.warn('⚠️ Response is not JSON');
+                    onSuccess('Role created successfully!');
+                }
+            } else if (response.status === 401) {
+                onError('Authentication required. Please ensure you are logged in as an Admin.');
+            } else if (response.status === 403) {
+                onError('Insufficient permissions. Admin role required to create roles.');
+            } else if (response.status === 404) {
+                onError('Role creation endpoint not found. Please check if the backend service is running.');
+            } else {
+                // Try to get error message from response
+                try {
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const errorData = await response.json();
+                        onError(errorData.message || `Failed to create role (Status: ${response.status})`);
+                    } else {
+                        const errorText = await response.text();
+                        console.error('❌ Non-JSON error response:', errorText);
+                        onError(`Failed to create role (Status: ${response.status})`);
+                    }
+                } catch (parseError) {
+                    console.error('❌ Error parsing error response:', parseError);
+                    onError(`Failed to create role (Status: ${response.status})`);
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error creating role:', error);
+            if (error instanceof TypeError && error.message.includes('fetch')) {
+                onError('Network error. Please check if the backend service is running.');
+            } else {
+                onError('Failed to create role. Please try again.');
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handlePermissionToggle = (permission: string) => {
+        setRoleFormData(prev => ({
+            ...prev,
+            permissions: prev.permissions.includes(permission)
+                ? prev.permissions.filter(p => p !== permission)
+                : [...prev.permissions, permission]
+        }));
+    };
+
+    // Handle keyboard navigation
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                onClose();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [onClose]);
+
+    return (
+        <div 
+            className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50"
+            style={{ animation: 'fadeIn 0.3s ease' }}
+            onClick={onClose}
+        >
+            <div 
+                className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl relative"
+                style={{ 
+                    animation: 'modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    boxShadow: '0 24px 64px rgba(0, 0, 0, 0.2)'
+                }}
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Modal Header - Matching Razor View Style */}
+                <div 
+                    className="relative p-8 pb-6 text-white overflow-hidden"
+                    style={{
+                        background: 'linear-gradient(135deg, #5a5cdb 0%, #7f53ac 100%)',
+                    }}
+                >
+                    {/* Background Pattern */}
+                    <div 
+                        className="absolute inset-0 opacity-30"
+                        style={{
+                            backgroundImage: `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><pattern id='grid' width='10' height='10' patternUnits='userSpaceOnUse'><path d='M 10 0 L 0 0 0 10' fill='none' stroke='rgba(255,255,255,0.1)' stroke-width='0.5'/></pattern></defs><rect width='100' height='100' fill='url(%23grid)'/></svg>")`
+                        }}
+                    />
+                    
+                    <div className="flex items-center justify-between relative z-10">
+                        <div className="flex items-center gap-3">
+                            <div 
+                                className="w-12 h-12 rounded-xl flex items-center justify-center"
+                                style={{ background: 'rgba(255, 255, 255, 0.2)' }}
+                            >
+                                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H11V21H5V19H13V17H5V15H13V13H5V11H13V9H21ZM13 7H18L13 2V7ZM20 15V18H23V20H20V23H18V20H15V18H18V15H20Z"/>
+                                </svg>
+                            </div>
+                            <h3 className="text-2xl font-bold">Create New Role</h3>
+                        </div>
+                        <button
+                            onClick={onClose}
+                            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 hover:rotate-90"
+                            style={{ background: 'rgba(255, 255, 255, 0.2)' }}
+                            disabled={isLoading}
+                            title="Close modal"
+                        >
+                            <span className="text-2xl font-light">×</span>
+                        </button>
+                    </div>
+                </div>
+
+                {/* Modal Body - Matching Razor View Style */}
+                <div className="p-10 max-h-[calc(90vh-200px)] overflow-y-auto">
+                    <form onSubmit={handleSubmit} className="space-y-8">
+                        {/* Role Name */}
+                        <div>
+                            <label className="flex items-center gap-2 text-base font-semibold text-gray-800 mb-3">
+                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                </svg>
+                                Role Name <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={roleFormData.name}
+                                onChange={(e) => handleInputChange('name', e.target.value)}
+                                className={`w-full px-5 py-4 border-2 rounded-xl text-base transition-all duration-300 ${
+                                    validationErrors.name 
+                                        ? 'border-red-500 focus:ring-4 focus:ring-red-100 focus:border-red-500' 
+                                        : 'border-gray-200 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 hover:border-blue-300'
+                                } focus:outline-none`}
+                                placeholder="Enter role name"
+                                required
+                                disabled={isLoading}
+                            />
+                            <div className="text-sm text-gray-500 mt-2 italic">Internal name for the role (e.g., "Supervisor")</div>
+                            {validationErrors.name && (
+                                <div className="flex items-center gap-2 text-sm text-red-600 mt-2">
+                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                    </svg>
+                                    {validationErrors.name}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Display Name */}
+                        <div>
+                            <label className="flex items-center gap-2 text-base font-semibold text-gray-800 mb-3">
+                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                Display Name
+                            </label>
+                            <input
+                                type="text"
+                                value={roleFormData.displayName}
+                                onChange={(e) => handleInputChange('displayName', e.target.value)}
+                                className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl text-base transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 hover:border-blue-300"
+                                placeholder="Enter display name"
+                                disabled={isLoading}
+                            />
+                            <div className="text-sm text-gray-500 mt-2 italic">Name shown to users (defaults to role name if empty)</div>
+                        </div>
+
+                        {/* Description */}
+                        <div>
+                            <label className="flex items-center gap-2 text-base font-semibold text-gray-800 mb-3">
+                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Description
+                            </label>
+                            <textarea
+                                value={roleFormData.description}
+                                onChange={(e) => handleInputChange('description', e.target.value)}
+                                className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl text-base transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 hover:border-blue-300"
+                                rows={3}
+                                placeholder="Describe the role's purpose and responsibilities"
+                                disabled={isLoading}
+                            />
+                        </div>
+
+                        {/* Priority Level */}
+                        <div>
+                            <label className="flex items-center gap-2 text-base font-semibold text-gray-800 mb-3">
+                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                                </svg>
+                                Priority Level
+                            </label>
+                            <input
+                                type="number"
+                                value={roleFormData.priority}
+                                onChange={(e) => handleInputChange('priority', parseInt(e.target.value) || 0)}
+                                className={`w-full px-5 py-4 border-2 rounded-xl text-base transition-all duration-300 ${
+                                    validationErrors.priority 
+                                        ? 'border-red-500 focus:ring-4 focus:ring-red-100 focus:border-red-500' 
+                                        : 'border-gray-200 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 hover:border-blue-300'
+                                } focus:outline-none`}
+                                min="0"
+                                max="100"
+                                placeholder="0"
+                                disabled={isLoading}
+                            />
+                            <div className="text-sm text-gray-500 mt-2 italic">Higher numbers = higher priority (0-100)</div>
+                            {validationErrors.priority && (
+                                <div className="flex items-center gap-2 text-sm text-red-600 mt-2">
+                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                    </svg>
+                                    {validationErrors.priority}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Permissions - Matching Razor View Style */}
+                        <div>
+                            <label className="flex items-center gap-2 text-base font-semibold text-gray-800 mb-4">
+                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m0 0a2 2 0 012 2 2 2 0 01-2 2m-2-4a2 2 0 00-2 2v1a2 2 0 00-2 2 2 2 0 002 2 2 2 0 002-2m0 0V9a2 2 0 012-2 2 2 0 012 2v1a2 2 0 01-2 2 2 2 0 01-2-2z" />
+                                </svg>
+                                Permissions
+                            </label>
+                            {isLoadingPermissions ? (
+                                <div className="flex flex-col items-center justify-center p-12 border-2 border-gray-200 rounded-xl bg-gray-50">
+                                    <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                                    <div className="text-base text-gray-600 font-medium">Loading permissions...</div>
+                                </div>
+                            ) : permissionsError ? (
+                                <div className="border-2 border-gray-200 rounded-xl p-4 bg-gray-50">
+                                    <div className="text-center text-sm text-amber-600 bg-amber-50 p-4 rounded-xl border border-amber-200">
+                                        <div className="flex items-center justify-center gap-2 font-medium mb-2">
+                                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                            </svg>
+                                            Permissions Loaded with Fallback
+                                        </div>
+                                        <div>{permissionsError}</div>
+                                    </div>
+                                </div>
+                            ) : permissionCategories.length === 0 ? (
+                                <div className="border-2 border-gray-200 rounded-xl p-4 bg-gray-50">
+                                    <div className="text-center text-sm text-gray-500 p-4">
+                                        <svg className="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        No permissions available to assign.
+                                    </div>
+                                </div>
+                            ) : (
+                                <div 
+                                    className="border-2 border-gray-200 rounded-xl p-4 max-h-80 overflow-y-auto"
+                                    style={{ background: '#f8f9fb' }}
+                                >
+                                    <div className="space-y-6">
+                                        {permissionCategories.map((category) => (
+                                            <div key={category.category} className="mb-6">
+                                                <h5 className="flex items-center gap-2 text-base font-semibold mb-3 pb-2 border-b border-blue-200"
+                                                    style={{ color: '#5a5cdb' }}>
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                                                    </svg>
+                                                    {category.category}
+                                                </h5>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                    {category.permissions.map((permission) => (
+                                                        <label
+                                                            key={permission}
+                                                            className="flex items-center space-x-3 p-3 hover:bg-blue-50 rounded-lg cursor-pointer transition-all duration-200 relative"
+                                                        >
+                                                            <div className="relative">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={roleFormData.permissions.includes(permission)}
+                                                                    onChange={() => handlePermissionToggle(permission)}
+                                                                    className="sr-only"
+                                                                    disabled={isLoading}
+                                                                />
+                                                                <div 
+                                                                    className={`w-5 h-5 border-2 rounded transition-all duration-300 flex items-center justify-center ${
+                                                                        roleFormData.permissions.includes(permission)
+                                                                            ? 'bg-blue-600 border-blue-600'
+                                                                            : 'bg-white border-gray-300 hover:border-blue-500'
+                                                                    }`}
+                                                                >
+                                                                    {roleFormData.permissions.includes(permission) && (
+                                                                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                                                        </svg>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <div className={`text-sm font-medium transition-colors ${
+                                                                    roleFormData.permissions.includes(permission) 
+                                                                        ? 'text-blue-700 font-semibold' 
+                                                                        : 'text-gray-900'
+                                                                }`}>
+                                                                    {permission.replace(/^[^.]+\./, '')}
+                                                                </div>
+                                                            </div>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </form>
+                </div>
+
+                {/* Modal Footer - Matching Razor View Style */}
+                <div 
+                    className="p-6 border-t border-gray-200 flex justify-end space-x-4"
+                    style={{ background: '#f8f9fb' }}
+                >
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="flex items-center gap-2 px-6 py-3 text-gray-600 hover:text-gray-800 font-semibold transition-all duration-200 border-2 border-gray-200 rounded-xl hover:bg-gray-50"
+                        disabled={isLoading}
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleSubmit}
+                        className="flex items-center gap-2 px-8 py-3 text-white rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg min-w-32"
+                        style={{
+                            background: isLoading ? '#9ca3af' : 'linear-gradient(135deg, #5a5cdb 0%, #7f53ac 100%)',
+                            boxShadow: '0 2px 8px rgba(90, 92, 219, 0.3)'
+                        }}
+                        disabled={isLoading || isLoadingPermissions || Object.keys(validationErrors).length > 0}
+                    >
+                        {isLoading ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                Creating...
+                            </>
+                        ) : (
+                            <>
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                Create Role
+                            </>
+                        )}
+                    </button>
+                </div>
+            </div>
+
+            {/* Add the CSS animations inline */}
+            <style>{`
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                
+                @keyframes modalSlideIn {
+                    from {
+                        transform: scale(0.8);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: scale(1);
+                        opacity: 1;
+                    }
+                }
+            `}</style>
         </div>
     );
 };
