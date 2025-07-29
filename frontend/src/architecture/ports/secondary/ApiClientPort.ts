@@ -34,6 +34,7 @@ export interface ApiClientPort {
   // File operations
   uploadFile<T>(url: string, file: File, config?: ApiRequestConfig): Promise<T>;
   downloadFile(url: string, filename: string, config?: ApiRequestConfig): Promise<void>;
+  downloadBlob(url: string, config?: ApiRequestConfig): Promise<Blob>;
   
   // Configuration
   setBaseUrl(baseUrl: string): void;

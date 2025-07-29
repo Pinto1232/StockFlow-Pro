@@ -176,3 +176,19 @@ export const useUploadProductImage = () => {
         },
     });
 };
+
+// Download product in any format mutation
+export const useDownloadProduct = () => {
+    return useMutation({
+        mutationFn: ({ id, format }: { id: string; format: string }) =>
+            productService.downloadProduct(id, format),
+    });
+};
+
+// Download all products in bulk mutation
+export const useDownloadAllProducts = () => {
+    return useMutation({
+        mutationFn: ({ format, filters }: { format: string; filters?: ProductFilters }) =>
+            productService.downloadAllProducts(format, filters),
+    });
+};

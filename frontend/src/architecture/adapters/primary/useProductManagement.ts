@@ -101,7 +101,7 @@ export const useProductManagement = ({ productService }: UseProductManagementPro
 
   // Mutation: Delete product
   const deleteProductMutation = useMutation({
-    mutationFn: (id: number) => productService.deleteProduct(id),
+    mutationFn: (id: string) => productService.deleteProduct(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['stockAlerts'] });
@@ -124,7 +124,7 @@ export const useProductManagement = ({ productService }: UseProductManagementPro
 
   // Mutation: Bulk update prices
   const bulkUpdatePricesMutation = useMutation({
-    mutationFn: (updates: Array<{ id: number; price: number }>) => 
+    mutationFn: (updates: Array<{ id: string; price: number }>) => 
       productService.bulkUpdatePrices(updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
@@ -144,6 +144,18 @@ export const useProductManagement = ({ productService }: UseProductManagementPro
     },
   });
 
+  // Mutation: Download product
+  const downloadProductMutation = useMutation({
+    mutationFn: ({ id, format }: { id: string; format: string }) => 
+      productService.downloadProduct(id, format),
+  });
+
+  // Mutation: Download all products
+  const downloadAllProductsMutation = useMutation({
+    mutationFn: ({ format, filters }: { format: string; filters?: ProductFilters }) => 
+      productService.downloadAllProducts(format, filters),
+  });
+
   // Helper functions
   const updateFilters = useCallback((newFilters: Partial<ProductFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
@@ -153,7 +165,7 @@ export const useProductManagement = ({ productService }: UseProductManagementPro
     setFilters({});
   }, []);
 
-  const getProductById = useCallback(async (id: number): Promise<ProductEntity> => {
+  const getProductById = useCallback(async (id: string): Promise<ProductEntity> => {
     // Check cache first
     const cachedProduct = queryClient.getQueryData<ProductEntity>(['product', id]);
     if (cachedProduct) {
@@ -237,6 +249,8 @@ export const useProductManagement = ({ productService }: UseProductManagementPro
     adjustStock: adjustStockMutation.mutate,
     bulkUpdatePrices: bulkUpdatePricesMutation.mutate,
     bulkAdjustStock: bulkAdjustStockMutation.mutate,
+    downloadProduct: downloadProductMutation.mutate,
+    downloadAllProducts: downloadAllProductsMutation.mutate,
 
     // Mutation states
     isCreatingProduct: createProductMutation.isPending,
@@ -245,6 +259,8 @@ export const useProductManagement = ({ productService }: UseProductManagementPro
     isAdjustingStock: adjustStockMutation.isPending,
     isBulkUpdatingPrices: bulkUpdatePricesMutation.isPending,
     isBulkAdjustingStock: bulkAdjustStockMutation.isPending,
+    isDownloadingProduct: downloadProductMutation.isPending,
+    isDownloadingAllProducts: downloadAllProductsMutation.isPending,
 
     // Mutation errors
     createProductError: createProductMutation.error,
@@ -253,6 +269,8 @@ export const useProductManagement = ({ productService }: UseProductManagementPro
     adjustStockError: adjustStockMutation.error,
     bulkUpdatePricesError: bulkUpdatePricesMutation.error,
     bulkAdjustStockError: bulkAdjustStockMutation.error,
+    downloadProductError: downloadProductMutation.error,
+    downloadAllProductsError: downloadAllProductsMutation.error,
 
     // Helper functions
     updateFilters,

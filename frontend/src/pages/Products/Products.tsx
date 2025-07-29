@@ -15,6 +15,9 @@ import {
     Terminal,
     EyeOff,
     Loader2,
+    Eye,
+    Download,
+    FileText,
 } from "lucide-react";
 import { formatCurrency, formatCurrencyCompact } from "../../utils/currency";
 import { useProducts as useArchitectureProducts } from "../../architecture/adapters/primary/hooks";
@@ -24,6 +27,7 @@ import { ProductEntity } from "../../architecture/domain/entities/Product";
 import ProductForm from "../../components/Products/ProductForm";
 import StockAdjustmentModal from "../../components/Products/StockAdjustmentModal";
 import DeleteProductModal from "../../components/Products/DeleteProductModal";
+import ProductDetail from "../../components/Products/ProductDetail";
 
 const Products: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -52,6 +56,7 @@ const Products: React.FC = () => {
     const [showProductForm, setShowProductForm] = useState(false);
     const [showStockModal, setShowStockModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<ProductEntity | null>(null);
     const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
 
@@ -182,6 +187,41 @@ const Products: React.FC = () => {
         addConsoleEntry(`Opening delete confirmation for product: ${product.name}`, "system");
     };
 
+    const handleViewProduct = (product: ProductEntity) => {
+        setSelectedProduct(product);
+        setShowDetailModal(true);
+        addConsoleEntry(`Opening product details for: ${product.name}`, "system");
+    };
+
+    const handleDownloadProduct = async (product: ProductEntity, format: string) => {
+        try {
+            addConsoleEntry(`Generating ${format.toUpperCase()} for product: ${product.name}`, "system");
+            
+            // Use the architecture's download method directly
+            productManagement.downloadProduct({ id: product.id, format });
+        } catch (error) {
+            addConsoleEntry(`Failed to download ${format}: ${error}`, "error");
+        }
+    };
+
+    const handleDownloadAllProducts = async (format: string) => {
+        try {
+            addConsoleEntry(`Generating bulk ${format.toUpperCase()} for all products`, "system");
+            
+            // Use current filters for bulk download
+            const currentFilters = {
+                search: searchQuery || undefined,
+                isActive: activeOnlyFilter || undefined,
+                stockStatus: lowStockOnlyFilter ? 'low' as const : undefined,
+            };
+            
+            // Use the architecture's bulk download method directly
+            productManagement.downloadAllProducts({ format, filters: currentFilters });
+        } catch (error) {
+            addConsoleEntry(`Failed to download bulk ${format}: ${error}`, "error");
+        }
+    };
+
     const handleProductSubmit = async (data: CreateProductRequest | UpdateProductRequest) => {
         try {
             if (formMode === 'create') {
@@ -213,7 +253,7 @@ const Products: React.FC = () => {
         if (!selectedProduct) return;
         
         try {
-            await productManagement.deleteProduct(Number(selectedProduct.id));
+            await productManagement.deleteProduct(selectedProduct.id);
             addConsoleEntry(`Product deleted successfully: ${selectedProduct.name}`, "database");
             setShowDeleteModal(false);
             setSelectedProduct(null);
@@ -663,6 +703,53 @@ const Products: React.FC = () => {
                                                                 <span>Edit</span>
                                                             </button>
                                                             <button
+                                                                onClick={() => handleViewProduct(product)}
+                                                                className="inline-flex items-center gap-1 px-3 py-2 text-xs bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-lg hover:from-cyan-600 hover:to-cyan-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(6,182,212,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(6,182,212,0.4)] border-0 min-w-[70px]"
+                                                                title="View Product"
+                                                            >
+                                                                <Eye className="h-3 w-3" />
+                                                                <span>View</span>
+                                                            </button>
+                                                            <div className="relative group">
+                                                                <button
+                                                                    className="inline-flex items-center gap-1 px-3 py-2 text-xs bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(16,185,129,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(16,185,129,0.4)] border-0 min-w-[70px]"
+                                                                    title="Download"
+                                                                >
+                                                                    <Download className="h-3 w-3" />
+                                                                    <span>Download</span>
+                                                                </button>
+                                                                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[120px] z-[60] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                                                    <button
+                                                                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                                                                        onClick={() => handleDownloadProduct(product, "pdf")}
+                                                                    >
+                                                                        <FileText className="h-4 w-4 text-red-600" />
+                                                                        PDF
+                                                                    </button>
+                                                                    <button
+                                                                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                                                                        onClick={() => handleDownloadProduct(product, "excel")}
+                                                                    >
+                                                                        <FileText className="h-4 w-4 text-green-600" />
+                                                                        Excel
+                                                                    </button>
+                                                                    <button
+                                                                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                                                                        onClick={() => handleDownloadProduct(product, "csv")}
+                                                                    >
+                                                                        <FileText className="h-4 w-4 text-blue-600" />
+                                                                        CSV
+                                                                    </button>
+                                                                    <button
+                                                                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                                                                        onClick={() => handleDownloadProduct(product, "json")}
+                                                                    >
+                                                                        <FileText className="h-4 w-4 text-yellow-600" />
+                                                                        JSON
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <button
                                                                 onClick={() => handleStockAdjustment(product)}
                                                                 className="inline-flex items-center gap-1 px-3 py-2 text-xs bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(245,158,11,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(245,158,11,0.4)] border-0 min-w-[70px]"
                                                                 title="Update Stock"
@@ -699,12 +786,62 @@ const Products: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Footer with pagination */}
+                    {/* Footer with pagination and bulk download - Matching Invoice Management Style */}
                     <div className="bg-[#f8fafc] border-t border-[#e2e8f0] px-6 py-4 flex justify-between items-center">
-                        <span className="text-sm text-gray-600 font-medium flex items-center gap-2">
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                            {totalCount} product{totalCount !== 1 ? "s" : ""}
-                        </span>
+                        <div className="flex items-center gap-4">
+                            <span className="text-sm text-gray-600 font-medium flex items-center gap-2">
+                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                {totalCount} product{totalCount !== 1 ? "s" : ""}
+                            </span>
+                            {totalCount > 0 && (
+                                <div className="relative group z-[70]">
+                                    <button
+                                        className="flex items-center gap-2 px-3 py-2 text-xs bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(147,51,234,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(147,51,234,0.4)] border-0"
+                                        title="Download All Products"
+                                        disabled={productManagement.isDownloadingAllProducts}
+                                    >
+                                        {productManagement.isDownloadingAllProducts ? (
+                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                        ) : (
+                                            <Download className="h-3 w-3" />
+                                        )}
+                                        <span>
+                                            {productManagement.isDownloadingAllProducts ? "Generating..." : "Download All"}
+                                        </span>
+                                    </button>
+                                    <div className="absolute left-0 bottom-full mb-1 bg-white border border-gray-200 rounded-lg shadow-xl p-2 min-w-[120px] z-[80] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                        <button
+                                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                                            onClick={() => handleDownloadAllProducts("pdf")}
+                                        >
+                                            <FileText className="h-4 w-4 text-red-600" />
+                                            PDF
+                                        </button>
+                                        <button
+                                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                                            onClick={() => handleDownloadAllProducts("excel")}
+                                        >
+                                            <FileText className="h-4 w-4 text-green-600" />
+                                            Excel
+                                        </button>
+                                        <button
+                                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                                            onClick={() => handleDownloadAllProducts("csv")}
+                                        >
+                                            <FileText className="h-4 w-4 text-blue-600" />
+                                            CSV
+                                        </button>
+                                        <button
+                                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                                            onClick={() => handleDownloadAllProducts("json")}
+                                        >
+                                            <FileText className="h-4 w-4 text-yellow-600" />
+                                            JSON
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                         {totalPages > 1 && (
                             <nav aria-label="Product pagination">
                                 <ul className="flex gap-1 justify-end mb-0 text-sm">
@@ -771,6 +908,21 @@ const Products: React.FC = () => {
                     }}
                     onConfirm={handleDeleteConfirm}
                     isLoading={productManagement.isDeletingProduct}
+                />
+            )}
+
+            {selectedProduct && (
+                <ProductDetail
+                    product={selectedProduct}
+                    isOpen={showDetailModal}
+                    onClose={() => {
+                        setShowDetailModal(false);
+                        setSelectedProduct(null);
+                    }}
+                    onEdit={() => {
+                        setShowDetailModal(false);
+                        handleEditProduct(selectedProduct);
+                    }}
                 />
             )}
         </div>

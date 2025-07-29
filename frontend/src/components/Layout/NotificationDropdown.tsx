@@ -167,7 +167,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ isOpen, onC
             </div>
 
             {/* Content */}
-            <div className="max-h-96 overflow-y-auto">
+            <div className="max-h-96 overflow-y-auto scrollbar-hide">
                 {isLoading ? (
                     <div className="p-4 text-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -270,6 +270,18 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ isOpen, onC
                     </Link>
                 </div>
             )}
+
+            {/* Custom CSS for hiding scrollbar */}
+            <style>{`
+                .scrollbar-hide {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+                
+                .scrollbar-hide::-webkit-scrollbar {
+                    display: none;
+                }
+            `}</style>
         </div>
     );
 };

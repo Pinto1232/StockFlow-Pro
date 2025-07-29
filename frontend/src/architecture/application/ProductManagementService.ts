@@ -307,4 +307,40 @@ export class ProductManagementService implements ProductManagementPort {
       }))
       .filter(suggestion => suggestion.suggestedQuantity > 0);
   }
+
+  async downloadProduct(id: string, format: string): Promise<Blob> {
+    try {
+      const response = await this.apiClient.downloadBlob(`/products/${id}/download/${format}`);
+      return response;
+    } catch (error) {
+      console.error(`Failed to download product ${id} as ${format}:`, error);
+      throw new Error(`Failed to download product as ${format}`);
+    }
+  }
+
+  async downloadAllProducts(format: string, filters?: ProductFilters): Promise<Blob> {
+    try {
+      const params: Record<string, string> = {};
+
+      // Add filters as query parameters
+      if (filters?.search) {
+        params.search = filters.search;
+      }
+      if (filters?.isActive !== undefined) {
+        params.isActive = filters.isActive.toString();
+      }
+      if (filters?.stockStatus) {
+        params.stockStatus = filters.stockStatus;
+      }
+
+      const queryString = new URLSearchParams(params).toString();
+      const url = `/products/download/bulk/${format}${queryString ? `?${queryString}` : ''}`;
+      
+      const response = await this.apiClient.downloadBlob(url);
+      return response;
+    } catch (error) {
+      console.error(`Failed to download all products as ${format}:`, error);
+      throw new Error(`Failed to download all products as ${format}`);
+    }
+  }
 }

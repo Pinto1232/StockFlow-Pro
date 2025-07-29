@@ -716,6 +716,254 @@ public class ProductsController : ControllerBase
             return BadRequest(new { message = $"Failed to remove image: {ex.Message}" });
         }
     }
+
+    [HttpGet("{id:guid}/download/{format}")]
+    [Authorize(Roles = "Manager,Admin")]
+    public async Task<ActionResult> DownloadProduct(Guid id, string format)
+    {
+        try
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Downloading product {id} as {format}");
+            
+            // Get the product
+            var productQuery = new GetProductByIdQuery { Id = id };
+            var product = await _mediator.Send(productQuery);
+            if (product == null)
+            {
+                return NotFound($"Product with ID {id} not found");
+            }
+
+            // Generate the file based on format
+            byte[] fileContent;
+            string contentType;
+            string fileName;
+
+            switch (format.ToLower())
+            {
+                case "pdf":
+                    fileContent = await GenerateProductPdf(product);
+                    contentType = "application/pdf";
+                    fileName = $"product_{product.Name}_{DateTime.Now:yyyyMMdd}.pdf";
+                    break;
+                case "excel":
+                case "xlsx":
+                    fileContent = await GenerateProductExcel(product);
+                    contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                    fileName = $"product_{product.Name}_{DateTime.Now:yyyyMMdd}.xlsx";
+                    break;
+                case "csv":
+                    fileContent = await GenerateProductCsv(product);
+                    contentType = "text/csv";
+                    fileName = $"product_{product.Name}_{DateTime.Now:yyyyMMdd}.csv";
+                    break;
+                default:
+                    return BadRequest($"Unsupported format: {format}");
+            }
+
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Generated {format} file for product {id}");
+            return File(fileContent, contentType, fileName);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Error downloading product {id} as {format}: {ex.Message}");
+            return BadRequest(new { message = $"Failed to download product as {format}: {ex.Message}" });
+        }
+    }
+
+    [HttpGet("download/bulk/{format}")]
+    [Authorize(Roles = "Manager,Admin")]
+    public async Task<ActionResult> DownloadAllProducts(
+        string format,
+        [FromQuery] string? search = null,
+        [FromQuery] bool? isActive = null,
+        [FromQuery] string? stockStatus = null)
+    {
+        try
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Downloading all products as {format} with filters - Search: '{search}', IsActive: {isActive}, StockStatus: '{stockStatus}'");
+            
+            // Build query based on filters
+            var query = new GetAllProductsQuery();
+            
+            if (isActive.HasValue)
+            {
+                query.ActiveOnly = isActive.Value;
+            }
+
+            // Apply stock status filter
+            if (!string.IsNullOrEmpty(stockStatus))
+            {
+                switch (stockStatus.ToLower())
+                {
+                    case "instock":
+                        query.InStockOnly = true;
+                        break;
+                    case "lowstock":
+                        query.LowStockOnly = true;
+                        break;
+                    case "outofstock":
+                        // This would need to be implemented in the query
+                        break;
+                }
+            }
+
+            var products = await _mediator.Send(query);
+
+            // Apply search filter if provided
+            if (!string.IsNullOrEmpty(search))
+            {
+                products = products.Where(p => 
+                    p.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                    (p.Id.ToString().Contains(search, StringComparison.OrdinalIgnoreCase))
+                ).ToList();
+            }
+
+            // Generate the file based on format
+            byte[] fileContent;
+            string contentType;
+            string fileName;
+
+            switch (format.ToLower())
+            {
+                case "pdf":
+                    fileContent = await GenerateProductsPdf(products);
+                    contentType = "application/pdf";
+                    fileName = $"products_export_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+                    break;
+                case "excel":
+                case "xlsx":
+                    fileContent = await GenerateProductsExcel(products);
+                    contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                    fileName = $"products_export_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                    break;
+                case "csv":
+                    fileContent = await GenerateProductsCsv(products);
+                    contentType = "text/csv";
+                    fileName = $"products_export_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+                    break;
+                default:
+                    return BadRequest($"Unsupported format: {format}");
+            }
+
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Generated {format} file for {products.Count()} products");
+            return File(fileContent, contentType, fileName);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Error downloading all products as {format}: {ex.Message}");
+            return BadRequest(new { message = $"Failed to download all products as {format}: {ex.Message}" });
+        }
+    }
+
+    // Helper methods for file generation
+    private Task<byte[]> GenerateProductPdf(ProductDto product)
+    {
+        // Simple PDF generation - in a real app, you'd use a library like iTextSharp or PdfSharp
+        var content = $@"
+PRODUCT REPORT
+==============
+
+Name: {product.Name}
+ID: {product.Id}
+Cost per Item: {product.CostPerItem:C}
+Number in Stock: {product.NumberInStock}
+Total Value: {product.TotalValue:C}
+Status: {(product.IsActive ? "Active" : "Inactive")}
+Stock Status: {(product.IsInStock ? "In Stock" : "Out of Stock")}
+Low Stock: {(product.IsLowStock ? "Yes" : "No")}
+Created: {product.CreatedAt:yyyy-MM-dd HH:mm:ss}
+
+Generated on: {DateTime.Now:yyyy-MM-dd HH:mm:ss}
+";
+        return Task.FromResult(System.Text.Encoding.UTF8.GetBytes(content));
+    }
+
+    private Task<byte[]> GenerateProductsPdf(IEnumerable<ProductDto> products)
+    {
+        var content = $@"
+PRODUCTS EXPORT REPORT
+======================
+
+Total Products: {products.Count()}
+Generated on: {DateTime.Now:yyyy-MM-dd HH:mm:ss}
+
+PRODUCT LIST
+============
+
+";
+        foreach (var product in products)
+        {
+            content += $@"
+Name: {product.Name}
+ID: {product.Id}
+Cost: {product.CostPerItem:C}
+Stock: {product.NumberInStock}
+Value: {product.TotalValue:C}
+Status: {(product.IsActive ? "Active" : "Inactive")}
+---
+
+";
+        }
+
+        return Task.FromResult(System.Text.Encoding.UTF8.GetBytes(content));
+    }
+
+    private Task<byte[]> GenerateProductExcel(ProductDto product)
+    {
+        // Simple Excel generation - in a real app, you'd use EPPlus or ClosedXML
+        var csv = $"Field,Value\n";
+        csv += $"Name,{product.Name}\n";
+        csv += $"ID,{product.Id}\n";
+        csv += $"Cost per Item,{product.CostPerItem}\n";
+        csv += $"Number in Stock,{product.NumberInStock}\n";
+        csv += $"Total Value,{product.TotalValue}\n";
+        csv += $"Is Active,{product.IsActive}\n";
+        csv += $"Is In Stock,{product.IsInStock}\n";
+        csv += $"Is Low Stock,{product.IsLowStock}\n";
+        csv += $"Created At,{product.CreatedAt:yyyy-MM-dd HH:mm:ss}\n";
+        
+        return Task.FromResult(System.Text.Encoding.UTF8.GetBytes(csv));
+    }
+
+    private Task<byte[]> GenerateProductsExcel(IEnumerable<ProductDto> products)
+    {
+        var csv = "Name,ID,Cost per Item,Number in Stock,Total Value,Is Active,Is In Stock,Is Low Stock,Created At\n";
+        
+        foreach (var product in products)
+        {
+            csv += $"\"{product.Name}\",{product.Id},{product.CostPerItem},{product.NumberInStock},{product.TotalValue},{product.IsActive},{product.IsInStock},{product.IsLowStock},{product.CreatedAt:yyyy-MM-dd HH:mm:ss}\n";
+        }
+        
+        return Task.FromResult(System.Text.Encoding.UTF8.GetBytes(csv));
+    }
+
+    private Task<byte[]> GenerateProductCsv(ProductDto product)
+    {
+        var csv = "Field,Value\n";
+        csv += $"Name,{product.Name}\n";
+        csv += $"ID,{product.Id}\n";
+        csv += $"Cost per Item,{product.CostPerItem}\n";
+        csv += $"Number in Stock,{product.NumberInStock}\n";
+        csv += $"Total Value,{product.TotalValue}\n";
+        csv += $"Is Active,{product.IsActive}\n";
+        csv += $"Is In Stock,{product.IsInStock}\n";
+        csv += $"Is Low Stock,{product.IsLowStock}\n";
+        csv += $"Created At,{product.CreatedAt:yyyy-MM-dd HH:mm:ss}\n";
+        
+        return Task.FromResult(System.Text.Encoding.UTF8.GetBytes(csv));
+    }
+
+    private Task<byte[]> GenerateProductsCsv(IEnumerable<ProductDto> products)
+    {
+        var csv = "Name,ID,Cost per Item,Number in Stock,Total Value,Is Active,Is In Stock,Is Low Stock,Created At\n";
+        
+        foreach (var product in products)
+        {
+            csv += $"\"{product.Name}\",{product.Id},{product.CostPerItem},{product.NumberInStock},{product.TotalValue},{product.IsActive},{product.IsInStock},{product.IsLowStock},{product.CreatedAt:yyyy-MM-dd HH:mm:ss}\n";
+        }
+        
+        return Task.FromResult(System.Text.Encoding.UTF8.GetBytes(csv));
+    }
 }
 
 // 🚀 ENHANCED DTOs with formatted properties

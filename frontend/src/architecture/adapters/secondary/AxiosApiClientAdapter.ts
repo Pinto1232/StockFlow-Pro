@@ -126,6 +126,14 @@ export class AxiosApiClientAdapter implements ApiClientPort {
     window.URL.revokeObjectURL(downloadUrl);
   }
 
+  async downloadBlob(url: string, config?: ApiRequestConfig): Promise<Blob> {
+    const response = await this.axiosInstance.get(url, {
+      ...this.convertConfig(config),
+      responseType: 'blob',
+    });
+    return new Blob([response.data]);
+  }
+
   setBaseUrl(baseUrl: string): void {
     this.axiosInstance.defaults.baseURL = baseUrl;
   }

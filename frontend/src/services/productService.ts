@@ -1,4 +1,5 @@
 import { apiService } from "./api";
+import api from "./api";
 import type {
     ProductDto,
     CreateProductDto,
@@ -121,5 +122,40 @@ export const productService = {
     // Get product statistics
     getProductStats: async () => {
         return await apiService.get("/products/stats");
+    },
+
+    // Download product in any format (pdf, excel, csv, json)
+    downloadProduct: async (id: string, format: string): Promise<Blob> => {
+        const response = await api.get(`/products/${id}/download/${format}`, {
+            responseType: 'blob'
+        });
+        return response.data;
+    },
+
+    // Download all products in bulk
+    downloadAllProducts: async (format: string, filters?: ProductFilters): Promise<Blob> => {
+        const params: Record<string, string> = {};
+
+        // Add filters as query parameters
+        if (filters?.search) {
+            params.search = filters.search;
+        }
+        if (filters?.isActive !== undefined) {
+            params.isActive = filters.isActive.toString();
+        }
+        if (filters?.isLowStock !== undefined) {
+            params.isLowStock = filters.isLowStock.toString();
+        }
+        if (filters?.inStockOnly !== undefined) {
+            params.inStockOnly = filters.inStockOnly.toString();
+        }
+
+        const queryString = new URLSearchParams(params).toString();
+        const url = `/products/download/bulk/${format}${queryString ? `?${queryString}` : ''}`;
+        
+        const response = await api.get(url, {
+            responseType: 'blob'
+        });
+        return response.data;
     },
 };

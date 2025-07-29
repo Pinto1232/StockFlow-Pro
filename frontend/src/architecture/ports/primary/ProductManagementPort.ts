@@ -79,4 +79,8 @@ export interface ProductManagementPort {
   // Reports
   getLowStockReport(): Promise<ProductEntity[]>;
   getInventoryValueReport(): Promise<{ totalValue: number; products: ProductEntity[] }>;
+  
+  // Downloads
+  downloadProduct(id: string, format: string): Promise<Blob>;
+  downloadAllProducts(format: string, filters?: ProductFilters): Promise<Blob>;
 }
