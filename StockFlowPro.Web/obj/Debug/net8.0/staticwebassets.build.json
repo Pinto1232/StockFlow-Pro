@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "nfk/7wStiVdMu8DbtRR75tymu2doDgpxDrdXj7N1yjs=",
+  "Hash": "ihFrd3aiXKk64uelyaH3914fnGq5r27PJ9VjX7fU2Aw=",
   "Source": "StockFlowPro.Web",
   "BasePath": "_content/StockFlowPro.Web",
   "Mode": "Default",
@@ -17,10 +17,10 @@
   ],
   "Assets": [
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\obj\\Debug\\net8.0\\scopedcss\\bundle\\StockFlowPro.Web.styles.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\obj\\Debug\\net8.0\\scopedcss\\bundle\\StockFlowPro.Web.styles.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Computed",
-      "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\obj\\Debug\\net8.0\\scopedcss\\bundle\\",
+      "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\obj\\Debug\\net8.0\\scopedcss\\bundle\\",
       "BasePath": "_content/StockFlowPro.Web",
       "RelativePath": "StockFlowPro.Web.styles.css",
       "AssetKind": "All",
@@ -33,13 +33,13 @@
       "AssetTraitValue": "ApplicationBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\obj\\Debug\\net8.0\\scopedcss\\bundle\\StockFlowPro.Web.styles.css"
+      "OriginalItemSpec": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\obj\\Debug\\net8.0\\scopedcss\\bundle\\StockFlowPro.Web.styles.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\StockFlowPro.Web.bundle.scp.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\StockFlowPro.Web.bundle.scp.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Computed",
-      "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\",
+      "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\",
       "BasePath": "_content/StockFlowPro.Web",
       "RelativePath": "StockFlowPro.Web.bundle.scp.css",
       "AssetKind": "All",
@@ -52,10 +52,10 @@
       "AssetTraitValue": "ProjectBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\StockFlowPro.Web.bundle.scp.css"
+      "OriginalItemSpec": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\StockFlowPro.Web.bundle.scp.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\css\\admin-panel.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\css\\admin-panel.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -74,7 +74,7 @@
       "OriginalItemSpec": "wwwroot\\css\\admin-panel.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\css\\auth.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\css\\auth.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -93,7 +93,7 @@
       "OriginalItemSpec": "wwwroot\\css\\auth.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\css\\dashboard.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\css\\dashboard.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -112,7 +112,7 @@
       "OriginalItemSpec": "wwwroot\\css\\dashboard.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\css\\edit-profile.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\css\\edit-profile.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -131,7 +131,7 @@
       "OriginalItemSpec": "wwwroot\\css\\edit-profile.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\css\\features.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\css\\features.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -150,7 +150,7 @@
       "OriginalItemSpec": "wwwroot\\css\\features.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\css\\layout.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\css\\layout.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -169,7 +169,7 @@
       "OriginalItemSpec": "wwwroot\\css\\layout.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\css\\mobile-nav.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\css\\mobile-nav.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -188,7 +188,7 @@
       "OriginalItemSpec": "wwwroot\\css\\mobile-nav.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\css\\products.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\css\\products.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -207,7 +207,7 @@
       "OriginalItemSpec": "wwwroot\\css\\products.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\css\\reports.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\css\\reports.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -226,7 +226,7 @@
       "OriginalItemSpec": "wwwroot\\css\\reports.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\css\\signalr.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\css\\signalr.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -245,7 +245,7 @@
       "OriginalItemSpec": "wwwroot\\css\\signalr.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\css\\site.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\css\\site.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -264,7 +264,7 @@
       "OriginalItemSpec": "wwwroot\\css\\site.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\css\\system-settings.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\css\\system-settings.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -283,7 +283,7 @@
       "OriginalItemSpec": "wwwroot\\css\\system-settings.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\css\\users.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\css\\users.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -302,7 +302,7 @@
       "OriginalItemSpec": "wwwroot\\css\\users.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\favicon.ico",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\favicon.ico",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -321,7 +321,7 @@
       "OriginalItemSpec": "wwwroot\\favicon.ico"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\images\\default-avatar.svg",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\images\\default-avatar.svg",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -340,7 +340,7 @@
       "OriginalItemSpec": "wwwroot\\images\\default-avatar.svg"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\images\\default-product.svg",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\images\\default-product.svg",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -359,7 +359,7 @@
       "OriginalItemSpec": "wwwroot\\images\\default-product.svg"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\js\\admin-panel.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\js\\admin-panel.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -378,7 +378,7 @@
       "OriginalItemSpec": "wwwroot\\js\\admin-panel.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\js\\dashboard.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\js\\dashboard.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -397,7 +397,7 @@
       "OriginalItemSpec": "wwwroot\\js\\dashboard.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\js\\debug-nav.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\js\\debug-nav.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -416,7 +416,7 @@
       "OriginalItemSpec": "wwwroot\\js\\debug-nav.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\js\\edit-profile.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\js\\edit-profile.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -435,7 +435,7 @@
       "OriginalItemSpec": "wwwroot\\js\\edit-profile.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\js\\login.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\js\\login.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -454,7 +454,7 @@
       "OriginalItemSpec": "wwwroot\\js\\login.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\js\\products.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\js\\products.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -473,7 +473,7 @@
       "OriginalItemSpec": "wwwroot\\js\\products.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\js\\reports.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\js\\reports.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -492,7 +492,7 @@
       "OriginalItemSpec": "wwwroot\\js\\reports.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\js\\shared\\error-handler.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\js\\shared\\error-handler.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -511,7 +511,7 @@
       "OriginalItemSpec": "wwwroot\\js\\shared\\error-handler.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\js\\shared\\formatting-utils.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\js\\shared\\formatting-utils.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -530,7 +530,7 @@
       "OriginalItemSpec": "wwwroot\\js\\shared\\formatting-utils.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\js\\signalr-client.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\js\\signalr-client.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -549,7 +549,7 @@
       "OriginalItemSpec": "wwwroot\\js\\signalr-client.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\js\\signalr-connection-manager.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\js\\signalr-connection-manager.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -568,7 +568,7 @@
       "OriginalItemSpec": "wwwroot\\js\\signalr-connection-manager.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\js\\site.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\js\\site.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -587,7 +587,7 @@
       "OriginalItemSpec": "wwwroot\\js\\site.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\js\\test-api.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\js\\test-api.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -606,7 +606,7 @@
       "OriginalItemSpec": "wwwroot\\js\\test-api.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -625,7 +625,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -644,7 +644,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -663,7 +663,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -682,7 +682,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -701,7 +701,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -720,7 +720,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -739,7 +739,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -758,7 +758,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -777,7 +777,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -796,7 +796,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -815,7 +815,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -834,7 +834,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -853,7 +853,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -872,7 +872,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -891,7 +891,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -910,7 +910,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -929,7 +929,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -948,7 +948,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -967,7 +967,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -986,7 +986,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1005,7 +1005,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1024,7 +1024,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1043,7 +1043,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1062,7 +1062,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1081,7 +1081,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1100,7 +1100,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1119,7 +1119,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1138,7 +1138,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1157,7 +1157,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1176,7 +1176,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1195,7 +1195,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1214,7 +1214,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1233,7 +1233,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1252,7 +1252,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1271,7 +1271,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1290,7 +1290,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1309,7 +1309,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1328,7 +1328,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1347,7 +1347,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1366,7 +1366,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1385,7 +1385,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1404,7 +1404,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1423,7 +1423,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1442,7 +1442,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\bootstrap\\LICENSE",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\bootstrap\\LICENSE",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1461,7 +1461,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\bootstrap\\LICENSE"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1480,7 +1480,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1499,7 +1499,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\jquery-validation-unobtrusive\\LICENSE.txt",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\jquery-validation-unobtrusive\\LICENSE.txt",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1518,7 +1518,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\jquery-validation-unobtrusive\\LICENSE.txt"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1537,7 +1537,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\jquery-validation\\dist\\additional-methods.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.min.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.min.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1556,7 +1556,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\jquery-validation\\dist\\additional-methods.min.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1575,7 +1575,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.min.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.min.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1594,7 +1594,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.min.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\jquery-validation\\LICENSE.md",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\jquery-validation\\LICENSE.md",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1613,7 +1613,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\jquery-validation\\LICENSE.md"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\jquery\\dist\\jquery.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\jquery\\dist\\jquery.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1632,7 +1632,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\jquery\\dist\\jquery.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\jquery\\dist\\jquery.min.js",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\jquery\\dist\\jquery.min.js",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1651,7 +1651,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\jquery\\dist\\jquery.min.js"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\jquery\\dist\\jquery.min.map",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\jquery\\dist\\jquery.min.map",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1670,7 +1670,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\jquery\\dist\\jquery.min.map"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\lib\\jquery\\LICENSE.txt",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\lib\\jquery\\LICENSE.txt",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1689,7 +1689,7 @@
       "OriginalItemSpec": "wwwroot\\lib\\jquery\\LICENSE.txt"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\signalr-test.html",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\signalr-test.html",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1708,7 +1708,7 @@
       "OriginalItemSpec": "wwwroot\\signalr-test.html"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\test-mobile-nav.html",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\test-mobile-nav.html",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1727,7 +1727,7 @@
       "OriginalItemSpec": "wwwroot\\test-mobile-nav.html"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\uploads\\profiles\\550e8400-e29b-41d4-a716-446655440000_8ca05573-03cc-471d-b4a2-8cbdb958d53b.jpg",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\uploads\\profiles\\550e8400-e29b-41d4-a716-446655440000_8ca05573-03cc-471d-b4a2-8cbdb958d53b.jpg",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1746,7 +1746,7 @@
       "OriginalItemSpec": "wwwroot\\uploads\\profiles\\550e8400-e29b-41d4-a716-446655440000_8ca05573-03cc-471d-b4a2-8cbdb958d53b.jpg"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\uploads\\profiles\\550e8400-e29b-41d4-a716-446655440000_d04b307d-74d1-4a7e-9552-8bc8fcae0f8b.png",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\uploads\\profiles\\550e8400-e29b-41d4-a716-446655440000_d04b307d-74d1-4a7e-9552-8bc8fcae0f8b.png",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1765,7 +1765,7 @@
       "OriginalItemSpec": "wwwroot\\uploads\\profiles\\550e8400-e29b-41d4-a716-446655440000_d04b307d-74d1-4a7e-9552-8bc8fcae0f8b.png"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\uploads\\profiles\\8abbe050-8037-443d-8e45-1ccb1494f320_34ba7ec6-eecf-4635-be2e-e7841c0c8a80.jpg",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\uploads\\profiles\\8abbe050-8037-443d-8e45-1ccb1494f320_34ba7ec6-eecf-4635-be2e-e7841c0c8a80.jpg",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1784,7 +1784,7 @@
       "OriginalItemSpec": "wwwroot\\uploads\\profiles\\8abbe050-8037-443d-8e45-1ccb1494f320_34ba7ec6-eecf-4635-be2e-e7841c0c8a80.jpg"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\uploads\\profiles\\8abbe050-8037-443d-8e45-1ccb1494f320_66b26cf6-e0a1-48da-bf5c-51a6708b89ab.png",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\uploads\\profiles\\8abbe050-8037-443d-8e45-1ccb1494f320_66b26cf6-e0a1-48da-bf5c-51a6708b89ab.png",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1803,7 +1803,7 @@
       "OriginalItemSpec": "wwwroot\\uploads\\profiles\\8abbe050-8037-443d-8e45-1ccb1494f320_66b26cf6-e0a1-48da-bf5c-51a6708b89ab.png"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\uploads\\profiles\\8abbe050-8037-443d-8e45-1ccb1494f320_f00d8760-aacc-4753-a32c-83187bfef3b2.png",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\uploads\\profiles\\8abbe050-8037-443d-8e45-1ccb1494f320_f00d8760-aacc-4753-a32c-83187bfef3b2.png",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1822,7 +1822,7 @@
       "OriginalItemSpec": "wwwroot\\uploads\\profiles\\8abbe050-8037-443d-8e45-1ccb1494f320_f00d8760-aacc-4753-a32c-83187bfef3b2.png"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\uploads\\profiles\\8cbdbeef-0755-477d-9980-7b164d610afb_8ae700b1-7801-4c0c-9da7-05fd43ef2905.jpg",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\uploads\\profiles\\8cbdbeef-0755-477d-9980-7b164d610afb_8ae700b1-7801-4c0c-9da7-05fd43ef2905.jpg",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1841,7 +1841,7 @@
       "OriginalItemSpec": "wwwroot\\uploads\\profiles\\8cbdbeef-0755-477d-9980-7b164d610afb_8ae700b1-7801-4c0c-9da7-05fd43ef2905.jpg"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\uploads\\profiles\\8cbdbeef-0755-477d-9980-7b164d610afb_aaa4c6e9-fbf3-4e17-8941-dbb02b84af66.png",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\uploads\\profiles\\8cbdbeef-0755-477d-9980-7b164d610afb_aaa4c6e9-fbf3-4e17-8941-dbb02b84af66.png",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
@@ -1860,7 +1860,7 @@
       "OriginalItemSpec": "wwwroot\\uploads\\profiles\\8cbdbeef-0755-477d-9980-7b164d610afb_aaa4c6e9-fbf3-4e17-8941-dbb02b84af66.png"
     },
     {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\uploads\\profiles\\c3291369-2a80-4fca-86c6-63272295f8e4_631fe862-2538-4478-821c-bc4c1440bfb2.jpg",
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\stockflowpro.web\\wwwroot\\uploads\\profiles\\c3291369-2a80-4fca-86c6-63272295f8e4_631fe862-2538-4478-821c-bc4c1440bfb2.jpg",
       "SourceId": "StockFlowPro.Web",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web\\wwwroot\\",
