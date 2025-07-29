@@ -145,45 +145,7 @@
                     </div>
                 }
 
-                @if (User.HasPermission(StockFlowPro.Web.Authorization.Permissions.System.ViewAdminPanel))
-                {
-                    <!-- Enhanced Product Management Card -->
-                    <div class="admin-card" data-category="inventory">
-                        <div class="card-header">
-                            <div class="card-icon-wrapper">
-                                <i class="fas fa-box-open card-icon"></i>
-                            </div>
-                            <div class="card-badge">
-                                <span class="badge-text">Core</span>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title">Product Management</h5>
-                            <p class="card-text">Add, edit, and organize your product inventory, including stock levels and pricing.</p>
-                            <div class="card-stats">
-                                <div class="stat">
-                                    <span class="stat-number" id="product-count">@Model.TotalProducts.ToString("N0")</span>
-                                    <span class="stat-label">Products</span>
-                                </div>
-                                <div class="stat">
-                                    <span class="stat-number" id="in-stock">@Model.InStockPercentage.ToString("F1")%</span>
-                                    <span class="stat-label">In Stock</span>
-                                </div>
-                            </div>
-                            <div class="card-actions">
-                                <a href="/Products" class="btn btn-success">
-                                    <i class="fas fa-boxes"></i>
-                                    <span>Manage Products</span>
-                                </a>
-                                <button class="btn btn-outline" onclick="quickAddProduct()">
-                                    <i class="fas fa-plus"></i>
-                                    <span>Add Product</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                }
-
+                
                 @if (User.HasPermission(StockFlowPro.Web.Authorization.Permissions.Reports.ViewBasic))
                 {
                     <!-- Enhanced Reports Card -->

@@ -71,32 +71,11 @@
                         </div>
                     </div>
 
-                    <!-- Stock Update Test -->
+                    <!-- Broadcast Message Test -->
                     @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                     {
                         <div class="row">
-                            <div class="col-md-6 mb-4">
-                                <div class="card border-warning">
-                                    <div class="card-header bg-warning text-dark">
-                                        <h5 class="mb-0">Stock Update Test</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="mb-3">
-                                            <label for="product-id" class="form-label">Product ID (GUID)</label>
-                                            <input type="text" class="form-control" id="product-id" placeholder="Enter product GUID">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="new-quantity" class="form-label">New Quantity</label>
-                                            <input type="number" class="form-control" id="new-quantity" placeholder="Enter new stock quantity" min="0">
-                                        </div>
-                                        <button type="button" class="btn btn-warning" onclick="updateStock()">
-                                            <i class="fas fa-boxes me-1"></i>Update Stock
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6 mb-4">
+                            <div class="col-md-12 mb-4">
                                 <div class="card border-danger">
                                     <div class="card-header bg-danger text-white">
                                         <h5 class="mb-0">Broadcast Message</h5>
@@ -229,37 +208,7 @@
             }
         }
 
-        async function updateStock() {
-            const productId = document.getElementById('product-id').value;
-            const newQuantity = document.getElementById('new-quantity').value;
-            
-            if (!productId.trim() || !newQuantity) {
-                alert('Please enter both Product ID and New Quantity');
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/realtime/update-stock/${productId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        newQuantity: parseInt(newQuantity)
-                    })
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    logEvent(`Stock update sent for product ${productId}: ${newQuantity} units`, 'success');
-                } else {
-                    logEvent(`Failed to update stock: ${result.message}`, 'error');
-                }
-            } catch (error) {
-                logEvent(`Error updating stock: ${error.message}`, 'error');
-            }
-        }
-
+        
         async function broadcastMessage() {
             const message = document.getElementById('broadcast-message').value;
             
@@ -328,18 +277,7 @@
                         originalHandleUserNotification.call(this, data);
                     };
 
-                    const originalHandleStockUpdate = window.stockFlowSignalR.handleStockUpdate;
-                    window.stockFlowSignalR.handleStockUpdate = function(data) {
-                        logEvent(`Stock Update: Product ${data.ProductId} quantity changed to ${data.NewQuantity}`, 'info');
-                        originalHandleStockUpdate.call(this, data);
-                    };
-
-                    const originalHandleStockLevelAlert = window.stockFlowSignalR.handleStockLevelAlert;
-                    window.stockFlowSignalR.handleStockLevelAlert = function(data) {
-                        logEvent(`Stock Alert: ${data.ProductName} - ${data.CurrentStock} units (${data.Severity})`, data.Severity === 'critical' ? 'error' : 'warning');
-                        originalHandleStockLevelAlert.call(this, data);
-                    };
-
+                    
                     // Add handler for broadcast messages
                     if (window.stockFlowSignalR.connection) {
                         window.stockFlowSignalR.connection.on("BroadcastMessage", function(data) {

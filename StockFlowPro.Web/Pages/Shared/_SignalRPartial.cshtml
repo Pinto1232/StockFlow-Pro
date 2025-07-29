@@ -127,51 +127,7 @@
         </script>
     }
 
-    @if (currentPage == "/Products")
-    {
-        <script>
-            // Products page-specific SignalR handlers
-            document.addEventListener('DOMContentLoaded', function() {
-                const initializeProducts = () => {
-                    if (window.stockFlowSignalR && window.stockFlowSignalR.isConnected) {
-                        // Join products group for real-time updates
-                        window.stockFlowSignalR.joinGroup('Products');
-                        
-                        // Override stock update handler for products page
-                        window.stockFlowSignalR.handleStockUpdate = function(data) {
-                            console.log('Stock Update on Products Page:', data);
-                            
-                            // Update product stock display
-                            const productRow = document.querySelector(`tr[data-product-id="${data.ProductId}"]`);
-                            if (productRow) {
-                                const stockCell = productRow.querySelector('.stock-quantity');
-                                if (stockCell) {
-                                    stockCell.textContent = data.NewQuantity;
-                                    stockCell.classList.add('updated');
-                                    
-                                    // Update stock level indicator
-                                    stockCell.classList.remove('low', 'critical');
-                                    if (data.NewQuantity === 0) {
-                                        stockCell.classList.add('critical');
-                                    } else if (data.NewQuantity <= 10) {
-                                        stockCell.classList.add('low');
-                                    }
-                                    
-                                    setTimeout(() => stockCell.classList.remove('updated'), 2000);
-                                }
-                            }
-                        };
-                    } else {
-                        // Wait for SignalR to be ready
-                        setTimeout(initializeProducts, 100);
-                    }
-                };
-                
-                initializeProducts();
-            });
-        </script>
-    }
-
+    
     
     @if (currentPage == "/AdminPanel" && User.IsInRole("Admin"))
     {
