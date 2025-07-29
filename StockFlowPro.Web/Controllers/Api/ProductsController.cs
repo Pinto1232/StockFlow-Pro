@@ -588,6 +588,141 @@ public class ProductsController : ControllerBase
         }
     }
 
+    [HttpPost("{id:guid}/adjust-stock")]
+    [Authorize(Roles = "Manager,Admin")]
+    public async Task<ActionResult<ProductDto>> AdjustProductStock(Guid id, [FromBody] AdjustProductStockDto adjustStockDto)
+    {
+        try
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Adjusting stock for product {id} by {adjustStockDto.Adjustment}");
+            
+            // Get current product to calculate new stock
+            var productQuery = new GetProductByIdQuery { Id = id };
+            var currentProduct = await _mediator.Send(productQuery);
+            
+            if (currentProduct == null)
+            {
+                return NotFound($"Product with ID {id} not found");
+            }
+
+            // Calculate new stock level
+            var newStock = currentProduct.NumberInStock + adjustStockDto.Adjustment;
+            
+            if (newStock < 0)
+            {
+                return BadRequest($"Cannot adjust stock by {adjustStockDto.Adjustment}. Current stock is {currentProduct.NumberInStock}. Adjustment would result in negative stock.");
+            }
+
+            // Update stock using existing command
+            var updateCommand = new UpdateProductStockCommand
+            {
+                Id = id,
+                NumberInStock = newStock
+            };
+            
+            var updatedProduct = await _mediator.Send(updateCommand);
+            
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Successfully adjusted stock for product {id} from {currentProduct.NumberInStock} to {updatedProduct.NumberInStock}");
+            
+            return Ok(updatedProduct);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound($"Product with ID {id} not found");
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Error adjusting stock for product {id}: {ex.Message}");
+            return BadRequest($"Failed to adjust stock: {ex.Message}");
+        }
+    }
+
+    [HttpPost("bulk-adjust-stock")]
+    [Authorize(Roles = "Manager,Admin")]
+    public async Task<ActionResult<ApiResponse<BulkStockAdjustmentResultDto>>> BulkAdjustStock([FromBody] BulkStockAdjustmentDto bulkAdjustmentDto)
+    {
+        try
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Processing bulk stock adjustment for {bulkAdjustmentDto.Adjustments.Count} products");
+            
+            var results = new List<StockAdjustmentResultDto>();
+            var errors = new List<string>();
+
+            foreach (var adjustment in bulkAdjustmentDto.Adjustments)
+            {
+                try
+                {
+                    // Get current product
+                    var productQuery = new GetProductByIdQuery { Id = adjustment.ProductId };
+                    var currentProduct = await _mediator.Send(productQuery);
+                    
+                    if (currentProduct == null)
+                    {
+                        errors.Add($"Product with ID {adjustment.ProductId} not found");
+                        continue;
+                    }
+
+                    // Calculate new stock level
+                    var newStock = currentProduct.NumberInStock + adjustment.Adjustment;
+                    
+                    if (newStock < 0)
+                    {
+                        errors.Add($"Cannot adjust stock for {currentProduct.Name} by {adjustment.Adjustment}. Current stock is {currentProduct.NumberInStock}.");
+                        continue;
+                    }
+
+                    // Update stock
+                    var updateCommand = new UpdateProductStockCommand
+                    {
+                        Id = adjustment.ProductId,
+                        NumberInStock = newStock
+                    };
+                    
+                    var updatedProduct = await _mediator.Send(updateCommand);
+                    
+                    results.Add(new StockAdjustmentResultDto
+                    {
+                        ProductId = adjustment.ProductId,
+                        ProductName = updatedProduct.Name,
+                        PreviousStock = currentProduct.NumberInStock,
+                        NewStock = updatedProduct.NumberInStock,
+                        Adjustment = adjustment.Adjustment,
+                        Success = true
+                    });
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"Error adjusting stock for product {adjustment.ProductId}: {ex.Message}");
+                }
+            }
+
+            var result = new BulkStockAdjustmentResultDto
+            {
+                TotalProcessed = bulkAdjustmentDto.Adjustments.Count,
+                SuccessfulAdjustments = results.Count,
+                FailedAdjustments = errors.Count,
+                Results = results,
+                Errors = errors
+            };
+
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Bulk stock adjustment completed - Success: {result.SuccessfulAdjustments}, Failed: {result.FailedAdjustments}");
+            
+            return Ok(ApiResponse<BulkStockAdjustmentResultDto>.SuccessResult(
+                result, 
+                $"Bulk stock adjustment completed. {result.SuccessfulAdjustments} successful, {result.FailedAdjustments} failed."));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[PRODUCT MANAGEMENT] Error processing bulk stock adjustment: {ex.Message}");
+            return BadRequest(ApiResponse<BulkStockAdjustmentResultDto>.ErrorResult(
+                "Failed to process bulk stock adjustment", ex.Message));
+        }
+    }
+
     [HttpDelete("{id:guid}")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult> DeleteProduct(Guid id)
@@ -1039,4 +1174,39 @@ public class InventoryValueReportDto
     public DateTime GeneratedAt { get; set; }
     public string GeneratedAtFormatted { get; set; } = string.Empty;
     public List<EnhancedProductDto> Products { get; set; } = new();
+}
+
+public class AdjustProductStockDto
+{
+    public int Adjustment { get; set; }
+}
+
+public class BulkStockAdjustmentDto
+{
+    public List<StockAdjustmentDto> Adjustments { get; set; } = new();
+}
+
+public class StockAdjustmentDto
+{
+    public Guid ProductId { get; set; }
+    public int Adjustment { get; set; }
+}
+
+public class BulkStockAdjustmentResultDto
+{
+    public int TotalProcessed { get; set; }
+    public int SuccessfulAdjustments { get; set; }
+    public int FailedAdjustments { get; set; }
+    public List<StockAdjustmentResultDto> Results { get; set; } = new();
+    public List<string> Errors { get; set; } = new();
+}
+
+public class StockAdjustmentResultDto
+{
+    public Guid ProductId { get; set; }
+    public string ProductName { get; set; } = string.Empty;
+    public int PreviousStock { get; set; }
+    public int NewStock { get; set; }
+    public int Adjustment { get; set; }
+    public bool Success { get; set; }
 }
