@@ -1,7 +1,0 @@
-{
-  "StockFlowPro.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Application",
-  "StockFlowPro.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Domain",
-  "StockFlowPro.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Infrastructure",
-  "StockFlowPro.Shared, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Shared",
-  "StockFlowPro.Web, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Users\\pinto\\Documents\\Development\\StockFlow-Pro\\StockFlowPro.Web"
-}
