@@ -242,6 +242,11 @@ const Products: React.FC = () => {
         try {
             await productManagement.adjustStock(request);
             addConsoleEntry(`Stock adjusted for product ID ${request.productId}: ${request.adjustment > 0 ? '+' : ''}${request.adjustment}`, "database");
+            
+            // Explicitly refetch products to ensure table updates
+            await productManagement.refetchProducts();
+            addConsoleEntry("Product table refreshed after stock adjustment", "system");
+            
             setShowStockModal(false);
             setSelectedProduct(null);
         } catch (error) {
