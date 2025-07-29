@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { formatCurrency, formatCurrencyCompact } from "../../utils/currency";
 import { useProducts as useArchitectureProducts } from "../../architecture/adapters/primary/hooks";
+import { useDownloadProduct, useDownloadAllProducts } from "../../hooks/useProducts";
 import { useRealTimeUpdates } from "../../hooks/useRealTimeUpdates";
 import { CreateProductRequest, UpdateProductRequest, StockAdjustmentRequest } from "../../architecture/ports/primary/ProductManagementPort";
 import { ProductEntity } from "../../architecture/domain/entities/Product";
@@ -28,6 +29,8 @@ import ProductForm from "../../components/Products/ProductForm";
 import StockAdjustmentModal from "../../components/Products/StockAdjustmentModal";
 import DeleteProductModal from "../../components/Products/DeleteProductModal";
 import ProductDetail from "../../components/Products/ProductDetail";
+import Snackbar from "../../components/ui/Snackbar";
+import AnimatedStatsCard from "../../components/ui/AnimatedStatsCard";
 
 const Products: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -60,8 +63,23 @@ const Products: React.FC = () => {
     const [selectedProduct, setSelectedProduct] = useState<ProductEntity | null>(null);
     const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
 
+    // Snackbar state
+    const [snackbar, setSnackbar] = useState<{
+        isOpen: boolean;
+        message: string;
+        type: 'success' | 'error' | 'warning' | 'info';
+    }>({
+        isOpen: false,
+        message: '',
+        type: 'info',
+    });
+
     // Use hexagonal architecture hooks
     const productManagement = useArchitectureProducts();
+    
+    // Download hooks for proper blob handling
+    const downloadProductMutation = useDownloadProduct();
+    const downloadAllProductsMutation = useDownloadAllProducts();
 
     // Extract stable function to avoid infinite re-renders
     const { updateFilters } = productManagement;
@@ -96,11 +114,16 @@ const Products: React.FC = () => {
     const error = productManagement.error;
     const categories = productManagement.categories;
 
-    // Calculate stats from API data
-    const totalProducts = totalCount;
-    const totalValue = productManagement.inventoryValueReport?.totalValue || products.reduce((sum, product) => sum + (product.totalValue || product.calculatedTotalValue), 0);
-    const lowStockCount = products.filter(product => product.isLowStock).length;
-    const outOfStockCount = products.filter(product => product.isOutOfStock).length;
+    // Get stats from dashboard stats API or fallback to calculated values
+    const dashboardStats = productManagement.dashboardStats;
+    const isLoadingStats = productManagement.isLoadingDashboardStats;
+    const statsError = productManagement.dashboardStatsError;
+    
+    // Use dashboard stats if available, otherwise fallback to calculated values
+    const totalProducts = dashboardStats?.totalProducts ?? totalCount;
+    const totalValue = dashboardStats?.totalValue ?? (productManagement.inventoryValueReport?.totalValue || products.reduce((sum, product) => sum + (product.totalValue || product.calculatedTotalValue), 0));
+    const lowStockCount = dashboardStats?.lowStockCount ?? products.filter(product => product.isLowStock).length;
+    const outOfStockCount = dashboardStats?.outOfStockCount ?? products.filter(product => product.isOutOfStock).length;
 
     // Log API calls to console
     useEffect(() => {
@@ -150,6 +173,19 @@ const Products: React.FC = () => {
         setSearchQuery("");
     };
 
+    // Snackbar helper functions
+    const showSnackbar = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
+        setSnackbar({
+            isOpen: true,
+            message,
+            type,
+        });
+    };
+
+    const hideSnackbar = () => {
+        setSnackbar(prev => ({ ...prev, isOpen: false }));
+    };
+
     // Reset to page 1 when filters change
     useEffect(() => {
         setCurrentPage(1);
@@ -196,17 +232,106 @@ const Products: React.FC = () => {
     const handleDownloadProduct = async (product: ProductEntity, format: string) => {
         try {
             addConsoleEntry(`Generating ${format.toUpperCase()} for product: ${product.name}`, "system");
+            showSnackbar(`Generating ${format.toUpperCase()}...`, "info");
             
-            // Use the architecture's download method directly
-            productManagement.downloadProduct({ id: product.id, format });
+            // Use the download hook that properly handles blob response
+            const blob = await downloadProductMutation.mutateAsync({ id: product.id, format });
+            
+            // Validate blob response
+            if (!blob || blob.size === 0) {
+                throw new Error('Received empty or invalid file from server');
+            }
+            
+            // Always check if content is text-based (regardless of MIME type)
+            let isTextContent = false;
+            let textContent = '';
+            
+            try {
+                // Try to read as text to check if it's actually text content
+                const clonedBlob = blob.slice();
+                textContent = await clonedBlob.text();
+                
+                // Check if it looks like text content (not binary)
+                isTextContent = textContent.length > 0 && 
+                    (textContent.includes('PRODUCT REPORT') || 
+                     textContent.includes('Name:') || 
+                     textContent.includes('ID:') ||
+                     textContent.includes('error') ||
+                     textContent.includes('Error') ||
+                     textContent.includes('<!DOCTYPE') ||
+                     blob.type.includes('text') ||
+                     blob.type.includes('json') ||
+                     blob.type.includes('html'));
+            } catch {
+                // If we can't read as text, it's likely binary
+                isTextContent = false;
+            }
+            
+            if (isTextContent) {
+                console.log('Detected text content, downloading as text file');
+                
+                // Create a proper text file download
+                const textBlob = new Blob([textContent], { type: 'text/plain; charset=utf-8' });
+                const url = window.URL.createObjectURL(textBlob);
+                const link = document.createElement("a");
+                link.href = url;
+                
+                // Use .txt extension for text content regardless of requested format
+                const fileExtension = format === 'pdf' ? 'txt' : 
+                                    format === 'excel' ? 'csv' : 
+                                    format === 'csv' ? 'csv' : 'txt';
+                
+                link.download = `product-${product.name.replace(/[^a-zA-Z0-9]/g, '_')}.${fileExtension}`;
+                
+                // Force download
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+                
+                const formatName = format === 'pdf' ? 'report (as text file)' : format.toUpperCase();
+                addConsoleEntry(`Product ${formatName} downloaded successfully for: ${product.name}`, "system");
+                showSnackbar(`Product ${formatName} downloaded successfully`, "success");
+                return;
+            }
+            
+            // Handle binary files normally
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            
+            // Set appropriate file extension for binary files
+            const extensions: Record<string, string> = {
+                pdf: 'pdf',
+                excel: 'xlsx',
+                csv: 'csv',
+                json: 'json'
+            };
+            
+            const extension = extensions[format] || format;
+            link.download = `product-${product.name.replace(/[^a-zA-Z0-9]/g, '_')}.${extension}`;
+            
+            // Force download
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            addConsoleEntry(`${format.toUpperCase()} downloaded successfully for product: ${product.name}`, "system");
+            showSnackbar(`${format.toUpperCase()} downloaded successfully`, "success");
         } catch (error) {
+            console.error(`Failed to download ${format}:`, error);
             addConsoleEntry(`Failed to download ${format}: ${error}`, "error");
+            showSnackbar(`Failed to download ${format.toUpperCase()}. Please try again.`, "error");
         }
     };
 
     const handleDownloadAllProducts = async (format: string) => {
         try {
             addConsoleEntry(`Generating bulk ${format.toUpperCase()} for all products`, "system");
+            showSnackbar(`Generating bulk ${format.toUpperCase()}...`, "info");
             
             // Use current filters for bulk download
             const currentFilters = {
@@ -215,10 +340,100 @@ const Products: React.FC = () => {
                 stockStatus: lowStockOnlyFilter ? 'low' as const : undefined,
             };
             
-            // Use the architecture's bulk download method directly
-            productManagement.downloadAllProducts({ format, filters: currentFilters });
+            // Use the download hook that properly handles blob response
+            const blob = await downloadAllProductsMutation.mutateAsync({ format, filters: currentFilters });
+            
+            // Validate blob response
+            if (!blob || blob.size === 0) {
+                throw new Error('Received empty or invalid file from server');
+            }
+            
+            // Always check if content is text-based (regardless of MIME type)
+            let isTextContent = false;
+            let textContent = '';
+            
+            try {
+                // Try to read as text to check if it's actually text content
+                const clonedBlob = blob.slice();
+                textContent = await clonedBlob.text();
+                
+                // Check if it looks like text content (not binary)
+                isTextContent = textContent.length > 0 && 
+                    (textContent.includes('PRODUCTS EXPORT REPORT') || 
+                     textContent.includes('PRODUCT LIST') ||
+                     textContent.includes('Name:') || 
+                     textContent.includes('ID:') ||
+                     textContent.includes('error') ||
+                     textContent.includes('Error') ||
+                     textContent.includes('<!DOCTYPE') ||
+                     blob.type.includes('text') ||
+                     blob.type.includes('json') ||
+                     blob.type.includes('html'));
+            } catch {
+                // If we can't read as text, it's likely binary
+                isTextContent = false;
+            }
+            
+            if (isTextContent) {
+                console.log('Detected text content for bulk download, downloading as text file');
+                
+                // Create a proper text file download
+                const textBlob = new Blob([textContent], { type: 'text/plain; charset=utf-8' });
+                const url = window.URL.createObjectURL(textBlob);
+                const link = document.createElement("a");
+                link.href = url;
+                
+                // Use .txt extension for text content regardless of requested format
+                const fileExtension = format === 'pdf' ? 'txt' : 
+                                    format === 'excel' ? 'csv' : 
+                                    format === 'csv' ? 'csv' : 'txt';
+                
+                const date = new Date().toISOString().split('T')[0];
+                link.download = `All_Products_${date}.${fileExtension}`;
+                
+                // Force download
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+                
+                const formatName = format === 'pdf' ? 'report (as text file)' : format.toUpperCase();
+                addConsoleEntry(`Bulk products ${formatName} downloaded successfully`, "system");
+                showSnackbar(`Bulk products ${formatName} downloaded successfully`, "success");
+                return;
+            }
+            
+            // Handle binary files normally
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            
+            // Set appropriate file extension for binary files
+            const extensions: Record<string, string> = {
+                pdf: 'pdf',
+                excel: 'xlsx',
+                csv: 'csv',
+                json: 'json'
+            };
+            
+            const extension = extensions[format] || format;
+            const date = new Date().toISOString().split('T')[0];
+            link.download = `All_Products_${date}.${extension}`;
+            
+            // Force download
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            addConsoleEntry(`Bulk ${format.toUpperCase()} downloaded successfully`, "system");
+            showSnackbar(`Bulk ${format.toUpperCase()} downloaded successfully`, "success");
         } catch (error) {
+            console.error(`Failed to download bulk ${format}:`, error);
             addConsoleEntry(`Failed to download bulk ${format}: ${error}`, "error");
+            showSnackbar(`Failed to download bulk ${format.toUpperCase()}. Please try again.`, "error");
         }
     };
 
@@ -347,85 +562,53 @@ const Products: React.FC = () => {
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div className="relative bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                        <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
-                                <Package className="h-7 w-7" />
-                            </div>
-                            <div className="flex-1">
-                                <div className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                                    Total Products
-                                </div>
-                                <div className="text-2xl font-bold text-gray-900">
-                                    {totalProducts}
-                                </div>
-                                <small className="text-gray-400 text-xs">
-                                    Enhanced formatting
-                                </small>
-                            </div>
-                        </div>
-                        <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-blue-500 to-blue-600 rounded-r-2xl"></div>
-                    </div>
+                    <AnimatedStatsCard
+                        title="Total Products"
+                        value={totalProducts}
+                        formattedValue={dashboardStats?.formattedTotalValue ? totalProducts.toLocaleString() : undefined}
+                        icon={Package}
+                        iconColor="from-blue-500 to-blue-600"
+                        borderColor="from-blue-500 to-blue-600"
+                        subtitle="Active products in inventory"
+                        isLoading={isLoadingStats}
+                        error={!!statsError}
+                    />
 
-                    <div className="relative bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                        <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
-                                <DollarSign className="h-7 w-7" />
-                            </div>
-                            <div className="flex-1">
-                                <div className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                                    Total Value
-                                </div>
-                                <div className="text-2xl font-bold text-gray-900">
-                                    {formatCurrencyCompact(totalValue)}
-                                </div>
-                                <small className="text-gray-400 text-xs">
-                                    South African Rand (ZAR)
-                                </small>
-                            </div>
-                        </div>
-                        <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-green-500 to-green-600 rounded-r-2xl"></div>
-                    </div>
+                    <AnimatedStatsCard
+                        title="Total Value"
+                        value={totalValue}
+                        formattedValue={dashboardStats?.formattedTotalValue || formatCurrencyCompact(totalValue)}
+                        icon={DollarSign}
+                        iconColor="from-green-500 to-green-600"
+                        borderColor="from-green-500 to-green-600"
+                        subtitle="South African Rand (ZAR)"
+                        isLoading={isLoadingStats}
+                        error={!!statsError}
+                    />
 
-                    <div className="relative bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                        <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
-                                <AlertTriangle className="h-7 w-7" />
-                            </div>
-                            <div className="flex-1">
-                                <div className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                                    Low Stock
-                                </div>
-                                <div className="text-2xl font-bold text-gray-900">
-                                    {lowStockCount}
-                                </div>
-                                <small className="text-gray-400 text-xs">
-                                    Count & percentage
-                                </small>
-                            </div>
-                        </div>
-                        <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-yellow-500 to-yellow-600 rounded-r-2xl"></div>
-                    </div>
+                    <AnimatedStatsCard
+                        title="Low Stock"
+                        value={lowStockCount}
+                        formattedValue={dashboardStats?.lowStockPercentage ? `${lowStockCount} (${dashboardStats.lowStockPercentage})` : undefined}
+                        icon={AlertTriangle}
+                        iconColor="from-yellow-500 to-yellow-600"
+                        borderColor="from-yellow-500 to-yellow-600"
+                        subtitle="Products requiring attention"
+                        isLoading={isLoadingStats}
+                        error={!!statsError}
+                    />
 
-                    <div className="relative bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                        <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
-                                <XCircle className="h-7 w-7" />
-                            </div>
-                            <div className="flex-1">
-                                <div className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                                    Out of Stock
-                                </div>
-                                <div className="text-2xl font-bold text-gray-900">
-                                    {outOfStockCount}
-                                </div>
-                                <small className="text-gray-400 text-xs">
-                                    Count & percentage
-                                </small>
-                            </div>
-                        </div>
-                        <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-red-500 to-red-600 rounded-r-2xl"></div>
-                    </div>
+                    <AnimatedStatsCard
+                        title="Out of Stock"
+                        value={outOfStockCount}
+                        formattedValue={dashboardStats?.outOfStockPercentage ? `${outOfStockCount} (${dashboardStats.outOfStockPercentage})` : undefined}
+                        icon={XCircle}
+                        iconColor="from-red-500 to-red-600"
+                        borderColor="from-red-500 to-red-600"
+                        subtitle="Products needing restock"
+                        isLoading={isLoadingStats}
+                        error={!!statsError}
+                    />
                 </div>
 
                 {/* Search and Filters */}
@@ -803,15 +986,15 @@ const Products: React.FC = () => {
                                     <button
                                         className="flex items-center gap-2 px-3 py-2 text-xs bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(147,51,234,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(147,51,234,0.4)] border-0"
                                         title="Download All Products"
-                                        disabled={productManagement.isDownloadingAllProducts}
+                                        disabled={downloadAllProductsMutation.isPending}
                                     >
-                                        {productManagement.isDownloadingAllProducts ? (
+                                        {downloadAllProductsMutation.isPending ? (
                                             <Loader2 className="h-3 w-3 animate-spin" />
                                         ) : (
                                             <Download className="h-3 w-3" />
                                         )}
                                         <span>
-                                            {productManagement.isDownloadingAllProducts ? "Generating..." : "Download All"}
+                                            {downloadAllProductsMutation.isPending ? "Generating..." : "Download All"}
                                         </span>
                                     </button>
                                     <div className="absolute left-0 bottom-full mb-1 bg-white border border-gray-200 rounded-lg shadow-xl p-2 min-w-[120px] z-[80] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
@@ -930,6 +1113,14 @@ const Products: React.FC = () => {
                     }}
                 />
             )}
+
+            {/* Snackbar */}
+            <Snackbar
+                isOpen={snackbar.isOpen}
+                message={snackbar.message}
+                type={snackbar.type}
+                onClose={hideSnackbar}
+            />
         </div>
     );
 };

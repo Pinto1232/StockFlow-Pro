@@ -4,7 +4,7 @@
 import { ProductEntity } from '../entities/Product';
 
 export interface StockAlert {
-  productId: number;
+  productId: string;
   productName: string;
   currentStock: number;
   threshold: number;

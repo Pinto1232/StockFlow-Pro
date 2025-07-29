@@ -38,7 +38,7 @@ const Users: React.FC = () => {
     const [statusFilter, setStatusFilter] = useState<boolean | undefined>();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
-    const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
     const {
         // Data
@@ -69,13 +69,14 @@ const Users: React.FC = () => {
         deleteUserError,
     } = useUsers();
 
-    // Apply filters
+    // Apply filters with default page size of 5
     React.useEffect(() => {
         updateFilters({
             search: searchQuery || undefined,
             roleId: roleFilter,
             isActive: statusFilter,
             page: 1,
+            pageSize: 5, // Set default page size to 5
         });
     }, [searchQuery, roleFilter, statusFilter, updateFilters]);
 
@@ -91,7 +92,7 @@ const Users: React.FC = () => {
         setShowCreateModal(false);
     };
 
-    const handleUpdateUser = (userId: number, userData: UserUpdateData) => {
+    const handleUpdateUser = (userId: string, userData: UserUpdateData) => {
         updateUser({
             id: userId,
             ...userData,
@@ -100,14 +101,14 @@ const Users: React.FC = () => {
         setSelectedUserId(null);
     };
 
-    const handleDeleteUser = (userId: number) => {
+    const handleDeleteUser = (userId: string) => {
         if (window.confirm('Are you sure you want to delete this user?')) {
-            deleteUser(userId);
+            deleteUser(parseInt(userId));
         }
     };
 
     const handlePageChange = (page: number) => {
-        updateFilters({ page });
+        updateFilters({ page, pageSize: 5 });
     };
 
     const clearSearch = () => {
@@ -268,7 +269,7 @@ const Users: React.FC = () => {
                                     Admins
                                 </div>
                                 <div className="text-2xl font-bold text-gray-900">
-                                    {users.filter((u: UserEntity) => u.role?.name === 'Admin').length}
+                                    {users.filter((u: UserEntity) => u.roleInfo.name === 'Admin').length}
                                 </div>
                             </div>
                         </div>
@@ -303,17 +304,17 @@ const Users: React.FC = () => {
                             <select
                                 value={roleFilter || ''}
                                 onChange={(e) => setRoleFilter(e.target.value ? Number(e.target.value) : undefined)}
-                                className="px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-200"
+                                className="appearance-none bg-white px-4 py-3 pr-10 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-200 cursor-pointer min-w-[140px]"
                             >
                                 <option value="">All Roles</option>
-                                <option value="1">User</option>
-                                <option value="2">Manager</option>
-                                <option value="3">Admin</option>
+                                <option value="1">Admin</option>
+                                <option value="2">User</option>
+                                <option value="3">Manager</option>
                             </select>
                             <select
                                 value={statusFilter === undefined ? '' : statusFilter.toString()}
                                 onChange={(e) => setStatusFilter(e.target.value === '' ? undefined : e.target.value === 'true')}
-                                className="px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-200"
+                                className="appearance-none bg-white px-4 py-3 pr-10 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-200 cursor-pointer min-w-[140px]"
                             >
                                 <option value="">All Status</option>
                                 <option value="true">Active</option>
@@ -409,9 +410,9 @@ const Users: React.FC = () => {
                                                     </div>
                                                 </td>
                                                 <td className={`align-middle text-sm p-4 ${index !== users.length - 1 ? "border-b border-[#f1f5f9]" : ""}`}>
-                                                    <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium ${getRoleBadgeColor(user.role?.name || 'User')}`}>
+                                                    <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium ${getRoleBadgeColor(user.roleInfo.name)}`}>
                                                         <Shield className="h-3 w-3" />
-                                                        {user.role?.name || 'User'}
+                                                        {user.roleInfo.name}
                                                     </span>
                                                 </td>
                                                 <td className={`align-middle text-sm p-4 ${index !== users.length - 1 ? "border-b border-[#f1f5f9]" : ""}`}>
@@ -452,7 +453,7 @@ const Users: React.FC = () => {
                                                         
                                                         {user.isActive ? (
                                                             <button
-                                                                onClick={() => deactivateUser(user.id)}
+                                                                onClick={() => deactivateUser(parseInt(user.id))}
                                                                 className="inline-flex items-center gap-1 px-3 py-2 text-xs bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 font-medium"
                                                                 disabled={currentUser?.id === user.id}
                                                             >
@@ -461,7 +462,7 @@ const Users: React.FC = () => {
                                                             </button>
                                                         ) : (
                                                             <button
-                                                                onClick={() => activateUser(user.id)}
+                                                                onClick={() => activateUser(parseInt(user.id))}
                                                                 className="inline-flex items-center gap-1 px-3 py-2 text-xs bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-medium"
                                                             >
                                                                 <UserCheck className="h-3 w-3" />
@@ -489,30 +490,126 @@ const Users: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Footer with pagination */}
+                    {/* Footer with pagination - Enhanced to match Product Management style */}
                     <div className="bg-[#f8fafc] border-t border-[#e2e8f0] px-6 py-4 flex justify-between items-center">
-                        <span className="text-sm text-gray-600 font-medium flex items-center gap-2">
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                            {totalUsers} user{totalUsers !== 1 ? "s" : ""}
-                        </span>
-                        {totalPages > 1 && (
-                            <nav aria-label="User pagination">
-                                <ul className="flex gap-1 justify-end mb-0 text-sm">
-                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                        <li key={page}>
-                                            <button
-                                                onClick={() => handlePageChange(page)}
-                                                className={`px-3 py-1 rounded transition-colors ${
-                                                    currentPage === page
-                                                        ? "bg-blue-500 text-white"
-                                                        : "bg-white text-gray-700 hover:bg-gray-100"
-                                                }`}
-                                            >
-                                                {page}
-                                            </button>
-                                        </li>
-                                    ))}
+                        <div className="flex items-center gap-4">
+                            <span className="text-sm text-gray-600 font-medium flex items-center gap-2">
+                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                {totalUsers} user{totalUsers !== 1 ? "s" : ""} total
+                            </span>
+                            <span className="text-xs text-gray-500">
+                                Page {currentPage} of {totalPages}
+                            </span>
+                        </div>
+                        {totalUsers > 5 && (
+                            <nav aria-label="User pagination" className="flex items-center gap-2">
+                                <button
+                                    onClick={() => handlePageChange(1)}
+                                    disabled={currentPage === 1}
+                                    className="px-2 py-1 text-xs bg-white text-gray-700 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    title="First page"
+                                >
+                                    ««
+                                </button>
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className="px-2 py-1 text-xs bg-white text-gray-700 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    title="Previous page"
+                                >
+                                    ‹
+                                </button>
+                                <ul className="flex gap-1 mb-0 text-sm">
+                                    {(() => {
+                                        const pages = [];
+                                        const maxVisiblePages = 5;
+                                        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+                                        const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+                                        
+                                        // Adjust start page if we're near the end
+                                        if (endPage - startPage + 1 < maxVisiblePages) {
+                                            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                                        }
+                                        
+                                        // Add first page and ellipsis if needed
+                                        if (startPage > 1) {
+                                            pages.push(
+                                                <li key={1}>
+                                                    <button
+                                                        onClick={() => handlePageChange(1)}
+                                                        className="px-3 py-1 rounded transition-colors bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                                                    >
+                                                        1
+                                                    </button>
+                                                </li>
+                                            );
+                                            if (startPage > 2) {
+                                                pages.push(
+                                                    <li key="ellipsis1" className="px-2 py-1 text-gray-400">
+                                                        ...
+                                                    </li>
+                                                );
+                                            }
+                                        }
+                                        
+                                        // Add visible page numbers
+                                        for (let i = startPage; i <= endPage; i++) {
+                                            pages.push(
+                                                <li key={i}>
+                                                    <button
+                                                        onClick={() => handlePageChange(i)}
+                                                        className={`px-3 py-1 rounded transition-colors border ${
+                                                            currentPage === i
+                                                                ? "bg-blue-500 text-white border-blue-500 shadow-sm"
+                                                                : "bg-white text-gray-700 hover:bg-gray-100 border-gray-300"
+                                                        }`}
+                                                    >
+                                                        {i}
+                                                    </button>
+                                                </li>
+                                            );
+                                        }
+                                        
+                                        // Add ellipsis and last page if needed
+                                        if (endPage < totalPages) {
+                                            if (endPage < totalPages - 1) {
+                                                pages.push(
+                                                    <li key="ellipsis2" className="px-2 py-1 text-gray-400">
+                                                        ...
+                                                    </li>
+                                                );
+                                            }
+                                            pages.push(
+                                                <li key={totalPages}>
+                                                    <button
+                                                        onClick={() => handlePageChange(totalPages)}
+                                                        className="px-3 py-1 rounded transition-colors bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                                                    >
+                                                        {totalPages}
+                                                    </button>
+                                                </li>
+                                            );
+                                        }
+                                        
+                                        return pages;
+                                    })()}
                                 </ul>
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className="px-2 py-1 text-xs bg-white text-gray-700 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    title="Next page"
+                                >
+                                    ›
+                                </button>
+                                <button
+                                    onClick={() => handlePageChange(totalPages)}
+                                    disabled={currentPage === totalPages}
+                                    className="px-2 py-1 text-xs bg-white text-gray-700 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    title="Last page"
+                                >
+                                    »»
+                                </button>
                             </nav>
                         )}
                     </div>
@@ -671,7 +768,7 @@ const CreateUserModal: React.FC<{
 
 // Edit User Modal Component (simplified for brevity)
 const EditUserModal: React.FC<{
-    userId: number;
+    userId: string;
     onClose: () => void;
     onSubmit: (userData: UserUpdateData) => void;
     isLoading: boolean;

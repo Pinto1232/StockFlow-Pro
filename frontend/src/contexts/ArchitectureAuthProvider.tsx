@@ -48,7 +48,7 @@ export const ArchitectureAuthProvider: React.FC<ArchitectureAuthProviderProps> =
                 isActive: currentUser.isActive,
                 createdAt: currentUser.createdAt.toISOString(),
                 updatedAt: currentUser.lastLoginAt?.toISOString(),
-                role: currentUser.role.id as unknown as UserRole, // Map role ID to legacy role
+                role: currentUser.role, // Role is already a UserRole enum value
             };
             setUser(legacyUser);
         } else {

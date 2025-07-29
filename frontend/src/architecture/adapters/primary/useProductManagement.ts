@@ -78,6 +78,19 @@ export const useProductManagement = ({ productService }: UseProductManagementPro
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
 
+  // Query: Dashboard stats
+  const {
+    data: dashboardStats,
+    isLoading: isLoadingDashboardStats,
+    error: dashboardStatsError,
+    refetch: refetchDashboardStats,
+  } = useQuery({
+    queryKey: ['dashboardStats'],
+    queryFn: () => productService.getDashboardStats(),
+    staleTime: 2 * 60 * 1000, // 2 minutes (stats should be relatively fresh)
+    refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes
+  });
+
   // Mutation: Create product
   const createProductMutation = useMutation({
     mutationFn: (request: CreateProductRequest) => productService.createProduct(request),
@@ -86,6 +99,7 @@ export const useProductManagement = ({ productService }: UseProductManagementPro
       queryClient.invalidateQueries({ queryKey: ['stockAlerts'] });
       queryClient.invalidateQueries({ queryKey: ['lowStockReport'] });
       queryClient.invalidateQueries({ queryKey: ['inventoryValueReport'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
     },
   });
 
@@ -95,6 +109,7 @@ export const useProductManagement = ({ productService }: UseProductManagementPro
     onSuccess: (updatedProduct) => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['stockAlerts'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
       queryClient.setQueryData(['product', updatedProduct.id], updatedProduct);
     },
   });
@@ -107,6 +122,7 @@ export const useProductManagement = ({ productService }: UseProductManagementPro
       queryClient.invalidateQueries({ queryKey: ['stockAlerts'] });
       queryClient.invalidateQueries({ queryKey: ['lowStockReport'] });
       queryClient.invalidateQueries({ queryKey: ['inventoryValueReport'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
     },
   });
 
@@ -118,6 +134,7 @@ export const useProductManagement = ({ productService }: UseProductManagementPro
       queryClient.invalidateQueries({ queryKey: ['stockAlerts'] });
       queryClient.invalidateQueries({ queryKey: ['lowStockReport'] });
       queryClient.invalidateQueries({ queryKey: ['inventoryValueReport'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
       queryClient.setQueryData(['product', updatedProduct.id], updatedProduct);
     },
   });
@@ -129,6 +146,7 @@ export const useProductManagement = ({ productService }: UseProductManagementPro
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['inventoryValueReport'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
     },
   });
 
@@ -141,6 +159,7 @@ export const useProductManagement = ({ productService }: UseProductManagementPro
       queryClient.invalidateQueries({ queryKey: ['stockAlerts'] });
       queryClient.invalidateQueries({ queryKey: ['lowStockReport'] });
       queryClient.invalidateQueries({ queryKey: ['inventoryValueReport'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
     },
   });
 
@@ -218,6 +237,7 @@ export const useProductManagement = ({ productService }: UseProductManagementPro
     stockAlerts: stockAlerts || [],
     lowStockProducts: lowStockProducts || [],
     inventoryValueReport,
+    dashboardStats,
     totalProducts,
     currentPage,
     totalPages,
@@ -232,10 +252,12 @@ export const useProductManagement = ({ productService }: UseProductManagementPro
     isLoadingStockAlerts,
     isLoadingLowStock,
     isLoadingInventoryValue,
+    isLoadingDashboardStats,
     error,
     stockAlertsError,
     lowStockError,
     inventoryValueError,
+    dashboardStatsError,
 
     // Alert counts
     criticalAlerts,
@@ -282,6 +304,7 @@ export const useProductManagement = ({ productService }: UseProductManagementPro
     getReorderSuggestions,
     refetchProducts,
     refetchStockAlerts,
+    refetchDashboardStats,
   };
 };
 

@@ -173,7 +173,7 @@ public class RoleManagementController : ControllerBase
     /// Gets available permissions that can be assigned to roles.
     /// </summary>
     [HttpGet("permissions")]
-    [Authorize(Roles = "Admin")]
+    [Authorize] // Allow any authenticated user to view permissions for role creation
     public async Task<ActionResult<IEnumerable<object>>> GetAvailablePermissions()
     {
         try

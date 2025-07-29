@@ -86,6 +86,41 @@ export interface StockAdjustmentApiResponse {
   performedAt: string;
 }
 
+export interface DashboardStatsApiResponse {
+  totalProducts: number;
+  totalValue: number;
+  lowStockCount: number;
+  outOfStockCount: number;
+  inStockCount: number;
+  totalProductsFormatted: string;
+  totalValueFormatted: string;
+  totalValueShort: string;
+  lowStockPercentage: string;
+  outOfStockPercentage: string;
+  inStockPercentage: string;
+  lastUpdated: string;
+  lastUpdatedFull: string;
+  averageProductValue: string;
+  healthScore: number;
+  statusSummary: string;
+}
+
+export interface DashboardStatsResponse {
+  totalProducts: number;
+  totalValue: number;
+  lowStockCount: number;
+  outOfStockCount: number;
+  inStockCount: number;
+  formattedTotalValue: string;
+  formattedTotalValueShort: string;
+  lowStockPercentage: string;
+  outOfStockPercentage: string;
+  inStockPercentage: string;
+  healthScore: number;
+  statusSummary: string;
+  lastUpdated: string;
+}
+
 // Generic error response
 export interface ApiErrorResponse {
   error: string;

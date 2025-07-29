@@ -27,16 +27,49 @@ export class UserManagementService implements UserManagementPort {
     try {
       const response = await this.apiClient.get<UserApiResponse[]>('/users', filters);
       
-      // Since the backend returns a direct array, we need to create a mock pagination response
-      const users = Array.isArray(response) ? response : [];
+      // Since the backend returns a direct array, we need to implement pagination on the frontend
+      const allUsers = Array.isArray(response) ? response : [];
+      
+      // Apply search filter if provided
+      let filteredUsers = allUsers;
+      if (filters?.search) {
+        const searchTerm = filters.search.toLowerCase();
+        filteredUsers = allUsers.filter(user => 
+          user.firstName?.toLowerCase().includes(searchTerm) ||
+          user.lastName?.toLowerCase().includes(searchTerm) ||
+          user.username?.toLowerCase().includes(searchTerm) ||
+          user.email?.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      // Apply role filter if provided
+      if (filters?.roleId) {
+        filteredUsers = filteredUsers.filter(user => user.role === filters.roleId);
+      }
+
+      // Apply status filter if provided
+      if (filters?.isActive !== undefined) {
+        filteredUsers = filteredUsers.filter(user => user.isActive === filters.isActive);
+      }
+
+      // Pagination parameters
+      const page = filters?.page || 1;
+      const pageSize = filters?.pageSize || 5; // Default to 5 users per page
+      const totalCount = filteredUsers.length;
+      const totalPages = Math.ceil(totalCount / pageSize);
+      
+      // Calculate pagination
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
       
       return {
-        users: users.map((user: UserApiResponse) => UserEntity.fromApiResponse(user)),
-        totalCount: users.length,
-        currentPage: 1,
-        totalPages: 1,
-        hasNextPage: false,
-        hasPreviousPage: false,
+        users: paginatedUsers.map((user: UserApiResponse) => UserEntity.fromApiResponse(user)),
+        totalCount,
+        currentPage: page,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
       };
     } catch (error) {
       console.error('Failed to fetch users:', error);

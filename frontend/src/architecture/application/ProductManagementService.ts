@@ -16,7 +16,9 @@ import { StoragePort } from '../ports/secondary/StoragePort';
 import { 
   PaginatedApiResponse, 
   ProductApiResponse, 
-  InventoryValueApiResponse 
+  InventoryValueApiResponse,
+  DashboardStatsApiResponse,
+  DashboardStatsResponse
 } from '../types/ApiTypes';
 
 export class ProductManagementService implements ProductManagementPort {
@@ -232,6 +234,34 @@ export class ProductManagementService implements ProductManagementPort {
     } catch (error) {
       console.error('Failed to fetch inventory value report:', error);
       throw new Error('Failed to fetch inventory value report');
+    }
+  }
+
+  async getDashboardStats(): Promise<DashboardStatsResponse> {
+    try {
+      const response = await this.apiClient.get<{ data: DashboardStatsApiResponse }>('/products/dashboard-stats');
+      
+      // Extract data from ApiResponse wrapper
+      const statsData = response.data || (response as unknown as DashboardStatsApiResponse);
+      
+      return {
+        totalProducts: statsData.totalProducts,
+        totalValue: statsData.totalValue,
+        lowStockCount: statsData.lowStockCount,
+        outOfStockCount: statsData.outOfStockCount,
+        inStockCount: statsData.inStockCount,
+        formattedTotalValue: statsData.totalValueFormatted,
+        formattedTotalValueShort: statsData.totalValueShort,
+        lowStockPercentage: statsData.lowStockPercentage,
+        outOfStockPercentage: statsData.outOfStockPercentage,
+        inStockPercentage: statsData.inStockPercentage,
+        healthScore: statsData.healthScore,
+        statusSummary: statsData.statusSummary,
+        lastUpdated: statsData.lastUpdated,
+      };
+    } catch (error) {
+      console.error('Failed to fetch dashboard stats:', error);
+      throw new Error('Failed to fetch dashboard stats');
     }
   }
 

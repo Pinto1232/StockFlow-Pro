@@ -69,8 +69,8 @@ export const ArchitectureTest: React.FC = () => {
           <div className="bg-gray-50 p-4 rounded-lg">
             <h4 className="font-medium text-gray-900 mb-2">User Role</h4>
             <p className="text-sm text-gray-700">
-              {currentUser?.role ? 
-                (typeof currentUser.role === 'object' ? currentUser.role.name : String(currentUser.role)) 
+              {currentUser?.role !== undefined ? 
+                currentUser.roleInfo.name 
                 : 'Unknown'}
             </p>
           </div>
