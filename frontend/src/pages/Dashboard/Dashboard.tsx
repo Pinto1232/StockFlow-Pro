@@ -22,6 +22,7 @@ import { useCurrentUser } from "../../hooks/useAuth";
 import { useRealTimeUpdates } from "../../hooks/useRealTimeUpdates";
 import { formatCurrency } from "../../utils/currency";
 import Snackbar from "../../components/ui/Snackbar";
+import { createNavigationHandlers } from "./dashboardLinks";
 
 const Dashboard: React.FC = () => {
     const navigate = useNavigate();
@@ -53,6 +54,9 @@ const Dashboard: React.FC = () => {
 
     // Enable real-time updates for SignalR connection and sound notifications
     useRealTimeUpdates();
+
+    // Create navigation handlers using the imported function
+    const navigationHandlers = createNavigationHandlers(navigate);
 
     const recentActivity = [
         { action: "New product added", time: "2 hours ago" },
@@ -235,7 +239,7 @@ const Dashboard: React.FC = () => {
                             </button>
                             <button
                                 className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium shadow-lg"
-                                onClick={openSettings}
+                                onClick={navigationHandlers.navigateToSettings}
                                 title="Dashboard Settings"
                             >
                                 <Settings className="w-4 h-4" />
@@ -740,7 +744,6 @@ interface RoleOption {
     keyPermissions: string[];
 }
 
-
 // Add Role Modal Component
 interface AddRoleModalProps {
     onClose: () => void;
@@ -1054,21 +1057,13 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onSuccess, onError
                 }}
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Modal Header - Matching Razor View Style */}
+                {/* Modal Header */}
                 <div 
                     className="relative p-8 pb-6 text-white overflow-hidden"
                     style={{
                         background: 'linear-gradient(135deg, #5a5cdb 0%, #7f53ac 100%)',
                     }}
                 >
-                    {/* Background Pattern */}
-                    <div 
-                        className="absolute inset-0 opacity-30"
-                        style={{
-                            backgroundImage: `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><pattern id='grid' width='10' height='10' patternUnits='userSpaceOnUse'><path d='M 10 0 L 0 0 0 10' fill='none' stroke='rgba(255,255,255,0.1)' stroke-width='0.5'/></pattern></defs><rect width='100' height='100' fill='url(%23grid)'/></svg>")`
-                        }}
-                    />
-                    
                     <div className="flex items-center justify-between relative z-10">
                         <div className="flex items-center gap-3">
                             <div 
@@ -1093,15 +1088,12 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onSuccess, onError
                     </div>
                 </div>
 
-                {/* Modal Body - Matching Razor View Style */}
+                {/* Modal Body */}
                 <div className="p-10 max-h-[calc(90vh-200px)] overflow-y-auto">
                     <form onSubmit={handleSubmit} className="space-y-8">
                         {/* Role Name */}
                         <div>
                             <label className="flex items-center gap-2 text-base font-semibold text-gray-800 mb-3">
-                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                                </svg>
                                 Role Name <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -1117,12 +1109,8 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onSuccess, onError
                                 required
                                 disabled={isLoading}
                             />
-                            <div className="text-sm text-gray-500 mt-2 italic">Internal name for the role (e.g., "Supervisor")</div>
                             {validationErrors.name && (
-                                <div className="flex items-center gap-2 text-sm text-red-600 mt-2">
-                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                    </svg>
+                                <div className="text-sm text-red-600 mt-2">
                                     {validationErrors.name}
                                 </div>
                             )}
@@ -1131,10 +1119,6 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onSuccess, onError
                         {/* Display Name */}
                         <div>
                             <label className="flex items-center gap-2 text-base font-semibold text-gray-800 mb-3">
-                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
                                 Display Name
                             </label>
                             <input
@@ -1145,15 +1129,11 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onSuccess, onError
                                 placeholder="Enter display name"
                                 disabled={isLoading}
                             />
-                            <div className="text-sm text-gray-500 mt-2 italic">Name shown to users (defaults to role name if empty)</div>
                         </div>
 
                         {/* Description */}
                         <div>
                             <label className="flex items-center gap-2 text-base font-semibold text-gray-800 mb-3">
-                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
                                 Description
                             </label>
                             <textarea
@@ -1169,9 +1149,6 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onSuccess, onError
                         {/* Priority Level */}
                         <div>
                             <label className="flex items-center gap-2 text-base font-semibold text-gray-800 mb-3">
-                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                                </svg>
                                 Priority Level
                             </label>
                             <input
@@ -1188,23 +1165,16 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onSuccess, onError
                                 placeholder="0"
                                 disabled={isLoading}
                             />
-                            <div className="text-sm text-gray-500 mt-2 italic">Higher numbers = higher priority (0-100)</div>
                             {validationErrors.priority && (
-                                <div className="flex items-center gap-2 text-sm text-red-600 mt-2">
-                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                    </svg>
+                                <div className="text-sm text-red-600 mt-2">
                                     {validationErrors.priority}
                                 </div>
                             )}
                         </div>
 
-                        {/* Permissions - Matching Razor View Style */}
+                        {/* Permissions */}
                         <div>
                             <label className="flex items-center gap-2 text-base font-semibold text-gray-800 mb-4">
-                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m0 0a2 2 0 012 2 2 2 0 01-2 2m-2-4a2 2 0 00-2 2v1a2 2 0 00-2 2 2 2 0 002 2 2 2 0 002-2m0 0V9a2 2 0 012-2 2 2 0 012 2v1a2 2 0 01-2 2 2 2 0 01-2-2z" />
-                                </svg>
                                 Permissions
                             </label>
                             {isLoadingPermissions ? (
@@ -1215,75 +1185,39 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onSuccess, onError
                             ) : permissionsError ? (
                                 <div className="border-2 border-gray-200 rounded-xl p-4 bg-gray-50">
                                     <div className="text-center text-sm text-amber-600 bg-amber-50 p-4 rounded-xl border border-amber-200">
-                                        <div className="flex items-center justify-center gap-2 font-medium mb-2">
-                                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                            </svg>
-                                            Permissions Loaded with Fallback
-                                        </div>
+                                        <div className="font-medium mb-2">Permissions Loaded with Fallback</div>
                                         <div>{permissionsError}</div>
                                     </div>
                                 </div>
                             ) : permissionCategories.length === 0 ? (
                                 <div className="border-2 border-gray-200 rounded-xl p-4 bg-gray-50">
                                     <div className="text-center text-sm text-gray-500 p-4">
-                                        <svg className="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
                                         No permissions available to assign.
                                     </div>
                                 </div>
                             ) : (
-                                <div 
-                                    className="border-2 border-gray-200 rounded-xl p-4 max-h-80 overflow-y-auto"
-                                    style={{ background: '#f8f9fb' }}
-                                >
+                                <div className="border-2 border-gray-200 rounded-xl p-4 max-h-80 overflow-y-auto bg-gray-50">
                                     <div className="space-y-6">
                                         {permissionCategories.map((category) => (
                                             <div key={category.category} className="mb-6">
-                                                <h5 className="flex items-center gap-2 text-base font-semibold mb-3 pb-2 border-b border-blue-200"
-                                                    style={{ color: '#5a5cdb' }}>
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-                                                    </svg>
+                                                <h5 className="text-base font-semibold mb-3 pb-2 border-b border-blue-200 text-blue-600">
                                                     {category.category}
                                                 </h5>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                                     {category.permissions.map((permission) => (
                                                         <label
                                                             key={permission}
-                                                            className="flex items-center space-x-3 p-3 hover:bg-blue-50 rounded-lg cursor-pointer transition-all duration-200 relative"
+                                                            className="flex items-center space-x-3 p-3 hover:bg-blue-50 rounded-lg cursor-pointer transition-all duration-200"
                                                         >
-                                                            <div className="relative">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={roleFormData.permissions.includes(permission)}
-                                                                    onChange={() => handlePermissionToggle(permission)}
-                                                                    className="sr-only"
-                                                                    disabled={isLoading}
-                                                                />
-                                                                <div 
-                                                                    className={`w-5 h-5 border-2 rounded transition-all duration-300 flex items-center justify-center ${
-                                                                        roleFormData.permissions.includes(permission)
-                                                                            ? 'bg-blue-600 border-blue-600'
-                                                                            : 'bg-white border-gray-300 hover:border-blue-500'
-                                                                    }`}
-                                                                >
-                                                                    {roleFormData.permissions.includes(permission) && (
-                                                                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                                                        </svg>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex-1">
-                                                                <div className={`text-sm font-medium transition-colors ${
-                                                                    roleFormData.permissions.includes(permission) 
-                                                                        ? 'text-blue-700 font-semibold' 
-                                                                        : 'text-gray-900'
-                                                                }`}>
-                                                                    {permission.replace(/^[^.]+\./, '')}
-                                                                </div>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={roleFormData.permissions.includes(permission)}
+                                                                onChange={() => handlePermissionToggle(permission)}
+                                                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                                                disabled={isLoading}
+                                                            />
+                                                            <div className="text-sm font-medium text-gray-900">
+                                                                {permission.replace(/^[^.]+\./, '')}
                                                             </div>
                                                         </label>
                                                     ))}
@@ -1297,20 +1231,14 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onSuccess, onError
                     </form>
                 </div>
 
-                {/* Modal Footer - Matching Razor View Style */}
-                <div 
-                    className="p-6 border-t border-gray-200 flex justify-end space-x-4"
-                    style={{ background: '#f8f9fb' }}
-                >
+                {/* Modal Footer */}
+                <div className="p-6 border-t border-gray-200 flex justify-end space-x-4 bg-gray-50">
                     <button
                         type="button"
                         onClick={onClose}
                         className="flex items-center gap-2 px-6 py-3 text-gray-600 hover:text-gray-800 font-semibold transition-all duration-200 border-2 border-gray-200 rounded-xl hover:bg-gray-50"
                         disabled={isLoading}
                     >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
                         Cancel
                     </button>
                     <button
@@ -1329,9 +1257,6 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onSuccess, onError
                             </>
                         ) : (
                             <>
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
                                 Create Role
                             </>
                         )}
@@ -1339,7 +1264,6 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onSuccess, onError
                 </div>
             </div>
 
-            {/* Add the CSS animations inline */}
             <style>{`
                 @keyframes fadeIn {
                     from { opacity: 0; }
