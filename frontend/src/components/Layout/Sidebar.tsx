@@ -267,48 +267,56 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
                                 )}
 
                                 {/* Account Sub-links */}
-                                {!isCollapsed && isAccountExpanded && (
-                                    <div className="ml-4 mt-2 space-y-1">
-                                        {accountSubItems
-                                            .filter((item) =>
-                                                currentUser ? item.roles.some(role => role === currentUser.role) : false,
-                                            )
-                                            .map((subItem) => {
-                                                const SubIcon = subItem.icon;
-                                                return (
-                                                    <NavLink
-                                                        key={subItem.name}
-                                                        to={subItem.href}
-                                                        className={({ isActive }) =>
-                                                            `group flex items-center px-4 py-2 text-sm font-medium transition-all duration-300 relative overflow-hidden ${
-                                                                isActive
-                                                                    ? "bg-white/15 text-white font-semibold shadow-lg transform translate-x-1"
-                                                                    : "text-white/75 hover:bg-white/10 hover:text-white hover:transform hover:translate-x-1"
-                                                            }`
-                                                        }
-                                                    >
-                                                        {({ isActive }) => (
-                                                            <>
-                                                                <div
-                                                                    className={`w-8 h-8 rounded-lg flex items-center justify-center mr-3 transition-all duration-300 ${
-                                                                        isActive
-                                                                            ? "bg-white/20 shadow-md transform scale-110"
-                                                                            : "bg-white/10 group-hover:bg-white/20 group-hover:scale-105"
-                                                                    }`}
-                                                                >
-                                                                    <SubIcon className="h-4 w-4 flex-shrink-0" />
-                                                                </div>
-                                                                <span className="truncate text-xs">
-                                                                    {subItem.name}
-                                                                </span>
-                                                                {isActive && (
-                                                                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-white"></div>
-                                                                )}
-                                                            </>
-                                                        )}
-                                                    </NavLink>
-                                                );
-                                            })}
+                                {!isCollapsed && (
+                                    <div 
+                                        className={`ml-4 mt-1 space-y-1 overflow-hidden transition-all duration-300 ease-out ${
+                                            isAccountExpanded 
+                                                ? "max-h-64 opacity-100" 
+                                                : "max-h-0 opacity-0"
+                                        }`}
+                                    >
+                                        <div className={`transition-all duration-200 ${isAccountExpanded ? 'pt-1' : 'pt-0'}`}>
+                                            {accountSubItems
+                                                .filter((item) =>
+                                                    currentUser ? item.roles.some(role => role === currentUser.role) : false,
+                                                )
+                                                .map((subItem) => {
+                                                    const SubIcon = subItem.icon;
+                                                    return (
+                                                        <NavLink
+                                                            key={subItem.name}
+                                                            to={subItem.href}
+                                                            className={({ isActive }) =>
+                                                                `group flex items-center px-4 py-2 text-sm font-medium transition-all duration-200 relative overflow-hidden rounded-lg mb-1 ${
+                                                                    isActive
+                                                                        ? "bg-black/30 text-white font-semibold shadow-lg transform translate-x-1 border-l-2 border-white/50"
+                                                                        : "text-white/70 hover:bg-black/20 hover:text-white hover:transform hover:translate-x-1 bg-black/10"
+                                                                }`
+                                                            }
+                                                        >
+                                                            {({ isActive }) => (
+                                                                <>
+                                                                    <div
+                                                                        className={`w-8 h-8 rounded-lg flex items-center justify-center mr-3 transition-all duration-200 ${
+                                                                            isActive
+                                                                                ? "bg-white/25 shadow-md transform scale-110 border border-white/20"
+                                                                                : "bg-black/20 group-hover:bg-white/15 group-hover:scale-105"
+                                                                        }`}
+                                                                    >
+                                                                        <SubIcon className="h-4 w-4 flex-shrink-0" />
+                                                                    </div>
+                                                                    <span className="truncate text-xs font-medium">
+                                                                        {subItem.name}
+                                                                    </span>
+                                                                    {isActive && (
+                                                                        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-white rounded-l-full"></div>
+                                                                    )}
+                                                                </>
+                                                            )}
+                                                        </NavLink>
+                                                    );
+                                                })}
+                                        </div>
                                     </div>
                                 )}
                             </div>
