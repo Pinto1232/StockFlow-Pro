@@ -4,7 +4,6 @@ import {
     Home,
     FolderOpen,
     CheckSquare,
-    Users,
     DollarSign,
     CreditCard,
     FileText,
@@ -17,6 +16,8 @@ import {
     LogOut,
     ChevronDown,
     ChevronRight,
+    Target,
+    MessageSquare,
 } from "lucide-react";
 import { useLogout, useCurrentUser } from "../../hooks/useAuth";
 import { UserRole } from "../../types/index";
@@ -36,6 +37,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
     const { data: currentUser } = useCurrentUser();
     const logoutMutation = useLogout();
     const [isAccountExpanded, setIsAccountExpanded] = useState(false);
+    const [isProjectExpanded, setIsProjectExpanded] = useState(false);
 
     const handleLogout = () => {
         logoutMutation.mutate();
@@ -45,30 +47,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
         setIsAccountExpanded(!isAccountExpanded);
     };
 
+    const toggleProjectSubmenu = () => {
+        setIsProjectExpanded(!isProjectExpanded);
+    };
+
     const navigationItems: NavigationItem[] = [
         {
             name: "Overview",
             href: "/dashboard",
             icon: Home,
             roles: [UserRole.Admin, UserRole.Manager, UserRole.User],
-        },
-        {
-            name: "Projects",
-            href: "/projects",
-            icon: FolderOpen,
-            roles: [UserRole.Admin, UserRole.Manager, UserRole.User],
-        },
-        {
-            name: "Tasks",
-            href: "/tasks",
-            icon: CheckSquare,
-            roles: [UserRole.Admin, UserRole.Manager, UserRole.User],
-        },
-        {
-            name: "Team",
-            href: "/team",
-            icon: Users,
-            roles: [UserRole.Admin, UserRole.Manager],
         },
         {
             name: "Income",
@@ -92,6 +80,34 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
             name: "Leaves",
             href: "/leaves",
             icon: CalendarX,
+            roles: [UserRole.Admin, UserRole.Manager],
+        },
+    ];
+
+    // Project Management sub-navigation items
+    const projectSubItems = [
+        {
+            name: "Task Management",
+            href: "/project-management/task-management",
+            icon: CheckSquare,
+            roles: [UserRole.Admin, UserRole.Manager, UserRole.User],
+        },
+        {
+            name: "Reports",
+            href: "/project-management/reports",
+            icon: BarChart3,
+            roles: [UserRole.Admin, UserRole.Manager],
+        },
+        {
+            name: "Team Collaboration",
+            href: "/project-management/team-collaboration",
+            icon: MessageSquare,
+            roles: [UserRole.Admin, UserRole.Manager, UserRole.User],
+        },
+        {
+            name: "Milestones & Deadlines",
+            href: "/project-management/milestones-deadlines",
+            icon: Target,
             roles: [UserRole.Admin, UserRole.Manager],
         },
     ];
@@ -204,6 +220,121 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
                             </NavLink>
                         );
                     })}
+
+                    {/* Project Management Section */}
+                    {currentUser && (
+                        <div className="pt-6">
+                            <div className="px-4 py-2">
+                                <p className="text-xs font-semibold text-white/60 uppercase tracking-wider">
+                                    Project Management
+                                </p>
+                            </div>
+                            
+                            {/* Project Management Main Link */}
+                            {!isCollapsed ? (
+                                <button
+                                    type="button"
+                                    onClick={toggleProjectSubmenu}
+                                    className="group flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-white/85 hover:bg-white/10 hover:text-white transition-all duration-300 hover:transform hover:translate-x-1"
+                                >
+                                    <div className="flex items-center">
+                                        <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center mr-3 group-hover:bg-white/20 group-hover:scale-105 transition-all duration-300">
+                                            <FolderOpen className="h-5 w-5 flex-shrink-0" />
+                                        </div>
+                                        <span className="truncate">Project Management</span>
+                                    </div>
+                                    {isProjectExpanded ? (
+                                        <ChevronDown className="h-4 w-4 transition-transform duration-200" />
+                                    ) : (
+                                        <ChevronRight className="h-4 w-4 transition-transform duration-200" />
+                                    )}
+                                </button>
+                            ) : (
+                                <NavLink
+                                    to="/project-management"
+                                    className={({ isActive }) =>
+                                        `group flex items-center justify-center px-3 py-3 text-sm font-medium transition-all duration-300 relative overflow-hidden ${
+                                            isActive
+                                                ? "bg-white/15 text-white font-semibold shadow-lg transform translate-x-1"
+                                                : "text-white/85 hover:bg-white/10 hover:text-white hover:transform hover:translate-x-1"
+                                        }`
+                                    }
+                                    title="Project Management"
+                                >
+                                    {({ isActive }) => (
+                                        <>
+                                            <div
+                                                className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300 ${
+                                                    isActive
+                                                        ? "bg-white/20 shadow-md transform scale-110"
+                                                        : "bg-white/10 group-hover:bg-white/20 group-hover:scale-105"
+                                                }`}
+                                            >
+                                                <FolderOpen className="h-5 w-5 flex-shrink-0" />
+                                            </div>
+                                            {isActive && (
+                                                <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-white"></div>
+                                            )}
+                                        </>
+                                    )}
+                                </NavLink>
+                            )}
+
+                            {/* Project Management Sub-links */}
+                            {!isCollapsed && (
+                                <div 
+                                    className={`ml-4 mt-1 space-y-1 overflow-hidden transition-all duration-300 ease-out ${
+                                        isProjectExpanded 
+                                            ? "max-h-64 opacity-100" 
+                                            : "max-h-0 opacity-0"
+                                    }`}
+                                >
+                                    <div className={`transition-all duration-200 ${isProjectExpanded ? 'pt-1' : 'pt-0'}`}>
+                                        {projectSubItems
+                                            .filter((item) =>
+                                                currentUser ? item.roles.some(role => role === currentUser.role) : false,
+                                            )
+                                            .map((subItem) => {
+                                                const SubIcon = subItem.icon;
+                                                return (
+                                                    <NavLink
+                                                        key={subItem.name}
+                                                        to={subItem.href}
+                                                        className={({ isActive }) =>
+                                                            `group flex items-center px-4 py-2 text-sm font-medium transition-all duration-200 relative overflow-hidden rounded-lg mb-1 ${
+                                                                isActive
+                                                                    ? "bg-black/30 text-white font-semibold shadow-lg transform translate-x-1 border-l-2 border-white/50"
+                                                                    : "text-white/70 hover:bg-black/20 hover:text-white hover:transform hover:translate-x-1 bg-black/10"
+                                                            }`
+                                                        }
+                                                    >
+                                                        {({ isActive }) => (
+                                                            <>
+                                                                <div
+                                                                    className={`w-8 h-8 rounded-lg flex items-center justify-center mr-3 transition-all duration-200 ${
+                                                                        isActive
+                                                                            ? "bg-white/25 shadow-md transform scale-110 border border-white/20"
+                                                                            : "bg-black/20 group-hover:bg-white/15 group-hover:scale-105"
+                                                                    }`}
+                                                                >
+                                                                    <SubIcon className="h-4 w-4 flex-shrink-0" />
+                                                                </div>
+                                                                <span className="truncate text-xs font-medium">
+                                                                    {subItem.name}
+                                                                </span>
+                                                                {isActive && (
+                                                                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-white rounded-l-full"></div>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </NavLink>
+                                                );
+                                            })}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Account Section */}
                     {currentUser &&

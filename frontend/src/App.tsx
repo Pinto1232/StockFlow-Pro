@@ -39,6 +39,11 @@ import FinancialReports from "./pages/Account/FinancialReports.tsx";
 import Payroll from "./pages/Account/Payroll.tsx";
 import ExpenseTracking from "./pages/Account/ExpenseTracking.tsx";
 import InvoicingBilling from "./pages/Account/InvoicingBilling.tsx";
+import ProjectManagement from "./pages/ProjectManagement/ProjectManagement.tsx";
+import ProjectOverview from "./pages/ProjectManagement/ProjectOverview.tsx";
+import TaskManagement from "./pages/ProjectManagement/TaskManagement.tsx";
+import TeamCollaboration from "./pages/ProjectManagement/TeamCollaboration.tsx";
+import ProjectReports from "./pages/ProjectManagement/ProjectReports.tsx";
 
 function App() {
     return (
@@ -214,6 +219,13 @@ function App() {
                                         </PermissionRoute>
                                     }
                                 />
+
+                                {/* Project Management */}
+                                <Route path="project-management" element={<ProjectManagement />} />
+                                <Route path="project-management/task-management" element={<TaskManagement />} />
+                                <Route path="project-management/reports" element={<ProjectReports />} />
+                                <Route path="project-management/team-collaboration" element={<TeamCollaboration />} />
+                                <Route path="project-management/milestones-deadlines" element={<ProjectOverview />} />
 
                                 {/* Notifications */}
                                 <Route path="notifications" element={<NotificationsPage />} />

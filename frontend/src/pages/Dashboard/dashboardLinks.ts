@@ -57,6 +57,31 @@ export const createNavigationHandlers = (navigate: NavigateFunction) => ({
 
     navigateToInvoicingBilling: () => {
         navigate("/account/invoicing-billing");
+    },
+
+    // Project Management navigation handlers
+    navigateToProjects: () => {
+        navigate("/projects");
+    },
+
+    navigateToProjectOverview: () => {
+        navigate("/projects/overview");
+    },
+
+    navigateToTaskManagement: () => {
+        navigate("/projects/tasks");
+    },
+
+    navigateToTeamCollaboration: () => {
+        navigate("/projects/team");
+    },
+
+    navigateToProjectReports: () => {
+        navigate("/projects/reports");
+    },
+
+    navigateToProjectSettings: () => {
+        navigate("/projects/settings");
     }
 });
 
@@ -294,6 +319,60 @@ export const accountLinks = {
             href: '/account/invoicing-billing',
             action: 'navigateToInvoicingBilling',
             description: 'Manage invoices, billing, and payment processing'
+        }
+    ]
+};
+
+// Project Management navigation links configuration
+export const projectManagementLinks = {
+    main: {
+        id: 'projects',
+        label: 'Project Management',
+        icon: 'FolderKanban',
+        href: '/projects',
+        action: 'navigateToProjects',
+        description: 'Manage projects, tasks, and team collaboration'
+    },
+    subLinks: [
+        {
+            id: 'project-overview',
+            label: 'Project Overview',
+            icon: 'LayoutDashboard',
+            href: '/projects/overview',
+            action: 'navigateToProjectOverview',
+            description: 'View project status and key metrics'
+        },
+        {
+            id: 'task-management',
+            label: 'Task Management',
+            icon: 'CheckSquare',
+            href: '/projects/tasks',
+            action: 'navigateToTaskManagement',
+            description: 'Create, assign, and track project tasks'
+        },
+        {
+            id: 'team-collaboration',
+            label: 'Team Collaboration',
+            icon: 'Users',
+            href: '/projects/team',
+            action: 'navigateToTeamCollaboration',
+            description: 'Collaborate with team members and manage assignments'
+        },
+        {
+            id: 'project-reports',
+            label: 'Project Reports',
+            icon: 'BarChart3',
+            href: '/projects/reports',
+            action: 'navigateToProjectReports',
+            description: 'Generate and view project performance reports'
+        },
+        {
+            id: 'project-settings',
+            label: 'Project Settings',
+            icon: 'Settings',
+            href: '/projects/settings',
+            action: 'navigateToProjectSettings',
+            description: 'Configure project settings and preferences'
         }
     ]
 };
