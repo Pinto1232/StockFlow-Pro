@@ -44,6 +44,12 @@ import ProjectOverview from "./pages/ProjectManagement/ProjectOverview.tsx";
 import TaskManagement from "./pages/ProjectManagement/TaskManagement.tsx";
 import TeamCollaboration from "./pages/ProjectManagement/TeamCollaboration.tsx";
 import ProjectReports from "./pages/ProjectManagement/ProjectReports.tsx";
+import HR from "./pages/HR/HR.tsx";
+import EmployeeDirectory from "./pages/HR/EmployeeDirectory.tsx";
+import EmployeePerformance from "./pages/HR/EmployeePerformance.tsx";
+import Payslip from "./pages/HR/Payslip.tsx";
+import Attendance from "./pages/HR/Attendance.tsx";
+import Holidays from "./pages/HR/Holidays.tsx";
 
 function App() {
     return (
@@ -226,6 +232,14 @@ function App() {
                                 <Route path="project-management/reports" element={<ProjectReports />} />
                                 <Route path="project-management/team-collaboration" element={<TeamCollaboration />} />
                                 <Route path="project-management/milestones-deadlines" element={<ProjectOverview />} />
+
+                                {/* Human Resources */}
+                                <Route path="hr" element={<HR />} />
+                                <Route path="hr/employee-directory" element={<EmployeeDirectory />} />
+                                <Route path="hr/employee-performance" element={<EmployeePerformance />} />
+                                <Route path="hr/payslip" element={<Payslip />} />
+                                <Route path="hr/attendance" element={<Attendance />} />
+                                <Route path="hr/holidays" element={<Holidays />} />
 
                                 {/* Notifications */}
                                 <Route path="notifications" element={<NotificationsPage />} />
