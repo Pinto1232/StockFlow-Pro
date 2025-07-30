@@ -36,6 +36,27 @@ export const createNavigationHandlers = (navigate: NavigateFunction) => ({
 
     navigateToLowStockProducts: () => {
         navigate("/products?filter=lowStock");
+    },
+
+    // Account navigation handlers
+    navigateToAccount: () => {
+        navigate("/account");
+    },
+
+    navigateToFinancialReports: () => {
+        navigate("/account/financial-reports");
+    },
+
+    navigateToPayroll: () => {
+        navigate("/account/payroll");
+    },
+
+    navigateToExpenseTracking: () => {
+        navigate("/account/expense-tracking");
+    },
+
+    navigateToInvoicingBilling: () => {
+        navigate("/account/invoicing-billing");
     }
 });
 
@@ -230,6 +251,52 @@ export const headerActionButtons = [
         title: 'Dashboard Settings'
     }
 ];
+
+// Account navigation links configuration
+export const accountLinks = {
+    main: {
+        id: 'account',
+        label: 'Account',
+        icon: 'CreditCard',
+        href: '/account',
+        action: 'navigateToAccount',
+        description: 'Manage financial operations and accounting'
+    },
+    subLinks: [
+        {
+            id: 'financial-reports',
+            label: 'Financial Reports',
+            icon: 'BarChart3',
+            href: '/account/financial-reports',
+            action: 'navigateToFinancialReports',
+            description: 'View comprehensive financial reports and analytics'
+        },
+        {
+            id: 'payroll',
+            label: 'Payroll',
+            icon: 'Banknote',
+            href: '/account/payroll',
+            action: 'navigateToPayroll',
+            description: 'Manage employee payroll and compensation'
+        },
+        {
+            id: 'expense-tracking',
+            label: 'Expense Tracking',
+            icon: 'CreditCard',
+            href: '/account/expense-tracking',
+            action: 'navigateToExpenseTracking',
+            description: 'Track and categorize business expenses'
+        },
+        {
+            id: 'invoicing-billing',
+            label: 'Invoicing & Billing',
+            icon: 'FileText',
+            href: '/account/invoicing-billing',
+            action: 'navigateToInvoicingBilling',
+            description: 'Manage invoices, billing, and payment processing'
+        }
+    ]
+};
 
 // External links (if any)
 export const externalLinks = {

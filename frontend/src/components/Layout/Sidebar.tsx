@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
     Home,
@@ -15,6 +15,8 @@ import {
     BarChart3,
     HelpCircle,
     LogOut,
+    ChevronDown,
+    ChevronRight,
 } from "lucide-react";
 import { useLogout, useCurrentUser } from "../../hooks/useAuth";
 import { UserRole } from "../../types/index";
@@ -33,9 +35,14 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
     const { data: currentUser } = useCurrentUser();
     const logoutMutation = useLogout();
+    const [isAccountExpanded, setIsAccountExpanded] = useState(false);
 
     const handleLogout = () => {
         logoutMutation.mutate();
+    };
+
+    const toggleAccountSubmenu = () => {
+        setIsAccountExpanded(!isAccountExpanded);
     };
 
     const navigationItems: NavigationItem[] = [
@@ -70,18 +77,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
             roles: [UserRole.Admin, UserRole.Manager],
         },
         {
-            name: "Expenses",
-            href: "/expenses",
-            icon: CreditCard,
-            roles: [UserRole.Admin, UserRole.Manager],
-        },
-        {
-            name: "Invoices",
-            href: "/invoices",
-            icon: FileText,
-            roles: [UserRole.Admin, UserRole.Manager],
-        },
-        {
             name: "Employees",
             href: "/employees",
             icon: User,
@@ -94,12 +89,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
             roles: [UserRole.Admin, UserRole.Manager],
         },
         {
-            name: "Payroll",
-            href: "/payroll",
-            icon: Banknote,
-            roles: [UserRole.Admin, UserRole.Manager],
-        },
-        {
             name: "Leaves",
             href: "/leaves",
             icon: CalendarX,
@@ -107,8 +96,36 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
         },
     ];
 
+    // Account sub-navigation items
+    const accountSubItems = [
+        {
+            name: "Financial Reports",
+            href: "/account/financial-reports",
+            icon: BarChart3,
+            roles: [UserRole.Admin, UserRole.Manager],
+        },
+        {
+            name: "Payroll",
+            href: "/account/payroll",
+            icon: Banknote,
+            roles: [UserRole.Admin, UserRole.Manager],
+        },
+        {
+            name: "Expense Tracking",
+            href: "/account/expense-tracking",
+            icon: CreditCard,
+            roles: [UserRole.Admin, UserRole.Manager],
+        },
+        {
+            name: "Invoicing & Billing",
+            href: "/account/invoicing-billing",
+            icon: FileText,
+            roles: [UserRole.Admin, UserRole.Manager],
+        },
+    ];
+
     const filteredNavigation = navigationItems.filter((item) =>
-        currentUser ? item.roles.includes(currentUser.role) : false,
+        currentUser ? item.roles.some(role => role === currentUser.role) : false,
     );
 
     return (
@@ -187,6 +204,115 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
                             </NavLink>
                         );
                     })}
+
+                    {/* Account Section */}
+                    {currentUser &&
+                        (currentUser.role === UserRole.Admin ||
+                            currentUser.role === UserRole.Manager) && (
+                            <div className="pt-6">
+                                <div className="px-4 py-2">
+                                    <p className="text-xs font-semibold text-white/60 uppercase tracking-wider">
+                                        Financial Management
+                                    </p>
+                                </div>
+                                
+                                {/* Account Main Link */}
+                                {!isCollapsed ? (
+                                    <button
+                                        type="button"
+                                        onClick={toggleAccountSubmenu}
+                                        className="group flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-white/85 hover:bg-white/10 hover:text-white transition-all duration-300 hover:transform hover:translate-x-1"
+                                    >
+                                        <div className="flex items-center">
+                                            <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center mr-3 group-hover:bg-white/20 group-hover:scale-105 transition-all duration-300">
+                                                <CreditCard className="h-5 w-5 flex-shrink-0" />
+                                            </div>
+                                            <span className="truncate">Account</span>
+                                        </div>
+                                        {isAccountExpanded ? (
+                                            <ChevronDown className="h-4 w-4 transition-transform duration-200" />
+                                        ) : (
+                                            <ChevronRight className="h-4 w-4 transition-transform duration-200" />
+                                        )}
+                                    </button>
+                                ) : (
+                                    <NavLink
+                                        to="/account"
+                                        className={({ isActive }) =>
+                                            `group flex items-center justify-center px-3 py-3 text-sm font-medium transition-all duration-300 relative overflow-hidden ${
+                                                isActive
+                                                    ? "bg-white/15 text-white font-semibold shadow-lg transform translate-x-1"
+                                                    : "text-white/85 hover:bg-white/10 hover:text-white hover:transform hover:translate-x-1"
+                                            }`
+                                        }
+                                        title="Account"
+                                    >
+                                        {({ isActive }) => (
+                                            <>
+                                                <div
+                                                    className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300 ${
+                                                        isActive
+                                                            ? "bg-white/20 shadow-md transform scale-110"
+                                                            : "bg-white/10 group-hover:bg-white/20 group-hover:scale-105"
+                                                    }`}
+                                                >
+                                                    <CreditCard className="h-5 w-5 flex-shrink-0" />
+                                                </div>
+                                                {isActive && (
+                                                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-white"></div>
+                                                )}
+                                            </>
+                                        )}
+                                    </NavLink>
+                                )}
+
+                                {/* Account Sub-links */}
+                                {!isCollapsed && isAccountExpanded && (
+                                    <div className="ml-4 mt-2 space-y-1">
+                                        {accountSubItems
+                                            .filter((item) =>
+                                                currentUser ? item.roles.some(role => role === currentUser.role) : false,
+                                            )
+                                            .map((subItem) => {
+                                                const SubIcon = subItem.icon;
+                                                return (
+                                                    <NavLink
+                                                        key={subItem.name}
+                                                        to={subItem.href}
+                                                        className={({ isActive }) =>
+                                                            `group flex items-center px-4 py-2 text-sm font-medium transition-all duration-300 relative overflow-hidden ${
+                                                                isActive
+                                                                    ? "bg-white/15 text-white font-semibold shadow-lg transform translate-x-1"
+                                                                    : "text-white/75 hover:bg-white/10 hover:text-white hover:transform hover:translate-x-1"
+                                                            }`
+                                                        }
+                                                    >
+                                                        {({ isActive }) => (
+                                                            <>
+                                                                <div
+                                                                    className={`w-8 h-8 rounded-lg flex items-center justify-center mr-3 transition-all duration-300 ${
+                                                                        isActive
+                                                                            ? "bg-white/20 shadow-md transform scale-110"
+                                                                            : "bg-white/10 group-hover:bg-white/20 group-hover:scale-105"
+                                                                    }`}
+                                                                >
+                                                                    <SubIcon className="h-4 w-4 flex-shrink-0" />
+                                                                </div>
+                                                                <span className="truncate text-xs">
+                                                                    {subItem.name}
+                                                                </span>
+                                                                {isActive && (
+                                                                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-white"></div>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </NavLink>
+                                                );
+                                            })}
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
                     {/* Reports Submenu */}
                     {currentUser &&

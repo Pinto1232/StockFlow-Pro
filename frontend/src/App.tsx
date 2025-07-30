@@ -34,6 +34,11 @@ import UserSync from "./pages/Sync/UserSync.tsx";
 import NotificationsPage from "./pages/NotificationsPage.tsx";
 import ArchitectureTestPage from "./pages/Debug/ArchitectureTestPage.tsx";
 import NotFound from "./pages/NotFound/NotFound.tsx";
+import Account from "./pages/Account/Account.tsx";
+import FinancialReports from "./pages/Account/FinancialReports.tsx";
+import Payroll from "./pages/Account/Payroll.tsx";
+import ExpenseTracking from "./pages/Account/ExpenseTracking.tsx";
+import InvoicingBilling from "./pages/Account/InvoicingBilling.tsx";
 
 function App() {
     return (
@@ -140,6 +145,72 @@ function App() {
                                             }
                                         >
                                             <UserSync />
+                                        </PermissionRoute>
+                                    }
+                                />
+
+                                {/* Account */}
+                                <Route
+                                    path="account"
+                                    element={
+                                        <PermissionRoute
+                                            permission={
+                                                Permissions.System
+                                                    .ViewAdminPanel
+                                            }
+                                        >
+                                            <Account />
+                                        </PermissionRoute>
+                                    }
+                                />
+                                <Route
+                                    path="account/financial-reports"
+                                    element={
+                                        <PermissionRoute
+                                            permission={
+                                                Permissions.System
+                                                    .ViewAdminPanel
+                                            }
+                                        >
+                                            <FinancialReports />
+                                        </PermissionRoute>
+                                    }
+                                />
+                                <Route
+                                    path="account/payroll"
+                                    element={
+                                        <PermissionRoute
+                                            permission={
+                                                Permissions.System
+                                                    .ViewAdminPanel
+                                            }
+                                        >
+                                            <Payroll />
+                                        </PermissionRoute>
+                                    }
+                                />
+                                <Route
+                                    path="account/expense-tracking"
+                                    element={
+                                        <PermissionRoute
+                                            permission={
+                                                Permissions.System
+                                                    .ViewAdminPanel
+                                            }
+                                        >
+                                            <ExpenseTracking />
+                                        </PermissionRoute>
+                                    }
+                                />
+                                <Route
+                                    path="account/invoicing-billing"
+                                    element={
+                                        <PermissionRoute
+                                            permission={
+                                                Permissions.Invoice.ViewInvoices
+                                            }
+                                        >
+                                            <InvoicingBilling />
                                         </PermissionRoute>
                                     }
                                 />
