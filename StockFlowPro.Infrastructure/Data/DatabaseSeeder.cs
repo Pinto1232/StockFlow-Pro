@@ -50,9 +50,9 @@ public class DatabaseSeeder
                             "admin" => "admin",
                             _ => user.Role switch
                             {
-                                UserRole.Admin => "admin123",
-                                UserRole.Manager => "manager123",
-                                _ => "user123"
+                                UserRole.Admin => "SecureAdmin2024!",
+                                UserRole.Manager => "SecureManager2024!",
+                                _ => "SecureUser2024!"
                             }
                         };
                         
@@ -97,25 +97,25 @@ public class DatabaseSeeder
                     phoneNumber: "+1-555-0101",
                     dateOfBirth: new DateTime(1985, 5, 15, 0, 0, 0, DateTimeKind.Utc),
                     role: UserRole.Admin,
-                    passwordHash: HashPassword("admin123", "550e8400-e29b-41d4-a716-446655440001")
+                    passwordHash: HashPassword("SecureAdmin2024!", "550e8400-e29b-41d4-a716-446655440001")
                 ),
                 new User(
                     firstName: "Jane",
                     lastName: "Manager",
-                    email: "manager@stockflowpro.com",
+                    email: "manager@stockflow.com",
                     phoneNumber: "+1-555-0102",
                     dateOfBirth: new DateTime(1990, 8, 22, 0, 0, 0, DateTimeKind.Utc),
                     role: UserRole.Manager,
-                    passwordHash: HashPassword("manager123", "550e8400-e29b-41d4-a716-446655440002")
+                    passwordHash: HashPassword("SecureManager2024!", "550e8400-e29b-41d4-a716-446655440002")
                 ),
                 new User(
                     firstName: "Bob",
                     lastName: "User",
-                    email: "user@stockflowpro.com",
+                    email: "user@stockflow.com",
                     phoneNumber: "+1-555-0103",
                     dateOfBirth: new DateTime(1992, 12, 10, 0, 0, 0, DateTimeKind.Utc),
                     role: UserRole.User,
-                    passwordHash: HashPassword("user123", "550e8400-e29b-41d4-a716-446655440003")
+                    passwordHash: HashPassword("SecureUser2024!", "550e8400-e29b-41d4-a716-446655440003")
                 ),
                 new User(
                     firstName: "Alice",

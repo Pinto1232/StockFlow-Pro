@@ -11,6 +11,23 @@ import { UserRole as UserRoleEnum } from "../types/index";
 const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:5131/api";
 
+// Helper function to get CSRF token
+const getCsrfToken = async (): Promise<string> => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/csrf/token`, {
+            method: "GET",
+            credentials: "include",
+        });
+        if (response.ok) {
+            const data = await response.json();
+            return data.token;
+        }
+    } catch (error) {
+        console.warn("Failed to get CSRF token:", error);
+    }
+    return "";
+};
+
 // Interface for backend user response
 interface BackendUserResponse {
     id: string;
@@ -140,11 +157,21 @@ export const authService = {
     // Login user via backend API
     login: async (credentials: LoginRequest): Promise<LoginResponse> => {
         try {
+            // Get CSRF token first
+            const csrfToken = await getCsrfToken();
+            
+            const headers: Record<string, string> = {
+                "Content-Type": "application/json",
+            };
+            
+            // Add CSRF token if available
+            if (csrfToken) {
+                headers["X-CSRF-TOKEN"] = csrfToken;
+            }
+
             const response = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers,
                 credentials: "include", // Include cookies for authentication
                 body: JSON.stringify({
                     username: credentials.email, // Backend expects username field
@@ -331,13 +358,23 @@ export const authService = {
         newPassword: string,
     ): Promise<void> => {
         try {
+            // Get CSRF token first
+            const csrfToken = await getCsrfToken();
+            
+            const headers: Record<string, string> = {
+                "Content-Type": "application/json",
+            };
+            
+            // Add CSRF token if available
+            if (csrfToken) {
+                headers["X-CSRF-TOKEN"] = csrfToken;
+            }
+
             const response = await fetch(
                 `${API_BASE_URL}/auth/change-password`,
                 {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
+                    headers,
                     credentials: "include", // Include cookies for authentication
                     body: JSON.stringify({
                         currentPassword,

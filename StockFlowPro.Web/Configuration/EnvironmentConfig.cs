@@ -44,19 +44,19 @@ public static class EnvironmentConfig
 
     // Password Security
     public static int PasswordMinLength => 
-        int.Parse(Environment.GetEnvironmentVariable("PASSWORD_MIN_LENGTH") ?? "6");
+        int.Parse(Environment.GetEnvironmentVariable("PASSWORD_MIN_LENGTH") ?? "8");
     
     public static bool PasswordRequireUppercase => 
-        bool.Parse(Environment.GetEnvironmentVariable("PASSWORD_REQUIRE_UPPERCASE") ?? "false");
+        bool.Parse(Environment.GetEnvironmentVariable("PASSWORD_REQUIRE_UPPERCASE") ?? "true");
     
     public static bool PasswordRequireLowercase => 
-        bool.Parse(Environment.GetEnvironmentVariable("PASSWORD_REQUIRE_LOWERCASE") ?? "false");
+        bool.Parse(Environment.GetEnvironmentVariable("PASSWORD_REQUIRE_LOWERCASE") ?? "true");
     
     public static bool PasswordRequireNumbers => 
-        bool.Parse(Environment.GetEnvironmentVariable("PASSWORD_REQUIRE_NUMBERS") ?? "false");
+        bool.Parse(Environment.GetEnvironmentVariable("PASSWORD_REQUIRE_NUMBERS") ?? "true");
     
     public static bool PasswordRequireSpecialChars => 
-        bool.Parse(Environment.GetEnvironmentVariable("PASSWORD_REQUIRE_SPECIAL_CHARS") ?? "false");
+        bool.Parse(Environment.GetEnvironmentVariable("PASSWORD_REQUIRE_SPECIAL_CHARS") ?? "true");
 
     // Rate Limiting
     public static int RateLimitUserCreationPerHour => 

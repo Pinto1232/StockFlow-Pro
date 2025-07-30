@@ -97,7 +97,7 @@ public class PersistentMockDataService : IPersistentMockDataService
             var user = users.FirstOrDefault(u => u.Id == id);
             
             if (user == null)
-                return null;
+                {return null;}
 
             user.FirstName = updateUserDto.FirstName;
             user.LastName = updateUserDto.LastName;
@@ -127,7 +127,7 @@ public class PersistentMockDataService : IPersistentMockDataService
             var user = users.FirstOrDefault(u => u.Id == id);
             
             if (user == null)
-                return false;
+                {return false;}
 
             users.Remove(user);
             await SaveUsersAsync(users);
@@ -157,7 +157,7 @@ public class PersistentMockDataService : IPersistentMockDataService
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                PasswordHash = CreateDefaultPasswordHash("admin123")
+                PasswordHash = CreateDefaultPasswordHash("SecureAdmin2024!")
             },
             new UserDto
             {
@@ -165,7 +165,7 @@ public class PersistentMockDataService : IPersistentMockDataService
                 FirstName = "John",
                 LastName = "Manager",
                 FullName = "John Manager",
-                Email = "john.manager@stockflowpro.com",
+                Email = "manager@stockflow.com",
                 PhoneNumber = "+1-555-0101",
                 DateOfBirth = new DateTime(1985, 5, 15, 0, 0, 0, DateTimeKind.Utc),
                 Age = CalculateAge(new DateTime(1985, 5, 15, 0, 0, 0, DateTimeKind.Utc)),
@@ -173,7 +173,7 @@ public class PersistentMockDataService : IPersistentMockDataService
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                PasswordHash = CreateDefaultPasswordHash("manager123")
+                PasswordHash = CreateDefaultPasswordHash("SecureManager2024!")
             },
             new UserDto
             {
@@ -181,7 +181,7 @@ public class PersistentMockDataService : IPersistentMockDataService
                 FirstName = "Jane",
                 LastName = "Smith",
                 FullName = "Jane Smith",
-                Email = "jane.smith@stockflowpro.com",
+                Email = "user@stockflow.com",
                 PhoneNumber = "+1-555-0102",
                 DateOfBirth = new DateTime(1992, 8, 20, 0, 0, 0, DateTimeKind.Utc),
                 Age = CalculateAge(new DateTime(1992, 8, 20, 0, 0, 0, DateTimeKind.Utc)),
@@ -189,7 +189,7 @@ public class PersistentMockDataService : IPersistentMockDataService
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                PasswordHash = CreateDefaultPasswordHash("user123")
+                PasswordHash = CreateDefaultPasswordHash("SecureUser2024!")
             }
         };
 
@@ -225,7 +225,7 @@ public class PersistentMockDataService : IPersistentMockDataService
         var today = DateTime.Today;
         var age = today.Year - dateOfBirth.Year;
         if (dateOfBirth.Date > today.AddYears(-age))
-            age--;
+            {age--;}
         return age;
     }
 

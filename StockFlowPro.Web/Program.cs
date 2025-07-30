@@ -28,6 +28,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
 
+// Add CSRF protection
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-CSRF-TOKEN";
+    options.Cookie.Name = "__RequestVerificationToken";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = EnvironmentConfig.CookieSecure ? CookieSecurePolicy.Always : CookieSecurePolicy.SameAsRequest;
+    options.Cookie.SameSite = EnvironmentConfig.CookieSameSite;
+    options.SuppressXFrameOptionsHeader = false;
+});
+
 // Add SignalR with detailed logging and configuration
 builder.Services.AddSignalR(options => 
 {

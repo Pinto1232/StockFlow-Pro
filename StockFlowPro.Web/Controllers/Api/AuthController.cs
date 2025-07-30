@@ -7,6 +7,7 @@ using StockFlowPro.Web.Configuration;
 using StockFlowPro.Web.Services;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Antiforgery;
 
 namespace StockFlowPro.Web.Controllers.Api;
 
@@ -27,6 +28,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    // [ValidateAntiForgeryToken] // Temporarily disabled for login
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))

@@ -119,7 +119,7 @@ public class JsonMockDataStorageService : IMockDataStorageService
                 DateOfBirth = new DateTime(1985, 5, 15, 0, 0, 0, DateTimeKind.Utc),
                 Age = DateTime.UtcNow.Year - 1985,
                 CreatedAt = DateTime.UtcNow,
-                PasswordHash = HashPasswordForDefaultUser("admin123", "550e8400-e29b-41d4-a716-446655440001")
+                PasswordHash = HashPasswordForDefaultUser("SecureAdmin2024!", "550e8400-e29b-41d4-a716-446655440001")
             },
             new UserDto 
             { 
@@ -127,14 +127,14 @@ public class JsonMockDataStorageService : IMockDataStorageService
                 FirstName = "Jane", 
                 LastName = "Manager", 
                 FullName = "Jane Manager",
-                Email = "manager@stockflowpro.com", 
+                Email = "manager@stockflow.com", 
                 PhoneNumber = "+1-555-0102", 
                 Role = UserRole.Manager,
                 IsActive = true,
                 DateOfBirth = new DateTime(1990, 8, 22, 0, 0, 0, DateTimeKind.Utc),
                 Age = DateTime.UtcNow.Year - 1990,
                 CreatedAt = DateTime.UtcNow,
-                PasswordHash = HashPasswordForDefaultUser("manager123", "550e8400-e29b-41d4-a716-446655440002")
+                PasswordHash = HashPasswordForDefaultUser("SecureManager2024!", "550e8400-e29b-41d4-a716-446655440002")
             },
             new UserDto 
             { 
@@ -142,14 +142,14 @@ public class JsonMockDataStorageService : IMockDataStorageService
                 FirstName = "Bob", 
                 LastName = "User", 
                 FullName = "Bob User",
-                Email = "user@stockflowpro.com", 
+                Email = "user@stockflow.com", 
                 PhoneNumber = "+1-555-0103", 
                 Role = UserRole.User,
                 IsActive = true,
                 DateOfBirth = new DateTime(1992, 12, 10, 0, 0, 0, DateTimeKind.Utc),
                 Age = DateTime.UtcNow.Year - 1992,
                 CreatedAt = DateTime.UtcNow,
-                PasswordHash = HashPasswordForDefaultUser("user123", "550e8400-e29b-41d4-a716-446655440003")
+                PasswordHash = HashPasswordForDefaultUser("SecureUser2024!", "550e8400-e29b-41d4-a716-446655440003")
             },
             new UserDto 
             { 
