@@ -26,18 +26,7 @@ EnvironmentConfig.ValidateConfiguration();
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorPages();
-
-// Add CSRF protection
-builder.Services.AddAntiforgery(options =>
-{
-    options.HeaderName = "X-CSRF-TOKEN";
-    options.Cookie.Name = "__RequestVerificationToken";
-    options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = EnvironmentConfig.CookieSecure ? CookieSecurePolicy.Always : CookieSecurePolicy.SameAsRequest;
-    options.Cookie.SameSite = EnvironmentConfig.CookieSameSite;
-    options.SuppressXFrameOptionsHeader = false;
-});
+// CSRF protection removed as it's primarily used for Razor Pages
 
 // Add SignalR with detailed logging and configuration
 builder.Services.AddSignalR(options => 
@@ -309,8 +298,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddAuthentication(EnvironmentConfig.CookieAuthName)
     .AddCookie(EnvironmentConfig.CookieAuthName, options =>
     {
-        options.LoginPath = "/Login";
-        options.AccessDeniedPath = "/AccessDenied";
+        // Remove login and access denied paths since we're API-only now
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
         options.Cookie.SecurePolicy = EnvironmentConfig.CookieSecure ? CookieSecurePolicy.Always : CookieSecurePolicy.SameAsRequest;
@@ -319,15 +307,16 @@ builder.Services.AddAuthentication(EnvironmentConfig.CookieAuthName)
         options.Cookie.Name = EnvironmentConfig.CookieAuthName;
         options.Cookie.IsEssential = true;
         
-        // Enhanced security settings
+        // Enhanced security settings - return 401 for all unauthorized requests
         options.Events.OnRedirectToLogin = context =>
         {
-            if (context.Request.Path.StartsWithSegments("/api"))
-            {
-                context.Response.StatusCode = 401;
-                return Task.CompletedTask;
-            }
-            context.Response.Redirect(context.RedirectUri);
+            context.Response.StatusCode = 401;
+            return Task.CompletedTask;
+        };
+        
+        options.Events.OnRedirectToAccessDenied = context =>
+        {
+            context.Response.StatusCode = 403;
             return Task.CompletedTask;
         };
     });
@@ -337,7 +326,8 @@ var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error");
+    // Use developer exception page for API-only application
+    app.UseDeveloperExceptionPage();
     // Enhanced HSTS configuration for production
     app.UseHsts();
 }
@@ -405,7 +395,6 @@ app.UseRateLimiting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapRazorPages();
 app.MapControllers();
 
 // Map SignalR hub

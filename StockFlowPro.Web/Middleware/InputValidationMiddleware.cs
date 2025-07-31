@@ -169,12 +169,7 @@ public class InputValidationMiddleware
             return true;
         }
 
-        // Skip validation for Razor Pages
-        if (path.Contains(".cshtml") || context.Request.Query.ContainsKey("handler"))
-        {
-            return true;
-        }
-
+        
         return false;
     }
 
@@ -182,12 +177,7 @@ public class InputValidationMiddleware
     {
         var safeFields = new[]
         {
-            "__RequestVerificationToken",
-            "__VIEWSTATE",
-            "__VIEWSTATEGENERATOR",
-            "__EVENTVALIDATION",
-            "ReturnUrl",
-            "handler"
+            "ReturnUrl"
         };
 
         return safeFields.Contains(fieldName, StringComparer.OrdinalIgnoreCase);

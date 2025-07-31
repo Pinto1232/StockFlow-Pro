@@ -26,7 +26,6 @@ public static class Permissions
     /// </summary>
     public static class System
     {
-        public const string ViewAdminPanel = "system.view_admin_panel";
         public const string ManageSettings = "system.manage_settings";
         public const string ViewLogs = "system.view_logs";
         public const string SyncData = "system.sync_data";
@@ -155,7 +154,6 @@ public static class RolePermissions
             Permissions.Invoice.ViewAllInvoices,
             Permissions.Invoice.ManageInvoiceItems,
             
-            Permissions.System.ViewAdminPanel,
             Permissions.System.ManageSettings,
             Permissions.System.ViewLogs,
             Permissions.System.SyncData,
