@@ -186,43 +186,6 @@
             color: #ffed4e;
         }
 
-        .demo-credentials {
-            background: rgba(59, 130, 246, 0.2);
-            border: 1px solid #3b82f6;
-            border-radius: 10px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .demo-credentials h4 {
-            color: #3b82f6;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .demo-credentials p {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.8rem;
-            margin: 0.2rem 0;
-        }
-
-        .demo-credentials button {
-            background: rgba(59, 130, 246, 0.3);
-            border: 1px solid #3b82f6;
-            color: #3b82f6;
-            padding: 0.3rem 0.8rem;
-            border-radius: 5px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            margin-top: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .demo-credentials button:hover {
-            background: rgba(59, 130, 246, 0.5);
-            color: white;
-        }
-
         /* Responsive Design */
         @media (max-width: 768px) {
             .login-container {
@@ -287,16 +250,6 @@
         <div class="error-message" id="error-message"></div>
         <div class="success-message" id="success-message"></div>
 
-        <div class="demo-credentials">
-            <h4>🔧 Demo Credentials</h4>
-            <p><strong>Admin:</strong> admin@stockflowpro.com / admin123</p>
-            <p><strong>Manager:</strong> manager@stockflowpro.com / manager123</p>
-            <p><strong>User:</strong> user@stockflowpro.com / user123</p>
-            <button onclick="fillDemoCredentials('admin')">Use Admin</button>
-            <button onclick="fillDemoCredentials('manager')">Use Manager</button>
-            <button onclick="fillDemoCredentials('user')">Use User</button>
-        </div>
-
         <form id="login-form">
             <div class="form-group">
                 <label for="username">Email or Username</label>
@@ -344,34 +297,6 @@
     </div>
 
     <script>
-        // Demo credentials
-        const demoCredentials = {
-            admin: { username: 'admin@stockflowpro.com', password: 'admin123' },
-            manager: { username: 'manager@stockflowpro.com', password: 'manager123' },
-            user: { username: 'user@stockflowpro.com', password: 'user123' }
-        };
-
-        function fillDemoCredentials(role) {
-            const credentials = demoCredentials[role];
-            document.getElementById('username').value = credentials.username;
-            document.getElementById('password').value = credentials.password;
-            
-            // Add visual feedback
-            const button = event.target;
-            const originalText = button.textContent;
-            button.textContent = '✓ Filled';
-            button.style.background = 'rgba(34, 197, 94, 0.3)';
-            button.style.borderColor = '#22c55e';
-            button.style.color = '#22c55e';
-            
-            setTimeout(() => {
-                button.textContent = originalText;
-                button.style.background = '';
-                button.style.borderColor = '';
-                button.style.color = '';
-            }, 1500);
-        }
-
         function showError(message) {
             const errorDiv = document.getElementById('error-message');
             const successDiv = document.getElementById('success-message');
