@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { useLogin, useRegister, useIsAuthenticated } from "../../hooks/useAuth";
-import DemoCredentials from "../../components/Auth/DemoCredentials";
 import { rolesService } from "../../services/authService";
 import type { LoginRequest, RegisterRequest } from "../../types/index";
 import "./Auth.css";
@@ -178,12 +177,6 @@ const Login: React.FC = () => {
         setShowConfirmPassword(!showConfirmPassword);
     };
 
-    const handleCredentialSelect = (email: string, password: string) => {
-        setLoginData({ email, password });
-        // Clear any existing errors
-        setLoginErrors({});
-    };
-
     if (registerSuccess) {
         return (
             <div className="auth-container">
@@ -354,10 +347,6 @@ const Login: React.FC = () => {
                                         </Link>
                                     </div>
                                 </form>
-
-                                <DemoCredentials
-                                    onCredentialSelect={handleCredentialSelect}
-                                />
                             </div>
                         </div>
                     )}
