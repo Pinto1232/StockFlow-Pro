@@ -350,6 +350,12 @@ else
 
 app.UseHttpsRedirection();
 
+// Configure default files to serve index.html
+app.UseDefaultFiles(new DefaultFilesOptions
+{
+    DefaultFileNames = { "index.html" }
+});
+
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = ctx =>

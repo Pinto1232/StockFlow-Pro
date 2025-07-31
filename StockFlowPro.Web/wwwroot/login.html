@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockFlow Pro - Admin Login</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+
+        .security-badge {
+            display: inline-block;
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid #22c55e;
+            color: #22c55e;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .security-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: white;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #ffd700;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #333;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .success-message {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid #22c55e;
+            color: #22c55e;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #333;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .login-footer p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .login-footer a {
+            color: #ffd700;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .login-footer a:hover {
+            color: #ffed4e;
+        }
+
+        .demo-credentials {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid #3b82f6;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .demo-credentials h4 {
+            color: #3b82f6;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .demo-credentials p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.8rem;
+            margin: 0.2rem 0;
+        }
+
+        .demo-credentials button {
+            background: rgba(59, 130, 246, 0.3);
+            border: 1px solid #3b82f6;
+            color: #3b82f6;
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .demo-credentials button:hover {
+            background: rgba(59, 130, 246, 0.5);
+            color: white;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .login-container {
+                margin: 1rem;
+                padding: 2rem;
+            }
+
+            .login-header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Security indicators */
+        .security-features {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .security-features h4 {
+            color: #22c55e;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .security-features ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .security-features li {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.8rem;
+            margin: 0.3rem 0;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .security-features li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #22c55e;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="security-badge">
+                <svg class="security-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,7C13.4,7 14.8,8.6 14.8,10V11H16V18H8V11H9.2V10C9.2,8.6 10.6,7 12,7M12,8.2C11.2,8.2 10.4,8.7 10.4,10V11H13.6V10C13.6,8.7 12.8,8.2 12,8.2Z"/>
+                </svg>
+                Secure Admin Access
+            </div>
+            <h1>StockFlow Pro</h1>
+            <p>Backend Administration Portal</p>
+        </div>
+
+        <div class="error-message" id="error-message"></div>
+        <div class="success-message" id="success-message"></div>
+
+        <div class="demo-credentials">
+            <h4>🔧 Demo Credentials</h4>
+            <p><strong>Admin:</strong> admin@stockflowpro.com / admin123</p>
+            <p><strong>Manager:</strong> manager@stockflowpro.com / manager123</p>
+            <p><strong>User:</strong> user@stockflowpro.com / user123</p>
+            <button onclick="fillDemoCredentials('admin')">Use Admin</button>
+            <button onclick="fillDemoCredentials('manager')">Use Manager</button>
+            <button onclick="fillDemoCredentials('user')">Use User</button>
+        </div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">Email or Username</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    placeholder="Enter your email or username"
+                    required
+                    autocomplete="username"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    placeholder="Enter your password"
+                    required
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <button type="submit" class="login-btn" id="login-btn">
+                <span id="login-text">Sign In to Dashboard</span>
+            </button>
+        </form>
+
+        <div class="security-features">
+            <h4>🔒 Security Features</h4>
+            <ul>
+                <li>Cookie-based authentication</li>
+                <li>Role-based access control</li>
+                <li>Session management</li>
+                <li>Secure API endpoints</li>
+            </ul>
+        </div>
+
+        <div class="login-footer">
+            <p>&copy; 2024 StockFlow Pro. Secure backend access portal.</p>
+            <p><a href="/swagger">API Documentation</a> | <a href="#" onclick="checkApiStatus()">System Status</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Demo credentials
+        const demoCredentials = {
+            admin: { username: 'admin@stockflowpro.com', password: 'admin123' },
+            manager: { username: 'manager@stockflowpro.com', password: 'manager123' },
+            user: { username: 'user@stockflowpro.com', password: 'user123' }
+        };
+
+        function fillDemoCredentials(role) {
+            const credentials = demoCredentials[role];
+            document.getElementById('username').value = credentials.username;
+            document.getElementById('password').value = credentials.password;
+            
+            // Add visual feedback
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = '✓ Filled';
+            button.style.background = 'rgba(34, 197, 94, 0.3)';
+            button.style.borderColor = '#22c55e';
+            button.style.color = '#22c55e';
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.background = '';
+                button.style.borderColor = '';
+                button.style.color = '';
+            }, 1500);
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            const successDiv = document.getElementById('success-message');
+            
+            successDiv.style.display = 'none';
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const errorDiv = document.getElementById('error-message');
+            const successDiv = document.getElementById('success-message');
+            
+            errorDiv.style.display = 'none';
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+        }
+
+        function setLoading(isLoading) {
+            const loginBtn = document.getElementById('login-btn');
+            const loginText = document.getElementById('login-text');
+            
+            if (isLoading) {
+                loginBtn.disabled = true;
+                loginText.innerHTML = '<span class="loading"></span>Signing In...';
+            } else {
+                loginBtn.disabled = false;
+                loginText.textContent = 'Sign In to Dashboard';
+            }
+        }
+
+        async function checkApiStatus() {
+            try {
+                const response = await fetch('/api/diagnostics/health');
+                if (response.ok) {
+                    const data = await response.json();
+                    showSuccess(`API Status: ${data.status} | Uptime: ${data.uptime} | Environment: ${data.environment}`);
+                } else {
+                    showError('API health check failed');
+                }
+            } catch (error) {
+                showError('Unable to connect to API');
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showError('Please enter both username and password');
+                return;
+            }
+            
+            setLoading(true);
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    }),
+                    credentials: 'include' // Important for cookie authentication
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSuccess(`Welcome back, ${data.user.firstName}! Redirecting to dashboard...`);
+                    
+                    // Redirect to main dashboard after successful login
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1500);
+                } else {
+                    showError(data.message || 'Login failed. Please check your credentials.');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('Unable to connect to the server. Please try again.');
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        // Check if user is already logged in
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/api/diagnostics/auth-status', {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.isAuthenticated) {
+                        showSuccess(`Already logged in as ${data.userName}. Redirecting...`);
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 1500);
+                    }
+                }
+            } catch (error) {
+                // User is not authenticated, continue with login page
+                console.log('User not authenticated, showing login form');
+            }
+        }
+
+        // Auto-focus on username field
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('username').focus();
+            checkAuthStatus();
+        });
+
+        // Handle Enter key in password field
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('login-form').dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Add some visual feedback for form interactions
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+                this.parentElement.style.transition = 'transform 0.2s ease';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

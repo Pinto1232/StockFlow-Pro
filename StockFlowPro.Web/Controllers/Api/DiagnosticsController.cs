@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using StockFlowPro.Domain.Repositories;
 using StockFlowPro.Infrastructure.Data;
 using StockFlowPro.Web.Attributes;
+using System.Diagnostics;
 
 namespace StockFlowPro.Web.Controllers.Api;
 
@@ -24,6 +25,37 @@ public class DiagnosticsController : ControllerBase
         _context = context;
         _userRepository = userRepository;
         _logger = logger;
+    }
+
+    /// <summary>
+    /// Simple health check endpoint for API status
+    /// </summary>
+    /// <returns>API health status</returns>
+    [HttpGet("health")]
+    [AllowAnonymous]
+    public IActionResult GetHealth()
+    {
+        try
+        {
+            return Ok(new
+            {
+                status = "healthy",
+                timestamp = DateTime.UtcNow,
+                version = "1.0.0",
+                environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production",
+                uptime = DateTime.UtcNow.Subtract(Process.GetCurrentProcess().StartTime).ToString(@"dd\.hh\:mm\:ss")
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Health check failed");
+            return StatusCode(500, new
+            {
+                status = "unhealthy",
+                timestamp = DateTime.UtcNow,
+                error = ex.Message
+            });
+        }
     }
 
     /// <summary>
