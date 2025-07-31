@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockFlowPro.Web.Services;
 using System.Text.Json;
@@ -9,6 +10,7 @@ namespace StockFlowPro.Web.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Authorize] // Require authentication for all documentation endpoints
 public class DocumentationController : ControllerBase
 {
     private readonly IDocumentationArchiveService _documentationService;
@@ -30,12 +32,24 @@ public class DocumentationController : ControllerBase
     {
         try
         {
+            // Debug authentication status
+            var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+            var userName = User.Identity?.Name ?? "Anonymous";
+            var userClaims = User.Claims.Select(c => $"{c.Type}: {c.Value}").ToList();
+            
+            _logger.LogInformation("Documentation archive request - IsAuthenticated: {IsAuthenticated}, User: {UserName}", 
+                isAuthenticated, userName);
+            Console.WriteLine($"[DOCS DEBUG] Documentation archive request - IsAuthenticated: {isAuthenticated}, User: {userName}");
+            Console.WriteLine($"[DOCS DEBUG] User claims: {string.Join(", ", userClaims)}");
+            Console.WriteLine($"[DOCS DEBUG] Request headers: {string.Join(", ", Request.Headers.Select(h => $"{h.Key}: {h.Value}"))}");
+
             var archive = await _documentationService.GetDocumentationArchiveAsync();
             return Ok(archive);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving documentation archive");
+            Console.WriteLine($"[DOCS DEBUG] Error retrieving documentation archive: {ex.Message}");
             return StatusCode(500, new { error = "Failed to retrieve documentation archive" });
         }
     }

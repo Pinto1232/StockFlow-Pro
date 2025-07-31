@@ -29,10 +29,16 @@ export const useLogin = () => {
         mutationFn: (credentials: LoginRequest) =>
             authService.login(credentials),
         onSuccess: (data) => {
+            console.log("[AUTH DEBUG] Login mutation successful, user data:", data.user);
             queryClient.setQueryData(authKeys.currentUser, data.user);
             queryClient.invalidateQueries({ queryKey: authKeys.currentUser });
+            
             // Redirect to dashboard after successful login
+            console.log("[AUTH DEBUG] Redirecting to dashboard...");
             window.location.href = "/dashboard";
+        },
+        onError: (error) => {
+            console.error("[AUTH DEBUG] Login mutation failed:", error);
         },
     });
 };

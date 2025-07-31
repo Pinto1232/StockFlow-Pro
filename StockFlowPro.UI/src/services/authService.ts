@@ -157,8 +157,11 @@ export const authService = {
     // Login user via backend API
     login: async (credentials: LoginRequest): Promise<LoginResponse> => {
         try {
+            console.log("[AUTH DEBUG] Starting login process for:", credentials.email);
+            
             // Get CSRF token first
             const csrfToken = await getCsrfToken();
+            console.log("[AUTH DEBUG] CSRF token obtained:", csrfToken ? "Yes" : "No");
             
             const headers: Record<string, string> = {
                 "Content-Type": "application/json",
@@ -168,6 +171,9 @@ export const authService = {
             if (csrfToken) {
                 headers["X-CSRF-TOKEN"] = csrfToken;
             }
+
+            console.log("[AUTH DEBUG] Making login request to:", `${API_BASE_URL}/auth/login`);
+            console.log("[AUTH DEBUG] Request headers:", headers);
 
             const response = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: "POST",
@@ -179,7 +185,11 @@ export const authService = {
                 }),
             });
 
+            console.log("[AUTH DEBUG] Login response status:", response.status);
+            console.log("[AUTH DEBUG] Login response headers:", [...response.headers.entries()]);
+
             const data = await handleApiResponse(response);
+            console.log("[AUTH DEBUG] Login response data:", data);
 
             // Since backend uses cookie auth, we'll create a session indicator
             // The actual authentication will be handled by cookies
@@ -204,9 +214,12 @@ export const authService = {
             localStorage.setItem("user", JSON.stringify(loginResponse.user));
             localStorage.setItem("isAuthenticated", "true");
 
+            console.log("[AUTH DEBUG] Login successful, stored in localStorage");
+            console.log("[AUTH DEBUG] Current cookies after login:", document.cookie);
+
             return loginResponse;
         } catch (error) {
-            console.error("Login error:", error);
+            console.error("[AUTH DEBUG] Login error:", error);
             throw error;
         }
     },

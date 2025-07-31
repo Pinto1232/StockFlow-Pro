@@ -531,19 +531,38 @@
             showLoading(true);
             
             try {
+                console.log('[DOCS DEBUG] Starting documentation archive load...');
+                console.log('[DOCS DEBUG] Current URL:', window.location.href);
+                console.log('[DOCS DEBUG] Document cookies:', document.cookie);
+                
                 const response = await fetch('/api/documentation', {
                     credentials: 'include'
                 });
                 
+                console.log('[DOCS DEBUG] Response status:', response.status);
+                console.log('[DOCS DEBUG] Response headers:', [...response.headers.entries()]);
+                
                 if (response.ok) {
+                    console.log('[DOCS DEBUG] Successfully loaded documentation archive');
                     documentationArchive = await response.json();
                     renderArchive();
                 } else {
-                    console.error('Failed to load documentation archive');
-                    showError('Failed to load documentation archive');
+                    console.error('[DOCS DEBUG] Failed to load documentation archive - Status:', response.status);
+                    const errorText = await response.text();
+                    console.error('[DOCS DEBUG] Error response:', errorText);
+                    
+                    if (response.status === 401) {
+                        console.log('[DOCS DEBUG] Unauthorized - redirecting to login');
+                        showError('Authentication required. Redirecting to login...');
+                        setTimeout(() => {
+                            window.location.href = '/login';
+                        }, 2000);
+                    } else {
+                        showError('Failed to load documentation archive');
+                    }
                 }
             } catch (error) {
-                console.error('Error loading documentation:', error);
+                console.error('[DOCS DEBUG] Error loading documentation:', error);
                 showError('Error loading documentation archive');
             } finally {
                 showLoading(false);

@@ -29,14 +29,22 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
+        _logger.LogInformation("Login attempt for username: {Username}", request.Username);
+        Console.WriteLine($"[AUTH DEBUG] Login attempt for username: {request.Username}");
+
         if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
         {
+            _logger.LogWarning("Login failed: Username or password is empty");
+            Console.WriteLine("[AUTH DEBUG] Login failed: Username or password is empty");
             return BadRequest(new { message = "Username and password are required." });
         }
 
         var user = await _authenticationService.AuthenticateAsync(request.Username, request.Password);
         if (user != null)
         {
+            _logger.LogInformation("Authentication successful for user: {UserId} - {Email}", user.Id, user.Email);
+            Console.WriteLine($"[AUTH DEBUG] Authentication successful for user: {user.Id} - {user.Email}");
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -49,7 +57,12 @@ public class AuthController : ControllerBase
 
             var claimsIdentity = new ClaimsIdentity(claims, EnvironmentConfig.CookieAuthName);
             var authProperties = new AuthenticationProperties { IsPersistent = true };
+            
+            Console.WriteLine($"[AUTH DEBUG] Signing in user with cookie scheme: {EnvironmentConfig.CookieAuthName}");
             await HttpContext.SignInAsync(EnvironmentConfig.CookieAuthName, new ClaimsPrincipal(claimsIdentity), authProperties);
+            
+            Console.WriteLine("[AUTH DEBUG] Cookie authentication completed successfully");
+            _logger.LogInformation("User signed in successfully: {UserId}", user.Id);
 
             return Ok(new 
             { 
@@ -71,6 +84,8 @@ public class AuthController : ControllerBase
             });
         }
 
+        _logger.LogWarning("Authentication failed for username: {Username}", request.Username);
+        Console.WriteLine($"[AUTH DEBUG] Authentication failed for username: {request.Username}");
         return Unauthorized(new { message = "Invalid credentials" });
     }
 

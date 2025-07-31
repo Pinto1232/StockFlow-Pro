@@ -343,7 +343,7 @@ if (!app.Environment.IsDevelopment())
 }
 else
 {
-    // Enhanced Swagger UI for development
+    // Enhanced Swagger UI for development with authentication protection
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
@@ -360,11 +360,7 @@ else
 
 app.UseHttpsRedirection();
 
-// Configure default files to serve index.html
-app.UseDefaultFiles(new DefaultFilesOptions
-{
-    DefaultFileNames = { "index.html" }
-});
+// Default files removed - root route handled by HomeController
 
 app.UseStaticFiles(new StaticFileOptions
 {
@@ -409,6 +405,29 @@ app.UseInputValidation();
 app.UseRateLimiting();
 
 app.UseAuthentication();
+
+// Add authentication middleware for Swagger (after authentication, before authorization)
+app.Use(async (context, next) =>
+{
+    // Protect Swagger endpoints
+    if (context.Request.Path.StartsWithSegments("/swagger") || 
+        context.Request.Path.StartsWithSegments("/swagger-ui"))
+    {
+        var isAuthenticated = context.User?.Identity?.IsAuthenticated ?? false;
+        Console.WriteLine($"[SWAGGER DEBUG] Swagger access attempt - IsAuthenticated: {isAuthenticated}, Path: {context.Request.Path}");
+        
+        if (!isAuthenticated)
+        {
+            Console.WriteLine("[SWAGGER DEBUG] Unauthorized access to Swagger - redirecting to login");
+            context.Response.StatusCode = 401;
+            await context.Response.WriteAsync("Authentication required to access API documentation. Please login first.");
+            return;
+        }
+    }
+    
+    await next();
+});
+
 app.UseAuthorization();
 
 app.MapControllers();
