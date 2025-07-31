@@ -113,6 +113,9 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddHttpContextAccessor();
 
+// Add Memory Cache for API Documentation
+builder.Services.AddMemoryCache();
+
 // Configure SignalR options
 builder.Services.Configure<StockFlowPro.Web.Configuration.SignalROptions>(
     builder.Configuration.GetSection(StockFlowPro.Web.Configuration.SignalROptions.SectionName));
@@ -268,6 +271,13 @@ builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IUserService, Sto
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IRoleUpgradeRequestService, StockFlowPro.Application.Services.RoleUpgradeRequestService>();
 builder.Services.AddScoped<StockFlowPro.Application.Services.ProductNotificationService>();
 builder.Services.AddScoped<ISecurityAuditService, SecurityAuditService>();
+
+// API Documentation services
+builder.Services.AddScoped<IApiDocumentationService, ApiDocumentationService>();
+
+
+// Documentation Archive services
+builder.Services.AddSingleton<IDocumentationArchiveService, DocumentationArchiveService>();
 
 // Enhanced notification system services
 builder.Services.AddScoped<StockFlowPro.Domain.Repositories.INotificationRepository, StockFlowPro.Infrastructure.Repositories.NotificationRepository>();

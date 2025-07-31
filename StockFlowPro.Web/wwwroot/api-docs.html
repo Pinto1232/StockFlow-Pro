@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockFlow Pro - API Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .card-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn.secondary {
+            background: #6c757d;
+            margin-left: 10px;
+        }
+
+        .btn.secondary:hover {
+            background: #5a6268;
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+        }
+
+        .quick-links {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .quick-links h2 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .quick-link {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .quick-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-online {
+            background: #28a745;
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+        }
+
+        .loading {
+            display: none;
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 StockFlow Pro API</h1>
+            <p>Comprehensive Inventory Management API Documentation</p>
+            <p><span class="status-indicator status-online"></span>API Status: <span id="api-status">Checking...</span></p>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <span class="card-icon">📊</span>
+                <h3>Interactive Dashboard</h3>
+                <p>Browse all API endpoints with detailed information, examples, and testing capabilities in a beautiful interactive interface.</p>
+                <a href="/api/documentation/dashboard" class="btn" target="_blank">Open Dashboard</a>
+            </div>
+
+            <div class="card">
+                <span class="card-icon">📖</span>
+                <h3>Swagger UI</h3>
+                <p>Explore and test the API using the industry-standard Swagger interface with live API calls and schema validation.</p>
+                <a href="/swagger" class="btn" target="_blank">Open Swagger</a>
+            </div>
+
+            <div class="card">
+                <span class="card-icon">📋</span>
+                <h3>API Reference</h3>
+                <p>Complete JSON documentation of all endpoints, parameters, responses, and examples for programmatic access.</p>
+                <a href="/api/documentation" class="btn" target="_blank">View JSON</a>
+                <a href="/api/documentation/markdown" class="btn secondary" target="_blank">Download MD</a>
+            </div>
+
+            <div class="card">
+                <span class="card-icon">🧪</span>
+                <h3>Testing Tools</h3>
+                <p>Download ready-to-use Postman collections and OpenAPI specifications for comprehensive API testing.</p>
+                <a href="/api/documentation/postman" class="btn" target="_blank">Postman Collection</a>
+                <a href="/api/documentation/openapi" class="btn secondary" target="_blank">OpenAPI Spec</a>
+            </div>
+
+            <div class="card">
+                <span class="card-icon">📈</span>
+                <h3>API Statistics</h3>
+                <p>View comprehensive metrics about the API including endpoint counts, categories, and system health information.</p>
+                <a href="/api/documentation/statistics" class="btn" target="_blank">View Statistics</a>
+            </div>
+
+            <div class="card">
+                <span class="card-icon">🔧</span>
+                <h3>Developer Tools</h3>
+                <p>Access developer resources, integration guides, and tools for building applications with the StockFlow Pro API.</p>
+                <a href="#" class="btn" onclick="showDeveloperInfo()">Developer Info</a>
+            </div>
+        </div>
+
+        <div class="quick-links">
+            <h2>🔗 Quick Access</h2>
+            <div class="links-grid">
+                <a href="/api/documentation/by-category" class="quick-link" target="_blank">
+                    📁 By Category
+                </a>
+                <a href="/api/documentation/version/v1" class="quick-link" target="_blank">
+                    🏷️ Version v1
+                </a>
+                <a href="/api/documentation/version/v2" class="quick-link" target="_blank">
+                    🏷️ Version v2
+                </a>
+                <a href="/api/documentation/endpoint?method=GET&path=%2Fapi%2Fusers" class="quick-link" target="_blank">
+                    👥 Users API
+                </a>
+                <a href="/api/documentation/endpoint?method=GET&path=%2Fapi%2Fproducts" class="quick-link" target="_blank">
+                    📦 Products API
+                </a>
+                <a href="/api/documentation/endpoint?method=GET&path=%2Fapi%2Finvoices" class="quick-link" target="_blank">
+                    🧾 Invoices API
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>StockFlow Pro API Documentation System</p>
+            <p>Last updated: <span id="last-updated">Loading...</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Check API status
+        async function checkApiStatus() {
+            try {
+                const response = await fetch('/api/documentation/statistics');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('api-status').textContent = 'Online';
+                    document.getElementById('last-updated').textContent = new Date(data.data.lastUpdated).toLocaleString();
+                } else {
+                    document.getElementById('api-status').textContent = 'Offline';
+                    document.getElementById('last-updated').textContent = 'Unknown';
+                }
+            } catch (error) {
+                document.getElementById('api-status').textContent = 'Error';
+                document.getElementById('last-updated').textContent = 'Error loading';
+            }
+        }
+
+        // Show developer information
+        function showDeveloperInfo() {
+            const info = `
+StockFlow Pro API - Developer Information
+
+Base URL: ${window.location.origin}/api
+Documentation: ${window.location.origin}/api/documentation
+
+Authentication:
+- Cookie-based authentication for web applications
+- API Key authentication for external integrations
+- Role-based access control (User, Manager, Admin)
+
+Rate Limiting:
+- Authenticated users: 1000 requests/hour
+- Unauthenticated users: 100 requests/hour
+- Search endpoints: 60 requests/minute
+
+Response Format:
+- All responses follow a consistent JSON structure
+- Success responses include data, message, and timestamp
+- Error responses include error details and validation information
+
+Support:
+- GitHub: https://github.com/your-username/StockFlow-Pro
+- Documentation: ${window.location.origin}/api/documentation/dashboard
+- API Reference: ${window.location.origin}/swagger
+
+Version: v1.0.0
+Last Updated: ${new Date().toLocaleDateString()}
+            `;
+            alert(info);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkApiStatus();
+            
+            // Refresh status every 30 seconds
+            setInterval(checkApiStatus, 30000);
+        });
+
+        // Add click tracking for analytics (optional)
+        document.querySelectorAll('.btn, .quick-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Track clicks for analytics if needed
+                console.log('Documentation link clicked:', this.href || this.textContent);
+            });
+        });
+    </script>
+</body>
+</html>

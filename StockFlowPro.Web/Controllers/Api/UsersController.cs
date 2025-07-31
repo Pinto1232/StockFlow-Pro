@@ -9,10 +9,12 @@ using StockFlowPro.Application.Interfaces;
 using StockFlowPro.Shared.Models;
 using StockFlowPro.Web.Authorization;
 using StockFlowPro.Web.Extensions;
+using StockFlowPro.Web.Attributes;
 
 namespace StockFlowPro.Web.Controllers.Api;
 
 [Route("api/[controller]")]
+[ApiDocumentation("User Management", "Comprehensive user management operations including CRUD operations, authentication, and permissions", Category = "User Management")]
 public class UsersController : ApiBaseController
 {
     private readonly IMediator _mediator;
@@ -55,6 +57,34 @@ public class UsersController : ApiBaseController
 
     [HttpGet]
     [Permission(Permissions.Users.ViewAll)]
+    [ApiDocumentation(
+        "Get All Users",
+        "Retrieves a list of all users in the system with optional filtering by active status. Supports pagination and role-based access control.",
+        RequiredPermissions = new[] { "Users.ViewAll" },
+        RateLimit = "100 requests per minute",
+        CacheInfo = "Cached for 5 minutes"
+    )]
+    [ApiExample(ExampleType.Response, "Success Response", @"{
+        ""success"": true,
+        ""data"": [
+            {
+                ""id"": ""550e8400-e29b-41d4-a716-446655440000"",
+                ""firstName"": ""John"",
+                ""lastName"": ""Doe"",
+                ""fullName"": ""John Doe"",
+                ""email"": ""john.doe@example.com"",
+                ""phoneNumber"": ""+1-555-0123"",
+                ""dateOfBirth"": ""1990-01-01T00:00:00Z"",
+                ""age"": 34,
+                ""isActive"": true,
+                ""createdAt"": ""2024-01-01T00:00:00Z"",
+                ""updatedAt"": ""2024-01-01T00:00:00Z"",
+                ""role"": ""User""
+            }
+        ],
+        ""message"": ""Users retrieved successfully"",
+        ""timestamp"": ""2024-01-01T00:00:00Z""
+    }")]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers([FromQuery] bool activeOnly = false)
     {
         var query = new GetAllUsersQuery { ActiveOnly = activeOnly };
@@ -108,6 +138,48 @@ public class UsersController : ApiBaseController
 
     [HttpPost]
     [Permission(Permissions.Users.Create)]
+    [ApiDocumentation(
+        "Create New User",
+        "Creates a new user account in the system with the provided information. Validates email uniqueness and enforces business rules.",
+        RequiredPermissions = new[] { "Users.Create" },
+        Notes = "Email addresses must be unique across the system. Password will be auto-generated and sent via email."
+    )]
+    [ApiExample(ExampleType.Request, "Create User Request", @"{
+        ""firstName"": ""John"",
+        ""lastName"": ""Doe"",
+        ""email"": ""john.doe@example.com"",
+        ""phoneNumber"": ""+1-555-0123"",
+        ""dateOfBirth"": ""1990-01-01T00:00:00Z"",
+        ""role"": ""User""
+    }")]
+    [ApiExample(ExampleType.Response, "Created User Response", @"{
+        ""success"": true,
+        ""data"": {
+            ""id"": ""550e8400-e29b-41d4-a716-446655440000"",
+            ""firstName"": ""John"",
+            ""lastName"": ""Doe"",
+            ""fullName"": ""John Doe"",
+            ""email"": ""john.doe@example.com"",
+            ""phoneNumber"": ""+1-555-0123"",
+            ""dateOfBirth"": ""1990-01-01T00:00:00Z"",
+            ""age"": 34,
+            ""isActive"": true,
+            ""createdAt"": ""2024-01-01T00:00:00Z"",
+            ""updatedAt"": ""2024-01-01T00:00:00Z"",
+            ""role"": ""User""
+        },
+        ""message"": ""User created successfully"",
+        ""timestamp"": ""2024-01-01T00:00:00Z""
+    }", StatusCode = 201)]
+    [ApiExample(ExampleType.Error, "Validation Error", @"{
+        ""success"": false,
+        ""message"": ""Validation failed"",
+        ""errors"": [
+            ""Email address is already in use"",
+            ""Phone number format is invalid""
+        ],
+        ""timestamp"": ""2024-01-01T00:00:00Z""
+    }", StatusCode = 422)]
     public async Task<ActionResult<UserDto>> CreateUser([FromBody] CreateUserDto createUserDto)
     {
         var command = _mapper.Map<CreateUserCommand>(createUserDto);

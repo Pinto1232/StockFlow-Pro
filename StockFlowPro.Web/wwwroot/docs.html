@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockFlow Pro - Documentation Archive</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+        }
+
+        .nav-links a:hover {
+            color: #ffd700;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
+        }
+
+        .search-btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #333;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .search-stats {
+            color: white;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        /* Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            color: white;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            color: #ffd700;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Documentation Grid */
+        .docs-section {
+            padding: 2rem 0;
+        }
+
+        .section-title {
+            color: white;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .category-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .category-icon {
+            font-size: 2rem;
+        }
+
+        .category-title {
+            color: #ffd700;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .category-description {
+            color: white;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .file-list {
+            list-style: none;
+        }
+
+        .file-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            transition: background 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .file-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-name {
+            color: white;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .file-type {
+            background: rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .file-description {
+            color: white;
+            opacity: 0.8;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: white;
+            opacity: 0.6;
+        }
+
+        .file-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 900px;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .file-content {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            color: white;
+            padding: 2rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffd700;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Search Results */
+        .search-results {
+            display: none;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .search-result-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .search-result-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .search-result-file {
+            color: #ffd700;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-result-context {
+            color: white;
+            opacity: 0.8;
+            font-size: 0.9rem;
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.5rem;
+            border-radius: 4px;
+            white-space: pre-line;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .categories-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .search-container {
+                flex-direction: column;
+            }
+
+            .modal-content {
+                margin: 1rem;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav container">
+            <a href="/" class="logo">📚 StockFlow Pro Docs</a>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/swagger">API Docs</a></li>
+                <li><a href="#" onclick="refreshDocs()">🔄 Refresh</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Documentation Archive</h1>
+                <p>Comprehensive documentation for StockFlow Pro - automatically organized and searchable</p>
+            </div>
+        </section>
+
+        <section class="container">
+            <!-- Search Section -->
+            <div class="search-section">
+                <div class="search-container">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search documentation..." />
+                    <button class="search-btn" onclick="searchDocs()">Search</button>
+                </div>
+                <div class="search-stats" id="searchStats">
+                    Enter a search term to find relevant documentation
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            <div class="search-results" id="searchResults">
+                <h3 style="color: white; margin-bottom: 1rem;">Search Results</h3>
+                <div id="searchResultsList"></div>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="stats-grid" id="statsGrid">
+                <!-- Stats will be loaded here -->
+            </div>
+
+            <!-- Loading -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Loading documentation archive...</p>
+            </div>
+
+            <!-- Documentation Categories -->
+            <div class="docs-section">
+                <h2 class="section-title">Documentation Categories</h2>
+                <div class="categories-grid" id="categoriesGrid">
+                    <!-- Categories will be loaded here -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for viewing file content -->
+    <div class="modal" id="fileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Document</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="file-content" id="fileContent">
+                Loading...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let documentationArchive = null;
+
+        // Load documentation archive on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDocumentationArchive();
+            
+            // Add enter key support for search
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchDocs();
+                }
+            });
+        });
+
+        async function loadDocumentationArchive() {
+            showLoading(true);
+            
+            try {
+                const response = await fetch('/api/documentation', {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    documentationArchive = await response.json();
+                    renderArchive();
+                } else {
+                    console.error('Failed to load documentation archive');
+                    showError('Failed to load documentation archive');
+                }
+            } catch (error) {
+                console.error('Error loading documentation:', error);
+                showError('Error loading documentation archive');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function renderArchive() {
+            if (!documentationArchive) return;
+
+            renderStats();
+            renderCategories();
+            updateSearchStats();
+        }
+
+        function renderStats() {
+            const statsGrid = document.getElementById('statsGrid');
+            const stats = documentationArchive.stats;
+            
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <h3>${stats.totalFiles}</h3>
+                    <p>Total Documents</p>
+                </div>
+                <div class="stat-card">
+                    <h3>${stats.totalCategories}</h3>
+                    <p>Categories</p>
+                </div>
+                <div class="stat-card">
+                    <h3>${stats.totalSizeFormatted}</h3>
+                    <p>Total Size</p>
+                </div>
+                <div class="stat-card">
+                    <h3>${new Date(stats.lastScanTime).toLocaleDateString()}</h3>
+                    <p>Last Updated</p>
+                </div>
+            `;
+        }
+
+        function renderCategories() {
+            const categoriesGrid = document.getElementById('categoriesGrid');
+            
+            categoriesGrid.innerHTML = documentationArchive.categories.map(category => `
+                <div class="category-card">
+                    <div class="category-header">
+                        <span class="category-icon">${category.icon}</span>
+                        <div>
+                            <div class="category-title">${category.name}</div>
+                            <div style="color: white; opacity: 0.7; font-size: 0.9rem;">${category.fileCount} files</div>
+                        </div>
+                    </div>
+                    <div class="category-description">${category.description}</div>
+                    <ul class="file-list">
+                        ${category.files.map(file => `
+                            <li class="file-item" onclick="viewFile('${file.fileName}')">
+                                <div class="file-header">
+                                    <div class="file-name">${file.displayName}</div>
+                                    <div class="file-type">${file.fileType}</div>
+                                </div>
+                                <div class="file-description">${file.description}</div>
+                                <div class="file-meta">
+                                    <div class="file-tags">
+                                        ${file.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                                    </div>
+                                    <div>${file.fileSizeFormatted} • ${new Date(file.lastModified).toLocaleDateString()}</div>
+                                </div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        }
+
+        function updateSearchStats() {
+            const stats = documentationArchive.stats;
+            document.getElementById('searchStats').textContent = 
+                `${stats.totalFiles} documents across ${stats.totalCategories} categories available for search`;
+        }
+
+        async function searchDocs() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                hideSearchResults();
+                return;
+            }
+
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`/api/documentation/search?query=${encodeURIComponent(query)}`, {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const results = await response.json();
+                    renderSearchResults(results);
+                } else {
+                    console.error('Search failed');
+                    showError('Search failed');
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                showError('Search error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function renderSearchResults(results) {
+            const searchResults = document.getElementById('searchResults');
+            const searchResultsList = document.getElementById('searchResultsList');
+            
+            if (results.totalResults === 0) {
+                searchResultsList.innerHTML = '<p style="color: white; opacity: 0.8;">No results found for your search.</p>';
+            } else {
+                searchResultsList.innerHTML = results.matches.map(match => `
+                    <div class="search-result-item" onclick="viewFile('${match.file.fileName}')">
+                        <div class="search-result-file">
+                            ${match.file.displayName} (${match.file.category})
+                            <span style="opacity: 0.7; font-weight: normal; margin-left: 1rem;">
+                                Line ${match.lineNumber} • Score: ${match.relevanceScore.toFixed(1)}
+                            </span>
+                        </div>
+                        <div class="search-result-context">${match.context}</div>
+                    </div>
+                `).join('');
+            }
+            
+            document.getElementById('searchStats').textContent = 
+                `Found ${results.totalResults} matches in ${results.searchDurationMs.toFixed(0)}ms`;
+            
+            searchResults.style.display = 'block';
+        }
+
+        function hideSearchResults() {
+            document.getElementById('searchResults').style.display = 'none';
+            updateSearchStats();
+        }
+
+        async function viewFile(fileName) {
+            const modal = document.getElementById('fileModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const fileContent = document.getElementById('fileContent');
+            
+            modalTitle.textContent = fileName;
+            fileContent.textContent = 'Loading...';
+            modal.style.display = 'block';
+            
+            try {
+                const response = await fetch(`/api/documentation/${encodeURIComponent(fileName)}`, {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    fileContent.textContent = data.content;
+                } else {
+                    fileContent.textContent = 'Failed to load file content.';
+                }
+            } catch (error) {
+                console.error('Error loading file:', error);
+                fileContent.textContent = 'Error loading file content.';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('fileModal').style.display = 'none';
+        }
+
+        async function refreshDocs() {
+            try {
+                const response = await fetch('/api/documentation/refresh', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    await loadDocumentationArchive();
+                    hideSearchResults();
+                    document.getElementById('searchInput').value = '';
+                } else {
+                    showError('Failed to refresh documentation');
+                }
+            } catch (error) {
+                console.error('Refresh error:', error);
+                showError('Error refreshing documentation');
+            }
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function showError(message) {
+            // Simple error display - you could enhance this with a proper notification system
+            alert(message);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('fileModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
