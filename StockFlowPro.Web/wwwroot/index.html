@@ -19,6 +19,200 @@
             color: #333;
         }
 
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.15);
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            /* Hide scrollbar for webkit browsers */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* Internet Explorer 10+ */
+        }
+
+        .sidebar::-webkit-scrollbar {
+            display: none; /* Safari and Chrome */
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .sidebar-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 1.5rem;
+            right: 1.5rem;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
+        }
+
+        .sidebar-header h1 {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffd700, #ffed4e, #ffa500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .sidebar-nav {
+            padding: 1.5rem 0 2rem;
+        }
+
+        .nav-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .nav-section:last-child {
+            margin-bottom: 1rem;
+        }
+
+        .nav-section-title {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 0 1.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .nav-section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 1.5rem;
+            width: 2rem;
+            height: 2px;
+            background: linear-gradient(90deg, #ffd700, transparent);
+            border-radius: 1px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            padding: 0.875rem 1.5rem;
+            margin: 0.25rem 0.75rem;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 3px solid transparent;
+            position: relative;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.1));
+            border-radius: 12px;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: -1;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            border-left-color: #ffd700;
+            transform: translateX(4px);
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.1);
+        }
+
+        .nav-item:hover::before {
+            width: 100%;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.08));
+            color: #ffd700;
+            border-left-color: #ffd700;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2);
+            font-weight: 600;
+        }
+
+        .nav-item.active::before {
+            width: 100%;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+        }
+
+        .nav-item-icon {
+            margin-right: 0.875rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-item:hover .nav-item-icon {
+            transform: scale(1.1);
+        }
+
+        .nav-item.active .nav-item-icon {
+            transform: scale(1.15);
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.expanded {
+            margin-left: 0;
+        }
+
         .header {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -27,6 +221,28 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .mobile-menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+            display: none;
+        }
+
+        .mobile-menu-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .header h1 {
@@ -65,6 +281,21 @@
             max-width: 1400px;
             margin: 2rem auto;
             padding: 0 2rem;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
         }
 
         .dashboard-grid {
@@ -269,11 +500,300 @@
             color: #22c55e;
         }
 
+        /* Observability Dashboard Styles */
+        .observability-container {
+            display: none;
+            width: calc(100% - 280px);
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 280px;
+            z-index: 100;
+        }
+
+        .observability-container.active {
+            display: block;
+        }
+
+        .observability-container.mobile {
+            width: 100%;
+            left: 0;
+            border-radius: 0;
+        }
+
+        .observability-header {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .observability-title {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .observability-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: stretch;
+        }
+
+        .time-range-selector {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .time-range-selector:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .refresh-btn {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #333;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .grafana-iframe {
+            width: 100%;
+            height: calc(100% - 120px);
+            border: none;
+            background: #1a1a1a;
+        }
+
+        .observability-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .observability-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .observability-tab {
+            padding: 0.75rem 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            min-width: fit-content;
+        }
+
+        .observability-tab:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .observability-tab.active {
+            color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+            border-bottom-color: #ffd700;
+        }
+
+        .observability-content {
+            height: calc(100% - 180px);
+            overflow: hidden;
+        }
+
+        .logs-container {
+            height: 100%;
+            padding: 0.75rem;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 215, 0, 0.3) transparent;
+        }
+
+        .logs-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .logs-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .logs-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 215, 0, 0.3);
+            border-radius: 3px;
+        }
+
+        .log-entry {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .log-entry:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .log-timestamp {
+            color: #ffd700;
+            font-weight: 600;
+            margin-right: 0.5rem;
+            display: inline-block;
+            font-size: 0.75rem;
+        }
+
+        .log-level {
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+            display: inline-block;
+        }
+
+        .log-level.info {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+
+        .log-level.warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+        }
+
+        .log-level.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        .log-level.debug {
+            background: rgba(156, 163, 175, 0.2);
+            color: #d1d5db;
+        }
+
+        .log-message {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 0.75rem;
+            padding: 0.75rem;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            height: fit-content;
+        }
+
+        .metric-title {
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffd700;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-description {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            line-height: 1.3;
+        }
+
+        .loading-spinner {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            padding: 1rem;
+        }
+
         @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
             .header {
                 padding: 1rem;
-                flex-direction: column;
-                gap: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
             }
 
             .container {
@@ -287,181 +807,559 @@
             .card-actions {
                 flex-direction: column;
             }
+
+            .user-info {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: flex-end;
+            }
+
+            /* Observability Dashboard Mobile Styles */
+            .observability-container {
+                left: 0;
+                border-radius: 0;
+            }
+
+            .observability-header {
+                padding: 0.75rem 1rem;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .observability-title {
+                font-size: 1.1rem;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .observability-controls {
+                flex-direction: row;
+                gap: 0.5rem;
+            }
+
+            .time-range-selector,
+            .refresh-btn {
+                width: auto;
+                flex: 1;
+                font-size: 0.8rem;
+                padding: 0.4rem 0.75rem;
+            }
+
+            .observability-tabs {
+                padding: 0 0.5rem;
+            }
+
+            .observability-tab {
+                padding: 0.6rem 0.75rem;
+                font-size: 0.75rem;
+                min-width: auto;
+                flex: 1;
+                text-align: center;
+            }
+
+            .observability-content {
+                height: calc(100% - 160px);
+            }
+
+            .grafana-iframe {
+                height: calc(100% - 100px);
+            }
+
+            .logs-container {
+                padding: 0.5rem;
+            }
+
+            .log-entry {
+                padding: 0.5rem;
+                font-size: 0.75rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .log-timestamp {
+                font-size: 0.7rem;
+                margin-right: 0.3rem;
+                display: block;
+                margin-bottom: 0.2rem;
+            }
+
+            .log-level {
+                font-size: 0.65rem;
+                padding: 0.15rem 0.3rem;
+                margin-right: 0.3rem;
+            }
+
+            .log-message {
+                font-size: 0.75rem;
+                line-height: 1.3;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+                padding: 0.5rem;
+            }
+
+            .metric-card {
+                padding: 0.75rem;
+            }
+
+            .metric-title {
+                font-size: 0.9rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .metric-value {
+                font-size: 1.25rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .metric-description {
+                font-size: 0.8rem;
+            }
+
+            .loading-spinner {
+                height: 150px;
+                padding: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .quick-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            /* Extra small mobile adjustments for Observability */
+            .observability-header {
+                padding: 0.5rem 0.75rem;
+            }
+
+            .observability-title {
+                font-size: 1rem;
+                gap: 0.5rem;
+            }
+
+            .observability-controls {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .time-range-selector,
+            .refresh-btn {
+                width: 100%;
+                font-size: 0.75rem;
+                padding: 0.4rem 0.5rem;
+            }
+
+            .observability-tab {
+                padding: 0.5rem 0.5rem;
+                font-size: 0.7rem;
+            }
+
+            .observability-content {
+                height: calc(100% - 180px);
+            }
+
+            .log-entry {
+                padding: 0.4rem;
+                font-size: 0.7rem;
+            }
+
+            .log-timestamp {
+                font-size: 0.65rem;
+            }
+
+            .log-level {
+                font-size: 0.6rem;
+                padding: 0.1rem 0.25rem;
+            }
+
+            .log-message {
+                font-size: 0.7rem;
+            }
+
+            .metric-card {
+                padding: 0.6rem;
+            }
+
+            .metric-title {
+                font-size: 0.85rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .metric-value {
+                font-size: 1.1rem;
+                margin-bottom: 0.3rem;
+            }
+
+            .metric-description {
+                font-size: 0.75rem;
+                line-height: 1.2;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>StockFlow Pro Backend</h1>
-        <div class="user-info">
-            <span id="user-welcome">Loading...</span>
-            <button class="logout-btn" onclick="logout()">Logout</button>
-        </div>
-    </div>
-
-    <div class="container">
-        <div id="error-message" class="message error-message"></div>
-        <div id="success-message" class="message success-message"></div>
-
-        <div class="quick-stats">
-            <div class="stat-card">
-                <div class="stat-value" id="api-status">
-                    <span class="loading"></span>
-                </div>
-                <div class="stat-label">API Status</div>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1>StockFlow Pro</h1>
+                <button class="sidebar-toggle" onclick="toggleSidebar()">✕</button>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="db-status">
-                    <span class="loading"></span>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Overview</div>
+                    <a href="#dashboard" class="nav-item active" onclick="setActiveNav(this)">
+                        <span class="nav-item-icon">📊</span>
+                        Dashboard
+                    </a>
+                    <a href="#system-status" class="nav-item" onclick="setActiveNav(this)">
+                        <span class="nav-item-icon">🩺</span>
+                        System Status
+                    </a>
                 </div>
-                <div class="stat-label">Database</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="auth-status">
-                    <span class="loading"></span>
-                </div>
-                <div class="stat-label">Authentication</div>
-            </div>
-        </div>
 
-        <div class="dashboard-grid">
-            <div class="card">
-                <h3>🔐 Authentication & Authorization</h3>
-                <p>User authentication, registration, password management, and session handling.</p>
-                <div class="card-actions">
-                    <a href="/api/auth" class="btn btn-primary">Auth API</a>
-                    <a href="/api/auth-test" class="btn btn-secondary">Auth Test</a>
-                    <a href="/api/enhanced-auth" class="btn btn-secondary">Enhanced Auth</a>
+                <div class="nav-section">
+                    <div class="nav-section-title">Core APIs</div>
+                    <a href="/api/auth" class="nav-item" onclick="setActiveNav(this)">
+                        <span class="nav-item-icon">🔐</span>
+                        Authentication
+                    </a>
+                    <a href="/api/users" class="nav-item" onclick="setActiveNav(this)">
+                        <span class="nav-item-icon">👥</span>
+                        User Management
+                    </a>
+                    <a href="/api/products" class="nav-item" onclick="setActiveNav(this)">
+                        <span class="nav-item-icon">🏪</span>
+                        Products & Inventory
+                    </a>
+                    <a href="/api/roles" class="nav-item" onclick="setActiveNav(this)">
+                        <span class="nav-item-icon">🎭</span>
+                        Roles & Permissions
+                    </a>
                 </div>
-            </div>
 
-            <div class="card">
-                <h3>👥 User Management</h3>
-                <p>Comprehensive user management with CRUD operations, permissions, and profile management.</p>
-                <div class="card-actions">
-                    <a href="/api/users" class="btn btn-primary">Users API</a>
-                    <a href="/api/optimized-users" class="btn btn-secondary">Optimized Users</a>
-                    <a href="/api/hybrid/users" class="btn btn-secondary">Hybrid Users</a>
-                    <a href="/api/v2/users" class="btn btn-secondary">Users v2</a>
+                <div class="nav-section">
+                    <div class="nav-section-title">Business</div>
+                    <a href="/api/invoices" class="nav-item" onclick="setActiveNav(this)">
+                        <span class="nav-item-icon">💳</span>
+                        Invoices & Billing
+                    </a>
+                    <a href="/api/reports" class="nav-item" onclick="setActiveNav(this)">
+                        <span class="nav-item-icon">📊</span>
+                        Reports & Analytics
+                    </a>
                 </div>
-            </div>
 
-            <div class="card">
-                <h3>🏪 Product & Inventory</h3>
-                <p>Product catalog management, inventory tracking, stock adjustments, and low stock alerts.</p>
-                <div class="card-actions">
-                    <a href="/api/products" class="btn btn-primary">Products API</a>
-                    <a href="/api/products/all" class="btn btn-secondary">All Products</a>
-                    <a href="/api/products/low-stock" class="btn btn-secondary">Low Stock</a>
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <a href="/api/admin" class="nav-item" onclick="setActiveNav(this)">
+                        <span class="nav-item-icon">🔧</span>
+                        Administration
+                    </a>
+                    <a href="/api/diagnostics/health" class="nav-item" onclick="setActiveNav(this)">
+                        <span class="nav-item-icon">🩺</span>
+                        Diagnostics
+                    </a>
+                    <a href="/hubs/stockflowhub" class="nav-item" onclick="setActiveNav(this)">
+                        <span class="nav-item-icon">🔔</span>
+                        Real-time Hub
+                    </a>
                 </div>
-            </div>
 
-            <div class="card">
-                <h3>🎭 Roles & Permissions</h3>
-                <p>Role-based access control, permission management, and role upgrade requests.</p>
-                <div class="card-actions">
-                    <a href="/api/roles" class="btn btn-primary">Roles API</a>
-                    <a href="/api/permissions" class="btn btn-secondary">Permissions</a>
-                    <a href="/api/role-management" class="btn btn-secondary">Role Management</a>
-                    <a href="/api/role-upgrade-request" class="btn btn-secondary">Role Upgrades</a>
+                <div class="nav-section">
+                    <div class="nav-section-title">Observability</div>
+                    <a href="#observability-dashboard" class="nav-item" onclick="showObservabilityDashboard(this)">
+                        <span class="nav-item-icon">📈</span>
+                        Metrics & Logs
+                    </a>
+                    <a href="#api-logs" class="nav-item" onclick="showApiLogs(this)">
+                        <span class="nav-item-icon">📋</span>
+                        API Documentation Logs
+                    </a>
+                    <a href="#performance" class="nav-item" onclick="showPerformanceMetrics(this)">
+                        <span class="nav-item-icon">⚡</span>
+                        Performance
+                    </a>
+                    <a href="#alerts" class="nav-item" onclick="showAlerts(this)">
+                        <span class="nav-item-icon">🚨</span>
+                        Alerts & Monitoring
+                    </a>
                 </div>
-            </div>
 
-            <div class="card">
-                <h3>💳 Invoices & Billing</h3>
-                <p>Invoice generation, management, item tracking, and export functionality.</p>
-                <div class="card-actions">
-                    <a href="/api/invoices" class="btn btn-primary">Invoices API</a>
-                    <a href="/api/invoices/my-invoices" class="btn btn-secondary">My Invoices</a>
-                    <a href="/api/invoices/date-range" class="btn btn-secondary">Date Range</a>
+                <div class="nav-section">
+                    <div class="nav-section-title">Documentation</div>
+                    <a href="/swagger" class="nav-item" onclick="setActiveNav(this)">
+                        <span class="nav-item-icon">📚</span>
+                        API Documentation
+                    </a>
+                    <a href="/docs.html" class="nav-item" onclick="setActiveNav(this)">
+                        <span class="nav-item-icon">📖</span>
+                        System Docs
+                    </a>
                 </div>
-            </div>
+            </nav>
+        </aside>
 
-            <div class="card">
-                <h3>📊 Reports & Analytics</h3>
-                <p>Comprehensive reporting system with inventory, sales, trends, and KPI analytics.</p>
-                <div class="card-actions">
-                    <a href="/api/reports" class="btn btn-primary">Reports API</a>
-                    <a href="/api/reports/dashboard" class="btn btn-secondary">Dashboard</a>
-                    <a href="/api/reports/kpi" class="btn btn-secondary">KPI Metrics</a>
+        <!-- Sidebar Overlay for Mobile -->
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <!-- Main Content -->
+        <main class="main-content" id="main-content">
+            <div class="header">
+                <div class="header-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                    <h1>Backend Dashboard</h1>
                 </div>
-            </div>
-
-            <div class="card">
-                <h3>👤 Profile Management</h3>
-                <p>User profile operations, password changes, photo uploads, and personal settings.</p>
-                <div class="card-actions">
-                    <a href="/api/profile" class="btn btn-primary">Profile API</a>
-                    <a href="/api/profile/debug" class="btn btn-secondary">Debug Info</a>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>🔄 User Synchronization</h3>
-                <p>User data synchronization, validation, and audit trail management.</p>
-                <div class="card-actions">
-                    <a href="/api/user-synchronization" class="btn btn-primary">Sync API</a>
-                    <a href="/api/user-synchronization/sync-self" class="btn btn-secondary">Self Sync</a>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>🔧 System Administration</h3>
-                <p>Administrative operations, system statistics, and product management tools.</p>
-                <div class="card-actions">
-                    <a href="/api/admin" class="btn btn-primary">Admin API</a>
-                    <a href="/api/admin/product-stats" class="btn btn-secondary">Product Stats</a>
+                <div class="user-info">
+                    <span id="user-welcome">Loading...</span>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
                 </div>
             </div>
 
-            <div class="card">
-                <h3>🩺 Diagnostics & Health</h3>
-                <p>System health monitoring, database diagnostics, and error logging.</p>
-                <div class="card-actions">
-                    <a href="/api/diagnostics/health" class="btn btn-primary">Health Check</a>
-                    <a href="/api/diagnostics/database-health" class="btn btn-secondary">DB Health</a>
-                    <a href="/api/diagnostics/auth-status" class="btn btn-secondary">Auth Status</a>
+            <div class="container">
+                <div id="error-message" class="message error-message"></div>
+                <div id="success-message" class="message success-message"></div>
+
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="api-status">
+                            <span class="loading"></span>
+                        </div>
+                        <div class="stat-label">API Status</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="db-status">
+                            <span class="loading"></span>
+                        </div>
+                        <div class="stat-label">Database</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="auth-status">
+                            <span class="loading"></span>
+                        </div>
+                        <div class="stat-label">Authentication</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3>🔐 Authentication & Authorization</h3>
+                        <p>User authentication, registration, password management, and session handling.</p>
+                        <div class="card-actions">
+                            <a href="/api/auth" class="btn btn-primary">Auth API</a>
+                            <a href="/api/auth-test" class="btn btn-secondary">Auth Test</a>
+                            <a href="/api/enhanced-auth" class="btn btn-secondary">Enhanced Auth</a>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>👥 User Management</h3>
+                        <p>Comprehensive user management with CRUD operations, permissions, and profile management.</p>
+                        <div class="card-actions">
+                            <a href="/api/users" class="btn btn-primary">Users API</a>
+                            <a href="/api/optimized-users" class="btn btn-secondary">Optimized Users</a>
+                            <a href="/api/hybrid/users" class="btn btn-secondary">Hybrid Users</a>
+                            <a href="/api/v2/users" class="btn btn-secondary">Users v2</a>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🏪 Product & Inventory</h3>
+                        <p>Product catalog management, inventory tracking, stock adjustments, and low stock alerts.</p>
+                        <div class="card-actions">
+                            <a href="/api/products" class="btn btn-primary">Products API</a>
+                            <a href="/api/products/all" class="btn btn-secondary">All Products</a>
+                            <a href="/api/products/low-stock" class="btn btn-secondary">Low Stock</a>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🎭 Roles & Permissions</h3>
+                        <p>Role-based access control, permission management, and role upgrade requests.</p>
+                        <div class="card-actions">
+                            <a href="/api/roles" class="btn btn-primary">Roles API</a>
+                            <a href="/api/permissions" class="btn btn-secondary">Permissions</a>
+                            <a href="/api/role-management" class="btn btn-secondary">Role Management</a>
+                            <a href="/api/role-upgrade-request" class="btn btn-secondary">Role Upgrades</a>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>💳 Invoices & Billing</h3>
+                        <p>Invoice generation, management, item tracking, and export functionality.</p>
+                        <div class="card-actions">
+                            <a href="/api/invoices" class="btn btn-primary">Invoices API</a>
+                            <a href="/api/invoices/my-invoices" class="btn btn-secondary">My Invoices</a>
+                            <a href="/api/invoices/date-range" class="btn btn-secondary">Date Range</a>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>📊 Reports & Analytics</h3>
+                        <p>Comprehensive reporting system with inventory, sales, trends, and KPI analytics.</p>
+                        <div class="card-actions">
+                            <a href="/api/reports" class="btn btn-primary">Reports API</a>
+                            <a href="/api/reports/dashboard" class="btn btn-secondary">Dashboard</a>
+                            <a href="/api/reports/kpi" class="btn btn-secondary">KPI Metrics</a>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>👤 Profile Management</h3>
+                        <p>User profile operations, password changes, photo uploads, and personal settings.</p>
+                        <div class="card-actions">
+                            <a href="/api/profile" class="btn btn-primary">Profile API</a>
+                            <a href="/api/profile/debug" class="btn btn-secondary">Debug Info</a>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🔄 User Synchronization</h3>
+                        <p>User data synchronization, validation, and audit trail management.</p>
+                        <div class="card-actions">
+                            <a href="/api/user-synchronization" class="btn btn-primary">Sync API</a>
+                            <a href="/api/user-synchronization/sync-self" class="btn btn-secondary">Self Sync</a>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🔧 System Administration</h3>
+                        <p>Administrative operations, system statistics, and product management tools.</p>
+                        <div class="card-actions">
+                            <a href="/api/admin" class="btn btn-primary">Admin API</a>
+                            <a href="/api/admin/product-stats" class="btn btn-secondary">Product Stats</a>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🩺 Diagnostics & Health</h3>
+                        <p>System health monitoring, database diagnostics, and error logging.</p>
+                        <div class="card-actions">
+                            <a href="/api/diagnostics/health" class="btn btn-primary">Health Check</a>
+                            <a href="/api/diagnostics/database-health" class="btn btn-secondary">DB Health</a>
+                            <a href="/api/diagnostics/auth-status" class="btn btn-secondary">Auth Status</a>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>📚 API Documentation</h3>
+                        <p>Comprehensive API documentation, OpenAPI specs, and endpoint information.</p>
+                        <div class="card-actions">
+                            <a href="/api/documentation" class="btn btn-primary">Docs API</a>
+                            <a href="/api/documentation/openapi" class="btn btn-secondary">OpenAPI</a>
+                            <a href="/api/documentation/postman" class="btn btn-secondary">Postman</a>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🔔 Real-time Communication</h3>
+                        <p>SignalR hubs for real-time notifications, stock updates, and live communication.</p>
+                        <div class="card-actions">
+                            <a href="/hubs/stockflowhub" class="btn btn-primary">SignalR Hub</a>
+                            <a href="/stockflowhub" class="btn btn-secondary">Stock Hub</a>
+                            <a href="/notifications" class="btn btn-secondary">Notifications</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="documentation-section">
+                    <h2>📚 Documentation & Resources</h2>
+                    <div class="doc-links">
+                        <a href="/swagger" class="doc-link">
+                            <h4>🔗 API Documentation</h4>
+                            <p>Interactive Swagger documentation for all API endpoints with authentication support.</p>
+                        </a>
+                        <a href="/docs.html" class="doc-link">
+                            <h4>📖 System Documentation</h4>
+                            <p>Comprehensive documentation archive including guides, tutorials, and technical specifications.</p>
+                        </a>
+                        <a href="/api-docs.html" class="doc-link">
+                            <h4>🛠️ Developer Resources</h4>
+                            <p>API integration guides, code examples, and developer tools for external applications.</p>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Observability Dashboard -->
+                <div class="observability-container" id="observability-container">
+                    <div class="observability-header">
+                        <div class="observability-title">
+                            <span>📈</span>
+                            <span id="observability-title-text">Observability Dashboard</span>
+                        </div>
+                        <div class="observability-controls">
+                            <select class="time-range-selector" id="time-range-selector">
+                                <option value="5m">Last 5 minutes</option>
+                                <option value="15m">Last 15 minutes</option>
+                                <option value="1h" selected>Last 1 hour</option>
+                                <option value="6h">Last 6 hours</option>
+                                <option value="24h">Last 24 hours</option>
+                                <option value="7d">Last 7 days</option>
+                            </select>
+                            <button class="refresh-btn" onclick="refreshObservabilityData()">🔄 Refresh</button>
+                        </div>
+                    </div>
+                    
+                    <div class="observability-tabs">
+                        <button class="observability-tab active" onclick="switchObservabilityTab('grafana', this)">📊 Grafana Dashboard</button>
+                        <button class="observability-tab" onclick="switchObservabilityTab('logs', this)">📋 API Logs</button>
+                        <button class="observability-tab" onclick="switchObservabilityTab('metrics', this)">📈 Metrics</button>
+                        <button class="observability-tab" onclick="switchObservabilityTab('alerts', this)">🚨 Alerts</button>
+                    </div>
+                    
+                    <div class="observability-content">
+                        <!-- Grafana Dashboard Tab -->
+                        <div id="grafana-tab" class="tab-content active">
+                            <iframe 
+                                id="grafana-iframe"
+                                class="grafana-iframe" 
+                                src="about:blank"
+                                title="Grafana Dashboard">
+                            </iframe>
+                        </div>
+                        
+                        <!-- API Logs Tab -->
+                        <div id="logs-tab" class="tab-content" style="display: none;">
+                            <div class="logs-container" id="logs-container">
+                                <div class="loading-spinner">
+                                    <span class="loading"></span>
+                                    <span style="margin-left: 1rem;">Loading API documentation logs...</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Metrics Tab -->
+                        <div id="metrics-tab" class="tab-content" style="display: none;">
+                            <div class="metrics-grid" id="metrics-grid">
+                                <div class="loading-spinner">
+                                    <span class="loading"></span>
+                                    <span style="margin-left: 1rem;">Loading metrics...</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Alerts Tab -->
+                        <div id="alerts-tab" class="tab-content" style="display: none;">
+                            <div class="metrics-grid" id="alerts-grid">
+                                <div class="loading-spinner">
+                                    <span class="loading"></span>
+                                    <span style="margin-left: 1rem;">Loading alerts...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="card">
-                <h3>📚 API Documentation</h3>
-                <p>Comprehensive API documentation, OpenAPI specs, and endpoint information.</p>
-                <div class="card-actions">
-                    <a href="/api/documentation" class="btn btn-primary">Docs API</a>
-                    <a href="/api/documentation/openapi" class="btn btn-secondary">OpenAPI</a>
-                    <a href="/api/documentation/postman" class="btn btn-secondary">Postman</a>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>🔔 Real-time Communication</h3>
-                <p>SignalR hubs for real-time notifications, stock updates, and live communication.</p>
-                <div class="card-actions">
-                    <a href="/hubs/stockflowhub" class="btn btn-primary">SignalR Hub</a>
-                    <a href="/stockflowhub" class="btn btn-secondary">Stock Hub</a>
-                    <a href="/notifications" class="btn btn-secondary">Notifications</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="documentation-section">
-            <h2>📚 Documentation & Resources</h2>
-            <div class="doc-links">
-                <a href="/swagger" class="doc-link">
-                    <h4>🔗 API Documentation</h4>
-                    <p>Interactive Swagger documentation for all API endpoints with authentication support.</p>
-                </a>
-                <a href="/docs.html" class="doc-link">
-                    <h4>📖 System Documentation</h4>
-                    <p>Comprehensive documentation archive including guides, tutorials, and technical specifications.</p>
-                </a>
-                <a href="/api-docs.html" class="doc-link">
-                    <h4>🛠️ Developer Resources</h4>
-                    <p>API integration guides, code examples, and developer tools for external applications.</p>
-                </a>
-            </div>
-        </div>
+        </main>
     </div>
 
     <script>
@@ -491,6 +1389,37 @@
             setTimeout(() => {
                 successDiv.style.display = 'none';
             }, 3000);
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const mainContent = document.getElementById('main-content');
+            
+            if (window.innerWidth <= 768) {
+                // Mobile behavior
+                sidebar.classList.toggle('mobile-open');
+                overlay.classList.toggle('active');
+            } else {
+                // Desktop behavior
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+            }
+        }
+
+        function setActiveNav(element) {
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to clicked item
+            element.classList.add('active');
+            
+            // Close sidebar on mobile after selection
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
         }
 
         async function loadUserInfo() {
@@ -563,6 +1492,23 @@
             }
         }
 
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const mainContent = document.getElementById('main-content');
+            
+            if (window.innerWidth > 768) {
+                // Reset mobile classes when switching to desktop
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.remove('active');
+            } else {
+                // Reset desktop classes when switching to mobile
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('expanded');
+            }
+        });
+
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Dashboard loaded');
@@ -578,6 +1524,414 @@
                 updateSystemStatus();
             }
         });
+
+        // Observability Functions
+        function showObservabilityDashboard(element) {
+            setActiveNav(element);
+            hideMainDashboard();
+            showObservabilityContainer();
+            document.getElementById('observability-title-text').textContent = 'Observability Dashboard';
+            loadGrafanaDashboard();
+        }
+
+        function showApiLogs(element) {
+            setActiveNav(element);
+            hideMainDashboard();
+            showObservabilityContainer();
+            document.getElementById('observability-title-text').textContent = 'API Documentation Logs';
+            switchObservabilityTab('logs', document.querySelector('.observability-tab:nth-child(2)'));
+            loadApiLogs();
+        }
+
+        function showPerformanceMetrics(element) {
+            setActiveNav(element);
+            hideMainDashboard();
+            showObservabilityContainer();
+            document.getElementById('observability-title-text').textContent = 'Performance Metrics';
+            switchObservabilityTab('metrics', document.querySelector('.observability-tab:nth-child(3)'));
+            loadPerformanceMetrics();
+        }
+
+        function showAlerts(element) {
+            setActiveNav(element);
+            hideMainDashboard();
+            showObservabilityContainer();
+            document.getElementById('observability-title-text').textContent = 'Alerts & Monitoring';
+            switchObservabilityTab('alerts', document.querySelector('.observability-tab:nth-child(4)'));
+            loadAlerts();
+        }
+
+        function hideMainDashboard() {
+            document.querySelector('.quick-stats').style.display = 'none';
+            document.querySelector('.dashboard-grid').style.display = 'none';
+            document.querySelector('.documentation-section').style.display = 'none';
+        }
+
+        function showMainDashboard() {
+            document.querySelector('.quick-stats').style.display = 'grid';
+            document.querySelector('.dashboard-grid').style.display = 'grid';
+            document.querySelector('.documentation-section').style.display = 'block';
+            document.getElementById('observability-container').classList.remove('active');
+        }
+
+        function showObservabilityContainer() {
+            const container = document.getElementById('observability-container');
+            container.classList.add('active');
+            
+            // Add mobile class if on mobile device
+            if (window.innerWidth <= 768) {
+                container.classList.add('mobile');
+            } else {
+                container.classList.remove('mobile');
+            }
+        }
+
+        function switchObservabilityTab(tabName, element) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.observability-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            element.classList.add('active');
+            
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').style.display = 'block';
+            
+            // Load content based on tab
+            switch(tabName) {
+                case 'grafana':
+                    loadGrafanaDashboard();
+                    break;
+                case 'logs':
+                    loadApiLogs();
+                    break;
+                case 'metrics':
+                    loadPerformanceMetrics();
+                    break;
+                case 'alerts':
+                    loadAlerts();
+                    break;
+            }
+        }
+
+        function loadGrafanaDashboard() {
+            const iframe = document.getElementById('grafana-iframe');
+            
+            console.log('Loading Grafana dashboard...');
+            
+            // Check if Grafana is available at localhost:3000
+            fetch('http://localhost:3000/api/health')
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Grafana is available, loading dashboard...');
+                        // Load the actual Grafana dashboard
+                        iframe.src = 'http://localhost:3000/d/stockflow/stockflow-pro?orgId=1&refresh=5s&kiosk=tv';
+                    } else {
+                        throw new Error('Grafana not available');
+                    }
+                })
+                .catch(error => {
+                    console.log('Grafana not available, showing setup instructions:', error);
+                    // Fall back to placeholder with setup instructions
+                    const placeholderUrl = '/api/observability/grafana-placeholder';
+                    iframe.src = placeholderUrl;
+                });
+            
+            iframe.onload = function() {
+                console.log('Iframe loaded successfully');
+            };
+            
+            iframe.onerror = function(error) {
+                console.error('Iframe load error:', error);
+                // Fall back to placeholder on error
+                iframe.src = '/api/observability/grafana-placeholder';
+            };
+        }
+
+        async function loadApiLogs() {
+            const container = document.getElementById('logs-container');
+            
+            try {
+                // Simulate API call to get logs
+                const response = await fetch('/api/observability/logs', {
+                    credentials: 'include'
+                });
+                
+                let logs;
+                if (response.ok) {
+                    logs = await response.json();
+                } else {
+                    // Generate mock logs for demonstration
+                    logs = generateMockApiLogs();
+                }
+                
+                container.innerHTML = logs.map(log => `
+                    <div class="log-entry">
+                        <span class="log-timestamp">${log.timestamp}</span>
+                        <span class="log-level ${log.level}">${log.level.toUpperCase()}</span>
+                        <span class="log-message">${log.message}</span>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Failed to load API logs:', error);
+                container.innerHTML = `
+                    <div class="log-entry">
+                        <span class="log-timestamp">${new Date().toISOString()}</span>
+                        <span class="log-level error">ERROR</span>
+                        <span class="log-message">Failed to load API documentation logs: ${error.message}</span>
+                    </div>
+                `;
+            }
+        }
+
+        function generateMockApiLogs() {
+            const levels = ['info', 'warning', 'error', 'debug'];
+            const endpoints = ['/api/documentation', '/api/auth', '/api/products', '/api/users', '/api/reports'];
+            const logs = [];
+            
+            for (let i = 0; i < 50; i++) {
+                const timestamp = new Date(Date.now() - Math.random() * 3600000).toISOString();
+                const level = levels[Math.floor(Math.random() * levels.length)];
+                const endpoint = endpoints[Math.floor(Math.random() * endpoints.length)];
+                const statusCode = level === 'error' ? 500 : (level === 'warning' ? 404 : 200);
+                const responseTime = Math.floor(Math.random() * 1000) + 10;
+                
+                logs.push({
+                    timestamp,
+                    level,
+                    message: `${endpoint} - ${statusCode} - ${responseTime}ms - API documentation accessed by user ${Math.floor(Math.random() * 1000)}`
+                });
+            }
+            
+            return logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        }
+
+        async function loadPerformanceMetrics() {
+            const container = document.getElementById('metrics-grid');
+            
+            try {
+                // Simulate API call to get metrics
+                const response = await fetch('/api/observability/metrics', {
+                    credentials: 'include'
+                });
+                
+                let metrics;
+                if (response.ok) {
+                    metrics = await response.json();
+                } else {
+                    // Generate mock metrics for demonstration
+                    metrics = generateMockMetrics();
+                }
+                
+                container.innerHTML = metrics.map(metric => `
+                    <div class="metric-card">
+                        <div class="metric-title">
+                            <span>${metric.icon}</span>
+                            <span>${metric.title}</span>
+                        </div>
+                        <div class="metric-value">${metric.value}</div>
+                        <div class="metric-description">${metric.description}</div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Failed to load metrics:', error);
+                container.innerHTML = `
+                    <div class="metric-card">
+                        <div class="metric-title">❌ Error</div>
+                        <div class="metric-value">N/A</div>
+                        <div class="metric-description">Failed to load performance metrics</div>
+                    </div>
+                `;
+            }
+        }
+
+        function generateMockMetrics() {
+            return [
+                {
+                    icon: '🚀',
+                    title: 'API Response Time',
+                    value: '125ms',
+                    description: 'Average response time across all endpoints'
+                },
+                {
+                    icon: '📊',
+                    title: 'Requests/Minute',
+                    value: '1,247',
+                    description: 'Current API request rate'
+                },
+                {
+                    icon: '💾',
+                    title: 'Memory Usage',
+                    value: '68%',
+                    description: 'Current application memory consumption'
+                },
+                {
+                    icon: '🔄',
+                    title: 'CPU Usage',
+                    value: '42%',
+                    description: 'Current CPU utilization'
+                },
+                {
+                    icon: '🗄️',
+                    title: 'Database Connections',
+                    value: '15/50',
+                    description: 'Active database connections'
+                },
+                {
+                    icon: '❌',
+                    title: 'Error Rate',
+                    value: '0.3%',
+                    description: 'Percentage of failed requests'
+                },
+                {
+                    icon: '👥',
+                    title: 'Active Users',
+                    value: '234',
+                    description: 'Currently authenticated users'
+                },
+                {
+                    icon: '📈',
+                    title: 'Uptime',
+                    value: '99.9%',
+                    description: 'System availability this month'
+                }
+            ];
+        }
+
+        async function loadAlerts() {
+            const container = document.getElementById('alerts-grid');
+            
+            try {
+                // Simulate API call to get alerts
+                const response = await fetch('/api/observability/alerts', {
+                    credentials: 'include'
+                });
+                
+                let alerts;
+                if (response.ok) {
+                    alerts = await response.json();
+                } else {
+                    // Generate mock alerts for demonstration
+                    alerts = generateMockAlerts();
+                }
+                
+                container.innerHTML = alerts.map(alert => `
+                    <div class="metric-card" style="border-left: 4px solid ${alert.color};">
+                        <div class="metric-title">
+                            <span>${alert.icon}</span>
+                            <span>${alert.title}</span>
+                        </div>
+                        <div class="metric-value" style="color: ${alert.color};">${alert.status}</div>
+                        <div class="metric-description">${alert.description}</div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Failed to load alerts:', error);
+                container.innerHTML = `
+                    <div class="metric-card">
+                        <div class="metric-title">❌ Error</div>
+                        <div class="metric-value">N/A</div>
+                        <div class="metric-description">Failed to load alerts</div>
+                    </div>
+                `;
+            }
+        }
+
+        function generateMockAlerts() {
+            return [
+                {
+                    icon: '🟢',
+                    title: 'API Health',
+                    status: 'HEALTHY',
+                    description: 'All API endpoints responding normally',
+                    color: '#22c55e'
+                },
+                {
+                    icon: '🟡',
+                    title: 'Database Performance',
+                    status: 'WARNING',
+                    description: 'Query response time above threshold (>500ms)',
+                    color: '#fbbf24'
+                },
+                {
+                    icon: '🟢',
+                    title: 'Memory Usage',
+                    status: 'NORMAL',
+                    description: 'Memory consumption within acceptable limits',
+                    color: '#22c55e'
+                },
+                {
+                    icon: '🔴',
+                    title: 'Disk Space',
+                    status: 'CRITICAL',
+                    description: 'Log partition at 85% capacity',
+                    color: '#ef4444'
+                },
+                {
+                    icon: '🟢',
+                    title: 'Authentication Service',
+                    status: 'OPERATIONAL',
+                    description: 'User authentication working normally',
+                    color: '#22c55e'
+                },
+                {
+                    icon: '🟡',
+                    title: 'External API',
+                    status: 'DEGRADED',
+                    description: 'Third-party service experiencing intermittent issues',
+                    color: '#fbbf24'
+                }
+            ];
+        }
+
+        function refreshObservabilityData() {
+            const activeTab = document.querySelector('.observability-tab.active');
+            const tabName = activeTab.textContent.toLowerCase();
+            
+            if (tabName.includes('grafana')) {
+                loadGrafanaDashboard();
+            } else if (tabName.includes('logs')) {
+                loadApiLogs();
+            } else if (tabName.includes('metrics')) {
+                loadPerformanceMetrics();
+            } else if (tabName.includes('alerts')) {
+                loadAlerts();
+            }
+            
+            showSuccess('Observability data refreshed successfully');
+        }
+
+        // Override setActiveNav for main dashboard items
+        function setActiveNav(element) {
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to clicked item
+            element.classList.add('active');
+            
+            // Check if it's a main dashboard item (not observability)
+            const href = element.getAttribute('href');
+            if (href && !href.startsWith('#observability') && !href.startsWith('#api-logs') && 
+                !href.startsWith('#performance') && !href.startsWith('#alerts')) {
+                showMainDashboard();
+            }
+            
+            // Close sidebar on mobile after selection
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
+        }
     </script>
 </body>
 </html>

@@ -87,7 +87,7 @@ const AdminPanel: React.FC = () => {
                     </div>
 
                     {/* Admin Cards Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                         {adminCards.map((card, index) => {
                             const Icon = card.icon;
                             return (
@@ -104,7 +104,7 @@ const AdminPanel: React.FC = () => {
                                     {/* Top Accent Bar */}
                                     <div className={`h-1 w-full ${card.color.replace('bg-', 'bg-gradient-to-r from-').replace('-500', '-400 to-').replace('blue', 'blue').replace('green', 'green').replace('purple', 'purple').replace('orange', 'orange').replace('red', 'red')}-600`}></div>
                                     
-                                    <div className="relative p-8">
+                                    <div className="relative p-4 sm:p-6 lg:p-8">
                                         {/* Icon Section */}
                                         <div className="flex items-start justify-between mb-6">
                                             <div className="relative">
@@ -195,53 +195,55 @@ const AdminPanel: React.FC = () => {
 
                     {/* System Status */}
                     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                        <div className="bg-gradient-to-r from-gray-50 to-white p-6 border-b border-gray-100">
-                            <div className="flex items-center space-x-3">
-                                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                                <h2 className="text-xl font-bold text-gray-900">
-                                    System Status
-                                </h2>
-                                <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full uppercase tracking-wide">
+                        <div className="bg-gradient-to-r from-gray-50 to-white p-4 sm:p-6 border-b border-gray-100">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-3">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                    <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+                                        System Status
+                                    </h2>
+                                </div>
+                                <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full uppercase tracking-wide self-start sm:self-auto">
                                     All Systems Operational
                                 </span>
                             </div>
                         </div>
-                        <div className="p-6">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="group relative bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 border border-green-200">
+                        <div className="p-4 sm:p-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                                <div className="group relative bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 border border-green-200">
                                     <div className="flex items-center justify-between mb-4">
-                                        <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
-                                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                                            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-3xl font-bold text-green-700 group-hover:scale-110 transition-transform duration-300">
+                                            <div className="text-2xl sm:text-3xl font-bold text-green-700 group-hover:scale-110 transition-transform duration-300">
                                                 99.9%
                                             </div>
-                                            <div className="text-sm font-semibold text-green-600 uppercase tracking-wide">System Uptime</div>
+                                            <div className="text-xs sm:text-sm font-semibold text-green-600 uppercase tracking-wide">System Uptime</div>
                                         </div>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <div className="flex-1 bg-green-200 rounded-full h-2">
                                             <div className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full" style={{width: '99.9%'}}></div>
                                         </div>
-                                        <span className="text-xs font-medium text-green-700">Excellent</span>
+                                        <span className="text-xs font-medium text-green-700 hidden sm:inline">Excellent</span>
                                     </div>
                                 </div>
 
-                                <div className="group relative bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 border border-blue-200">
+                                <div className="group relative bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 border border-blue-200">
                                     <div className="flex items-center justify-between mb-4">
-                                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                                            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                                             </svg>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-3xl font-bold text-blue-700 group-hover:scale-110 transition-transform duration-300">
+                                            <div className="text-2xl sm:text-3xl font-bold text-blue-700 group-hover:scale-110 transition-transform duration-300">
                                                 1,234
                                             </div>
-                                            <div className="text-sm font-semibold text-blue-600 uppercase tracking-wide">Active Users</div>
+                                            <div className="text-xs sm:text-sm font-semibold text-blue-600 uppercase tracking-wide">Active Users</div>
                                         </div>
                                     </div>
                                     <div className="flex items-center space-x-2">
@@ -250,29 +252,29 @@ const AdminPanel: React.FC = () => {
                                             <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
                                             <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
                                         </div>
-                                        <span className="text-xs font-medium text-blue-700">+12% from yesterday</span>
+                                        <span className="text-xs font-medium text-blue-700 hidden sm:inline">+12% from yesterday</span>
                                     </div>
                                 </div>
 
-                                <div className="group relative bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 border border-purple-200">
+                                <div className="group relative bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 border border-purple-200">
                                     <div className="flex items-center justify-between mb-4">
-                                        <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                                            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                                             </svg>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-3xl font-bold text-purple-700 group-hover:scale-110 transition-transform duration-300">
+                                            <div className="text-2xl sm:text-3xl font-bold text-purple-700 group-hover:scale-110 transition-transform duration-300">
                                                 5.2GB
                                             </div>
-                                            <div className="text-sm font-semibold text-purple-600 uppercase tracking-wide">Storage Used</div>
+                                            <div className="text-xs sm:text-sm font-semibold text-purple-600 uppercase tracking-wide">Storage Used</div>
                                         </div>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <div className="flex-1 bg-purple-200 rounded-full h-2">
                                             <div className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full" style={{width: '52%'}}></div>
                                         </div>
-                                        <span className="text-xs font-medium text-purple-700">52% of 10GB</span>
+                                        <span className="text-xs font-medium text-purple-700 hidden sm:inline">52% of 10GB</span>
                                     </div>
                                 </div>
                             </div>

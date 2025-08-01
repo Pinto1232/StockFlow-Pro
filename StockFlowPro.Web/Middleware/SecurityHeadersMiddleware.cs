@@ -1,9 +1,9 @@
-using StockFlowPro.Web.Configuration;
+using Microsoft.Extensions.Primitives;
 
 namespace StockFlowPro.Web.Middleware;
 
 /// <summary>
-/// Middleware to add security headers to HTTP responses
+/// Middleware to configure security headers including CSP for iframe embedding
 /// </summary>
 public class SecurityHeadersMiddleware
 {
@@ -18,132 +18,93 @@ public class SecurityHeadersMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        // Add security headers before processing the request
-        AddSecurityHeaders(context);
+        // Configure security headers based on the request path
+        ConfigureSecurityHeaders(context);
 
         await _next(context);
     }
 
-    private void AddSecurityHeaders(HttpContext context)
+    private void ConfigureSecurityHeaders(HttpContext context)
     {
-        var response = context.Response;
+        var path = context.Request.Path.Value?.ToLowerInvariant() ?? "";
 
         try
         {
-            // Content Security Policy
-            if (!response.Headers.ContainsKey("Content-Security-Policy"))
+            // For observability iframe content, allow same-origin embedding
+            if (path.Contains("/api/observability/grafana-placeholder"))
             {
-                var csp = BuildContentSecurityPolicy();
-                response.Headers["Content-Security-Policy"] = csp;
+                context.Response.Headers.Remove("X-Frame-Options");
+                context.Response.Headers.Remove("Content-Security-Policy");
+                
+                context.Response.Headers["X-Frame-Options"] = "SAMEORIGIN";
+                context.Response.Headers["Content-Security-Policy"] = 
+                    "default-src 'self'; " +
+                    "style-src 'self' 'unsafe-inline'; " +
+                    "script-src 'self' 'unsafe-inline'; " +
+                    "frame-ancestors 'self'; " +
+                    "img-src 'self' data:; " +
+                    "font-src 'self'";
+                
+                _logger.LogDebug("Applied iframe-friendly CSP headers for observability content");
+            }
+            // For the main dashboard page, allow iframe embedding from same origin
+            else if (path.Contains("/index.html") || path == "/" || path == "")
+            {
+                context.Response.Headers.Remove("X-Frame-Options");
+                context.Response.Headers.Remove("Content-Security-Policy");
+                
+                context.Response.Headers["X-Frame-Options"] = "SAMEORIGIN";
+                context.Response.Headers["Content-Security-Policy"] = 
+                    "default-src 'self'; " +
+                    "style-src 'self' 'unsafe-inline'; " +
+                    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+                    "frame-src 'self'; " +
+                    "frame-ancestors 'self'; " +
+                    "img-src 'self' data: blob:; " +
+                    "font-src 'self'; " +
+                    "connect-src 'self'; " +
+                    "media-src 'self'";
+                
+                _logger.LogDebug("Applied dashboard CSP headers allowing iframe embedding");
+            }
+            // For API endpoints, use standard security headers
+            else if (path.StartsWith("/api/"))
+            {
+                context.Response.Headers.Remove("X-Frame-Options");
+                context.Response.Headers.Remove("Content-Security-Policy");
+                
+                context.Response.Headers["X-Frame-Options"] = "DENY";
+                context.Response.Headers["Content-Security-Policy"] = "default-src 'none'";
+                
+                _logger.LogDebug("Applied strict CSP headers for API endpoints");
+            }
+            // Default security headers for other content
+            else
+            {
+                context.Response.Headers.Remove("X-Frame-Options");
+                context.Response.Headers.Remove("Content-Security-Policy");
+                
+                context.Response.Headers["X-Frame-Options"] = "SAMEORIGIN";
+                context.Response.Headers["Content-Security-Policy"] = 
+                    "default-src 'self'; " +
+                    "style-src 'self' 'unsafe-inline'; " +
+                    "script-src 'self' 'unsafe-inline'; " +
+                    "frame-src 'self'; " +
+                    "frame-ancestors 'self'; " +
+                    "img-src 'self' data:; " +
+                    "font-src 'self'";
+                
+                _logger.LogDebug("Applied default CSP headers");
             }
 
-            // X-Frame-Options - Prevent clickjacking
-            if (!response.Headers.ContainsKey("X-Frame-Options"))
-            {
-                response.Headers["X-Frame-Options"] = "DENY";
-            }
-
-            // X-Content-Type-Options - Prevent MIME type sniffing
-            if (!response.Headers.ContainsKey("X-Content-Type-Options"))
-            {
-                response.Headers["X-Content-Type-Options"] = "nosniff";
-            }
-
-            // X-XSS-Protection - Enable XSS filtering
-            if (!response.Headers.ContainsKey("X-XSS-Protection"))
-            {
-                response.Headers["X-XSS-Protection"] = "1; mode=block";
-            }
-
-            // Referrer-Policy - Control referrer information
-            if (!response.Headers.ContainsKey("Referrer-Policy"))
-            {
-                response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
-            }
-
-            // Permissions-Policy - Control browser features
-            if (!response.Headers.ContainsKey("Permissions-Policy"))
-            {
-                response.Headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), payment=(), usb=()";
-            }
-
-            // Remove server information
-            response.Headers.Remove("Server");
-            response.Headers.Remove("X-Powered-By");
-            response.Headers.Remove("X-AspNet-Version");
-            response.Headers.Remove("X-AspNetMvc-Version");
-
-            // Cache-Control for sensitive pages
-            if (IsSensitivePage(context.Request.Path))
-            {
-                response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
-                response.Headers["Pragma"] = "no-cache";
-                response.Headers["Expires"] = "0";
-            }
+            // Add other security headers
+            context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+            context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
+            context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding security headers");
+            _logger.LogError(ex, "Error configuring security headers for path: {Path}", path);
         }
-    }
-
-    private string BuildContentSecurityPolicy()
-    {
-        var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
-
-        if (isDevelopment)
-        {
-            // More permissive CSP for development - includes unpkg.com for SignalR
-            return "default-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-                   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; " +
-                   "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; " +
-                   "img-src 'self' data: https:; " +
-                   "font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; " +
-                   "connect-src 'self' ws: wss:; " +
-                   "frame-ancestors 'none'; " +
-                   "base-uri 'self'; " +
-                   "form-action 'self';";
-        }
-        else
-        {
-            // Strict CSP for production
-            return "default-src 'self'; " +
-                   "script-src 'self' 'nonce-{nonce}'; " +
-                   "style-src 'self' 'nonce-{nonce}'; " +
-                   "img-src 'self' data: https:; " +
-                   "font-src 'self'; " +
-                   "connect-src 'self' wss:; " +
-                   "frame-ancestors 'none'; " +
-                   "base-uri 'self'; " +
-                   "form-action 'self'; " +
-                   "upgrade-insecure-requests;";
-        }
-    }
-
-    private bool IsSensitivePage(PathString path)
-    {
-        var sensitivePaths = new[]
-        {
-            "/login",
-            "/register",
-            "/admin",
-            "/users",
-            "/api/auth",
-            "/systemsettings",
-            "/changepassword"
-        };
-
-        return sensitivePaths.Any(p => path.StartsWithSegments(p, StringComparison.OrdinalIgnoreCase));
-    }
-}
-
-/// <summary>
-/// Extension method to register the security headers middleware
-/// </summary>
-public static class SecurityHeadersMiddlewareExtensions
-{
-    public static IApplicationBuilder UseSecurityHeaders(this IApplicationBuilder builder)
-    {
-        return builder.UseMiddleware<SecurityHeadersMiddleware>();
     }
 }

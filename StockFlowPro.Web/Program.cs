@@ -392,7 +392,7 @@ else
 }
 
 // Security middleware should be added after CORS
-app.UseSecurityHeaders();
+app.UseMiddleware<SecurityHeadersMiddleware>();
 
 // Add enhanced API security middleware (before other auth middleware)
 app.UseEnhancedApiSecurity();
