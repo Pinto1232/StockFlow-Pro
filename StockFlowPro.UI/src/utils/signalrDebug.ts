@@ -4,7 +4,7 @@
  */
 
 export const testSignalRConnection = async (): Promise<void> => {
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5131/api';
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
     const baseUrl = apiBaseUrl.replace('/api', '');
     const hubUrl = `${baseUrl}/stockflowhub`;
     
@@ -46,7 +46,7 @@ export const testSignalRConnection = async (): Promise<void> => {
 };
 
 export const checkBackendHealth = async (): Promise<boolean> => {
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5131/api';
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
     
     try {
         console.log('Checking backend health at:', apiBaseUrl);

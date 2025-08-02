@@ -35,9 +35,11 @@ class SignalRServiceImpl implements SignalRService {
     private initializeConnection(): void {
         // Get the base URL from environment or default to localhost
         // Remove /api suffix if present since SignalR hub is at root level
-        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5131/api';
+        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
         const baseUrl = apiBaseUrl.replace('/api', '');
-        const hubUrl = `${baseUrl}/stockflowhub`;
+        // For SignalR, convert https to wss and http to ws
+        const wsBaseUrl = baseUrl.replace(/^https:/, 'wss:').replace(/^http:/, 'ws:');
+        const hubUrl = `${wsBaseUrl}/stockflowhub`;
 
         console.log('Initializing SignalR connection to:', hubUrl);
 

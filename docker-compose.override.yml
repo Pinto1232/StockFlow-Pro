@@ -1,0 +1,79 @@
+# Development overrides for docker-compose.yml
+services:
+  stockflow-api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - USE_MOCK_DATA=false
+      - ENABLE_SWAGGER=true
+      - DETAILED_ERRORS=true
+    volumes:
+      # Enable hot reload for development
+      - ./StockFlowPro.Web:/app/source:ro
+      - ./StockFlowPro.Web/wwwroot:/app/wwwroot
+      - ./StockFlowPro.Web/App_Data:/app/App_Data
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    command: ["dotnet", "watch", "run", "--project", "/app/source/StockFlowPro.Web.csproj", "--urls", "http://+:8080"]
+
+  # stockflow-frontend: 
+  #   # Commented out for production build - using nginx to serve static files
+  #   environment:
+  #     - NODE_ENV=development
+  #     - VITE_API_URL=http://localhost:5000
+  #     - VITE_WS_URL=ws://localhost:5000
+  #     - CHOKIDAR_USEPOLLING=true
+  #   volumes:
+  #     # Enable hot reload for development
+  #     - ./StockFlowPro.UI/src:/app/src
+  #     - ./StockFlowPro.UI/public:/app/public
+  #     - ./StockFlowPro.UI/index.html:/app/index.html
+  #     - ./StockFlowPro.UI/vite.config.ts:/app/vite.config.ts
+  #     - ./StockFlowPro.UI/package.json:/app/package.json
+  #   command: ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
+
+  stockflow-db:
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=StockFlow123!
+      - MSSQL_DB=StockFlowProDb
+    ports:
+      - "1433:1433"
+    volumes:
+      - stockflow-db-data:/var/opt/mssql
+      - ./database/init:/docker-entrypoint-initdb.d
+
+  redis:
+    command: redis-server --appendonly yes --requirepass StockFlowRedis123!
+    ports:
+      - "6379:6379"
+
+  # Development tools
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: stockflow-mailhog
+    ports:
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web UI
+    networks:
+      - stockflow-network
+
+  # Database management tool
+  sqlserver-admin:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: stockflow-db-admin
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=StockFlow123!
+    command: /bin/bash -c "while true; do sleep 30; done"
+    depends_on:
+      - stockflow-db
+    networks:
+      - stockflow-network
+    profiles:
+      - tools
+
+volumes:
+  stockflow-db-data:
+  redis-data:

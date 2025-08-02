@@ -1,0 +1,122 @@
+services:
+  # SQL Server Database
+  stockflow-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: stockflow-database
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=StockFlow123!
+      - MSSQL_DB=StockFlowProDb
+    ports:
+      - "1433:1433"
+    volumes:
+      - stockflow-db-data:/var/opt/mssql
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - stockflow-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 10s bash -c '</dev/tcp/localhost/1433' || exit 1"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
+
+  # .NET 8 Web API
+  stockflow-api:
+    build:
+      context: .
+      dockerfile: StockFlowPro.Web/Dockerfile
+    container_name: stockflow-api
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080;https://+:8081
+      - ConnectionStrings__DefaultConnection=Server=stockflow-db,1433;Database=StockFlowProDb;User Id=sa;Password=StockFlow123!;TrustServerCertificate=true;MultipleActiveResultSets=true;
+      - USE_MOCK_DATA=false
+      - COOKIE_AUTH_NAME=StockFlowProAuth
+      - COOKIE_SECURE=false
+      - JWT_SECRET_KEY=your-super-secret-jwt-key-minimum-32-characters-for-development
+      - JWT_ISSUER=StockFlowPro
+      - JWT_AUDIENCE=StockFlowPro-Users
+      - JWT_EXPIRY_MINUTES=60
+    depends_on:
+      stockflow-db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./StockFlowPro.Web/wwwroot:/app/wwwroot
+      - ./StockFlowPro.Web/App_Data:/app/App_Data
+    networks:
+      - stockflow-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # React Frontend
+  stockflow-frontend:
+    build:
+      context: ./StockFlowPro.UI
+      dockerfile: Dockerfile
+    container_name: stockflow-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - stockflow-api
+    networks:
+      - stockflow-network
+    restart: unless-stopped
+
+  # Redis for SignalR scaling and caching
+  redis:
+    image: redis:7-alpine
+    container_name: stockflow-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass StockFlowRedis123!
+    volumes:
+      - redis-data:/data
+    networks:
+      - stockflow-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Reverse Proxy (Optional - for production-like setup)
+  nginx:
+    image: nginx:alpine
+    container_name: stockflow-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - stockflow-api
+      - stockflow-frontend
+    networks:
+      - stockflow-network
+    restart: unless-stopped
+
+networks:
+  stockflow-network:
+    driver: bridge
+    name: stockflow-network
+
+volumes:
+  stockflow-db-data:
+    driver: local
+    name: stockflow-db-data
+  redis-data:
+    driver: local
+    name: stockflow-redis-data

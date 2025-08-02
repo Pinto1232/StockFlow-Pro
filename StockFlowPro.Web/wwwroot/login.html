@@ -20,6 +20,15 @@
             align-items: center;
             justify-content: center;
             color: #333;
+            padding: 1rem;
+            overflow-y: auto;
+            /* Hide scrollbar for webkit browsers */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* Internet Explorer 10+ */
+        }
+
+        body::-webkit-scrollbar {
+            display: none; /* Safari and Chrome */
         }
 
         .login-container {
@@ -31,6 +40,16 @@
             width: 100%;
             max-width: 450px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            margin: auto;
+            max-height: calc(100vh - 2rem);
+            overflow-y: auto;
+            /* Hide scrollbar for webkit browsers */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* Internet Explorer 10+ */
+        }
+
+        .login-container::-webkit-scrollbar {
+            display: none; /* Safari and Chrome */
         }
 
         .login-header {

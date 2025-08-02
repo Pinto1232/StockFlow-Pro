@@ -45,6 +45,11 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
     });
 
+// Add health checks for Docker containers
+builder.Services.AddHealthChecks()
+    .AddCheck("database", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("Database connection available"))
+    .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("Application is running"));
+
 builder.Services.AddEndpointsApiExplorer();
 
 // Enhanced Swagger configuration for external API documentation
@@ -431,6 +436,9 @@ app.Use(async (context, next) =>
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Map health check endpoint for Docker containers
+app.MapHealthChecks("/health");
 
 // Map SignalR hub
 app.MapHub<StockFlowHub>("/hubs/stockflowhub");

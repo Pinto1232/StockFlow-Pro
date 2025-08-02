@@ -9,7 +9,7 @@ import { UserRole as UserRoleEnum } from "../types/index";
 
 // API base URL - this should be configured based on environment
 const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:5131/api";
+    import.meta.env.VITE_API_BASE_URL || "https://localhost:7046/api";
 
 // Helper function to get CSRF token
 const getCsrfToken = async (): Promise<string> => {

@@ -1,0 +1,168 @@
+version: '3.8'
+
+# Production configuration for StockFlow Pro
+services:
+  stockflow-api:
+    build:
+      context: .
+      dockerfile: StockFlowPro.Web/Dockerfile
+      target: final
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=stockflow-db,1433;Database=StockFlowProDb;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=true;MultipleActiveResultSets=true;
+      - USE_MOCK_DATA=false
+      - ENABLE_SWAGGER=false
+      - DETAILED_ERRORS=false
+      - COOKIE_AUTH_NAME=StockFlowProAuth
+      - COOKIE_SECURE=true
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ISSUER=StockFlowPro
+      - JWT_AUDIENCE=StockFlowPro-Users
+      - JWT_EXPIRY_MINUTES=60
+      - REDIS_CONNECTION_STRING=stockflow-redis:6379,password=${REDIS_PASSWORD}
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  stockflow-frontend:
+    build:
+      context: ./StockFlowPro.UI
+      dockerfile: Dockerfile
+      target: production
+    environment:
+      - NODE_ENV=production
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  stockflow-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${DB_PASSWORD}
+      - MSSQL_DB=StockFlowProDb
+    volumes:
+      - stockflow-db-data:/var/opt/mssql
+      - ./database/backup:/var/opt/mssql/backup
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${DB_PASSWORD} -Q 'SELECT 1'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/logs:/var/log/nginx
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    depends_on:
+      - stockflow-api
+      - stockflow-frontend
+
+  # Backup service
+  backup:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./database/backup:/backup
+      - ./scripts/backup.sh:/backup.sh
+    command: /bin/bash -c "chmod +x /backup.sh && /backup.sh"
+    depends_on:
+      - stockflow-db
+    profiles:
+      - backup
+
+networks:
+  stockflow-network:
+    driver: overlay
+    attachable: true
+
+volumes:
+  stockflow-db-data:
+    driver: local
+  redis-data:
+    driver: local
+
+secrets:
+  db_password:
+    external: true
+  jwt_secret:
+    external: true
+  redis_password:
+    external: true
