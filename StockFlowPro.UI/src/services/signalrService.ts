@@ -29,26 +29,52 @@ class SignalRServiceImpl implements SignalRService {
     private reconnectDelay = 5000; // 5 seconds
 
     constructor() {
-        this.initializeConnection();
+        // Add a small delay to avoid conflicts with browser extensions
+        setTimeout(() => {
+            this.initializeConnection();
+        }, 100);
+    }
+
+    private async testConnectivity(baseUrl: string): Promise<boolean> {
+        try {
+            console.log('Testing backend connectivity...');
+            const response = await fetch(`${baseUrl}/health`, {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json',
+                }
+            });
+            console.log('Health check response:', response.status, response.statusText);
+            return response.ok;
+        } catch (error) {
+            console.error('Backend connectivity test failed:', error);
+            return false;
+        }
     }
 
     private initializeConnection(): void {
         // Get the base URL from environment or default to localhost
         // Remove /api suffix if present since SignalR hub is at root level
-        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5131/api';
         const baseUrl = apiBaseUrl.replace('/api', '');
-        // For SignalR, convert https to wss and http to ws
-        const wsBaseUrl = baseUrl.replace(/^https:/, 'wss:').replace(/^http:/, 'ws:');
-        const hubUrl = `${wsBaseUrl}/stockflowhub`;
+        // SignalR uses HTTP/HTTPS for negotiation, not WebSocket URLs directly
+        const hubUrl = `${baseUrl}/stockflowhub`;
 
         console.log('Initializing SignalR connection to:', hubUrl);
+        console.log('Base URL:', baseUrl);
+        console.log('API Base URL:', apiBaseUrl);
 
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl(hubUrl, {
                 withCredentials: true,
                 transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling,
                 // Skip negotiation for better performance if using WebSockets only
-                skipNegotiation: false
+                skipNegotiation: false,
+                // Add headers for debugging
+                headers: {
+                    'Access-Control-Allow-Credentials': 'true'
+                }
             })
             .withAutomaticReconnect({
                 nextRetryDelayInMilliseconds: (retryContext) => {
@@ -58,7 +84,7 @@ class SignalRServiceImpl implements SignalRService {
                     return delay + jitter;
                 }
             })
-            .configureLogging(signalR.LogLevel.Information)
+            .configureLogging(signalR.LogLevel.Debug) // Increase logging level for debugging
             .build();
 
         this.setupEventHandlers();
@@ -68,6 +94,11 @@ class SignalRServiceImpl implements SignalRService {
         if (!this.connection) return;
 
         this.connection.onclose((error) => {
+            // Filter out browser extension errors
+            if (error && error.message && error.message.includes('Receiving end does not exist')) {
+                console.debug('Browser extension error (can be ignored):', error.message);
+                return;
+            }
             console.log('SignalR connection closed:', error);
             this.updateConnectionState(ConnectionState.Disconnected);
             this.reconnectAttempts = 0;
@@ -235,7 +266,15 @@ class SignalRServiceImpl implements SignalRService {
         }
     }
 
+    private connectionPromise: Promise<void> | null = null;
+
     public async start(): Promise<void> {
+        // If there's already a connection attempt in progress, wait for it
+        if (this.connectionPromise) {
+            console.log('Connection attempt already in progress, waiting for it to complete...');
+            return this.connectionPromise;
+        }
+
         if (!this.connection) {
             this.initializeConnection();
         }
@@ -246,77 +285,114 @@ class SignalRServiceImpl implements SignalRService {
         // If already connected, return immediately
         if (currentState === signalR.HubConnectionState.Connected) {
             console.log('SignalR already connected');
-            return;
+            return Promise.resolve();
         }
 
         // If currently connecting, wait for it to complete
         if (currentState === signalR.HubConnectionState.Connecting) {
             console.log('Connection already in progress, waiting...');
-            return;
+            // Create a promise that resolves when connection state changes
+            return new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error('Connection timeout while waiting for existing connection'));
+                }, 15000);
+
+                const checkState = () => {
+                    const state = this.connection?.state;
+                    if (state === signalR.HubConnectionState.Connected) {
+                        clearTimeout(timeout);
+                        resolve();
+                    } else if (state === signalR.HubConnectionState.Disconnected) {
+                        clearTimeout(timeout);
+                        reject(new Error('Connection failed while waiting'));
+                    } else {
+                        // Check again in 100ms
+                        setTimeout(checkState, 100);
+                    }
+                };
+                checkState();
+            });
         }
 
         // If in reconnecting state, let the automatic reconnection handle it
         if (currentState === signalR.HubConnectionState.Reconnecting) {
             console.log('Connection is reconnecting, waiting...');
-            return;
+            return Promise.resolve();
         }
 
         // Only start if disconnected or disconnecting
         if (currentState !== signalR.HubConnectionState.Disconnected && 
             currentState !== signalR.HubConnectionState.Disconnecting) {
             console.warn(`Cannot start connection in state: ${currentState}`);
-            return;
+            return Promise.resolve();
         }
 
-        try {
-            console.log('Starting SignalR connection with cookie authentication...');
-            this.updateConnectionState(ConnectionState.Connecting);
-            
-            // Add timeout to prevent hanging connections
-            const connectionPromise = this.connection!.start();
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Connection timeout')), 15000);
-            });
-            
-            await Promise.race([connectionPromise, timeoutPromise]);
-            
-            this.updateConnectionState(ConnectionState.Connected);
-            this.reconnectAttempts = 0;
-            console.log('SignalR connection started successfully');
-            
-            // Play connection sound when initially connected
-            notificationSoundService.playConnectionSound().catch(error => {
-                console.warn('Failed to play connection sound:', error);
-            });
-        } catch (error) {
-            console.error('Error starting SignalR connection:', error);
-            this.updateConnectionState(ConnectionState.Disconnected);
-            
-            // Log additional debug information
-            if (error instanceof Error) {
-                console.error('Error details:', {
-                    name: error.name,
-                    message: error.message,
-                    stack: error.stack
-                });
-            }
-            
-            // Attempt to reconnect if we haven't exceeded max attempts
-            if (this.reconnectAttempts < this.maxReconnectAttempts) {
-                this.reconnectAttempts++;
-                console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts}) in ${this.reconnectDelay}ms...`);
+        // Create and store the connection promise
+        this.connectionPromise = (async () => {
+            try {
+                console.log('Starting SignalR connection with cookie authentication...');
+                this.updateConnectionState(ConnectionState.Connecting);
                 
-                setTimeout(() => {
-                    this.start().catch(err => {
-                        console.error('Reconnection attempt failed:', err);
+                // Test backend connectivity first
+                const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5131/api';
+                const baseUrl = apiBaseUrl.replace('/api', '');
+                const isBackendReachable = await this.testConnectivity(baseUrl);
+                
+                if (!isBackendReachable) {
+                    throw new Error('Backend is not reachable. Please ensure the backend server is running.');
+                }
+                
+                // Add timeout to prevent hanging connections
+                const connectionPromise = this.connection!.start();
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Connection timeout')), 15000);
+                });
+                
+                await Promise.race([connectionPromise, timeoutPromise]);
+                
+                this.updateConnectionState(ConnectionState.Connected);
+                this.reconnectAttempts = 0;
+                console.log('SignalR connection started successfully');
+                
+                // Play connection sound when initially connected
+                notificationSoundService.playConnectionSound().catch(error => {
+                    console.warn('Failed to play connection sound:', error);
+                });
+            } catch (error) {
+                console.error('Error starting SignalR connection:', error);
+                this.updateConnectionState(ConnectionState.Disconnected);
+                
+                // Log additional debug information
+                if (error instanceof Error) {
+                    console.error('Error details:', {
+                        name: error.name,
+                        message: error.message,
+                        stack: error.stack
                     });
-                }, this.reconnectDelay);
-            } else {
-                console.error('Max reconnection attempts reached. SignalR connection failed permanently.');
+                }
+                
+                // Attempt to reconnect if we haven't exceeded max attempts
+                if (this.reconnectAttempts < this.maxReconnectAttempts) {
+                    this.reconnectAttempts++;
+                    console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts}) in ${this.reconnectDelay}ms...`);
+                    
+                    setTimeout(() => {
+                        this.start().catch(err => {
+                            console.error('Reconnection attempt failed:', err);
+                        });
+                    }, this.reconnectDelay);
+                } else {
+                    console.error('Max reconnection attempts reached. SignalR connection failed permanently.');
+                }
+                
+                throw error;
+            } finally {
+                // Clear the connection promise when done
+                this.connectionPromise = null;
             }
-            
-            throw error;
-        }
+        })();
+
+        return this.connectionPromise;
     }
 
     public async stop(): Promise<void> {

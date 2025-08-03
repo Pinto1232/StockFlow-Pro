@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
     Home,
@@ -125,6 +125,18 @@ const Products: React.FC = () => {
     const lowStockCount = dashboardStats?.lowStockCount ?? products.filter(product => product.isLowStock).length;
     const outOfStockCount = dashboardStats?.outOfStockCount ?? products.filter(product => product.isOutOfStock).length;
 
+    // Memoized console entry function to prevent infinite re-renders
+    const addConsoleEntry = useCallback((
+        message: string,
+        type: "system" | "database" | "api" | "error",
+    ) => {
+        const timestamp = new Date().toLocaleTimeString();
+        setConsoleEntries((prev) => [
+            ...prev,
+            { timestamp: `[${timestamp}]`, message, type },
+        ]);
+    }, []);
+
     // Log API calls to console
     useEffect(() => {
         if (isLoading) {
@@ -137,18 +149,7 @@ const Products: React.FC = () => {
                 "api"
             );
         }
-    }, [isLoading, error, products, pageSize, currentPage, totalPages, totalProducts]);
-
-    const addConsoleEntry = (
-        message: string,
-        type: "system" | "database" | "api" | "error",
-    ) => {
-        const timestamp = new Date().toLocaleTimeString();
-        setConsoleEntries((prev) => [
-            ...prev,
-            { timestamp: `[${timestamp}]`, message, type },
-        ]);
-    };
+    }, [isLoading, error, products, pageSize, currentPage, totalPages, totalProducts, addConsoleEntry]);
 
     const clearConsole = () => {
         setConsoleEntries([

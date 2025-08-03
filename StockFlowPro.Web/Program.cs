@@ -231,7 +231,8 @@ builder.Services.AddCors(options =>
                 "http://localhost:8081", 
                 "http://localhost:3000", 
                 "http://localhost:5173",
-                "https://localhost:5173"
+                "https://localhost:5173",
+                "http://localhost:4173"  // Vite preview port
               )
               .AllowAnyHeader()
               .AllowAnyMethod()
@@ -441,8 +442,7 @@ app.MapControllers();
 app.MapHealthChecks("/health");
 
 // Map SignalR hub
-app.MapHub<StockFlowHub>("/hubs/stockflowhub");
-app.MapHub<StockFlowPro.Web.Hubs.StockFlowHub>("/stockflowhub");
+app.MapHub<StockFlowHub>("/stockflowhub");
 
 await app.RunAsync();
 
