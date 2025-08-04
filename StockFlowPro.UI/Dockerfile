@@ -1,6 +1,9 @@
 # Multi-stage build for React TypeScript application
 FROM node:20-alpine AS build
 
+# Apply security updates
+RUN apk update && apk upgrade && apk add --no-cache curl
+
 # Set working directory
 WORKDIR /app
 
@@ -13,10 +16,13 @@ RUN npm install
 # Copy source code
 COPY . .
 
+# Use Docker-specific environment configuration
+COPY .env.development.docker .env.local
+
 # Build the application
 RUN npm run build
 
-# Production stage with Nginx
+# Production stage with Nginx - use latest alpine with security updates
 FROM nginx:alpine
 
 # Install curl for health checks

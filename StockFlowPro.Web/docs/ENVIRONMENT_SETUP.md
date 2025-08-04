@@ -72,7 +72,7 @@ DATABASE_CONNECTION_STRING=Server=localhost;Database=StockFlowProDB;Trusted_Conn
 DATABASE_CONNECTION_STRING=Server=your-server;Database=StockFlowPro;Trusted_Connection=true;TrustServerCertificate=true;
 
 # SQL Server (With Authentication)
-DATABASE_CONNECTION_STRING=Server=localhost;Database=StockFlowProDB;User Id=sa;Password=YourPassword;TrustServerCertificate=true;
+DATABASE_CONNECTION_STRING=Server=localhost;Database=StockFlowProDB;User Id=sa;Password=your_strong_password;TrustServerCertificate=true;
 ```
 
 ### 🔐 **Security Configuration**
@@ -107,7 +107,7 @@ RATE_LIMIT_SYNC_PER_HOUR=5
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USERNAME=your-email@gmail.com
-SMTP_PASSWORD=your-app-password
+SMTP_PASSWORD=your_smtp_app_password
 SMTP_USE_SSL=true
 SMTP_FROM_EMAIL=noreply@stockflowpro.com
 SMTP_FROM_NAME=StockFlow Pro
@@ -294,7 +294,7 @@ foreach (var item in config)
   "SmtpSettings": {
     "Host": "smtp.gmail.com",
     "Username": "your-email@gmail.com",
-    "Password": "your-password"
+    "Password": "your_smtp_password"
   }
 }
 ```
@@ -304,7 +304,7 @@ foreach (var item in config)
 DATABASE_CONNECTION_STRING=Data Source=StockFlowProDb.sqlite
 SMTP_HOST=smtp.gmail.com
 SMTP_USERNAME=your-email@gmail.com
-SMTP_PASSWORD=your-password
+SMTP_PASSWORD=your_smtp_password
 ```
 
 ## Additional Resources

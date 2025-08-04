@@ -78,7 +78,7 @@ StockFlow-Pro/
 
 ## 🔐 Default Credentials
 
-- **Grafana**: admin / admin123
+- **Grafana**: admin / `your_secure_password` (change immediately after first login)
 - **Prometheus**: No authentication
 - **AlertManager**: No authentication
 
@@ -138,7 +138,7 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK
 # Database Connection
 SQL_SERVER_HOST=localhost
 SQL_SERVER_USER=sa
-SQL_SERVER_PASS=YourPassword123!
+SQL_SERVER_PASS=your_strong_db_password
 SQL_SERVER_DB=StockFlowProDb
 
 # PagerDuty Integration
