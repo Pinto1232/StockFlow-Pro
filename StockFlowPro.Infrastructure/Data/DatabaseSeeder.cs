@@ -7,22 +7,15 @@ using System.Text;
 
 namespace StockFlowPro.Infrastructure.Data;
 
-public class DatabaseSeeder
+public class DatabaseSeeder(ApplicationDbContext context, ILogger<DatabaseSeeder> logger)
 {
-    private readonly ApplicationDbContext _context;
-    private readonly ILogger<DatabaseSeeder> _logger;
-
-    public DatabaseSeeder(ApplicationDbContext context, ILogger<DatabaseSeeder> logger)
-    {
-        _context = context;
-        _logger = logger;
-    }
+    private readonly ApplicationDbContext _context = context;
+    private readonly ILogger<DatabaseSeeder> _logger = logger;
 
     private static string HashPassword(string password, string salt)
     {
-        using var sha256 = SHA256.Create();
         var saltedPassword = password + salt;
-        var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(saltedPassword));
+        var hashedBytes = SHA256.HashData(Encoding.UTF8.GetBytes(saltedPassword));
         var hashedPassword = Convert.ToBase64String(hashedBytes);
         return $"{hashedPassword}:{salt}";
     }
@@ -33,13 +26,13 @@ public class DatabaseSeeder
         {
             await _context.Database.EnsureCreatedAsync();
 
-            if (await _context.Users.AnyAsync())
+            if (await _context.Users.CountAsync() > 0)
             {
                 var usersWithoutPasswords = await _context.Users
                     .Where(u => string.IsNullOrEmpty(u.PasswordHash))
                     .ToListAsync();
                 
-                if (usersWithoutPasswords.Any())
+                if (usersWithoutPasswords.Count > 0)
                 {
                     _logger.LogInformation("Found {Count} users without password hashes. Updating them...", usersWithoutPasswords.Count);
                     
@@ -81,7 +74,7 @@ public class DatabaseSeeder
             var seedUsers = new List<User>
             {
                 // Test admin user with simple credentials
-                new User(
+                new(
                     firstName: "Admin",
                     lastName: "User",
                     email: "admin",
@@ -90,7 +83,7 @@ public class DatabaseSeeder
                     role: UserRole.Admin,
                     passwordHash: HashPassword("admin", "550e8400-e29b-41d4-a716-446655440000")
                 ),
-                new User(
+                new(
                     firstName: "John",
                     lastName: "Admin",
                     email: "admin@stockflowpro.com",
@@ -99,7 +92,7 @@ public class DatabaseSeeder
                     role: UserRole.Admin,
                     passwordHash: HashPassword("SecureAdmin2024!", "550e8400-e29b-41d4-a716-446655440001")
                 ),
-                new User(
+                new(
                     firstName: "Jane",
                     lastName: "Manager",
                     email: "manager@stockflow.com",
@@ -108,7 +101,7 @@ public class DatabaseSeeder
                     role: UserRole.Manager,
                     passwordHash: HashPassword("SecureManager2024!", "550e8400-e29b-41d4-a716-446655440002")
                 ),
-                new User(
+                new(
                     firstName: "Bob",
                     lastName: "User",
                     email: "user@stockflow.com",
@@ -117,7 +110,7 @@ public class DatabaseSeeder
                     role: UserRole.User,
                     passwordHash: HashPassword("SecureUser2024!", "550e8400-e29b-41d4-a716-446655440003")
                 ),
-                new User(
+                new(
                     firstName: "Alice",
                     lastName: "Smith",
                     email: "alice.smith@stockflowpro.com",
@@ -128,7 +121,7 @@ public class DatabaseSeeder
                 )
             };
 
-            seedUsers[seedUsers.Count - 1].Deactivate();
+            seedUsers[^1].Deactivate();
 
             await _context.Users.AddRangeAsync(seedUsers);
             await _context.SaveChangesAsync();
@@ -168,16 +161,16 @@ public class DatabaseSeeder
 
                 var seedProducts = new List<Product>
                 {
-                    new Product("Laptop Computer", 999.99m, 25),
-                    new Product("Wireless Mouse", 29.99m, 150),
-                    new Product("Mechanical Keyboard", 89.99m, 75),
-                    new Product("USB-C Cable", 19.99m, 200),
-                    new Product("Monitor Stand", 49.99m, 50),
-                    new Product("Webcam HD", 79.99m, 30),
-                    new Product("Desk Lamp", 39.99m, 40),
-                    new Product("Office Chair", 299.99m, 15),
-                    new Product("Smartphone", 699.99m, 60),
-                    new Product("Tablet", 399.99m, 35)
+                    new("Laptop Computer", 999.99m, 25),
+                    new("Wireless Mouse", 29.99m, 150),
+                    new("Mechanical Keyboard", 89.99m, 75),
+                    new("USB-C Cable", 19.99m, 200),
+                    new("Monitor Stand", 49.99m, 50),
+                    new("Webcam HD", 79.99m, 30),
+                    new("Desk Lamp", 39.99m, 40),
+                    new("Office Chair", 299.99m, 15),
+                    new("Smartphone", 699.99m, 60),
+                    new("Tablet", 399.99m, 35)
                 };
 
                 // Set one product as low stock for testing
@@ -269,48 +262,48 @@ public class DatabaseSeeder
                 var permissions = new List<Permission>
                 {
                     // User Management Permissions
-                    new Permission("users.view", "View Users", "View user profiles and basic information", "User Management"),
-                    new Permission("users.create", "Create Users", "Create new user accounts", "User Management"),
-                    new Permission("users.edit", "Edit Users", "Edit user profiles and information", "User Management"),
-                    new Permission("users.delete", "Delete Users", "Delete user accounts", "User Management"),
-                    new Permission("users.view_all", "View All Users", "View all users in the system", "User Management"),
-                    new Permission("users.manage_roles", "Manage User Roles", "Assign and modify user roles", "User Management"),
-                    new Permission("users.view_reports", "View User Reports", "Access user-related reports", "User Management"),
+                    new("users.view", "View Users", "View user profiles and basic information", "User Management"),
+                    new("users.create", "Create Users", "Create new user accounts", "User Management"),
+                    new("users.edit", "Edit Users", "Edit user profiles and information", "User Management"),
+                    new("users.delete", "Delete Users", "Delete user accounts", "User Management"),
+                    new("users.view_all", "View All Users", "View all users in the system", "User Management"),
+                    new("users.manage_roles", "Manage User Roles", "Assign and modify user roles", "User Management"),
+                    new("users.view_reports", "View User Reports", "Access user-related reports", "User Management"),
 
                     // System Administration Permissions
-                    new Permission("system.view_admin_panel", "View Admin Panel", "Access the administrative dashboard", "System Administration"),
-                    new Permission("system.manage_settings", "Manage Settings", "Configure system settings", "System Administration"),
-                    new Permission("system.view_logs", "View System Logs", "Access system logs and audit trails", "System Administration"),
-                    new Permission("system.sync_data", "Sync Data", "Perform data synchronization operations", "System Administration"),
-                    new Permission("system.view_statistics", "View Statistics", "Access system statistics and metrics", "System Administration"),
+                    new("system.view_admin_panel", "View Admin Panel", "Access the administrative dashboard", "System Administration"),
+                    new("system.manage_settings", "Manage Settings", "Configure system settings", "System Administration"),
+                    new("system.view_logs", "View System Logs", "Access system logs and audit trails", "System Administration"),
+                    new("system.sync_data", "Sync Data", "Perform data synchronization operations", "System Administration"),
+                    new("system.view_statistics", "View Statistics", "Access system statistics and metrics", "System Administration"),
 
                     // Data Management Permissions
-                    new Permission("data.export", "Export Data", "Export data in various formats", "Data Management"),
-                    new Permission("data.import", "Import Data", "Import data from external sources", "Data Management"),
-                    new Permission("data.backup", "Backup Data", "Create system backups", "Data Management"),
-                    new Permission("data.restore", "Restore Data", "Restore data from backups", "Data Management"),
+                    new("data.export", "Export Data", "Export data in various formats", "Data Management"),
+                    new("data.import", "Import Data", "Import data from external sources", "Data Management"),
+                    new("data.backup", "Backup Data", "Create system backups", "Data Management"),
+                    new("data.restore", "Restore Data", "Restore data from backups", "Data Management"),
 
                     // Invoice Management Permissions
-                    new Permission("invoice.view", "View Invoices", "View invoice information", "Invoice Management"),
-                    new Permission("invoice.create", "Create Invoices", "Create new invoices", "Invoice Management"),
-                    new Permission("invoice.edit", "Edit Invoices", "Modify existing invoices", "Invoice Management"),
-                    new Permission("invoice.delete", "Delete Invoices", "Delete invoices", "Invoice Management"),
-                    new Permission("invoice.view_all", "View All Invoices", "Access all invoices in the system", "Invoice Management"),
-                    new Permission("invoice.manage_items", "Manage Invoice Items", "Add, edit, and remove invoice items", "Invoice Management"),
+                    new("invoice.view", "View Invoices", "View invoice information", "Invoice Management"),
+                    new("invoice.create", "Create Invoices", "Create new invoices", "Invoice Management"),
+                    new("invoice.edit", "Edit Invoices", "Modify existing invoices", "Invoice Management"),
+                    new("invoice.delete", "Delete Invoices", "Delete invoices", "Invoice Management"),
+                    new("invoice.view_all", "View All Invoices", "Access all invoices in the system", "Invoice Management"),
+                    new("invoice.manage_items", "Manage Invoice Items", "Add, edit, and remove invoice items", "Invoice Management"),
 
                     // Product Management Permissions
-                    new Permission("product.view", "View Products", "View product information and catalog", "Product Management"),
-                    new Permission("product.create", "Create Products", "Add new products to inventory", "Product Management"),
-                    new Permission("product.edit", "Edit Products", "Modify product information", "Product Management"),
-                    new Permission("product.delete", "Delete Products", "Remove products from inventory", "Product Management"),
-                    new Permission("product.update_stock", "Update Stock", "Modify product stock levels", "Product Management"),
-                    new Permission("product.view_reports", "View Product Reports", "Access product-related reports", "Product Management"),
+                    new("product.view", "View Products", "View product information and catalog", "Product Management"),
+                    new("product.create", "Create Products", "Add new products to inventory", "Product Management"),
+                    new("product.edit", "Edit Products", "Modify product information", "Product Management"),
+                    new("product.delete", "Delete Products", "Remove products from inventory", "Product Management"),
+                    new("product.update_stock", "Update Stock", "Modify product stock levels", "Product Management"),
+                    new("product.view_reports", "View Product Reports", "Access product-related reports", "Product Management"),
 
                     // Reporting Permissions
-                    new Permission("reports.view_basic", "View Basic Reports", "Access basic reporting features", "Reporting"),
-                    new Permission("reports.view_advanced", "View Advanced Reports", "Access advanced reporting and analytics", "Reporting"),
-                    new Permission("reports.generate", "Generate Reports", "Create custom reports", "Reporting"),
-                    new Permission("reports.schedule", "Schedule Reports", "Set up automated report generation", "Reporting")
+                    new("reports.view_basic", "View Basic Reports", "Access basic reporting features", "Reporting"),
+                    new("reports.view_advanced", "View Advanced Reports", "Access advanced reporting and analytics", "Reporting"),
+                    new("reports.generate", "Generate Reports", "Create custom reports", "Reporting"),
+                    new("reports.schedule", "Schedule Reports", "Set up automated report generation", "Reporting")
                 };
 
                 await _context.Permissions.AddRangeAsync(permissions);
@@ -441,16 +434,16 @@ public class DatabaseSeeder
 
                 var planFeatures = new List<PlanFeature>
                 {
-                    new PlanFeature("Advanced Analytics", "Access to advanced analytics and reporting dashboards", "advanced_analytics", "boolean"),
-                    new PlanFeature("API Access", "Full REST API access for integrations", "api_access", "boolean"),
-                    new PlanFeature("Priority Support", "24/7 priority customer support", "priority_support", "boolean"),
-                    new PlanFeature("Custom Branding", "White-label and custom branding options", "custom_branding", "boolean"),
-                    new PlanFeature("Data Export", "Export data in various formats (CSV, Excel, PDF)", "data_export", "boolean"),
-                    new PlanFeature("Team Collaboration", "Advanced team collaboration features", "team_collaboration", "boolean"),
-                    new PlanFeature("Advanced Reporting", "Custom reports and advanced analytics", "advanced_reporting", "boolean"),
-                    new PlanFeature("Multi-Location Support", "Support for multiple business locations", "multi_location", "boolean"),
-                    new PlanFeature("Inventory Forecasting", "AI-powered inventory forecasting", "inventory_forecasting", "boolean"),
-                    new PlanFeature("Automated Workflows", "Custom automated business workflows", "automated_workflows", "boolean")
+                    new("Advanced Analytics", "Access to advanced analytics and reporting dashboards", "advanced_analytics", "boolean"),
+                    new("API Access", "Full REST API access for integrations", "api_access", "boolean"),
+                    new("Priority Support", "24/7 priority customer support", "priority_support", "boolean"),
+                    new("Custom Branding", "White-label and custom branding options", "custom_branding", "boolean"),
+                    new("Data Export", "Export data in various formats (CSV, Excel, PDF)", "data_export", "boolean"),
+                    new("Team Collaboration", "Advanced team collaboration features", "team_collaboration", "boolean"),
+                    new("Advanced Reporting", "Custom reports and advanced analytics", "advanced_reporting", "boolean"),
+                    new("Multi-Location Support", "Support for multiple business locations", "multi_location", "boolean"),
+                    new("Inventory Forecasting", "AI-powered inventory forecasting", "inventory_forecasting", "boolean"),
+                    new("Automated Workflows", "Custom automated business workflows", "automated_workflows", "boolean")
                 };
 
                 // Set sort orders
@@ -589,8 +582,8 @@ public class DatabaseSeeder
             foreach (var featureKey in basicFeatures)
             {
                 var feature = features.First(f => f.FeatureKey == featureKey);
-                planFeatureRelationships.Add(new SubscriptionPlanFeature(basicPlan.Id, feature.Id, "true", true));
-                planFeatureRelationships.Add(new SubscriptionPlanFeature(basicAnnual.Id, feature.Id, "true", true));
+                planFeatureRelationships.Add(new(basicPlan.Id, feature.Id, "true", true));
+                planFeatureRelationships.Add(new(basicAnnual.Id, feature.Id, "true", true));
             }
 
             // Professional Plan Features
@@ -601,8 +594,8 @@ public class DatabaseSeeder
             foreach (var featureKey in proFeatures)
             {
                 var feature = features.First(f => f.FeatureKey == featureKey);
-                planFeatureRelationships.Add(new SubscriptionPlanFeature(proPlan.Id, feature.Id, "true", true));
-                planFeatureRelationships.Add(new SubscriptionPlanFeature(proAnnual.Id, feature.Id, "true", true));
+                planFeatureRelationships.Add(new(proPlan.Id, feature.Id, "true", true));
+                planFeatureRelationships.Add(new(proAnnual.Id, feature.Id, "true", true));
             }
 
             // Enterprise Plan Features (all features)
@@ -611,8 +604,8 @@ public class DatabaseSeeder
             
             foreach (var feature in features)
             {
-                planFeatureRelationships.Add(new SubscriptionPlanFeature(enterprisePlan.Id, feature.Id, "true", true));
-                planFeatureRelationships.Add(new SubscriptionPlanFeature(enterpriseAnnual.Id, feature.Id, "true", true));
+                planFeatureRelationships.Add(new(enterprisePlan.Id, feature.Id, "true", true));
+                planFeatureRelationships.Add(new(enterpriseAnnual.Id, feature.Id, "true", true));
             }
 
             await _context.SubscriptionPlanFeatures.AddRangeAsync(planFeatureRelationships);

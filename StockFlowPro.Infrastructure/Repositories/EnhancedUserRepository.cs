@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using StockFlowPro.Domain.Entities;
 using StockFlowPro.Domain.Repositories;
+using StockFlowPro.Domain.Utilities;
 using StockFlowPro.Infrastructure.Data;
 
 namespace StockFlowPro.Infrastructure.Repositories;

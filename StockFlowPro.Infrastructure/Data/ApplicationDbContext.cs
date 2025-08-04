@@ -7,9 +7,26 @@ namespace StockFlowPro.Infrastructure.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
+            Users = Set<User>();
+            Products = Set<Product>();
+            Invoices = Set<Invoice>();
+            InvoiceItems = Set<InvoiceItem>();
+            Roles = Set<Role>();
+            Permissions = Set<Permission>();
+            RolePermissions = Set<RolePermission>();
+            SubscriptionPlans = Set<SubscriptionPlan>();
+            Subscriptions = Set<Subscription>();
+            Payments = Set<Payment>();
+            PaymentRefunds = Set<PaymentRefund>();
+            SubscriptionHistories = Set<SubscriptionHistory>();
+            PlanFeatures = Set<PlanFeature>();
+            SubscriptionPlanFeatures = Set<SubscriptionPlanFeature>();
+            PaymentMethods = Set<PaymentMethodEntity>();
+            Notifications = Set<Notification>();
+            NotificationTemplates = Set<NotificationTemplate>();
+            NotificationPreferences = Set<NotificationPreference>();
         }
         
         public DbSet<User> Users { get; set; }
