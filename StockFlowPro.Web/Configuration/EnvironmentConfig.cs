@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+
 namespace StockFlowPro.Web.Configuration;
 
 /// <summary>
@@ -21,7 +23,7 @@ public static class EnvironmentConfig
 
     // Security Configuration
     public static string JwtSecretKey => 
-        Environment.GetEnvironmentVariable("JWT_SECRET_KEY") ?? "StockFlowPro-Development-Secret-Key-32-Characters-Minimum";
+        Environment.GetEnvironmentVariable("JWT_SECRET_KEY") ?? GenerateSecureRandomKey(64);
     
     public static string JwtIssuer => 
         Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "StockFlowPro";
@@ -42,9 +44,9 @@ public static class EnvironmentConfig
     public static SameSiteMode CookieSameSite => 
         Enum.Parse<SameSiteMode>(Environment.GetEnvironmentVariable("COOKIE_SAME_SITE") ?? "Lax");
 
-    // Password Security
+    // Password Security - Enhanced requirements
     public static int PasswordMinLength => 
-        int.Parse(Environment.GetEnvironmentVariable("PASSWORD_MIN_LENGTH") ?? "8");
+        int.Parse(Environment.GetEnvironmentVariable("PASSWORD_MIN_LENGTH") ?? "12");
     
     public static bool PasswordRequireUppercase => 
         bool.Parse(Environment.GetEnvironmentVariable("PASSWORD_REQUIRE_UPPERCASE") ?? "true");
@@ -136,6 +138,27 @@ public static class EnvironmentConfig
     
     public static string CspStyleSrc => 
         Environment.GetEnvironmentVariable("CSP_STYLE_SRC") ?? "'self' 'unsafe-inline'";
+
+    /// <summary>
+    /// Generates a cryptographically secure random key
+    /// </summary>
+    /// <param name="length">Length of the key in characters</param>
+    /// <returns>Base64 encoded random key</returns>
+    private static string GenerateSecureRandomKey(int length)
+    {
+        try
+        {
+            using var rng = RandomNumberGenerator.Create();
+            var bytes = new byte[length];
+            rng.GetBytes(bytes);
+            return Convert.ToBase64String(bytes);
+        }
+        catch (Exception ex)
+        {
+            // Fallback to a more secure default if random generation fails
+            throw new InvalidOperationException("Failed to generate secure random key", ex);
+        }
+    }
 
     /// <summary>
     /// Validates that all required environment variables are set

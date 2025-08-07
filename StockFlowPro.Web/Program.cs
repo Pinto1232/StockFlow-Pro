@@ -178,33 +178,29 @@ builder.Services.AddCors(options =>
               .WithExposedHeaders("X-Total-Count", "X-Page-Count", "X-Current-Page"); // For pagination
     });
     
-    // Development CORS policy - more permissive for React Native development
+    // Development CORS policy - more restrictive for security
     options.AddPolicy("DevelopmentCors", policy =>
     {
         policy.SetIsOriginAllowed(origin => 
         {
             if (string.IsNullOrWhiteSpace(origin)) {return false;}
             
-            // Allow localhost on any port
+            // Allow localhost on specific ports only
             if (origin.StartsWith("http://localhost:") || 
-                origin.StartsWith("https://localhost:") ||
-                origin.StartsWith("http://127.0.0.1:") ||
-                origin.StartsWith("https://127.0.0.1:"))
-                {return true;}
+                origin.StartsWith("https://localhost:"))
+            {
+                var allowedPorts = new[] { "3000", "5173", "8081", "19000", "19006" };
+                return allowedPorts.Any(port => origin.Contains($":{port}"));
+            }
                 
             // Allow Expo development URLs
             if (origin.StartsWith("exp://") || 
                 origin.StartsWith("exps://"))
                 {return true;}
                 
-            // Allow local network IPs for mobile development
+            // Allow local network IPs for mobile development (restricted)
             if (origin.StartsWith("http://10.") || 
-                origin.StartsWith("http://192.168.") ||
-                origin.StartsWith("http://172."))
-                {return true;}
-                
-            // Allow React Native Metro bundler
-            if (origin.Contains("metro") || origin.Contains("expo"))
+                origin.StartsWith("http://192.168."))
                 {return true;}
                 
             return false;

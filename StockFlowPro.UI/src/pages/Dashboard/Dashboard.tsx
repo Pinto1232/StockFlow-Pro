@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
     Package,
     Users,
@@ -10,6 +11,7 @@ import {
     Box,
     Settings,
     UserPlus,
+    Home,
 } from "lucide-react";
 import { useLowStockProducts } from "../../hooks/useProducts";
 import { useCurrentUser } from "../../hooks/useAuth";
@@ -102,12 +104,34 @@ const Dashboard: React.FC = () => {
                 }
             `}</style>
             
+            {/* Navigation Breadcrumb */}
+            <nav className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-16 z-30 w-full py-4">
+                <div className="px-4 sm:px-6 lg:px-8">
+                    <ol className="flex items-center gap-2 text-sm">
+                        <li className="flex items-center gap-2">
+                            <Link
+                                to="/dashboard"
+                                className="flex items-center gap-2 text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors font-medium"
+                            >
+                                <Home className="h-4 w-4" />
+                                <span>Dashboard</span>
+                            </Link>
+                        </li>
+                    </ol>
+                </div>
+            </nav>
+            
+            {/* Spacer for breadcrumb */}
+            <div className="h-4"></div>
+            
             {/* Header with Navigation */}
-            <DashboardHeader
-                currentUser={currentUser}
-                onRefresh={refreshDashboard}
-                onSettings={navigationHandlers.navigateToSettings}
-            />
+            <div className="mx-4 sm:mx-6 lg:mx-8">
+                <DashboardHeader
+                    currentUser={currentUser}
+                    onRefresh={refreshDashboard}
+                    onSettings={navigationHandlers.navigateToSettings}
+                />
+            </div>
 
             <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
                 {/* System Status Banner */}
