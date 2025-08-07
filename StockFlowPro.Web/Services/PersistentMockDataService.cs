@@ -157,39 +157,31 @@ public class PersistentMockDataService : IPersistentMockDataService
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                PasswordHash = CreateDefaultPasswordHash("SecureAdmin2024!")
-            },
-            new UserDto
-            {
-                Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440001"),
-                FirstName = "John",
-                LastName = "Manager",
-                FullName = "John Manager",
-                Email = "manager@stockflow.com",
-                PhoneNumber = "+1-555-0101",
-                DateOfBirth = new DateTime(1985, 5, 15, 0, 0, 0, DateTimeKind.Utc),
-                Age = CalculateAge(new DateTime(1985, 5, 15, 0, 0, 0, DateTimeKind.Utc)),
-                Role = StockFlowPro.Domain.Enums.UserRole.Manager,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                PasswordHash = CreateDefaultPasswordHash("SecureManager2024!")
+                PasswordHash = CreateDefaultPasswordHash("SecureAdmin2024!@#")
             },
             new UserDto
             {
                 Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440002"),
-                FirstName = "Jane",
-                LastName = "Smith",
-                FullName = "Jane Smith",
-                Email = "user@stockflow.com",
-                PhoneNumber = "+1-555-0102",
-                DateOfBirth = new DateTime(1992, 8, 20, 0, 0, 0, DateTimeKind.Utc),
-                Age = CalculateAge(new DateTime(1992, 8, 20, 0, 0, 0, DateTimeKind.Utc)),
+                Email = "manager@stockflowpro.com",
+                FirstName = "Manager",
+                LastName = "User",
+                Role = StockFlowPro.Domain.Enums.UserRole.Manager,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow.AddDays(-30),
+                UpdatedAt = DateTime.UtcNow.AddDays(-5),
+                PasswordHash = CreateDefaultPasswordHash("SecureManager2024!@#")
+            },
+            new UserDto
+            {
+                Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440003"),
+                Email = "user@stockflowpro.com",
+                FirstName = "Regular",
+                LastName = "User",
                 Role = StockFlowPro.Domain.Enums.UserRole.User,
                 IsActive = true,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                PasswordHash = CreateDefaultPasswordHash("SecureUser2024!")
+                CreatedAt = DateTime.UtcNow.AddDays(-25),
+                UpdatedAt = DateTime.UtcNow.AddDays(-3),
+                PasswordHash = CreateDefaultPasswordHash("SecureUser2024!@#")
             }
         };
 

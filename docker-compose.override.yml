@@ -36,7 +36,7 @@ services:
   stockflow-db:
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=StockFlow123!
+      - SA_PASSWORD=${DB_PASSWORD:-StockFlow123!}
       - MSSQL_DB=StockFlowProDb
     ports:
       - "1433:1433"
@@ -45,7 +45,7 @@ services:
       - ./database/init:/docker-entrypoint-initdb.d
 
   redis:
-    command: redis-server --appendonly yes --requirepass StockFlowRedis123!
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-StockFlowRedis123!}
     ports:
       - "6379:6379"
 

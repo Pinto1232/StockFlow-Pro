@@ -104,67 +104,55 @@ public class JsonMockDataStorageService : IMockDataStorageService
                 DateOfBirth = new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 Age = DateTime.UtcNow.Year - 1980,
                 CreatedAt = DateTime.UtcNow,
-                PasswordHash = HashPasswordForDefaultUser("admin", "550e8400-e29b-41d4-a716-446655440000")
+                PasswordHash = HashPasswordForDefaultUser("SecureAdmin2024!@#", "550e8400-e29b-41d4-a716-446655440000")
             },
-            new UserDto 
-            { 
-                Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440001"), 
-                FirstName = "John", 
-                LastName = "Admin", 
-                FullName = "John Admin",
-                Email = "admin@stockflowpro.com", 
-                PhoneNumber = "+1-555-0101", 
+            new UserDto
+            {
+                Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440001"),
+                Email = "admin@stockflowpro.com",
+                FirstName = "Admin",
+                LastName = "User",
                 Role = UserRole.Admin,
                 IsActive = true,
-                DateOfBirth = new DateTime(1985, 5, 15, 0, 0, 0, DateTimeKind.Utc),
-                Age = DateTime.UtcNow.Year - 1985,
-                CreatedAt = DateTime.UtcNow,
-                PasswordHash = HashPasswordForDefaultUser("SecureAdmin2024!", "550e8400-e29b-41d4-a716-446655440001")
+                CreatedAt = DateTime.UtcNow.AddDays(-60),
+                UpdatedAt = DateTime.UtcNow.AddDays(-10),
+                PasswordHash = HashPasswordForDefaultUser("SecureAdmin2024!@#", "550e8400-e29b-41d4-a716-446655440001")
             },
-            new UserDto 
-            { 
-                Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440002"), 
-                FirstName = "Jane", 
-                LastName = "Manager", 
-                FullName = "Jane Manager",
-                Email = "manager@stockflow.com", 
-                PhoneNumber = "+1-555-0102", 
+            new UserDto
+            {
+                Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440002"),
+                Email = "manager@stockflowpro.com",
+                FirstName = "Manager",
+                LastName = "User",
                 Role = UserRole.Manager,
                 IsActive = true,
-                DateOfBirth = new DateTime(1990, 8, 22, 0, 0, 0, DateTimeKind.Utc),
-                Age = DateTime.UtcNow.Year - 1990,
-                CreatedAt = DateTime.UtcNow,
-                PasswordHash = HashPasswordForDefaultUser("SecureManager2024!", "550e8400-e29b-41d4-a716-446655440002")
+                CreatedAt = DateTime.UtcNow.AddDays(-30),
+                UpdatedAt = DateTime.UtcNow.AddDays(-5),
+                PasswordHash = HashPasswordForDefaultUser("SecureManager2024!@#", "550e8400-e29b-41d4-a716-446655440002")
             },
-            new UserDto 
-            { 
-                Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440003"), 
-                FirstName = "Bob", 
-                LastName = "User", 
-                FullName = "Bob User",
-                Email = "user@stockflow.com", 
-                PhoneNumber = "+1-555-0103", 
+            new UserDto
+            {
+                Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440003"),
+                Email = "user@stockflowpro.com",
+                FirstName = "Regular",
+                LastName = "User",
                 Role = UserRole.User,
                 IsActive = true,
-                DateOfBirth = new DateTime(1992, 12, 10, 0, 0, 0, DateTimeKind.Utc),
-                Age = DateTime.UtcNow.Year - 1992,
-                CreatedAt = DateTime.UtcNow,
-                PasswordHash = HashPasswordForDefaultUser("SecureUser2024!", "550e8400-e29b-41d4-a716-446655440003")
+                CreatedAt = DateTime.UtcNow.AddDays(-25),
+                UpdatedAt = DateTime.UtcNow.AddDays(-3),
+                PasswordHash = HashPasswordForDefaultUser("SecureUser2024!@#", "550e8400-e29b-41d4-a716-446655440003")
             },
-            new UserDto 
-            { 
-                Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440004"), 
-                FirstName = "Alice", 
-                LastName = "Smith", 
-                FullName = "Alice Smith",
-                Email = "alice.smith@stockflowpro.com", 
-                PhoneNumber = "+1-555-0104", 
+            new UserDto
+            {
+                Id = Guid.Parse("550e8400-e29b-41d4-a716-446655440004"),
+                Email = "alice@stockflowpro.com",
+                FirstName = "Alice",
+                LastName = "Johnson",
                 Role = UserRole.User,
-                IsActive = false,
-                DateOfBirth = new DateTime(1988, 3, 7, 0, 0, 0, DateTimeKind.Utc),
-                Age = DateTime.UtcNow.Year - 1988,
-                CreatedAt = DateTime.UtcNow,
-                PasswordHash = HashPasswordForDefaultUser("alice123", "550e8400-e29b-41d4-a716-446655440004")
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow.AddDays(-20),
+                UpdatedAt = DateTime.UtcNow.AddDays(-2),
+                PasswordHash = HashPasswordForDefaultUser("SecureAlice2024!@#", "550e8400-e29b-41d4-a716-446655440004")
             }
         };
 

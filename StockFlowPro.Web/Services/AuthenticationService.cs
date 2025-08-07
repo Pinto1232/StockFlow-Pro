@@ -239,24 +239,88 @@ public class UserAuthenticationService : IUserAuthenticationService
 
     public Task<string> HashPasswordAsync(string password)
     {
-        using var sha256 = SHA256.Create();
-        var salt = Guid.NewGuid().ToString();
-        var saltedPassword = password + salt;
-        var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(saltedPassword));
-        var hashedPassword = Convert.ToBase64String(hashedBytes);
-        return Task.FromResult($"{hashedPassword}:{salt}");
+        const int saltSize = 32; // 256 bits
+        const int hashSize = 32; // 256 bits
+        const int iterations = 100000; // OWASP recommended minimum
+
+        try
+        {
+            // Generate a cryptographically secure random salt
+            using var rng = RandomNumberGenerator.Create();
+            var salt = new byte[saltSize];
+            rng.GetBytes(salt);
+
+            // Hash the password using PBKDF2 with SHA256
+            using var pbkdf2 = new Rfc2898DeriveBytes(password, salt, iterations, HashAlgorithmName.SHA256);
+            var hash = pbkdf2.GetBytes(hashSize);
+
+            // Combine salt and hash for storage
+            var hashBytes = new byte[saltSize + hashSize];
+            Array.Copy(salt, 0, hashBytes, 0, saltSize);
+            Array.Copy(hash, 0, hashBytes, saltSize, hashSize);
+
+            return Task.FromResult(Convert.ToBase64String(hashBytes));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error hashing password");
+            throw new InvalidOperationException("Password hashing failed", ex);
+        }
     }
 
     public Task<bool> VerifyPasswordAsync(string password, string hashedPassword)
     {
         if (string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(hashedPassword))
-            {return Task.FromResult(false);}
+        {
+            return Task.FromResult(false);
+        }
 
+        try
+        {
+            // Check if this is a legacy SHA256 hash (contains colon separator)
+            if (hashedPassword.Contains(':'))
+            {
+                return VerifyLegacyPasswordAsync(password, hashedPassword);
+            }
+
+            // New PBKDF2 hash format
+            const int saltSize = 32;
+            const int hashSize = 32;
+            const int iterations = 100000;
+
+            var hashBytes = Convert.FromBase64String(hashedPassword);
+            if (hashBytes.Length != saltSize + hashSize)
+            {
+                return Task.FromResult(false);
+            }
+
+            var salt = new byte[saltSize];
+            var storedHash = new byte[hashSize];
+            Array.Copy(hashBytes, 0, salt, 0, saltSize);
+            Array.Copy(hashBytes, saltSize, storedHash, 0, hashSize);
+
+            using var pbkdf2 = new Rfc2898DeriveBytes(password, salt, iterations, HashAlgorithmName.SHA256);
+            var computedHash = pbkdf2.GetBytes(hashSize);
+
+            // Constant-time comparison to prevent timing attacks
+            return Task.FromResult(computedHash.SequenceEqual(storedHash));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error verifying password hash");
+            return Task.FromResult(false);
+        }
+    }
+
+    private Task<bool> VerifyLegacyPasswordAsync(string password, string hashedPassword)
+    {
         try
         {
             var parts = hashedPassword.Split(':');
             if (parts.Length != 2)
-                {return Task.FromResult(false);}
+            {
+                return Task.FromResult(false);
+            }
 
             var hash = parts[0];
             var salt = parts[1];
@@ -270,7 +334,7 @@ public class UserAuthenticationService : IUserAuthenticationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error verifying password hash");
+            _logger.LogError(ex, "Error verifying legacy password hash");
             return Task.FromResult(false);
         }
     }

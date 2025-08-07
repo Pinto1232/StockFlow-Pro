@@ -5,7 +5,7 @@ services:
     container_name: stockflow-database
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=StockFlow123!
+      - SA_PASSWORD=${DB_PASSWORD:-StockFlow123!}
       - MSSQL_DB=StockFlowProDb
     ports:
       - "1433:1433"
@@ -34,11 +34,11 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080;https://+:8081
-      - ConnectionStrings__DefaultConnection=Server=stockflow-db,1433;Database=StockFlowProDb;User Id=sa;Password=StockFlow123!;TrustServerCertificate=true;MultipleActiveResultSets=true;
+      - ConnectionStrings__DefaultConnection=Server=stockflow-db,1433;Database=StockFlowProDb;User Id=sa;Password=${DB_PASSWORD:-StockFlow123!};TrustServerCertificate=true;MultipleActiveResultSets=true;
       - USE_MOCK_DATA=false
       - COOKIE_AUTH_NAME=StockFlowProAuth
       - COOKIE_SECURE=false
-      - JWT_SECRET_KEY=your-super-secret-jwt-key-minimum-32-characters-for-development
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-super-secret-jwt-key-minimum-32-characters-for-development}
       - JWT_ISSUER=StockFlowPro
       - JWT_AUDIENCE=StockFlowPro-Users
       - JWT_EXPIRY_MINUTES=60
@@ -79,7 +79,7 @@ services:
     container_name: stockflow-redis
     ports:
       - "6379:6379"
-    command: redis-server --appendonly yes --requirepass StockFlowRedis123!
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-StockFlowRedis123!}
     volumes:
       - redis-data:/data
     networks:
