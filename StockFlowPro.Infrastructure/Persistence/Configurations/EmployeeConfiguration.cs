@@ -20,6 +20,11 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
 
         builder.HasIndex(e => e.Email).IsUnique();
 
+        // Ignore read-only navigation properties; map via backing fields with OwnsMany
+        builder.Ignore(e => e.Documents);
+        builder.Ignore(e => e.OnboardingChecklist);
+        builder.Ignore(e => e.OffboardingChecklist);
+
         // Owned types for checklists and documents as separate tables
         builder.OwnsMany<ChecklistItem>("_onboardingChecklist", ob =>
         {
