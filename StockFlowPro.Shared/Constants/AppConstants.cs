@@ -51,6 +51,6 @@ public static class AppConstants
     public const string RequiredFieldMessage = "This field is required.";
     public const string InvalidEmailMessage = "Please enter a valid email address.";
     public const string InvalidPhoneMessage = "Please enter a valid phone number.";
-    public const string PasswordTooShortMessage = "Password must be at least 6 characters long.";
+    public const string PasswordTooShortMessage = "Password must be at least 12 characters long.";
     #endregion
 }

@@ -23,6 +23,7 @@ const Layout: React.FC = () => {
     // Define pages that need special content padding
     const isProducts = location.pathname.startsWith("/products");
     const isInvoices = location.pathname.startsWith("/invoices");
+    const isDashboard = location.pathname === "/dashboard";
 
     if (isFullWidthPage) {
         return (
@@ -83,7 +84,7 @@ const Layout: React.FC = () => {
                     <main className="bg-gray-50 min-h-screen">
                         <div
                             className={`${
-                                isProducts || isInvoices
+                                isProducts || isInvoices || isDashboard
                                     ? "max-w-none px-0 py-0"
                                     : "max-w-none px-6 py-8"
                             }`}
