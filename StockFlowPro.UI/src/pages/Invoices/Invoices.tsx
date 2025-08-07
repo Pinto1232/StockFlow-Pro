@@ -287,23 +287,25 @@ const Invoices: React.FC = () => {
     return (
         <div className="min-h-screen bg-gray-50 w-full">
             {/* Navigation Breadcrumb */}
-            <nav className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-16 z-30 w-full px-4 sm:px-6 lg:px-8 py-4">
-                <ol className="flex items-center gap-2 text-sm">
-                    <li className="flex items-center gap-2">
-                        <Link
-                            to="/dashboard"
-                            className="flex items-center gap-2 text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors font-medium"
-                        >
-                            <Home className="h-4 w-4" />
-                            <span>Dashboard</span>
-                        </Link>
-                    </li>
-                    <span className="text-gray-400">/</span>
-                    <li className="flex items-center gap-2 text-gray-900 font-semibold">
-                        <FileText className="h-4 w-4" />
-                        <span>Invoice Management</span>
-                    </li>
-                </ol>
+            <nav className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-16 z-30 w-full py-4">
+                <div className="px-4 sm:px-6 lg:px-8">
+                    <ol className="flex items-center gap-2 text-sm">
+                        <li className="flex items-center gap-2">
+                            <Link
+                                to="/dashboard"
+                                className="flex items-center gap-2 text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors font-medium"
+                            >
+                                <Home className="h-4 w-4" />
+                                <span>Dashboard</span>
+                            </Link>
+                        </li>
+                        <span className="text-gray-400">/</span>
+                        <li className="flex items-center gap-2 text-gray-900 font-semibold">
+                            <FileText className="h-4 w-4" />
+                            <span>Invoice Management</span>
+                        </li>
+                    </ol>
+                </div>
             </nav>
 
             <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
