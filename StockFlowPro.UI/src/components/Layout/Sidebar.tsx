@@ -7,7 +7,6 @@ import {
     DollarSign,
     CreditCard,
     FileText,
-    User,
     Calendar,
     Banknote,
     CalendarX,
@@ -72,18 +71,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
             name: "Income",
             href: "/income",
             icon: DollarSign,
-            roles: [UserRole.Admin, UserRole.Manager],
-        },
-        {
-            name: "Employees",
-            href: "/employees",
-            icon: User,
-            roles: [UserRole.Admin, UserRole.Manager],
-        },
-        {
-            name: "Attendance",
-            href: "/attendance",
-            icon: Calendar,
             roles: [UserRole.Admin, UserRole.Manager],
         },
         {

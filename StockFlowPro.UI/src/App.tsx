@@ -48,8 +48,10 @@ import HR from "./pages/HR/HR.tsx";
 import EmployeeDirectory from "./pages/HR/EmployeeDirectory.tsx";
 import EmployeePerformance from "./pages/HR/EmployeePerformance.tsx";
 import Payslip from "./pages/HR/Payslip.tsx";
-import Attendance from "./pages/HR/Attendance.tsx";
+import HRAttendance from "./pages/HR/Attendance.tsx";
 import Holidays from "./pages/HR/Holidays.tsx";
+import Income from "./pages/Income/Income.tsx";
+import Leaves from "./pages/Leaves/Leaves.tsx";
 
 function App() {
     return (
@@ -87,6 +89,35 @@ function App() {
                                 <Route
                                     path="products/:id"
                                     element={<ProductDetail />}
+                                />
+
+                                {/* Income */}
+                                <Route
+                                    path="income"
+                                    element={
+                                        <PermissionRoute
+                                            permission={
+                                                Permissions.System.ViewAdminPanel
+                                            }
+                                        >
+                                            <Income />
+                                        </PermissionRoute>
+                                    }
+                                />
+
+                                
+                                {/* Leaves */}
+                                <Route
+                                    path="leaves"
+                                    element={
+                                        <PermissionRoute
+                                            permission={
+                                                Permissions.System.ViewAdminPanel
+                                            }
+                                        >
+                                            <Leaves />
+                                        </PermissionRoute>
+                                    }
                                 />
 
                                 {/* Invoices */}
@@ -238,7 +269,7 @@ function App() {
                                 <Route path="hr/employee-directory" element={<EmployeeDirectory />} />
                                 <Route path="hr/employee-performance" element={<EmployeePerformance />} />
                                 <Route path="hr/payslip" element={<Payslip />} />
-                                <Route path="hr/attendance" element={<Attendance />} />
+                                <Route path="hr/attendance" element={<HRAttendance />} />
                                 <Route path="hr/holidays" element={<Holidays />} />
 
                                 {/* Notifications */}
