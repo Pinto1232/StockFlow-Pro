@@ -36,7 +36,7 @@ public class CreateEmployeeHandler : IRequestHandler<CreateEmployeeCommand, Empl
     {
         var dto = request.Dto;
         if (await _repo.EmailExistsAsync(dto.Email, null, cancellationToken))
-            throw new DomainException("An employee with this email already exists.");
+            {throw new DomainException("An employee with this email already exists.");}
 
         var entity = new Employee(
             dto.FirstName,
@@ -95,7 +95,7 @@ public class DeleteEmployeeHandler : IRequestHandler<DeleteEmployeeCommand, bool
     public async Task<bool> Handle(DeleteEmployeeCommand request, CancellationToken cancellationToken)
     {
         var entity = await _repo.GetByIdAsync(request.Id, cancellationToken);
-        if (entity == null) return false;
+        if (entity == null) {return false;}
         await _repo.DeleteAsync(entity, cancellationToken);
         return true;
     }
@@ -186,7 +186,7 @@ public class ArchiveEmployeeDocumentHandler : IRequestHandler<ArchiveEmployeeDoc
     public async Task<bool> Handle(ArchiveEmployeeDocumentCommand request, CancellationToken cancellationToken)
     {
         var e = await _repo.GetByIdAsync(request.EmployeeId, cancellationToken);
-        if (e == null) return false;
+        if (e == null) {return false;}
         e.ArchiveDocument(request.DocumentId, request.Reason);
         await _repo.UpdateAsync(e, cancellationToken);
         return true;
