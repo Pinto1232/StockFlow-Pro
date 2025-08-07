@@ -27,9 +27,12 @@ namespace StockFlowPro.Infrastructure.Data
             Notifications = Set<Notification>();
             NotificationTemplates = Set<NotificationTemplate>();
             NotificationPreferences = Set<NotificationPreference>();
+
+            Employees = Set<Employee>();
         }
         
         public DbSet<User> Users { get; set; }
+        public DbSet<Employee> Employees { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
         public DbSet<InvoiceItem> InvoiceItems { get; set; }
@@ -82,6 +85,9 @@ namespace StockFlowPro.Infrastructure.Data
             modelBuilder.ApplyConfiguration(new NotificationConfiguration());
             modelBuilder.ApplyConfiguration(new NotificationTemplateConfiguration());
             modelBuilder.ApplyConfiguration(new NotificationPreferenceConfiguration());
+
+            // Employee configurations
+            modelBuilder.ApplyConfiguration(new EmployeeConfiguration());
         }
     }
 }

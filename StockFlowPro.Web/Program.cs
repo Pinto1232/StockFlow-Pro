@@ -242,12 +242,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         b => b.MigrationsAssembly("StockFlowPro.Infrastructure")));
 
 builder.Services.AddMediatR(typeof(StockFlowPro.Application.Commands.Users.CreateUserCommand).Assembly);
-builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(StockFlowPro.Application.Mappings.ProductMappingProfile), typeof(StockFlowPro.Application.Mappings.SubscriptionPlanMappingProfile), typeof(StockFlowPro.Application.Mappings.PermissionMappingProfile));
+builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(StockFlowPro.Application.Mappings.ProductMappingProfile), typeof(StockFlowPro.Application.Mappings.SubscriptionPlanMappingProfile), typeof(StockFlowPro.Application.Mappings.PermissionMappingProfile), typeof(StockFlowPro.Application.Mappings.EmployeeMappingProfile));
 builder.Services.AddValidatorsFromAssembly(typeof(StockFlowPro.Application.Validators.CreateUserCommandValidator).Assembly);
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+builder.Services.AddScoped<StockFlowPro.Domain.Repositories.IEmployeeRepository, StockFlowPro.Infrastructure.Repositories.EmployeeRepository>();
 builder.Services.AddScoped<StockFlowPro.Domain.Repositories.IInvoiceRepository, StockFlowPro.Infrastructure.Repositories.InvoiceRepository>();
 builder.Services.AddScoped<StockFlowPro.Domain.Repositories.ISubscriptionPlanRepository, StockFlowPro.Infrastructure.Repositories.SubscriptionPlanRepository>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
