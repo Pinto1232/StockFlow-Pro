@@ -16,6 +16,9 @@ public class Employee : IEntity
     public string PhoneNumber { get; private set; } = string.Empty;
     public DateTime? DateOfBirth { get; private set; }
 
+    // Profile image
+    public string? ImageUrl { get; private set; }
+
     // Job details
     public string JobTitle { get; private set; } = string.Empty;
     public Guid? DepartmentId { get; private set; }
@@ -61,10 +64,22 @@ public class Employee : IEntity
         Guid? managerId = null,
         DateTime? hireDate = null)
     {
-        if (string.IsNullOrWhiteSpace(firstName)) throw new ArgumentException("First name is required", nameof(firstName));
-        if (string.IsNullOrWhiteSpace(lastName)) throw new ArgumentException("Last name is required", nameof(lastName));
-        if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("Email is required", nameof(email));
-        if (string.IsNullOrWhiteSpace(jobTitle)) throw new ArgumentException("Job title is required", nameof(jobTitle));
+        if (string.IsNullOrWhiteSpace(firstName))
+        {
+            throw new ArgumentException("First name is required", nameof(firstName));
+        }
+        if (string.IsNullOrWhiteSpace(lastName))
+        {
+            throw new ArgumentException("Last name is required", nameof(lastName));
+        }
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            throw new ArgumentException("Email is required", nameof(email));
+        }
+        if (string.IsNullOrWhiteSpace(jobTitle))
+        {
+            throw new ArgumentException("Job title is required", nameof(jobTitle));
+        }
 
         Id = Guid.NewGuid();
         FirstName = firstName.Trim();
@@ -99,7 +114,9 @@ public class Employee : IEntity
     public void UpdateJobDetails(string jobTitle, Guid? departmentId, string? departmentName, Guid? managerId)
     {
         if (!string.IsNullOrWhiteSpace(jobTitle))
+        {
             JobTitle = jobTitle.Trim();
+        }
 
         DepartmentId = departmentId;
         DepartmentName = departmentName;
@@ -109,7 +126,10 @@ public class Employee : IEntity
 
     public void UpdateEmail(string email)
     {
-        if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("Email is required", nameof(email));
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            throw new ArgumentException("Email is required", nameof(email));
+        }
         Email = email.Trim().ToLowerInvariant();
         Touch();
     }
@@ -117,7 +137,9 @@ public class Employee : IEntity
     public void Activate()
     {
         if (Status == EmploymentStatus.Terminated)
+        {
             throw new DomainException("Cannot activate a terminated employee.");
+        }
 
         IsActive = true;
         if (Status == EmploymentStatus.Onboarding && _onboardingChecklist.All(i => i.CompletedAt.HasValue))
@@ -135,7 +157,9 @@ public class Employee : IEntity
     public void Suspend(string reason)
     {
         if (Status == EmploymentStatus.Terminated)
+        {
             throw new DomainException("Cannot suspend a terminated employee.");
+        }
         Status = EmploymentStatus.Suspended;
         IsActive = false;
         Touch();
@@ -144,7 +168,9 @@ public class Employee : IEntity
     public void StartOnboarding()
     {
         if (Status == EmploymentStatus.Terminated)
+        {
             throw new DomainException("Cannot onboard a terminated employee.");
+        }
         Status = EmploymentStatus.Onboarding;
         IsActive = false;
         if (_onboardingChecklist.Count == 0)
@@ -158,7 +184,10 @@ public class Employee : IEntity
     public void CompleteOnboardingTask(string code)
     {
         var item = _onboardingChecklist.FirstOrDefault(i => i.Code.Equals(code, StringComparison.OrdinalIgnoreCase));
-        if (item == null) throw new DomainException($"Onboarding task '{code}' not found.");
+        if (item == null)
+        {
+            throw new DomainException($"Onboarding task '{code}' not found.");
+        }
         item.MarkCompleted();
         if (_onboardingChecklist.All(i => i.CompletedAt.HasValue))
         {
@@ -172,7 +201,9 @@ public class Employee : IEntity
     public void InitiateOffboarding(string reason)
     {
         if (Status == EmploymentStatus.Terminated)
+        {
             throw new DomainException("Employee is already terminated.");
+        }
 
         Status = EmploymentStatus.Offboarding;
         IsActive = false;
@@ -185,7 +216,10 @@ public class Employee : IEntity
     public void CompleteOffboardingTask(string code)
     {
         var item = _offboardingChecklist.FirstOrDefault(i => i.Code.Equals(code, StringComparison.OrdinalIgnoreCase));
-        if (item == null) throw new DomainException($"Offboarding task '{code}' not found.");
+        if (item == null)
+        {
+            throw new DomainException($"Offboarding task '{code}' not found.");
+        }
         item.MarkCompleted();
         if (_offboardingChecklist.All(i => i.CompletedAt.HasValue))
         {
@@ -198,7 +232,9 @@ public class Employee : IEntity
     public void Terminate(string reason)
     {
         if (Status == EmploymentStatus.Terminated)
+        {
             throw new DomainException("Employee is already terminated.");
+        }
         Status = EmploymentStatus.Terminated;
         TerminationDate = DateTime.UtcNow.Date;
         IsActive = false;
@@ -208,9 +244,18 @@ public class Employee : IEntity
     // Documents
     public EmployeeDocument AddDocument(string fileName, DocumentType type, string storagePath, long sizeBytes, string contentType, DateTime? issuedAt = null, DateTime? expiresAt = null)
     {
-        if (string.IsNullOrWhiteSpace(fileName)) throw new ArgumentException("File name is required", nameof(fileName));
-        if (string.IsNullOrWhiteSpace(storagePath)) throw new ArgumentException("Storage path is required", nameof(storagePath));
-        if (sizeBytes <= 0) throw new ArgumentException("Document size must be positive", nameof(sizeBytes));
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            throw new ArgumentException("File name is required", nameof(fileName));
+        }
+        if (string.IsNullOrWhiteSpace(storagePath))
+        {
+            throw new ArgumentException("Storage path is required", nameof(storagePath));
+        }
+        if (sizeBytes <= 0)
+        {
+            throw new ArgumentException("Document size must be positive", nameof(sizeBytes));
+        }
 
         // Versioning: increment version for same type
         var version = _documents.Where(d => d.Type == type).Select(d => d.Version).DefaultIfEmpty(0).Max() + 1;
@@ -262,6 +307,12 @@ public class Employee : IEntity
         });
     }
 
+    public void UpdateImage(string? imageUrl)
+    {
+        ImageUrl = imageUrl;
+        Touch();
+    }
+
     private void Touch() => UpdatedAt = DateTime.UtcNow;
 }
 
@@ -278,7 +329,10 @@ public class Department : IEntity
 
     public Department(string name)
     {
-        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Department name is required", nameof(name));
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Department name is required", nameof(name));
+        }
         Id = Guid.NewGuid();
         Name = name.Trim();
         IsActive = true;
@@ -286,7 +340,10 @@ public class Department : IEntity
 
     public void Rename(string name)
     {
-        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Department name is required", nameof(name));
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Department name is required", nameof(name));
+        }
         Name = name.Trim();
     }
 
@@ -333,7 +390,10 @@ public class EmployeeDocument : IEntity
 
     public void Archive(string reason)
     {
-        if (IsArchived) return;
+        if (IsArchived)
+        {
+            return;
+        }
         IsArchived = true;
         ArchiveReason = reason;
         ArchivedAt = DateTime.UtcNow;
@@ -341,7 +401,10 @@ public class EmployeeDocument : IEntity
 
     public void Replace(string newFileName, string newStoragePath, long sizeBytes, string contentType)
     {
-        if (IsArchived) throw new DomainException("Cannot replace an archived document.");
+        if (IsArchived)
+        {
+            throw new DomainException("Cannot replace an archived document.");
+        }
         FileName = newFileName;
         StoragePath = newStoragePath;
         SizeBytes = sizeBytes;
@@ -375,7 +438,10 @@ public class ChecklistItem : IEntity
 
     public void MarkCompleted()
     {
-        if (CompletedAt.HasValue) return;
+        if (CompletedAt.HasValue)
+        {
+            return;
+        }
         CompletedAt = DateTime.UtcNow;
     }
 }

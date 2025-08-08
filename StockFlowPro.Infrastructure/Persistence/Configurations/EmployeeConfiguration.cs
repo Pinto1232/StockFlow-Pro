@@ -17,6 +17,7 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         builder.Property(e => e.PhoneNumber).HasMaxLength(50);
         builder.Property(e => e.JobTitle).IsRequired().HasMaxLength(150);
         builder.Property(e => e.DepartmentName).HasMaxLength(150);
+        builder.Property(e => e.ImageUrl).HasMaxLength(500);
 
         builder.HasIndex(e => e.Email).IsUnique();
 

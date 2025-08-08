@@ -64,6 +64,7 @@ public class DatabaseSeeder(ApplicationDbContext context, ILogger<DatabaseSeeder
                 await SeedRolesAsync();
                 await SeedPermissionsAsync();
                 await SeedProductsAsync();
+                await SeedEmployeesAsync();
                 await SeedSubscriptionSystemAsync();
                 await SeedNotificationSystemAsync();
                 return;
@@ -137,6 +138,9 @@ public class DatabaseSeeder(ApplicationDbContext context, ILogger<DatabaseSeeder
             // Seed Products
             await SeedProductsAsync();
 
+            // Seed Employees
+            await SeedEmployeesAsync();
+
             // Seed Subscription System
             await SeedSubscriptionSystemAsync();
 
@@ -193,6 +197,138 @@ public class DatabaseSeeder(ApplicationDbContext context, ILogger<DatabaseSeeder
         {
             _logger.LogError(ex, "An error occurred while seeding products: {ErrorMessage}", ex.Message);
             throw new InvalidOperationException("Failed to seed products data", ex);
+        }
+    }
+
+    private async Task SeedEmployeesAsync()
+    {
+        try
+        {
+            if (await _context.Employees.AnyAsync())
+            {
+                _logger.LogInformation("Employees already exist in database. Skipping employee seed.");
+                return;
+            }
+
+            _logger.LogInformation("Seeding database with initial employees...");
+
+            var now = DateTime.UtcNow;
+            var employees = new List<Employee>();
+
+            // Onboarding employee (not yet active)
+            var onboardingEmp = new Employee(
+                firstName: "Ethan",
+                lastName: "Onboard",
+                email: "ethan.onboard@company.com",
+                phoneNumber: "+1-555-1001",
+                jobTitle: "Junior Analyst",
+                departmentId: null,
+                departmentName: "Operations",
+                managerId: null,
+                hireDate: now.AddDays(-7)
+            );
+            onboardingEmp.AddDocument(
+                fileName: "national-id.pdf",
+                type: DocumentType.Identification,
+                storagePath: "employees/ethan/id-v1.pdf",
+                sizeBytes: 120_000,
+                contentType: "application/pdf",
+                issuedAt: now.AddYears(-5),
+                expiresAt: now.AddYears(5)
+            );
+            employees.Add(onboardingEmp);
+
+            // Active employee (completed onboarding)
+            var activeEmp = new Employee(
+                firstName: "Ava",
+                lastName: "Active",
+                email: "ava.active@company.com",
+                phoneNumber: "+1-555-1002",
+                jobTitle: "Senior Engineer",
+                departmentId: null,
+                departmentName: "Engineering",
+                managerId: null,
+                hireDate: now.AddMonths(-6)
+            );
+            foreach (var code in new[] { "ACCOUNTS", "DOCUMENTS", "CONTRACT", "TRAINING" })
+            {
+                activeEmp.CompleteOnboardingTask(code);
+            }
+            activeEmp.AddDocument(
+                fileName: "employment-contract.pdf",
+                type: DocumentType.Contract,
+                storagePath: "employees/ava/contract-v1.pdf",
+                sizeBytes: 250_000,
+                contentType: "application/pdf",
+                issuedAt: now.AddMonths(-6),
+                expiresAt: null
+            );
+            employees.Add(activeEmp);
+
+            // Suspended employee
+            var suspendedEmp = new Employee(
+                firstName: "Sam",
+                lastName: "Suspended",
+                email: "sam.suspended@company.com",
+                phoneNumber: "+1-555-1003",
+                jobTitle: "Support Specialist",
+                departmentId: null,
+                departmentName: "Support",
+                managerId: null,
+                hireDate: now.AddMonths(-3)
+            );
+            foreach (var code in new[] { "ACCOUNTS", "DOCUMENTS", "CONTRACT", "TRAINING" })
+            {
+                suspendedEmp.CompleteOnboardingTask(code);
+            }
+            suspendedEmp.Suspend("Policy review in progress");
+            employees.Add(suspendedEmp);
+
+            // Offboarding employee
+            var offboardingEmp = new Employee(
+                firstName: "Olivia",
+                lastName: "Offboard",
+                email: "olivia.offboard@company.com",
+                phoneNumber: "+1-555-1004",
+                jobTitle: "Account Manager",
+                departmentId: null,
+                departmentName: "Sales",
+                managerId: null,
+                hireDate: now.AddYears(-2)
+            );
+            foreach (var code in new[] { "ACCOUNTS", "DOCUMENTS", "CONTRACT", "TRAINING" })
+            {
+                offboardingEmp.CompleteOnboardingTask(code);
+            }
+            offboardingEmp.InitiateOffboarding("Role redundancy");
+            // Complete one offboarding task
+            offboardingEmp.CompleteOffboardingTask("DISABLE_ACCESS");
+            employees.Add(offboardingEmp);
+
+            // Terminated employee
+            var terminatedEmp = new Employee(
+                firstName: "Liam",
+                lastName: "Terminated",
+                email: "liam.terminated@company.com",
+                phoneNumber: "+1-555-1005",
+                jobTitle: "Intern",
+                departmentId: null,
+                departmentName: "R&D",
+                managerId: null,
+                hireDate: now.AddMonths(-2)
+            );
+            terminatedEmp.Terminate("Contract ended");
+            employees.Add(terminatedEmp);
+
+            await _context.Employees.AddRangeAsync(employees);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Successfully seeded database with {Count} employees", employees.Count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while seeding employees: {Message}", ex.Message);
+            throw new InvalidOperationException("Failed to seed employees data", ex);
         }
     }
 

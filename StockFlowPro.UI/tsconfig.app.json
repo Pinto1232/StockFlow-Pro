@@ -22,7 +22,13 @@
     "erasableSyntaxOnly": false,
     "noFallthroughCasesInSwitch": false,
     "noUncheckedSideEffectImports": false,
-    "types": ["node"]
+    "types": ["node"],
+
+    /* Path aliases to match Vite alias { '@': '/src' } */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src"],
   "exclude": [

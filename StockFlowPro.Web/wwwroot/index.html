@@ -1516,6 +1516,10 @@
             
             // Update status every 30 seconds
             setInterval(updateSystemStatus, 30000);
+
+            // Dynamically populate API cards (e.g., Employee Management) from API documentation
+            // This ensures new APIs like Employment automatically show up without manual edits
+            populateDynamicApiCards();
         });
 
         // Handle visibility change to refresh auth when tab becomes visible
@@ -1908,6 +1912,142 @@
             }
             
             showSuccess('Observability data refreshed successfully');
+        }
+
+        // Dynamic API Cards
+        async function populateDynamicApiCards() {
+            try {
+                const res = await fetch('/api/api-documentation/by-category', { credentials: 'include' });
+                if (!res.ok) {
+                    console.warn('Failed to load API documentation by category');
+                    return;
+                }
+
+                const payload = await res.json();
+                // The ApiResponse wrapper uses { success, data, ... }
+                const categorized = payload.data ?? payload;
+                if (!categorized || typeof categorized !== 'object') return;
+
+                // Ensure Employee Management card gets created if Employees API exists
+                await ensureEmployeeManagementCard(categorized);
+
+            } catch (err) {
+                console.error('populateDynamicApiCards error:', err);
+            }
+        }
+
+        function cardExistsByHref(href) {
+            return !!document.querySelector(`.dashboard-grid a[href="${href}"]`);
+        }
+
+        function createCardElement({ id, title, description, primaryLink, primaryText, extraLinks = [] }) {
+            const div = document.createElement('div');
+            div.className = 'card';
+            if (id) div.id = id;
+
+            const h3 = document.createElement('h3');
+            h3.textContent = title;
+            const p = document.createElement('p');
+            p.textContent = description;
+
+            const actions = document.createElement('div');
+            actions.className = 'card-actions';
+
+            const primary = document.createElement('a');
+            primary.href = primaryLink;
+            primary.className = 'btn btn-primary';
+            primary.textContent = primaryText;
+            actions.appendChild(primary);
+
+            for (const link of extraLinks) {
+                const a = document.createElement('a');
+                a.href = link.href;
+                a.className = 'btn btn-secondary';
+                a.textContent = link.text;
+                actions.appendChild(a);
+            }
+
+            div.appendChild(h3);
+            div.appendChild(p);
+            div.appendChild(actions);
+            return div;
+        }
+
+        async function ensureEmployeeManagementCard(categorizedDocs) {
+            const grid = document.querySelector('.dashboard-grid');
+            if (!grid) return;
+
+            const categoryKey = Object.keys(categorizedDocs).find(k => k.toLowerCase().includes('employee'));
+            if (!categoryKey) return; // No Employee category found
+
+            const endpoints = categorizedDocs[categoryKey] || [];
+            // Prefer a GET collection endpoint without path params
+            const getEndpoints = endpoints.filter(e => (e.method || e.Method) === 'GET');
+            let primary = getEndpoints.find(e => !/(\{|\})/.test((e.path || e.Path)))
+                         || endpoints[0];
+            if (!primary) return;
+
+            const primaryHref = primary.path || primary.Path;
+            if (!primaryHref) return;
+
+            // Avoid duplicates if a card already links to /api/employees
+            if (cardExistsByHref(primaryHref) || cardExistsByHref('/api/employees')) return;
+
+            const title = '👔 Employee Management';
+            const description = 'Manage employees, documents, onboarding, and lifecycle workflows.';
+
+            const extra = [];
+            // Add a few useful extra links if discovered
+            const extraCandidates = [
+                '/api/employees',
+                '/api/employees?activeOnly=true'
+            ];
+            for (const href of extraCandidates) {
+                if (href !== primaryHref) {
+                    extra.push({ href, text: href.includes('activeOnly') ? 'Active Only' : 'Employees API' });
+                }
+            }
+
+            const card = createCardElement({
+                id: 'card-employee-management',
+                title,
+                description,
+                primaryLink: primaryHref,
+                primaryText: 'Employees API',
+                extraLinks: extra
+            });
+
+            grid.appendChild(card);
+
+            // Also add a navigation item under the Business section if not present
+            ensureBusinessNavItem('💼', 'Employment', primaryHref);
+        }
+
+        function ensureBusinessNavItem(icon, text, href) {
+            // If a nav item already exists for this href, skip
+            if (document.querySelector(`.sidebar .nav-item[href="${href}"]`)) return;
+
+            // Find the Business section container
+            const sections = Array.from(document.querySelectorAll('.sidebar .nav-section'));
+            const businessSection = sections.find(sec => {
+                const title = sec.querySelector('.nav-section-title');
+                return title && title.textContent && title.textContent.trim().toLowerCase() === 'business';
+            });
+            if (!businessSection) return;
+
+            const a = document.createElement('a');
+            a.href = href;
+            a.className = 'nav-item';
+            a.setAttribute('onclick', 'setActiveNav(this)');
+
+            const spanIcon = document.createElement('span');
+            spanIcon.className = 'nav-item-icon';
+            spanIcon.textContent = icon;
+
+            a.appendChild(spanIcon);
+            a.appendChild(document.createTextNode(text));
+
+            businessSection.appendChild(a);
         }
 
         // Override setActiveNav for main dashboard items

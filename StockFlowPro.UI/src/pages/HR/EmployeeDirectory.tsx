@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
     Home,
@@ -9,11 +9,119 @@ import {
     Plus,
     Mail,
     Phone,
-    MapPin,
     Edit,
+    BadgeCheck,
+    Calendar,
 } from "lucide-react";
+import { useCreateEmployee, useEmployees, type EmployeeDto } from "../../hooks/employees";
+
+function initials(first?: string | null, last?: string | null) {
+    const f = (first ?? "").trim();
+    const l = (last ?? "").trim();
+    const fi = f ? f[0]! : "";
+    const li = l ? l[0]! : "";
+    return (fi + li || "??").toUpperCase();
+}
+
+function buildFullName(first?: string | null, last?: string | null) {
+    return `${first ?? ""} ${last ?? ""}`.trim();
+}
+
+function resolveImageUrl(url?: string | null) {
+    if (!url) return undefined;
+    if (/^https?:\/\//i.test(url)) return url;
+    const base = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '');
+    const origin = base.endsWith('/api') ? base.slice(0, -4) : base;
+    if (!origin) return url;
+    return url.startsWith('/') ? `${origin}${url}` : `${origin}/${url}`;
+}
+
+function statusToLabel(status: EmployeeDto['status'] | number): string {
+    // Backend example shows numeric codes: 0 Onboarding, 1 Active, 2 Suspended, 3 Offboarding, 4 Terminated
+    if (typeof status === "number") {
+        switch (status) {
+            case 0: return "Onboarding";
+            case 1: return "Active";
+            case 2: return "Suspended";
+            case 3: return "Offboarding";
+            case 4: return "Terminated";
+            default: return String(status);
+        }
+    }
+    if (typeof status === "string") return status;
+    return "Unknown";
+}
+
+function statusClasses(label: string): string {
+    switch (label) {
+        case "Active": return "bg-green-100 text-green-800";
+        case "Onboarding": return "bg-blue-100 text-blue-800";
+        case "Suspended": return "bg-yellow-100 text-yellow-800";
+        case "Offboarding": return "bg-purple-100 text-purple-800";
+        case "Terminated": return "bg-red-100 text-red-800";
+        default: return "bg-gray-100 text-gray-800";
+    }
+}
+
+function normalize(str?: string | null) {
+    return (str ?? "").toLowerCase();
+}
 
 const EmployeeDirectory: React.FC = () => {
+    const { data: employees, isLoading, isError } = useEmployees();
+
+    const [search, setSearch] = useState("");
+    const [departmentFilter, setDepartmentFilter] = useState<string>("All");
+    const [positionFilter, setPositionFilter] = useState<string>("All");
+    const [showCreateModal, setShowCreateModal] = useState(false);
+
+    useEffect(() => {
+        if (employees) {
+            console.log('[EmployeeDirectory] employees:', employees);
+        }
+    }, [employees]);
+
+    const departments = useMemo(() => {
+        const set = new Set<string>();
+        (employees ?? []).forEach(e => {
+            if (e.departmentName) set.add(e.departmentName);
+        });
+        return ["All", ...Array.from(set.values()).sort()];
+    }, [employees]);
+
+    const filtered = useMemo(() => {
+        const term = normalize(search);
+        return (employees ?? []).filter(e => {
+            const matchesSearch = !term
+                || normalize(e.fullName).includes(term)
+                || normalize(buildFullName(e.firstName, e.lastName)).includes(term)
+                || normalize(e.firstName).includes(term)
+                || normalize(e.lastName).includes(term)
+                || normalize(e.email).includes(term)
+                || normalize(e.jobTitle).includes(term)
+                || normalize(e.departmentName).includes(term);
+
+            const matchesDept = departmentFilter === "All" || e.departmentName === departmentFilter;
+
+            const matchesPos = positionFilter === "All" ||
+                (positionFilter === "Manager" && /manager/i.test(e.jobTitle ?? "")) ||
+                (positionFilter === "Senior" && /senior|sr\.?/i.test(e.jobTitle ?? "")) ||
+                (positionFilter === "Junior" && /junior|jr\.?/i.test(e.jobTitle ?? "")) ||
+                (positionFilter === "Intern" && /intern/i.test(e.jobTitle ?? ""));
+
+            return matchesSearch && matchesDept && matchesPos;
+        });
+    }, [employees, search, departmentFilter, positionFilter]);
+
+    const departmentCounts = useMemo(() => {
+        const counts = new Map<string, number>();
+        (employees ?? []).forEach(e => {
+            const key = e.departmentName ?? "Unassigned";
+            counts.set(key, (counts.get(key) ?? 0) + 1);
+        });
+        return Array.from(counts.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+    }, [employees]);
+
     return (
         <div className="min-h-screen bg-gray-50 w-full">
             {/* Navigation Breadcrumb */}
@@ -56,7 +164,10 @@ const EmployeeDirectory: React.FC = () => {
                                 <Filter className="w-4 h-4" />
                                 <span>Filter</span>
                             </button>
-                            <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium shadow-lg">
+                            <button
+                                onClick={() => setShowCreateModal(true)}
+                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium shadow-lg"
+                            >
                                 <Plus className="w-4 h-4" />
                                 <span>Add Employee</span>
                             </button>
@@ -72,195 +183,272 @@ const EmployeeDirectory: React.FC = () => {
                             <input
                                 type="text"
                                 placeholder="Search employees by name, department, or position..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
                                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </div>
-                        <select className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option>All Departments</option>
-                            <option>Engineering</option>
-                            <option>Sales</option>
-                            <option>Marketing</option>
-                            <option>Operations</option>
-                            <option>HR</option>
+                        <select
+                            value={departmentFilter}
+                            onChange={(e) => setDepartmentFilter(e.target.value)}
+                            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            {departments.map((d) => (
+                                <option key={d} value={d}>{d === "All" ? "All Departments" : d}</option>
+                            ))}
                         </select>
-                        <select className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option>All Positions</option>
-                            <option>Manager</option>
-                            <option>Senior</option>
-                            <option>Junior</option>
-                            <option>Intern</option>
+                        <select
+                            value={positionFilter}
+                            onChange={(e) => setPositionFilter(e.target.value)}
+                            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            {[
+                                "All",
+                                "Manager",
+                                "Senior",
+                                "Junior",
+                                "Intern",
+                            ].map((p) => (
+                                <option key={p} value={p}>{p === "All" ? "All Positions" : p}</option>
+                            ))}
                         </select>
                     </div>
                 </div>
 
+                {/* Loading / Error states */}
+                {isLoading && (
+                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
+                        <div className="flex items-center gap-3 text-gray-600"><BadgeCheck className="w-5 h-5 animate-pulse" /> Loading employees…</div>
+                    </div>
+                )}
+                {isError && (
+                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
+                        <div className="text-red-600">Failed to load employees.</div>
+                    </div>
+                )}
+
                 {/* Employee Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                    {/* Employee Card 1 */}
-                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
-                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 text-center">
-                            <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <span className="text-white font-bold text-xl">JD</span>
-                            </div>
-                            <h3 className="text-lg font-bold text-gray-900">John Doe</h3>
-                            <p className="text-sm text-gray-600">Senior Software Engineer</p>
-                            <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full mt-2">
-                                Engineering
-                            </span>
-                        </div>
-                        <div className="p-6">
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <Mail className="w-4 h-4" />
-                                    <span>john.doe@company.com</span>
+                    {(filtered ?? []).map((e) => {
+                        const label = statusToLabel(e.status);
+                        return (
+                            <div key={e.id} className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+                                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 text-center">
+                                    {e.imageUrl ? (
+                                        <img src={resolveImageUrl(e.imageUrl)} alt={e.fullName ?? buildFullName(e.firstName, e.lastName)} className="w-20 h-20 rounded-full object-cover mx-auto mb-4" />
+                                    ) : (
+                                        <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <span className="text-white font-bold text-xl">{initials(e.firstName, e.lastName)}</span>
+                                        </div>
+                                    )}
+                                    <h3 className="text-lg font-bold text-gray-900">{e.fullName ?? buildFullName(e.firstName, e.lastName)}</h3>
+                                    <p className="text-sm text-gray-600">{e.jobTitle ?? "—"}</p>
+                                    <div className="mt-2 flex items-center justify-center gap-2">
+                                        {e.isActive && <span className="inline-block w-2 h-2 rounded-full bg-green-500" title="Active"></span>}
+                                        <span className={`inline-block ${statusClasses(label)} text-xs font-semibold px-3 py-1 rounded-full`}>{label}</span>
+                                        <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                            {e.departmentName ?? "Unassigned"}
+                                        </span>
+                                        <span className="inline-block bg-gray-100 text-gray-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                            Docs: {(e.documents?.length ?? 0)}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <Phone className="w-4 h-4" />
-                                    <span>+1 (555) 123-4567</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <MapPin className="w-4 h-4" />
-                                    <span>New York, NY</span>
-                                </div>
-                            </div>
-                            <button className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200">
-                                <Edit className="w-4 h-4" />
-                                <span>View Profile</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Employee Card 2 */}
-                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
-                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 text-center">
-                            <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <span className="text-white font-bold text-xl">JS</span>
-                            </div>
-                            <h3 className="text-lg font-bold text-gray-900">Jane Smith</h3>
-                            <p className="text-sm text-gray-600">Marketing Manager</p>
-                            <span className="inline-block bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full mt-2">
-                                Marketing
-                            </span>
-                        </div>
-                        <div className="p-6">
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <Mail className="w-4 h-4" />
-                                    <span>jane.smith@company.com</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <Phone className="w-4 h-4" />
-                                    <span>+1 (555) 234-5678</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <MapPin className="w-4 h-4" />
-                                    <span>Los Angeles, CA</span>
+                                <div className="p-6">
+                                    <div className="space-y-3">
+                                        {e.email && (
+                                            <div className="flex items-center gap-3 text-sm text-gray-600">
+                                                <Mail className="w-4 h-4" />
+                                                <span>{e.email}</span>
+                                            </div>
+                                        )}
+                                        {e.phoneNumber && (
+                                            <div className="flex items-center gap-3 text-sm text-gray-600">
+                                                <Phone className="w-4 h-4" />
+                                                <span>{e.phoneNumber}</span>
+                                            </div>
+                                        )}
+                                        {e.hireDate && (
+                                            <div className="flex items-center gap-3 text-sm text-gray-600">
+                                                <Calendar className="w-4 h-4" />
+                                                <span>Hired: {new Date(e.hireDate).toLocaleDateString()}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <Link
+                                        to={`/hr/employees/${e.id}`}
+                                        className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200"
+                                    >
+                                        <Edit className="w-4 h-4" />
+                                        <span>View Profile</span>
+                                    </Link>
                                 </div>
                             </div>
-                            <button className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200">
-                                <Edit className="w-4 h-4" />
-                                <span>View Profile</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Employee Card 3 */}
-                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
-                        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 text-center">
-                            <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <span className="text-white font-bold text-xl">MB</span>
-                            </div>
-                            <h3 className="text-lg font-bold text-gray-900">Mike Brown</h3>
-                            <p className="text-sm text-gray-600">Sales Director</p>
-                            <span className="inline-block bg-purple-100 text-purple-800 text-xs font-semibold px-3 py-1 rounded-full mt-2">
-                                Sales
-                            </span>
-                        </div>
-                        <div className="p-6">
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <Mail className="w-4 h-4" />
-                                    <span>mike.brown@company.com</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <Phone className="w-4 h-4" />
-                                    <span>+1 (555) 345-6789</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <MapPin className="w-4 h-4" />
-                                    <span>Chicago, IL</span>
-                                </div>
-                            </div>
-                            <button className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200">
-                                <Edit className="w-4 h-4" />
-                                <span>View Profile</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Employee Card 4 */}
-                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
-                        <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 text-center">
-                            <div className="w-20 h-20 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <span className="text-white font-bold text-xl">SW</span>
-                            </div>
-                            <h3 className="text-lg font-bold text-gray-900">Sarah Wilson</h3>
-                            <p className="text-sm text-gray-600">HR Specialist</p>
-                            <span className="inline-block bg-orange-100 text-orange-800 text-xs font-semibold px-3 py-1 rounded-full mt-2">
-                                Human Resources
-                            </span>
-                        </div>
-                        <div className="p-6">
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <Mail className="w-4 h-4" />
-                                    <span>sarah.wilson@company.com</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <Phone className="w-4 h-4" />
-                                    <span>+1 (555) 456-7890</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <MapPin className="w-4 h-4" />
-                                    <span>Miami, FL</span>
-                                </div>
-                            </div>
-                            <button className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200">
-                                <Edit className="w-4 h-4" />
-                                <span>View Profile</span>
-                            </button>
-                        </div>
-                    </div>
+                        );
+                    })}
                 </div>
 
                 {/* Department Summary */}
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
                     <h3 className="text-xl font-bold text-gray-900 mb-6">Department Overview</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                        <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl">
-                            <div className="text-2xl font-bold text-blue-600 mb-1">32</div>
-                            <div className="text-sm text-blue-700 font-medium">Engineering</div>
-                        </div>
-                        <div className="text-center p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl">
-                            <div className="text-2xl font-bold text-green-600 mb-1">18</div>
-                            <div className="text-sm text-green-700 font-medium">Sales</div>
-                        </div>
-                        <div className="text-center p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl">
-                            <div className="text-2xl font-bold text-purple-600 mb-1">24</div>
-                            <div className="text-sm text-purple-700 font-medium">Marketing</div>
-                        </div>
-                        <div className="text-center p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl">
-                            <div className="text-2xl font-bold text-orange-600 mb-1">15</div>
-                            <div className="text-sm text-orange-700 font-medium">Operations</div>
-                        </div>
-                        <div className="text-center p-4 bg-gradient-to-r from-teal-50 to-teal-100 rounded-xl">
-                            <div className="text-2xl font-bold text-teal-600 mb-1">8</div>
-                            <div className="text-sm text-teal-700 font-medium">HR</div>
-                        </div>
+                        {departmentCounts.length === 0 && (
+                            <div className="col-span-full text-gray-500">No departments to display.</div>
+                        )}
+                        {departmentCounts.map(([dept, count], idx) => {
+                            const palette = [
+                                "from-blue-50 to-blue-100 text-blue-700",
+                                "from-green-50 to-green-100 text-green-700",
+                                "from-purple-50 to-purple-100 text-purple-700",
+                                "from-orange-50 to-orange-100 text-orange-700",
+                                "from-teal-50 to-teal-100 text-teal-700",
+                            ];
+                            const color = palette[idx % palette.length];
+                            const numberColor = color.includes("blue") ? "text-blue-600" :
+                                color.includes("green") ? "text-green-600" :
+                                color.includes("purple") ? "text-purple-600" :
+                                color.includes("orange") ? "text-orange-600" : "text-teal-600";
+                            return (
+                                <div key={dept} className={`text-center p-4 bg-gradient-to-r ${color} rounded-xl`}>
+                                    <div className={`text-2xl font-bold mb-1 ${numberColor}`}>{count}</div>
+                                    <div className="text-sm font-medium">{dept}</div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
+
+            {showCreateModal && (
+                <CreateEmployeeModal
+                    onClose={() => setShowCreateModal(false)}
+                />
+            )}
         </div>
     );
 };
 
 export default EmployeeDirectory;
+
+// Create Employee Modal (inline component for simplicity)
+const CreateEmployeeModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+    const { mutateAsync: createEmployee, isPending } = useCreateEmployee();
+    const [form, setForm] = useState<Partial<EmployeeDto>>({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phoneNumber: "",
+        jobTitle: "",
+        departmentName: "",
+    });
+    const [error, setError] = useState<string | null>(null);
+
+    const canSubmit = (form.firstName ?? "").trim() !== "" && (form.lastName ?? "").trim() !== "" && (form.email ?? "").trim() !== "";
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError(null);
+        if (!canSubmit) return;
+        try {
+            // Let backend set defaults for status/isActive/hireDate
+            await createEmployee({
+                firstName: form.firstName?.trim(),
+                lastName: form.lastName?.trim(),
+                email: form.email?.trim(),
+                phoneNumber: form.phoneNumber?.trim(),
+                jobTitle: form.jobTitle?.trim(),
+                departmentName: form.departmentName?.trim(),
+            });
+            onClose();
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : (typeof err === 'string' ? err : 'Failed to create employee');
+            setError(message);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-2xl">
+                <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-900">Add New Employee</h3>
+                    <button
+                        onClick={onClose}
+                        className="px-3 py-1 text-gray-500 hover:text-gray-700"
+                        aria-label="Close"
+                    >✕</button>
+                </div>
+                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    {error && (
+                        <div className="p-3 rounded-lg bg-red-50 text-red-700 text-sm border border-red-200">{error}</div>
+                    )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                            <input
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                value={form.firstName ?? ""}
+                                onChange={(e) => setForm(f => ({ ...f, firstName: e.target.value }))}
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                            <input
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                value={form.lastName ?? ""}
+                                onChange={(e) => setForm(f => ({ ...f, lastName: e.target.value }))}
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input
+                                type="email"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                value={form.email ?? ""}
+                                onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))}
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                            <input
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                value={form.phoneNumber ?? ""}
+                                onChange={(e) => setForm(f => ({ ...f, phoneNumber: e.target.value }))}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
+                            <input
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                value={form.jobTitle ?? ""}
+                                onChange={(e) => setForm(f => ({ ...f, jobTitle: e.target.value }))}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                            <input
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                value={form.departmentName ?? ""}
+                                onChange={(e) => setForm(f => ({ ...f, departmentName: e.target.value }))}
+                            />
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-end gap-3 pt-4">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                        >Cancel</button>
+                        <button
+                            type="submit"
+                            disabled={!canSubmit || isPending}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                        >{isPending ? 'Creating…' : 'Create Employee'}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};

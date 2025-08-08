@@ -9,7 +9,8 @@ public class EmployeeMappingProfile : Profile
     public EmployeeMappingProfile()
     {
         CreateMap<Employee, EmployeeDto>()
-            .ForMember(d => d.Documents, opt => opt.MapFrom(s => s.Documents));
+            .ForMember(d => d.Documents, opt => opt.MapFrom(s => s.Documents))
+            .ForMember(d => d.ImageUrl, opt => opt.MapFrom(s => s.ImageUrl));
 
         CreateMap<EmployeeDocument, EmployeeDocumentDto>();
 
