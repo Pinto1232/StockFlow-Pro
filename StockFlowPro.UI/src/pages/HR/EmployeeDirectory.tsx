@@ -556,13 +556,13 @@ const EmployeeDirectory: React.FC = () => {
                 </div>
 
                 {/* Views and Settings Bar */}
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        <label className="text-sm text-gray-600">Saved View</label>
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    <div className="flex items-center gap-3 flex-nowrap whitespace-nowrap">
+                        <label className="text-sm text-gray-600 whitespace-nowrap">Saved View</label>
                         <select
                             value={activeViewId ?? ""}
                             onChange={(e) => setActiveViewId(e.target.value || null)}
-                            className="px-3 py-2 border border-gray-300 rounded-lg"
+                            className="px-3 py-2 border border-gray-300 rounded-lg whitespace-nowrap"
                         >
                             <option value="">— None —</option>
                             {views.map(v => (
@@ -574,7 +574,7 @@ const EmployeeDirectory: React.FC = () => {
                                 const name = prompt("View name?");
                                 if (name && name.trim()) saveCurrentView(name.trim());
                             }}
-                            className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                            className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap"
                         >Save current</button>
                         <button
                             disabled={!activeViewId}
@@ -582,17 +582,18 @@ const EmployeeDirectory: React.FC = () => {
                                 const name = prompt("Rename view? Leave empty to keep.");
                                 updateActiveView(name || undefined);
                             }}
-                            className="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
+                            className="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50 whitespace-nowrap"
                         >Update</button>
                         <button
                             disabled={!activeViewId}
                             onClick={deleteActiveView}
-                            className="px-3 py-2 border border-red-300 text-red-600 rounded-lg disabled:opacity-50"
+                            className="px-3 py-2 border border-red-300 text-red-600 rounded-lg disabled:opacity-50 whitespace-nowrap"
                         >Delete</button>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-3 text-sm flex-nowrap max-w-full overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    <div className="flex items-center gap-4 flex-nowrap whitespace-nowrap">
+                        <div className="flex items-center gap-3 text-sm flex-nowrap">
+                            {/* toggles container already nowrap */}
                             <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all whitespace-nowrap">
                                 <ModernCheckbox
                                     checked={settings.showEmail}
@@ -630,19 +631,19 @@ const EmployeeDirectory: React.FC = () => {
                                 <span className="text-gray-700 whitespace-nowrap">Hire Date</span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 flex-nowrap whitespace-nowrap">
                             <button
                                 onClick={() => exportCsv((selectedIds.size>0 ? (employees ?? []).filter(e=>selectedIds.has(e.id)) : (filtered ?? [])))}
-                                className="px-3 py-2 border border-gray-300 rounded-lg"
+                                className="px-3 py-2 border border-gray-300 rounded-lg whitespace-nowrap"
                             >Export CSV</button>
                             <button
                                 disabled={selectedIds.size===0}
                                 onClick={clearSelection}
-                                className="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
+                                className="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50 whitespace-nowrap"
                             >Clear Selection</button>
                             <button
                                 onClick={() => setReorderMode(v=>!v)}
-                                className={`px-3 py-2 rounded-lg border ${reorderMode ? 'border-blue-300 text-blue-700 bg-blue-50' : 'border-gray-300 text-gray-700'}`}
+                                className={`px-3 py-2 rounded-lg border whitespace-nowrap ${reorderMode ? 'border-blue-300 text-blue-700 bg-blue-50' : 'border-gray-300 text-gray-700'}`}
                                 title="Toggle reorder mode"
                             >{reorderMode ? 'Reorder: On' : 'Reorder: Off'}</button>
                         </div>
