@@ -19,6 +19,42 @@ import {
 } from "lucide-react";
 import { useCreateEmployee, useEmployees, useUploadEmployeeImage, type EmployeeDto } from "../../hooks/employees";
 
+// Modern, accessible checkbox for selection
+interface ModernCheckboxProps {
+    checked: boolean;
+    onChange: () => void;
+    ariaLabel?: string;
+    title?: string;
+}
+
+const ModernCheckbox: React.FC<ModernCheckboxProps> = ({ checked, onChange, ariaLabel, title }) => (
+    <label className="group relative inline-flex items-center cursor-pointer select-none" title={title}>
+        <input
+            type="checkbox"
+            checked={checked}
+            onChange={onChange}
+            aria-label={ariaLabel}
+            className="peer sr-only"
+        />
+        <span
+            className="h-5 w-5 rounded-md border border-gray-300 bg-white shadow-sm transition-all duration-200
+                       group-hover:shadow-md group-active:scale-95
+                       peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 peer-focus:ring-offset-2
+                       peer-checked:border-blue-600 peer-checked:bg-blue-600 flex items-center justify-center"
+        >
+            <svg
+                className="h-3.5 w-3.5 text-white opacity-0 scale-75 transition-all duration-200
+                           peer-checked:opacity-100 peer-checked:scale-100"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <path d="M6 10l2 2 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        </span>
+    </label>
+);
+
 // Saved views types
 type DirectoryView = {
     id: string;
@@ -634,7 +670,12 @@ const EmployeeDirectory: React.FC = () => {
                                         <EmployeeImageUpload employee={e} />
                                     </div>
                                     <div className="flex items-center justify-center gap-3 mb-1">
-                                        <input type="checkbox" checked={checked} onChange={()=>toggleSelected(e.id)} className="w-4 h-4" aria-label="Select employee" />
+                                        <ModernCheckbox
+                                            checked={checked}
+                                            onChange={() => toggleSelected(e.id)}
+                                            ariaLabel="Select employee"
+                                            title="Select employee"
+                                        />
                                         <h3 className="text-lg font-bold text-gray-900">{e.fullName ?? buildFullName(e.firstName, e.lastName)}</h3>
                                     </div>
                                     {settings.showJobTitle && <p className="text-sm text-gray-600">{e.jobTitle ?? "—"}</p>}
