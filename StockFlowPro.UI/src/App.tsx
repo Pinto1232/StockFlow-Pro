@@ -53,6 +53,7 @@ import HRAttendance from "./pages/HR/Attendance.tsx";
 import Holidays from "./pages/HR/Holidays.tsx";
 import Income from "./pages/Income/Income.tsx";
 import Leaves from "./pages/Leaves/Leaves.tsx";
+import Landing from "./pages/Pricing/Landing.tsx";
 
 function App() {
     return (
@@ -62,6 +63,8 @@ function App() {
                     <div className="min-h-screen bg-gray-50">
                         <Routes>
                             {/* Public routes */}
+                            <Route path="/pricing" element={<Landing />} />
+                            <Route path="/" element={<Landing />} />
                             <Route path="/login" element={<Login />} />
                             <Route path="/register" element={<Register />} />
 
