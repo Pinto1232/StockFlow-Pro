@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
     <Compile Remove="Middleware\AdminAccessMiddleware.cs" />
@@ -37,7 +37,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <UserSecretsId>eb524ffb-b81d-4c4e-bf67-40ca732af293</UserSecretsId>
   </PropertyGroup>
 
 </Project>

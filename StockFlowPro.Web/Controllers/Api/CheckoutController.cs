@@ -21,24 +21,21 @@ public class CheckoutController : ControllerBase
         ILogger<CheckoutController> logger,
         Services.IPendingSubscriptionStore pendingStore,
         ISubscriptionPlanRepository planRepository,
-        ISubscriptionRepository subscriptionRepository,
-        StockFlowPro.Application.Interfaces.IBillingService? billing = null)
+        ISubscriptionRepository subscriptionRepository)
     {
         _logger = logger;
         _pendingStore = pendingStore;
         _planRepository = planRepository;
         _subscriptionRepository = subscriptionRepository;
-        _billing = billing;
     }
 
     public record CheckoutRequest([Required] string PlanId, [Required] string Cadence); // cadence: "monthly" | "annual"
     public record CheckoutSessionResponse(string SessionId, string? RedirectUrl = null, string Status = "initialized");
-    private readonly StockFlowPro.Application.Interfaces.IBillingService? _billing;
 
     [HttpPost("session")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(CheckoutSessionResponse), 200)]
-    public async Task<ActionResult<CheckoutSessionResponse>> CreateSession([FromBody] CheckoutRequest request)
+    public ActionResult<CheckoutSessionResponse> CreateSession([FromBody] CheckoutRequest request)
     {
         if (!ModelState.IsValid)
         {
@@ -49,22 +46,7 @@ public class CheckoutController : ControllerBase
         _pendingStore.CreateSession(sessionId, request.PlanId);
         _logger.LogInformation("[CHECKOUT] Created session {SessionId} for plan {PlanId} ({Cadence})", sessionId, request.PlanId, request.Cadence);
 
-        string? redirectUrl = null;
-        if (_billing is not null)
-        {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            Guid? userId = Guid.TryParse(userIdStr, out var uid) ? uid : null;
-
-            if (Guid.TryParse(request.PlanId, out var planGuid))
-            {
-                var (url, providerSessionId) = await _billing.CreateCheckoutSessionAsync(planGuid, request.Cadence, userId, email);
-                if (!string.IsNullOrEmpty(providerSessionId)) { sessionId = providerSessionId; }
-                redirectUrl = url;
-            }
-        }
-
-        return Ok(new CheckoutSessionResponse(sessionId, redirectUrl));
+        return Ok(new CheckoutSessionResponse(sessionId));
     }
 
     [HttpPost("initialize")]

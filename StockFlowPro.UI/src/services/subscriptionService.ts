@@ -5,7 +5,7 @@ export type SubscriptionPlan = {
   id: string;
   name: string;
   description: string;
-  price: number; 
+  price: number; // price in the plan's billing interval (monthly or annual)
   interval: 'Monthly' | 'Annual';
   currency: string;
   sortOrder?: number;
@@ -21,7 +21,7 @@ type BackendSubscriptionPlan = {
   description: string;
   price: number;
   currency: string;
-  billingInterval: number; 
+  billingInterval: number; // 1 = Monthly, 4 = Annual
   billingIntervalCount: number;
   isActive: boolean;
   isPublic: boolean;
@@ -221,20 +221,5 @@ export async function attachPendingSubscription(): Promise<AttachResponse>
     return res;
   } catch {
     return { attached: false, message: 'Attach failed' };
-  }
-}
-
-// Start hosted Stripe checkout for authenticated user
-export async function startHostedCheckout(planId: string, yearly: boolean): Promise<{ url?: string }>
-{
-  try {
-    const cadence = yearly ? 'annual' : 'monthly';
-    const res = await http.post<{ url?: string }>(
-      '/api/billing/checkout',
-      { planId, cadence }
-    );
-    return res ?? {};
-  } catch {
-    return {};
   }
 }
