@@ -592,7 +592,7 @@ const EmployeeDirectory: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-3 text-sm flex-nowrap max-w-full overflow-x-auto">
+                        <div className="flex items-center gap-3 text-sm flex-nowrap max-w-full overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                             <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all whitespace-nowrap">
                                 <ModernCheckbox
                                     checked={settings.showEmail}
