@@ -251,6 +251,7 @@ builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 builder.Services.AddScoped<StockFlowPro.Domain.Repositories.IEmployeeRepository, StockFlowPro.Infrastructure.Repositories.EmployeeRepository>();
 builder.Services.AddScoped<StockFlowPro.Domain.Repositories.IInvoiceRepository, StockFlowPro.Infrastructure.Repositories.InvoiceRepository>();
 builder.Services.AddScoped<StockFlowPro.Domain.Repositories.ISubscriptionPlanRepository, StockFlowPro.Infrastructure.Repositories.SubscriptionPlanRepository>();
+builder.Services.AddScoped<StockFlowPro.Domain.Repositories.ISubscriptionRepository, StockFlowPro.Infrastructure.Repositories.SubscriptionRepository>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
@@ -289,6 +290,7 @@ builder.Services.AddScoped<StockFlowPro.Domain.Repositories.INotificationPrefere
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IEnhancedNotificationService, StockFlowPro.Application.Services.EnhancedNotificationService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.INotificationTemplateService, StockFlowPro.Application.Services.NotificationTemplateService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.INotificationPreferenceService, StockFlowPro.Application.Services.NotificationPreferenceService>();
+builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IEntitlementService, StockFlowPro.Application.Services.EntitlementService>();
 builder.Services.AddHostedService<DatabaseInitializationService>();
 builder.Services.AddHostedService<StockFlowPro.Web.Services.NotificationBackgroundService>();
 
@@ -334,6 +336,9 @@ builder.Services.AddAuthentication(EnvironmentConfig.CookieAuthName)
         };
     });
 
+
+// Register services (before build)
+builder.Services.AddSingleton<StockFlowPro.Web.Services.IPendingSubscriptionStore, StockFlowPro.Web.Services.InMemoryPendingSubscriptionStore>();
 
 var app = builder.Build();
 

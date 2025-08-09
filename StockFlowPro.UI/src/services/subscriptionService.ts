@@ -1,15 +1,17 @@
 import { http } from './api/client';
+import type { Entitlements } from '../hooks/useFeatures';
 
 export type SubscriptionPlan = {
   id: string;
   name: string;
   description: string;
-  price: number; // monthly price
+  price: number; // price in the plan's billing interval (monthly or annual)
   interval: 'Monthly' | 'Annual';
   currency: string;
   sortOrder?: number;
   features?: string[];
   isPopular?: boolean;
+  monthlyEquivalentPrice?: number;
 };
 
 // Backend response type
@@ -117,12 +119,13 @@ function mapBackendPlanToFrontend(backendPlan: BackendSubscriptionPlan): Subscri
     id: backendPlan.id,
     name: backendPlan.name,
     description: backendPlan.description,
-    price: backendPlan.monthlyEquivalentPrice, // Use monthly equivalent for comparison
+    price: backendPlan.price, // Use backend plan price for the chosen interval
     interval: backendPlan.billingInterval === 4 ? 'Annual' : 'Monthly',
     currency: backendPlan.currency,
     sortOrder: backendPlan.sortOrder,
     features,
     isPopular,
+    monthlyEquivalentPrice: backendPlan.monthlyEquivalentPrice,
   };
 }
 
@@ -145,6 +148,35 @@ export async function getPublicPlans(): Promise<SubscriptionPlan[]> {
     return mockPlans;
   } catch {
     return mockPlans;
+  }
+}
+
+// Fetch plans by billing interval (Monthly or Annual)
+export async function getPlansByInterval(interval: 'Monthly' | 'Annual'): Promise<SubscriptionPlan[]> {
+  try {
+    // Prefer explicit interval endpoints first
+    const endpoints = interval === 'Annual'
+      ? ['/api/subscription-plans/billing-interval/Annual']
+      : ['/api/subscription-plans'];
+
+    // Fallbacks if needed
+    endpoints.push('/api/plans', '/api/subscriptions/plans');
+
+    for (const ep of endpoints) {
+      try {
+        const data = await http.get<SubscriptionPlansResponse>(ep);
+        const backendPlans = Array.isArray(data) ? data : data.items;
+        if (backendPlans && backendPlans.length) {
+          const mapped = backendPlans
+            .map(mapBackendPlanToFrontend)
+            .filter(p => p.interval === interval);
+          if (mapped.length) return mapped;
+        }
+      } catch { /* try next */ }
+    }
+    return mockPlans.filter(p => p.interval === interval);
+  } catch {
+    return mockPlans.filter(p => p.interval === interval);
   }
 }
 
@@ -174,5 +206,20 @@ export async function confirmCheckout(sessionId: string, email: string): Promise
     return res ?? null;
   } catch {
     return null;
+  }
+}
+
+// Attach pending subscription to authenticated user and return fresh entitlements
+export type AttachResponse = { attached: boolean; entitlements?: Entitlements; message?: string };
+export async function attachPendingSubscription(): Promise<AttachResponse>
+{
+  try {
+    const res = await http.post<AttachResponse>(
+      '/api/checkout/attach',
+      {}
+    );
+    return res;
+  } catch {
+    return { attached: false, message: 'Attach failed' };
   }
 }

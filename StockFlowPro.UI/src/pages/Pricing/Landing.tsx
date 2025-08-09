@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { getPublicPlans, createCheckoutSession, confirmCheckout, type SubscriptionPlan } from '../../services/subscriptionService';
+import { getPlansByInterval, createCheckoutSession, confirmCheckout, type SubscriptionPlan, attachPendingSubscription } from '../../services/subscriptionService';
 import { Check, Zap, Crown, Star, ArrowRight, Shield, Clock, Users, BarChart3 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useCurrentUser } from '../../hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
+import { featuresQueryKey } from '../../hooks/useFeatures';
 
 const formatPrice = (price: number, currency: string) => new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(price);
 
@@ -11,6 +14,8 @@ const Landing: React.FC = () => {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [yearly, setYearly] = useState(false);
   const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
+  const { data: currentUser } = useCurrentUser();
+  const queryClient = useQueryClient();
 
   // modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -19,15 +24,24 @@ const Landing: React.FC = () => {
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [appliedNow, setAppliedNow] = useState(false);
   const navigate = useNavigate();
+
+  const loadPlans = async (interval: 'Monthly' | 'Annual') => {
+    const p = await getPlansByInterval(interval);
+    setPlans(p.slice().sort((a,b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999) || a.name.localeCompare(b.name)));
+  };
 
   useEffect(() => {
     (async () => {
-      const p = await getPublicPlans();
-      // Sort by sortOrder then name
-      setPlans(p.slice().sort((a,b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999) || a.name.localeCompare(b.name)));
+      await loadPlans(yearly ? 'Annual' : 'Monthly');
     })();
-  }, []);
+  }, [yearly]);
+
+  // Prefill email if authenticated
+  useEffect(() => {
+    if (currentUser?.email) setEmail(currentUser.email);
+  }, [currentUser?.email]);
 
   const openModalForPlan = async (plan: SubscriptionPlan) => {
     setSelectedPlan(plan);
@@ -36,7 +50,25 @@ const Landing: React.FC = () => {
     setLoadingPlanId(plan.id);
     try {
       const res = await createCheckoutSession(plan.id, yearly);
-      setSessionId(res.sessionId);
+      const sid = res.sessionId;
+      setSessionId(sid);
+
+      // If user is authenticated, confirm + attach automatically and refresh features
+      if (sid && currentUser?.email) {
+        await confirmCheckout(sid, currentUser.email);
+        const attach = await attachPendingSubscription();
+        if (attach.attached && attach.entitlements) {
+          // Update client-side entitlements cache so dashboard reflects immediately
+          queryClient.setQueryData(featuresQueryKey, attach.entitlements);
+          setAppliedNow(true);
+          setStep('success');
+          // Redirect to dashboard
+          navigate('/app/dashboard');
+          return;
+        }
+      }
+
+      // Otherwise go to manual email confirmation step
       setStep('details');
     } catch (e) {
       console.error(e);
@@ -56,6 +88,18 @@ const Landing: React.FC = () => {
     try {
       const res = await confirmCheckout(sessionId, email);
       if (res && res.status === 'confirmed') {
+        // If the viewer is authenticated, try to attach immediately
+        if (currentUser?.email) {
+          const attach = await attachPendingSubscription();
+          if (attach.attached && attach.entitlements) {
+            queryClient.setQueryData(featuresQueryKey, attach.entitlements);
+            setAppliedNow(true);
+            setStep('success');
+            navigate('/app/dashboard');
+            return;
+          }
+        }
+        // Fallback: show success and guide the user
         setStep('success');
       } else {
         alert('Checkout could not be confirmed.');
@@ -131,8 +175,9 @@ const Landing: React.FC = () => {
           {/* Pricing Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {plans.map((plan) => {
+              const isAnnual = plan.interval === 'Annual';
               const base = plan.price;
-              const price = yearly ? +(base * 12 * 0.8).toFixed(2) : base;
+              const price = base;
               return (
                 <div 
                   key={plan.id} 
@@ -159,11 +204,11 @@ const Landing: React.FC = () => {
                   <div className="text-center mb-8">
                     <div className="flex items-baseline justify-center gap-2 mb-2">
                       <span className="text-4xl font-extrabold text-gray-900">{formatPrice(price, plan.currency)}</span>
-                      <span className="text-gray-500 font-medium">/{yearly ? 'year' : 'month'}</span>
+                      <span className="text-gray-500 font-medium">/{isAnnual ? 'year' : 'month'}</span>
                     </div>
-                    {yearly && (
+                    {plan.monthlyEquivalentPrice && isAnnual && (
                       <p className="text-sm text-green-600 font-medium">
-                        Save {formatPrice(base * 12 - price, plan.currency)} per year
+                        ~{formatPrice(plan.monthlyEquivalentPrice, plan.currency)} per month equivalent
                       </p>
                     )}
                   </div>
@@ -265,6 +310,7 @@ const Landing: React.FC = () => {
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
                       className="w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      disabled={!!currentUser?.email}
                     />
                   </div>
                   <button
@@ -287,21 +333,29 @@ const Landing: React.FC = () => {
                     <Check className="w-7 h-7 text-green-600" />
                   </div>
                   <h4 className="text-xl font-bold mb-2">You're all set!</h4>
-                  <p className="text-gray-600 mb-6">Your subscription has been initialized. You can now sign in and start using StockFlow Pro.</p>
-                  <div className="flex items-center justify-center gap-3">
-                    <button
-                      onClick={() => navigate('/login')}
-                      className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold hover:from-blue-700 hover:to-indigo-700"
-                    >
-                      Sign in now
-                    </button>
-                    <button
-                      onClick={() => setIsModalOpen(false)}
-                      className="px-5 py-2.5 rounded-lg bg-gray-900 text-white font-semibold hover:bg-gray-800"
-                    >
-                      Close
-                    </button>
-                  </div>
+                  <p className="text-gray-600 mb-6">
+                    {currentUser?.email
+                      ? (appliedNow
+                          ? 'Your subscription has been applied to your account. Redirecting to dashboard...'
+                          : 'Subscription confirmed. Please log out and log in to apply it to your current session, or continue to the dashboard.')
+                      : 'Your subscription has been initialized. You can now sign in and start using StockFlow Pro.'}
+                  </p>
+                  {!currentUser?.email && (
+                    <div className="flex items-center justify-center gap-3">
+                      <button
+                        onClick={() => navigate('/login')}
+                        className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold hover:from-blue-700 hover:to-indigo-700"
+                      >
+                        Sign in now
+                      </button>
+                      <button
+                        onClick={() => setIsModalOpen(false)}
+                        className="px-5 py-2.5 rounded-lg bg-gray-900 text-white font-semibold hover:bg-gray-800"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

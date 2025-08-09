@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockFlowPro.Application.Commands.Users;
 using StockFlowPro.Application.DTOs;
+using StockFlowPro.Application.Interfaces;
 using StockFlowPro.Application.Queries.Users;
 using StockFlowPro.Web.Extensions;
 
@@ -16,11 +17,13 @@ public class ProfileController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
+    private readonly IEntitlementService _entitlementService;
 
-    public ProfileController(IMediator mediator, IMapper mapper)
+    public ProfileController(IMediator mediator, IMapper mapper, IEntitlementService entitlementService)
     {
         _mediator = mediator;
         _mapper = mapper;
+        _entitlementService = entitlementService;
     }
 
     /// <summary>
@@ -337,5 +340,18 @@ public class ProfileController : ControllerBase
         {
             return BadRequest($"Failed to remove photo: {ex.Message}");
         }
+    }
+
+    [HttpGet("features")]
+    public async Task<ActionResult<EntitlementsDto>> GetFeatures()
+    {
+        var userId = User.GetUserId();
+        if (!userId.HasValue)
+        {
+            return Unauthorized(new { message = "User ID not found in token" });
+        }
+
+        var entitlements = await _entitlementService.GetEntitlementsForUserAsync(userId.Value);
+        return Ok(entitlements);
     }
 }
