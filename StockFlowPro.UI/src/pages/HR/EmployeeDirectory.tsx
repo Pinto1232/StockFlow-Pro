@@ -592,11 +592,43 @@ const EmployeeDirectory: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-3 text-sm">
-                            <label className="flex items-center gap-2"><input type="checkbox" checked={settings.showEmail} onChange={(e)=>setSettings(s=>({...s,showEmail:e.target.checked}))}/> Email</label>
-                            <label className="flex items-center gap-2"><input type="checkbox" checked={settings.showPhone} onChange={(e)=>setSettings(s=>({...s,showPhone:e.target.checked}))}/> Phone</label>
-                            <label className="flex items-center gap-2"><input type="checkbox" checked={settings.showJobTitle} onChange={(e)=>setSettings(s=>({...s,showJobTitle:e.target.checked}))}/> Job Title</label>
-                            <label className="flex items-center gap-2"><input type="checkbox" checked={settings.showHireDate} onChange={(e)=>setSettings(s=>({...s,showHireDate:e.target.checked}))}/> Hire Date</label>
+                        <div className="flex items-center gap-3 text-sm flex-wrap">
+                            <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all">
+                                <ModernCheckbox
+                                    checked={settings.showEmail}
+                                    onChange={() => setSettings(s => ({ ...s, showEmail: !s.showEmail }))}
+                                    ariaLabel="Toggle Email field"
+                                    title="Show Email"
+                                />
+                                <span className="text-gray-700">Email</span>
+                            </div>
+                            <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all">
+                                <ModernCheckbox
+                                    checked={settings.showPhone}
+                                    onChange={() => setSettings(s => ({ ...s, showPhone: !s.showPhone }))}
+                                    ariaLabel="Toggle Phone field"
+                                    title="Show Phone"
+                                />
+                                <span className="text-gray-700">Phone</span>
+                            </div>
+                            <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all">
+                                <ModernCheckbox
+                                    checked={settings.showJobTitle}
+                                    onChange={() => setSettings(s => ({ ...s, showJobTitle: !s.showJobTitle }))}
+                                    ariaLabel="Toggle Job Title field"
+                                    title="Show Job Title"
+                                />
+                                <span className="text-gray-700 whitespace-nowrap">Job Title</span>
+                            </div>
+                            <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all">
+                                <ModernCheckbox
+                                    checked={settings.showHireDate}
+                                    onChange={() => setSettings(s => ({ ...s, showHireDate: !s.showHireDate }))}
+                                    ariaLabel="Toggle Hire Date field"
+                                    title="Show Hire Date"
+                                />
+                                <span className="text-gray-700 whitespace-nowrap">Hire Date</span>
+                            </div>
                         </div>
                         <div className="flex items-center gap-3">
                             <button
