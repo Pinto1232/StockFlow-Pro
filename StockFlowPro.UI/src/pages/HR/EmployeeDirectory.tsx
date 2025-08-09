@@ -102,6 +102,21 @@ function normalize(str?: string | null) {
     return (str ?? "").toLowerCase();
 }
 
+function fuzzyMatch(needle: string, haystack: string): boolean {
+    // Basic fuzzy: direct include or all chars in order (subsequence)
+    const n = normalize(needle);
+    const h = normalize(haystack);
+    if (!n) return true;
+    if (h.includes(n)) return true;
+    // subsequence
+    let i = 0;
+    for (const c of h) {
+        if (c === n[i]) i++;
+        if (i === n.length) return true;
+    }
+    return false;
+}
+
 // Custom Dropdown Component
 interface CustomDropdownProps {
     value: string;
@@ -252,7 +267,6 @@ const EmployeeDirectory: React.FC = () => {
 
     // Selection state for bulk actions
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-    const allSelected = (employees ?? []).length > 0 && selectedIds.size > 0 && selectedIds.size === (employees ?? []).length;
     const clearSelection = () => setSelectedIds(new Set());
 
     const toggleSelected = (id: string) => {
@@ -261,13 +275,6 @@ const EmployeeDirectory: React.FC = () => {
             if (next.has(id)) next.delete(id); else next.add(id);
             return next;
         });
-    };
-
-    const toggleSelectAll = () => {
-        if (allSelected) { clearSelection(); return; }
-        const next = new Set<string>();
-        (filtered ?? []).forEach(e => next.add(e.id));
-        setSelectedIds(next);
     };
 
     // CSV Export of current filtered set or selection
@@ -342,14 +349,14 @@ const EmployeeDirectory: React.FC = () => {
     const filtered = useMemo(() => {
         const term = normalize(search);
         return (employees ?? []).filter(e => {
+            const name = e.fullName || buildFullName(e.firstName, e.lastName);
             const matchesSearch = !term
-                || normalize(e.fullName).includes(term)
-                || normalize(buildFullName(e.firstName, e.lastName)).includes(term)
-                || normalize(e.firstName).includes(term)
-                || normalize(e.lastName).includes(term)
-                || normalize(e.email).includes(term)
-                || normalize(e.jobTitle).includes(term)
-                || normalize(e.departmentName).includes(term);
+                || fuzzyMatch(term, name)
+                || fuzzyMatch(term, e.firstName ?? "")
+                || fuzzyMatch(term, e.lastName ?? "")
+                || fuzzyMatch(term, e.email ?? "")
+                || fuzzyMatch(term, e.jobTitle ?? "")
+                || fuzzyMatch(term, e.departmentName ?? "");
 
             const matchesDept = departmentFilter === "All" || e.departmentName === departmentFilter;
 
@@ -525,7 +532,7 @@ const EmployeeDirectory: React.FC = () => {
                 </div>
 
                 {/* Search and Filters */}
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-8">
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-2">
                     <div className="flex flex-col lg:flex-row gap-4">
                         <div className="flex-1 relative">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -567,15 +574,28 @@ const EmployeeDirectory: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Bulk selection bar */}
-                {selectedIds.size>0 && (
-                    <div className="sticky top-16 z-20 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm">
-                        <div className="text-sm text-gray-700">Selected: {selectedIds.size}</div>
-                        <div className="flex items-center gap-3">
-                            <button onClick={toggleSelectAll} className="px-3 py-2 border rounded-lg">{allSelected? 'Unselect all' : 'Select all (page)'}</button>
-                            <button onClick={() => exportCsv((employees ?? []).filter(e=>selectedIds.has(e.id)))} className="px-3 py-2 border rounded-lg">Export selected</button>
-                            <button onClick={clearSelection} className="px-3 py-2 border rounded-lg">Clear</button>
-                        </div>
+                {/* Active filter chips */}
+                {(search || departmentFilter !== "All" || positionFilter !== "All") && (
+                    <div className="bg-white rounded-xl border border-gray-200 px-4 py-3 mb-8 flex items-center gap-2 flex-wrap">
+                        {search && (
+                            <span className="inline-flex items-center gap-2 px-3 py-1 text-sm bg-blue-50 text-blue-700 rounded-full border border-blue-200">
+                                Search: "{search}"
+                                <button className="text-blue-600" onClick={()=>setSearch("")}>✕</button>
+                            </span>
+                        )}
+                        {departmentFilter !== "All" && (
+                            <span className="inline-flex items-center gap-2 px-3 py-1 text-sm bg-purple-50 text-purple-700 rounded-full border border-purple-200">
+                                Dept: {departmentFilter}
+                                <button className="text-purple-600" onClick={()=>setDepartmentFilter("All")}>✕</button>
+                            </span>
+                        )}
+                        {positionFilter !== "All" && (
+                            <span className="inline-flex items-center gap-2 px-3 py-1 text-sm bg-teal-50 text-teal-700 rounded-full border border-teal-200">
+                                Position: {positionFilter}
+                                <button className="text-teal-600" onClick={()=>setPositionFilter("All")}>✕</button>
+                            </span>
+                        )}
+                        <button className="ml-auto text-sm text-gray-600 hover:text-gray-800" onClick={()=>{ setSearch(""); setDepartmentFilter("All"); setPositionFilter("All"); }}>Clear all</button>
                     </div>
                 )}
 
