@@ -124,7 +124,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
                 <div className="flex-shrink-0 text-gray-500">
                     {icon}
                 </div>
-                <span className="flex-1 text-left text-gray-700 font-medium">
+                <span className="flex-1 text-left text-gray-700 font-medium whitespace-nowrap">
                     {selectedOption?.label || placeholder}
                 </span>
                 <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'transform rotate-180' : ''}`} />
@@ -160,7 +160,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
                                 <div className={`flex-shrink-0 ${value === option.value ? 'text-blue-500' : 'text-gray-400'}`}>
                                     {icon}
                                 </div>
-                                <span className="font-medium">{option.label}</span>
+                                <span className="font-medium whitespace-nowrap">{option.label}</span>
                                 {value === option.value && (
                                     <UserCheck className="w-4 h-4 text-blue-600 ml-auto" />
                                 )}
