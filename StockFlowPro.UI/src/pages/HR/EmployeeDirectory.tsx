@@ -12,8 +12,12 @@ import {
     Edit,
     BadgeCheck,
     Calendar,
+    Camera,
+    ChevronDown,
+    Building2,
+    UserCheck,
 } from "lucide-react";
-import { useCreateEmployee, useEmployees, type EmployeeDto } from "../../hooks/employees";
+import { useCreateEmployee, useEmployees, useUploadEmployeeImage, type EmployeeDto } from "../../hooks/employees";
 
 function initials(first?: string | null, last?: string | null) {
     const f = (first ?? "").trim();
@@ -27,13 +31,27 @@ function buildFullName(first?: string | null, last?: string | null) {
     return `${first ?? ""} ${last ?? ""}`.trim();
 }
 
-function resolveImageUrl(url?: string | null) {
+function resolveImageUrl(url?: string | null, cacheBusting: boolean = false) {
     if (!url) return undefined;
-    if (/^https?:\/\//i.test(url)) return url;
+    if (/^https?:\/\//i.test(url)) {
+        // For absolute URLs, add cache busting if needed
+        if (cacheBusting) {
+            const separator = url.includes('?') ? '&' : '?';
+            return `${url}${separator}t=${Date.now()}`;
+        }
+        return url;
+    }
     const base = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '');
     const origin = base.endsWith('/api') ? base.slice(0, -4) : base;
     if (!origin) return url;
-    return url.startsWith('/') ? `${origin}${url}` : `${origin}/${url}`;
+    const fullUrl = url.startsWith('/') ? `${origin}${url}` : `${origin}/${url}`;
+    
+    // Add cache busting for relative URLs if needed
+    if (cacheBusting) {
+        const separator = fullUrl.includes('?') ? '&' : '?';
+        return `${fullUrl}${separator}t=${Date.now()}`;
+    }
+    return fullUrl;
 }
 
 function statusToLabel(status: EmployeeDto['status'] | number): string {
@@ -66,6 +84,94 @@ function statusClasses(label: string): string {
 function normalize(str?: string | null) {
     return (str ?? "").toLowerCase();
 }
+
+// Custom Dropdown Component
+interface CustomDropdownProps {
+    value: string;
+    onChange: (value: string) => void;
+    options: { value: string; label: string }[];
+    placeholder: string;
+    icon: React.ReactNode;
+    className?: string;
+}
+
+const CustomDropdown: React.FC<CustomDropdownProps> = ({
+    value,
+    onChange,
+    options,
+    placeholder,
+    icon,
+    className = ""
+}) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const selectedOption = options.find(opt => opt.value === value);
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Escape') {
+            setIsOpen(false);
+        }
+    };
+
+    return (
+        <div className={`relative ${className}`} onKeyDown={handleKeyDown}>
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                aria-expanded={isOpen}
+                aria-haspopup="listbox"
+                className="w-full flex items-center gap-3 px-4 py-3 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm hover:shadow-md"
+            >
+                <div className="flex-shrink-0 text-gray-500">
+                    {icon}
+                </div>
+                <span className="flex-1 text-left text-gray-700 font-medium">
+                    {selectedOption?.label || placeholder}
+                </span>
+                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'transform rotate-180' : ''}`} />
+            </button>
+            
+            {isOpen && (
+                <>
+                    <div 
+                        className="fixed inset-0 z-10" 
+                        onClick={() => setIsOpen(false)}
+                    />
+                    <div className="absolute z-20 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto ring-1 ring-black ring-opacity-5">
+                        {options.map((option, index) => (
+                            <button
+                                key={option.value}
+                                type="button"
+                                onClick={() => {
+                                    onChange(option.value);
+                                    setIsOpen(false);
+                                }}
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors duration-150 ${
+                                    value === option.value 
+                                        ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500' 
+                                        : 'text-gray-700 hover:text-gray-900'
+                                } ${
+                                    index === 0 ? 'rounded-t-lg' : ''
+                                } ${
+                                    index === options.length - 1 ? 'rounded-b-lg' : ''
+                                }`}
+                                role="option"
+                                aria-selected={value === option.value}
+                            >
+                                <div className={`flex-shrink-0 ${value === option.value ? 'text-blue-500' : 'text-gray-400'}`}>
+                                    {icon}
+                                </div>
+                                <span className="font-medium">{option.label}</span>
+                                {value === option.value && (
+                                    <UserCheck className="w-4 h-4 text-blue-600 ml-auto" />
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                </>
+            )}
+        </div>
+    );
+};
 
 const EmployeeDirectory: React.FC = () => {
     const { data: employees, isLoading, isError } = useEmployees();
@@ -122,6 +228,48 @@ const EmployeeDirectory: React.FC = () => {
         return Array.from(counts.entries()).sort((a, b) => a[0].localeCompare(b[0]));
     }, [employees]);
 
+    // Create a component for individual employee image upload
+    const EmployeeImageUpload: React.FC<{ employee: EmployeeDto }> = ({ employee }) => {
+        const { mutateAsync: uploadImage, isPending: isUploading } = useUploadEmployeeImage(employee.id);
+
+        const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+            const file = event.target.files?.[0];
+            if (file) {
+                try {
+                    await uploadImage(file);
+                } catch (error) {
+                    console.error('Failed to upload image:', error);
+                } finally {
+                    event.target.value = "";
+                }
+            }
+        };
+
+        return (
+            <>
+                <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    id={`employee-image-${employee.id}`}
+                    onChange={handleFileChange}
+                />
+                <label
+                    htmlFor={`employee-image-${employee.id}`}
+                    className={`absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-full opacity-0 hover:opacity-100 transition-opacity duration-200 cursor-pointer ${
+                        isUploading ? "opacity-100" : ""
+                    }`}
+                >
+                    {isUploading ? (
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                        <Camera className="w-5 h-5" />
+                    )}
+                </label>
+            </>
+        );
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 w-full">
             {/* Navigation Breadcrumb */}
@@ -177,7 +325,7 @@ const EmployeeDirectory: React.FC = () => {
 
                 {/* Search and Filters */}
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-8">
-                    <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex flex-col lg:flex-row gap-4">
                         <div className="flex-1 relative">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                             <input
@@ -188,30 +336,33 @@ const EmployeeDirectory: React.FC = () => {
                                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </div>
-                        <select
-                            value={departmentFilter}
-                            onChange={(e) => setDepartmentFilter(e.target.value)}
-                            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                            {departments.map((d) => (
-                                <option key={d} value={d}>{d === "All" ? "All Departments" : d}</option>
-                            ))}
-                        </select>
-                        <select
-                            value={positionFilter}
-                            onChange={(e) => setPositionFilter(e.target.value)}
-                            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                            {[
-                                "All",
-                                "Manager",
-                                "Senior",
-                                "Junior",
-                                "Intern",
-                            ].map((p) => (
-                                <option key={p} value={p}>{p === "All" ? "All Positions" : p}</option>
-                            ))}
-                        </select>
+                        <div className="flex flex-col sm:flex-row gap-4 lg:w-auto lg:flex-shrink-0">
+                            <CustomDropdown
+                                value={departmentFilter}
+                                onChange={setDepartmentFilter}
+                                options={departments.map((d) => ({
+                                    value: d,
+                                    label: d === "All" ? "All Departments" : d
+                                }))}
+                                placeholder="Select Department"
+                                icon={<Building2 className="w-4 h-4" />}
+                                className="w-full sm:w-48"
+                            />
+                            <CustomDropdown
+                                value={positionFilter}
+                                onChange={setPositionFilter}
+                                options={[
+                                    { value: "All", label: "All Positions" },
+                                    { value: "Manager", label: "Manager" },
+                                    { value: "Senior", label: "Senior" },
+                                    { value: "Junior", label: "Junior" },
+                                    { value: "Intern", label: "Intern" },
+                                ]}
+                                placeholder="Select Position"
+                                icon={<UserCheck className="w-4 h-4" />}
+                                className="w-full sm:w-48"
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -234,13 +385,20 @@ const EmployeeDirectory: React.FC = () => {
                         return (
                             <div key={e.id} className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
                                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 text-center">
-                                    {e.imageUrl ? (
-                                        <img src={resolveImageUrl(e.imageUrl)} alt={e.fullName ?? buildFullName(e.firstName, e.lastName)} className="w-20 h-20 rounded-full object-cover mx-auto mb-4" />
-                                    ) : (
-                                        <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <span className="text-white font-bold text-xl">{initials(e.firstName, e.lastName)}</span>
-                                        </div>
-                                    )}
+                                    <div className="relative w-20 h-20 mx-auto mb-4 group">
+                                        {e.imageUrl ? (
+                                            <img 
+                                                src={resolveImageUrl(e.imageUrl, true)} 
+                                                alt={e.fullName ?? buildFullName(e.firstName, e.lastName)} 
+                                                className="w-20 h-20 rounded-full object-cover" 
+                                            />
+                                        ) : (
+                                            <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                                                <span className="text-white font-bold text-xl">{initials(e.firstName, e.lastName)}</span>
+                                            </div>
+                                        )}
+                                        <EmployeeImageUpload employee={e} />
+                                    </div>
                                     <h3 className="text-lg font-bold text-gray-900">{e.fullName ?? buildFullName(e.firstName, e.lastName)}</h3>
                                     <p className="text-sm text-gray-600">{e.jobTitle ?? "—"}</p>
                                     <div className="mt-2 flex items-center justify-center gap-2">
