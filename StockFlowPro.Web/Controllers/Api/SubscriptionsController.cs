@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockFlowPro.Application.DTOs;
 using StockFlowPro.Application.Interfaces;
+using StockFlowPro.Domain.Enums;
 
 namespace StockFlowPro.Web.Controllers.Api;
 
@@ -25,9 +26,9 @@ public class SubscriptionsController : ControllerBase
     }
 
     /// <summary>
-    /// Gets all public subscription plans
+    /// Gets all public subscription plans (monthly only)
     /// </summary>
-    /// <returns>Collection of public subscription plans</returns>
+    /// <returns>Collection of public monthly subscription plans</returns>
     [HttpGet("plans")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(IEnumerable<SubscriptionPlanDto>), 200)]
@@ -36,15 +37,18 @@ public class SubscriptionsController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Fetching public subscription plans via SubscriptionsController");
-            var plans = await _subscriptionPlanService.GetPublicPlansAsync();
+            _logger.LogInformation("Fetching public monthly subscription plans via SubscriptionsController");
+            var allPlans = await _subscriptionPlanService.GetPublicPlansAsync();
             
-            _logger.LogInformation("Successfully retrieved {Count} public subscription plans", plans.Count());
-            return Ok(plans);
+            // Filter out annual plans (BillingInterval.Annual = 4) and only return monthly plans
+            var monthlyPlans = allPlans.Where(p => p.BillingInterval == BillingInterval.Monthly).ToList();
+            
+            _logger.LogInformation("Successfully retrieved {Count} public monthly subscription plans", monthlyPlans.Count());
+            return Ok(monthlyPlans);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching public subscription plans via SubscriptionsController");
+            _logger.LogError(ex, "Error fetching public monthly subscription plans via SubscriptionsController");
             return StatusCode(500, new { error = "An error occurred while fetching subscription plans" });
         }
     }

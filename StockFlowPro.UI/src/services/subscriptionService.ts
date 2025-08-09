@@ -39,6 +39,12 @@ type BackendSubscriptionPlan = {
 
 type SubscriptionPlansResponse = BackendSubscriptionPlan[] | { items: BackendSubscriptionPlan[] };
 
+type CheckoutSessionResponse = { sessionId?: string; redirectUrl?: string; status?: string };
+
+type CheckoutConfirmRequest = { sessionId: string; email: string };
+
+type CheckoutConfirmResponse = { sessionId: string; status: string };
+
 const mockPlans: SubscriptionPlan[] = [
   {
     id: 'basic',
@@ -80,7 +86,7 @@ function mapBackendPlanToFrontend(backendPlan: BackendSubscriptionPlan): Subscri
   // Add features based on backend flags
   if (backendPlan.maxUsers) {
     features.push(`Up to ${backendPlan.maxUsers} users`);
-  } else if (backendPlan.maxUsers === null) {
+  } else if (backendPlan.maxUsers === null as unknown as number) {
     features.push('Unlimited users');
   }
   
@@ -142,19 +148,31 @@ export async function getPublicPlans(): Promise<SubscriptionPlan[]> {
   }
 }
 
-export async function createCheckoutSession(planId: string, yearly: boolean): Promise<{ redirectUrl?: string }>
+export async function createCheckoutSession(planId: string, yearly: boolean): Promise<{ redirectUrl?: string; sessionId?: string }>
 {
   try {
     const body = { planId, cadence: yearly ? 'annual' : 'monthly' };
     const endpoints = ['/api/checkout/session', '/api/checkout/initialize'];
     for (const ep of endpoints) {
       try {
-        const res = await http.post<{ url?: string; redirectUrl?: string }>(ep, body);
-        return { redirectUrl: res?.url || res?.redirectUrl };
+        const res = await http.post<CheckoutSessionResponse>(ep, body);
+        // return either redirect or sessionId for modal flow
+        return { redirectUrl: res?.redirectUrl, sessionId: res?.sessionId };
       } catch { /* try next */ }
     }
     return {};
   } catch {
     return {};
+  }
+}
+
+export async function confirmCheckout(sessionId: string, email: string): Promise<CheckoutConfirmResponse | null>
+{
+  try {
+    const body: CheckoutConfirmRequest = { sessionId, email };
+    const res = await http.post<CheckoutConfirmResponse>('/api/checkout/confirm', body);
+    return res ?? null;
+  } catch {
+    return null;
   }
 }

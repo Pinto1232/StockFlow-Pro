@@ -39,8 +39,9 @@ public class ApiKeyAuthenticationMiddleware
             return;
         }
 
-        // Skip API key validation for authentication endpoints
-        if (context.Request.Path.StartsWithSegments("/api/auth"))
+        // Skip API key validation for authentication and checkout endpoints
+        if (context.Request.Path.StartsWithSegments("/api/auth") ||
+            context.Request.Path.StartsWithSegments("/api/checkout"))
         {
             await _next(context);
             return;
@@ -71,8 +72,7 @@ public class ApiKeyAuthenticationMiddleware
         if (_options.LogApiKeyUsage)
         {
             _logger.LogInformation("Valid API key used for {Path} from {IP}", 
-                context.Request.Path, 
-                context.Connection.RemoteIpAddress);
+                context.Request.Path, context.Connection.RemoteIpAddress?.ToString());
         }
 
         await _next(context);
@@ -80,13 +80,11 @@ public class ApiKeyAuthenticationMiddleware
 
     private string? ExtractApiKey(HttpRequest request)
     {
-        // Try to get API key from header first
         if (request.Headers.TryGetValue(_options.HeaderName, out var headerValue))
         {
             return headerValue.FirstOrDefault();
         }
 
-        // Try to get API key from query parameter if allowed
         if (_options.AllowQueryParameter && 
             request.Query.TryGetValue(_options.QueryParameterName, out var queryValue))
         {
@@ -101,24 +99,12 @@ public class ApiKeyAuthenticationMiddleware
         return _options.ValidApiKeys.Contains(apiKey);
     }
 
-    private async Task HandleUnauthorized(HttpContext context, string message)
+    private static async Task HandleUnauthorized(HttpContext context, string message)
     {
-        context.Response.StatusCode = 401;
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
         context.Response.ContentType = "application/json";
-
-        var response = new
-        {
-            success = false,
-            message = message,
-            timestamp = DateTime.UtcNow
-        };
-
-        var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
-
-        await context.Response.WriteAsync(json);
+        var response = new { error = message };
+        await context.Response.WriteAsync(JsonSerializer.Serialize(response));
     }
 }
 
