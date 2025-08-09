@@ -28,9 +28,10 @@ interface ModernCheckboxProps {
     onChange: () => void;
     ariaLabel?: string;
     title?: string;
+    colorizeBackground?: boolean; // if false, do not fill blue when checked
 }
 
-const ModernCheckbox: React.FC<ModernCheckboxProps> = ({ checked, onChange, ariaLabel, title }) => (
+const ModernCheckbox: React.FC<ModernCheckboxProps> = ({ checked, onChange, ariaLabel, title, colorizeBackground = true }) => (
     <label className="group relative inline-flex items-center cursor-pointer select-none" title={title}>
         <input
             type="checkbox"
@@ -40,14 +41,22 @@ const ModernCheckbox: React.FC<ModernCheckboxProps> = ({ checked, onChange, aria
             className="peer sr-only"
         />
         <span
-            className="h-5 w-5 rounded-md border border-gray-300 bg-white shadow-sm transition-all duration-200
-                       group-hover:shadow-md group-active:scale-95
-                       peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 peer-focus:ring-offset-2
-                       peer-checked:border-blue-600 peer-checked:bg-blue-600 flex items-center justify-center"
+            className={
+                "h-5 w-5 rounded-md border bg-white shadow-sm transition-all duration-200 " +
+                "group-hover:shadow-md group-active:scale-95 " +
+                "peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 peer-focus:ring-offset-2 " +
+                (colorizeBackground
+                    ? "border-gray-300 peer-checked:border-blue-600 peer-checked:bg-blue-600"
+                    : "border-gray-300 peer-checked:border-blue-600 peer-checked:bg-white")
+            }
         >
             <svg
-                className="h-3.5 w-3.5 text-white opacity-0 scale-75 transition-all duration-200
-                           peer-checked:opacity-100 peer-checked:scale-100"
+                className={
+                    "h-3.5 w-3.5 transition-all duration-200 opacity-0 scale-75 " +
+                    (colorizeBackground
+                        ? "text-white peer-checked:opacity-100 peer-checked:scale-100"
+                        : "text-blue-600 peer-checked:opacity-100 peer-checked:scale-100")
+                }
                 viewBox="0 0 20 20"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -618,6 +627,7 @@ const EmployeeDirectory: React.FC = () => {
                                     onChange={() => setSettings(s => ({ ...s, showEmail: !s.showEmail }))}
                                     ariaLabel="Toggle Email field"
                                     title="Show Email"
+                                    colorizeBackground={false}
                                 />
                                 <span className="text-gray-700 whitespace-nowrap">Email</span>
                             </div>
@@ -627,6 +637,7 @@ const EmployeeDirectory: React.FC = () => {
                                     onChange={() => setSettings(s => ({ ...s, showPhone: !s.showPhone }))}
                                     ariaLabel="Toggle Phone field"
                                     title="Show Phone"
+                                    colorizeBackground={false}
                                 />
                                 <span className="text-gray-700 whitespace-nowrap">Phone</span>
                             </div>
@@ -636,6 +647,7 @@ const EmployeeDirectory: React.FC = () => {
                                     onChange={() => setSettings(s => ({ ...s, showJobTitle: !s.showJobTitle }))}
                                     ariaLabel="Toggle Job Title field"
                                     title="Show Job Title"
+                                    colorizeBackground={false}
                                 />
                                 <span className="text-gray-700 whitespace-nowrap">Job Title</span>
                             </div>
@@ -645,6 +657,7 @@ const EmployeeDirectory: React.FC = () => {
                                     onChange={() => setSettings(s => ({ ...s, showHireDate: !s.showHireDate }))}
                                     ariaLabel="Toggle Hire Date field"
                                     title="Show Hire Date"
+                                    colorizeBackground={false}
                                 />
                                 <span className="text-gray-700 whitespace-nowrap">Hire Date</span>
                             </div>
