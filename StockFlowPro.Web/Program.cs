@@ -14,9 +14,11 @@ using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using DotNetEnv;
 using StockFlowPro.Web.Configuration;
+using StockFlowPro.Shared.Configuration;
 using Microsoft.OpenApi.Models;
 using System.Text.Json;
 using StockFlowPro.Web.Hubs;
+using StockFlowPro.Infrastructure.Services;
 
 // Load environment variables from .env file
 Env.Load();
@@ -291,6 +293,10 @@ builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IEnhancedNotifica
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.INotificationTemplateService, StockFlowPro.Application.Services.NotificationTemplateService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.INotificationPreferenceService, StockFlowPro.Application.Services.NotificationPreferenceService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IEntitlementService, StockFlowPro.Application.Services.EntitlementService>();
+
+// Stripe/Billing
+builder.Services.Configure<StockFlowPro.Shared.Configuration.StripeOptions>(builder.Configuration.GetSection(StockFlowPro.Shared.Configuration.StripeOptions.SectionName));
+builder.Services.AddScoped<IBillingService, StripeBillingService>();
 builder.Services.AddHostedService<DatabaseInitializationService>();
 builder.Services.AddHostedService<StockFlowPro.Web.Services.NotificationBackgroundService>();
 
@@ -342,16 +348,12 @@ builder.Services.AddSingleton<StockFlowPro.Web.Services.IPendingSubscriptionStor
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
-    // Use developer exception page for API-only application
+    // Show detailed exceptions during development
     app.UseDeveloperExceptionPage();
-    // Enhanced HSTS configuration for production
-    app.UseHsts();
-}
-else
-{
-    // Enhanced Swagger UI for development with authentication protection
+
+    // Swagger UI for development
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
@@ -364,6 +366,11 @@ else
         c.DisplayOperationId();
         c.DisplayRequestDuration();
     });
+}
+else
+{
+    // Production security settings
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
@@ -414,27 +421,30 @@ app.UseRateLimiting();
 
 app.UseAuthentication();
 
-// Add authentication middleware for Swagger (after authentication, before authorization)
-app.Use(async (context, next) =>
+// Add authentication middleware for Swagger (only in non-development)
+if (!app.Environment.IsDevelopment())
 {
-    // Protect Swagger endpoints
-    if (context.Request.Path.StartsWithSegments("/swagger") || 
-        context.Request.Path.StartsWithSegments("/swagger-ui"))
+    app.Use(async (context, next) =>
     {
-        var isAuthenticated = context.User?.Identity?.IsAuthenticated ?? false;
-        Console.WriteLine($"[SWAGGER DEBUG] Swagger access attempt - IsAuthenticated: {isAuthenticated}, Path: {context.Request.Path}");
-        
-        if (!isAuthenticated)
+        // Protect Swagger endpoints
+        if (context.Request.Path.StartsWithSegments("/swagger") || 
+            context.Request.Path.StartsWithSegments("/swagger-ui"))
         {
-            Console.WriteLine("[SWAGGER DEBUG] Unauthorized access to Swagger - redirecting to login");
-            context.Response.StatusCode = 401;
-            await context.Response.WriteAsync("Authentication required to access API documentation. Please login first.");
-            return;
+            var isAuthenticated = context.User?.Identity?.IsAuthenticated ?? false;
+            Console.WriteLine($"[SWAGGER DEBUG] Swagger access attempt - IsAuthenticated: {isAuthenticated}, Path: {context.Request.Path}");
+            
+            if (!isAuthenticated)
+            {
+                Console.WriteLine("[SWAGGER DEBUG] Unauthorized access to Swagger - redirecting to login");
+                context.Response.StatusCode = 401;
+                await context.Response.WriteAsync("Authentication required to access API documentation. Please login first.");
+                return;
+            }
         }
-    }
-    
-    await next();
-});
+        
+        await next();
+    });
+}
 
 app.UseAuthorization();
 

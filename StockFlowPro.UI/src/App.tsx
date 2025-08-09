@@ -1,8 +1,10 @@
+import React, { useEffect, useState } from "react";
 import {
     BrowserRouter as Router,
     Routes,
     Route,
     Navigate,
+    useNavigate,
 } from "react-router-dom";
 
 // Hexagonal Architecture Provider
@@ -54,6 +56,70 @@ import Holidays from "./pages/HR/Holidays.tsx";
 import Income from "./pages/Income/Income.tsx";
 import Leaves from "./pages/Leaves/Leaves.tsx";
 import Landing from "./pages/Pricing/Landing.tsx";
+import Checkout from "./pages/Checkout/Checkout.tsx";
+
+// Checkout result pages (hosted Stripe Checkout)
+const CheckoutSuccess: React.FC = () => {
+    const navigate = useNavigate();
+    const [message, setMessage] = useState<string>("Processing your subscription...");
+    const [attempts, setAttempts] = useState<number>(0);
+
+    useEffect(() => {
+        let cancelled = false;
+        const poll = async () => {
+            try {
+                const res = await fetch("/api/profile/features", { credentials: "include" });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.planName && data.planName !== "Free") {
+                        setMessage("Subscription applied. Redirecting to dashboard...");
+                        setTimeout(() => navigate("/app/dashboard", { replace: true }), 750);
+                        return;
+                    }
+                }
+            } catch {
+                // ignore and retry
+            }
+            if (!cancelled) {
+                if (attempts < 10) {
+                    setAttempts(a => a + 1);
+                    setTimeout(poll, 2000);
+                } else {
+                    setMessage("We couldn't confirm your subscription yet. You can refresh later or go to the dashboard.");
+                }
+            }
+        };
+        poll();
+        return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    return (
+        <div className="min-h-screen flex items-center justify-center p-8">
+            <div className="max-w-lg w-full bg-white shadow rounded p-6 text-center">
+                <h1 className="text-2xl font-bold mb-2">Payment Success</h1>
+                <p className="text-gray-700 mb-6">{message}</p>
+                <div className="flex items-center justify-center gap-3">
+                    <button onClick={() => navigate("/app/dashboard", { replace: true })} className="px-4 py-2 rounded bg-blue-600 text-white">Go to dashboard</button>
+                    <button onClick={() => navigate("/pricing", { replace: true })} className="px-4 py-2 rounded bg-gray-100">Pricing</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const CheckoutCancel: React.FC = () => {
+    const navigate = useNavigate();
+    return (
+        <div className="min-h-screen flex items-center justify-center p-8">
+            <div className="max-w-lg w-full bg-white shadow rounded p-6 text-center">
+                <h1 className="text-2xl font-bold mb-2">Payment Cancelled</h1>
+                <p className="text-gray-700 mb-6">Your payment was cancelled. You can choose a plan again.</p>
+                <button onClick={() => navigate("/pricing", { replace: true })} className="px-4 py-2 rounded bg-blue-600 text-white">Back to Pricing</button>
+            </div>
+        </div>
+    );
+};
 
 function App() {
     return (
@@ -67,6 +133,9 @@ function App() {
                             <Route path="/pricing" element={<Landing />} />
                             <Route path="/login" element={<Login />} />
                             <Route path="/register" element={<Register />} />
+                            <Route path="/checkout" element={<Checkout />} />
+                            <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                            <Route path="/checkout/cancel" element={<CheckoutCancel />} />
 
                             {/* Protected routes */}
                             <Route
