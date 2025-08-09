@@ -42,18 +42,18 @@ const ModernCheckbox: React.FC<ModernCheckboxProps> = ({ checked, onChange, aria
         />
         <span
             className={
-                "h-5 w-5 rounded-md border bg-white shadow-sm transition-all duration-200 " +
+                "h-6 w-6 rounded-md border bg-white shadow-sm transition-all duration-200 " +
+                "flex items-center justify-center " +
                 "group-hover:shadow-md group-active:scale-95 " +
                 "peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 peer-focus:ring-offset-2 " +
                 "peer-checked:border-blue-600 " +
                 (colorizeBackground ? "peer-checked:bg-blue-600 " : "") +
-                // Toggle child svg visibility when peer is checked
                 "peer-checked:[&>svg]:opacity-100 peer-checked:[&>svg]:scale-100"
             }
         >
             <svg
                 className={
-                    "h-3.5 w-3.5 transition-all duration-200 opacity-0 scale-75 " +
+                    "h-4 w-4 transition-all duration-200 opacity-0 scale-75 " +
                     (colorizeBackground ? "text-white" : "text-blue-600")
                 }
                 viewBox="0 0 20 20"
