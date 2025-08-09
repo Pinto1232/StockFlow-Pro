@@ -592,26 +592,26 @@ const EmployeeDirectory: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-3 text-sm flex-wrap">
-                            <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all">
+                        <div className="flex items-center gap-3 text-sm flex-nowrap max-w-full overflow-x-auto">
+                            <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all whitespace-nowrap">
                                 <ModernCheckbox
                                     checked={settings.showEmail}
                                     onChange={() => setSettings(s => ({ ...s, showEmail: !s.showEmail }))}
                                     ariaLabel="Toggle Email field"
                                     title="Show Email"
                                 />
-                                <span className="text-gray-700">Email</span>
+                                <span className="text-gray-700 whitespace-nowrap">Email</span>
                             </div>
-                            <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all">
+                            <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all whitespace-nowrap">
                                 <ModernCheckbox
                                     checked={settings.showPhone}
                                     onChange={() => setSettings(s => ({ ...s, showPhone: !s.showPhone }))}
                                     ariaLabel="Toggle Phone field"
                                     title="Show Phone"
                                 />
-                                <span className="text-gray-700">Phone</span>
+                                <span className="text-gray-700 whitespace-nowrap">Phone</span>
                             </div>
-                            <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all">
+                            <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all whitespace-nowrap">
                                 <ModernCheckbox
                                     checked={settings.showJobTitle}
                                     onChange={() => setSettings(s => ({ ...s, showJobTitle: !s.showJobTitle }))}
@@ -620,7 +620,7 @@ const EmployeeDirectory: React.FC = () => {
                                 />
                                 <span className="text-gray-700 whitespace-nowrap">Job Title</span>
                             </div>
-                            <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all">
+                            <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all whitespace-nowrap">
                                 <ModernCheckbox
                                     checked={settings.showHireDate}
                                     onChange={() => setSettings(s => ({ ...s, showHireDate: !s.showHireDate }))}
