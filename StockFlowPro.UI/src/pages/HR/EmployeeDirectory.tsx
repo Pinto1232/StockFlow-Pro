@@ -109,56 +109,10 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
     // Disable page scroll while dropdown is open
     useEffect(() => {
         if (!isOpen) return;
-
-        const html = document.documentElement;
-        const body = document.body;
-
-        const previous = {
-            htmlOverflow: html.style.overflow,
-            bodyOverflow: body.style.overflow,
-            htmlPaddingRight: html.style.paddingRight,
-            bodyPaddingRight: body.style.paddingRight,
-            bodyPosition: body.style.position,
-            bodyTop: body.style.top,
-            htmlOverscroll: html.style.overscrollBehavior as string | undefined,
-            bodyOverscroll: body.style.overscrollBehavior as string | undefined,
-        };
-
-        const scrollY = window.scrollY;
-        const scrollbarWidth = window.innerWidth - html.clientWidth;
-
-        // Hide scrollbars and prevent scroll chaining
-        html.style.overflow = "hidden";
-        body.style.overflow = "hidden";
-        html.style.overscrollBehavior = "contain";
-        body.style.overscrollBehavior = "contain";
-
-        // Compensate layout shift when hiding scrollbar
-        if (scrollbarWidth > 0) {
-            html.style.paddingRight = `${scrollbarWidth}px`;
-            body.style.paddingRight = `${scrollbarWidth}px`;
-        }
-
-        // Lock scroll position (prevents wheel/keyboard scroll)
-        body.style.position = "fixed";
-        body.style.top = `-${scrollY}px`;
-        
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
         return () => {
-            // Restore styles
-            html.style.overflow = previous.htmlOverflow;
-            body.style.overflow = previous.bodyOverflow;
-            html.style.paddingRight = previous.htmlPaddingRight;
-            body.style.paddingRight = previous.bodyPaddingRight;
-            html.style.overscrollBehavior = previous.htmlOverscroll ?? "";
-            body.style.overscrollBehavior = previous.bodyOverscroll ?? "";
-
-            // Restore scroll position
-            const y = parseInt(previous.bodyTop || body.style.top || "0", 10);
-            body.style.position = previous.bodyPosition;
-            body.style.top = previous.bodyTop;
-            if (!Number.isNaN(y)) {
-                window.scrollTo(0, Math.abs(y));
-            }
+            document.body.style.overflow = previousOverflow;
         };
     }, [isOpen]);
 
