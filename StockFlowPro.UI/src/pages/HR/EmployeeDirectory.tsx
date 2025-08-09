@@ -106,6 +106,16 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
     const [isOpen, setIsOpen] = useState(false);
     const selectedOption = options.find(opt => opt.value === value);
 
+    // Disable page scroll while dropdown is open
+    useEffect(() => {
+        if (!isOpen) return;
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [isOpen]);
+
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Escape') {
             setIsOpen(false);
