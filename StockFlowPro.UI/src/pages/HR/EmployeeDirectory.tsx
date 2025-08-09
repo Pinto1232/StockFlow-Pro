@@ -19,6 +19,23 @@ import {
 } from "lucide-react";
 import { useCreateEmployee, useEmployees, useUploadEmployeeImage, type EmployeeDto } from "../../hooks/employees";
 
+// Saved views types
+type DirectoryView = {
+    id: string;
+    name: string;
+    search: string;
+    department: string;
+    position: string;
+    settings: FieldSettings;
+};
+
+type FieldSettings = {
+    showEmail: boolean;
+    showPhone: boolean;
+    showJobTitle: boolean;
+    showHireDate: boolean;
+};
+
 function initials(first?: string | null, last?: string | null) {
     const f = (first ?? "").trim();
     const l = (last ?? "").trim();
@@ -191,6 +208,123 @@ const EmployeeDirectory: React.FC = () => {
     const [positionFilter, setPositionFilter] = useState<string>("All");
     const [showCreateModal, setShowCreateModal] = useState(false);
 
+    // Field visibility settings (persisted)
+    const [settings, setSettings] = useState<FieldSettings>(() => {
+        const raw = localStorage.getItem("sf_dir_settings");
+        return raw ? JSON.parse(raw) as FieldSettings : {
+            showEmail: true,
+            showPhone: true,
+            showJobTitle: true,
+            showHireDate: true,
+        };
+    });
+
+    useEffect(() => {
+        localStorage.setItem("sf_dir_settings", JSON.stringify(settings));
+    }, [settings]);
+
+    // Saved views (persisted)
+    const [views, setViews] = useState<DirectoryView[]>(() => {
+        const raw = localStorage.getItem("sf_dir_views");
+        return raw ? JSON.parse(raw) as DirectoryView[] : [];
+    });
+    const [activeViewId, setActiveViewId] = useState<string | null>(() => localStorage.getItem("sf_dir_active_view") || null);
+
+    useEffect(() => {
+        localStorage.setItem("sf_dir_views", JSON.stringify(views));
+    }, [views]);
+    useEffect(() => {
+        if (activeViewId) localStorage.setItem("sf_dir_active_view", activeViewId);
+        else localStorage.removeItem("sf_dir_active_view");
+    }, [activeViewId]);
+
+    // Apply active view
+    useEffect(() => {
+        if (!activeViewId) return;
+        const v = views.find(x => x.id === activeViewId);
+        if (!v) return;
+        setSearch(v.search);
+        setDepartmentFilter(v.department);
+        setPositionFilter(v.position);
+        setSettings(v.settings);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeViewId]);
+
+    // Selection state for bulk actions
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const allSelected = (employees ?? []).length > 0 && selectedIds.size > 0 && selectedIds.size === (employees ?? []).length;
+    const clearSelection = () => setSelectedIds(new Set());
+
+    const toggleSelected = (id: string) => {
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id); else next.add(id);
+            return next;
+        });
+    };
+
+    const toggleSelectAll = () => {
+        if (allSelected) { clearSelection(); return; }
+        const next = new Set<string>();
+        (filtered ?? []).forEach(e => next.add(e.id));
+        setSelectedIds(next);
+    };
+
+    // CSV Export of current filtered set or selection
+    function exportCsv(rows: EmployeeDto[]) {
+        const headers = ["Id","First Name","Last Name","Full Name","Email","Phone","Job Title","Department","Status","Hire Date"];
+        const lines = rows.map(r => [
+            r.id,
+            r.firstName ?? "",
+            r.lastName ?? "",
+            r.fullName ?? "",
+            r.email ?? "",
+            r.phoneNumber ?? "",
+            r.jobTitle ?? "",
+            r.departmentName ?? "",
+            statusToLabel(r.status),
+            r.hireDate ? new Date(r.hireDate).toISOString().split("T")[0] : ""
+        ].map(v => `"${String(v).replaceAll('"','""')}"`).join(","));
+        const csv = [headers.join(","), ...lines].join("\n");
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `employees_${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // Saved view helpers
+    function saveCurrentView(name: string) {
+        const v: DirectoryView = {
+            id: crypto.randomUUID(),
+            name,
+            search,
+            department: departmentFilter,
+            position: positionFilter,
+            settings,
+        };
+        setViews(prev => [...prev, v]);
+        setActiveViewId(v.id);
+    }
+    function updateActiveView(name?: string) {
+        if (!activeViewId) return;
+        setViews(prev => prev.map(v => v.id === activeViewId ? {
+            ...v,
+            name: name ?? v.name,
+            search,
+            department: departmentFilter,
+            position: positionFilter,
+            settings,
+        } : v));
+    }
+    function deleteActiveView() {
+        if (!activeViewId) return;
+        setViews(prev => prev.filter(v => v.id !== activeViewId));
+        setActiveViewId(null);
+    }
+
     useEffect(() => {
         if (employees) {
             console.log('[EmployeeDirectory] employees:', employees);
@@ -333,6 +467,63 @@ const EmployeeDirectory: React.FC = () => {
                     </div>
                 </div>
 
+                {/* Views and Settings Bar */}
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <label className="text-sm text-gray-600">Saved View</label>
+                        <select
+                            value={activeViewId ?? ""}
+                            onChange={(e) => setActiveViewId(e.target.value || null)}
+                            className="px-3 py-2 border border-gray-300 rounded-lg"
+                        >
+                            <option value="">— None —</option>
+                            {views.map(v => (
+                                <option key={v.id} value={v.id}>{v.name}</option>
+                            ))}
+                        </select>
+                        <button
+                            onClick={() => {
+                                const name = prompt("View name?");
+                                if (name && name.trim()) saveCurrentView(name.trim());
+                            }}
+                            className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        >Save current</button>
+                        <button
+                            disabled={!activeViewId}
+                            onClick={() => {
+                                const name = prompt("Rename view? Leave empty to keep.");
+                                updateActiveView(name || undefined);
+                            }}
+                            className="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
+                        >Update</button>
+                        <button
+                            disabled={!activeViewId}
+                            onClick={deleteActiveView}
+                            className="px-3 py-2 border border-red-300 text-red-600 rounded-lg disabled:opacity-50"
+                        >Delete</button>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3 text-sm">
+                            <label className="flex items-center gap-2"><input type="checkbox" checked={settings.showEmail} onChange={(e)=>setSettings(s=>({...s,showEmail:e.target.checked}))}/> Email</label>
+                            <label className="flex items-center gap-2"><input type="checkbox" checked={settings.showPhone} onChange={(e)=>setSettings(s=>({...s,showPhone:e.target.checked}))}/> Phone</label>
+                            <label className="flex items-center gap-2"><input type="checkbox" checked={settings.showJobTitle} onChange={(e)=>setSettings(s=>({...s,showJobTitle:e.target.checked}))}/> Job Title</label>
+                            <label className="flex items-center gap-2"><input type="checkbox" checked={settings.showHireDate} onChange={(e)=>setSettings(s=>({...s,showHireDate:e.target.checked}))}/> Hire Date</label>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => exportCsv((selectedIds.size>0 ? (employees ?? []).filter(e=>selectedIds.has(e.id)) : (filtered ?? [])))}
+                                className="px-3 py-2 border border-gray-300 rounded-lg"
+                            >Export CSV</button>
+                            <button
+                                disabled={selectedIds.size===0}
+                                onClick={clearSelection}
+                                className="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
+                            >Clear Selection</button>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Search and Filters */}
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-8">
                     <div className="flex flex-col lg:flex-row gap-4">
@@ -376,6 +567,18 @@ const EmployeeDirectory: React.FC = () => {
                     </div>
                 </div>
 
+                {/* Bulk selection bar */}
+                {selectedIds.size>0 && (
+                    <div className="sticky top-16 z-20 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm">
+                        <div className="text-sm text-gray-700">Selected: {selectedIds.size}</div>
+                        <div className="flex items-center gap-3">
+                            <button onClick={toggleSelectAll} className="px-3 py-2 border rounded-lg">{allSelected? 'Unselect all' : 'Select all (page)'}</button>
+                            <button onClick={() => exportCsv((employees ?? []).filter(e=>selectedIds.has(e.id)))} className="px-3 py-2 border rounded-lg">Export selected</button>
+                            <button onClick={clearSelection} className="px-3 py-2 border rounded-lg">Clear</button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Loading / Error states */}
                 {isLoading && (
                     <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
@@ -392,6 +595,7 @@ const EmployeeDirectory: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
                     {(filtered ?? []).map((e) => {
                         const label = statusToLabel(e.status);
+                        const checked = selectedIds.has(e.id);
                         return (
                             <div key={e.id} className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
                                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 text-center">
@@ -409,8 +613,11 @@ const EmployeeDirectory: React.FC = () => {
                                         )}
                                         <EmployeeImageUpload employee={e} />
                                     </div>
-                                    <h3 className="text-lg font-bold text-gray-900">{e.fullName ?? buildFullName(e.firstName, e.lastName)}</h3>
-                                    <p className="text-sm text-gray-600">{e.jobTitle ?? "—"}</p>
+                                    <div className="flex items-center justify-center gap-3 mb-1">
+                                        <input type="checkbox" checked={checked} onChange={()=>toggleSelected(e.id)} className="w-4 h-4" aria-label="Select employee" />
+                                        <h3 className="text-lg font-bold text-gray-900">{e.fullName ?? buildFullName(e.firstName, e.lastName)}</h3>
+                                    </div>
+                                    {settings.showJobTitle && <p className="text-sm text-gray-600">{e.jobTitle ?? "—"}</p>}
                                     <div className="mt-2 flex items-center justify-center gap-2">
                                         {e.isActive && <span className="inline-block w-2 h-2 rounded-full bg-green-500" title="Active"></span>}
                                         <span className={`inline-block ${statusClasses(label)} text-xs font-semibold px-3 py-1 rounded-full`}>{label}</span>
@@ -424,19 +631,19 @@ const EmployeeDirectory: React.FC = () => {
                                 </div>
                                 <div className="p-6">
                                     <div className="space-y-3">
-                                        {e.email && (
+                                        {settings.showEmail && e.email && (
                                             <div className="flex items-center gap-3 text-sm text-gray-600">
                                                 <Mail className="w-4 h-4" />
                                                 <span>{e.email}</span>
                                             </div>
                                         )}
-                                        {e.phoneNumber && (
+                                        {settings.showPhone && e.phoneNumber && (
                                             <div className="flex items-center gap-3 text-sm text-gray-600">
                                                 <Phone className="w-4 h-4" />
                                                 <span>{e.phoneNumber}</span>
                                             </div>
                                         )}
-                                        {e.hireDate && (
+                                        {settings.showHireDate && e.hireDate && (
                                             <div className="flex items-center gap-3 text-sm text-gray-600">
                                                 <Calendar className="w-4 h-4" />
                                                 <span>Hired: {new Date(e.hireDate).toLocaleDateString()}</span>
