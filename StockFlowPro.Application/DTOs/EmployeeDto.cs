@@ -16,6 +16,7 @@ public class EmployeeDto
     public string? DepartmentName { get; set; }
     public Guid? ManagerId { get; set; }
     public EmploymentStatus Status { get; set; }
+    public string? ImageUrl { get; set; }
     public DateTime? HireDate { get; set; }
     public DateTime? TerminationDate { get; set; }
     public bool IsActive { get; set; }

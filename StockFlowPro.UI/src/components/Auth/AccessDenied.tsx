@@ -17,7 +17,7 @@ interface AccessDeniedProps {
 const AccessDenied: React.FC<AccessDeniedProps> = ({
     message = "You don't have permission to access this resource.",
     showBackButton = true,
-    backTo = "/dashboard",
+            backTo = "/app/dashboard",
 }) => {
     const navigate = useNavigate();
 

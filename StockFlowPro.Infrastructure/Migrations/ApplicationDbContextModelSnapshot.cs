@@ -22,6 +22,92 @@ namespace StockFlowPro.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("StockFlowPro.Domain.Entities.Employee", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DepartmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DepartmentName")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("HireDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("JobTitle")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid?>("ManagerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("OffboardingCompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("OffboardingStartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("OnboardingCompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("OnboardingStartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("TerminationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("Employees", (string)null);
+                });
+
             modelBuilder.Entity("StockFlowPro.Domain.Entities.Invoice", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1384,6 +1470,149 @@ namespace StockFlowPro.Infrastructure.Migrations
                         .HasDatabaseName("IX_Users_RoleId");
 
                     b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("StockFlowPro.Domain.Entities.Employee", b =>
+                {
+                    b.OwnsMany("StockFlowPro.Domain.Entities.ChecklistItem", "_offboardingChecklist", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Code")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b1.Property<DateTime?>("CompletedAt")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<DateTime>("CreatedAt")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<Guid>("EmployeeId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Title")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("EmployeeId");
+
+                            b1.ToTable("EmployeeOffboardingChecklist", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("EmployeeId");
+                        });
+
+                    b.OwnsMany("StockFlowPro.Domain.Entities.ChecklistItem", "_onboardingChecklist", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Code")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b1.Property<DateTime?>("CompletedAt")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<DateTime>("CreatedAt")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<Guid>("EmployeeId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Title")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("EmployeeId");
+
+                            b1.ToTable("EmployeeOnboardingChecklist", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("EmployeeId");
+                        });
+
+                    b.OwnsMany("StockFlowPro.Domain.Entities.EmployeeDocument", "_documents", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("ArchiveReason")
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b1.Property<DateTime?>("ArchivedAt")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<string>("ContentType")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+
+                            b1.Property<DateTime>("CreatedAt")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<Guid>("EmployeeId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<DateTime?>("ExpiresAt")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<string>("FileName")
+                                .IsRequired()
+                                .HasMaxLength(260)
+                                .HasColumnType("nvarchar(260)");
+
+                            b1.Property<bool>("IsArchived")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("bit")
+                                .HasDefaultValue(false);
+
+                            b1.Property<DateTime?>("IssuedAt")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<long>("SizeBytes")
+                                .HasColumnType("bigint");
+
+                            b1.Property<string>("StoragePath")
+                                .IsRequired()
+                                .HasMaxLength(512)
+                                .HasColumnType("nvarchar(512)");
+
+                            b1.Property<int>("Type")
+                                .HasColumnType("int");
+
+                            b1.Property<int>("Version")
+                                .HasColumnType("int");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("EmployeeId");
+
+                            b1.ToTable("EmployeeDocuments", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("EmployeeId");
+                        });
+
+                    b.Navigation("_documents");
+
+                    b.Navigation("_offboardingChecklist");
+
+                    b.Navigation("_onboardingChecklist");
                 });
 
             modelBuilder.Entity("StockFlowPro.Domain.Entities.Invoice", b =>

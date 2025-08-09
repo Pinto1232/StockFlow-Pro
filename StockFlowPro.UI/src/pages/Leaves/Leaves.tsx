@@ -145,7 +145,7 @@ const Leaves: React.FC = () => {
                 <ol className="flex items-center gap-2 text-sm">
                     <li className="flex items-center gap-2 text-gray-500">
                         <Home className="h-4 w-4" />
-                        <Link to="/dashboard" className="hover:text-gray-700">Dashboard</Link>
+                        <Link to="/app/dashboard" className="hover:text-gray-700">Dashboard</Link>
                     </li>
                     <li className="text-gray-400">/</li>
                     <li className="flex items-center gap-2 text-gray-900 font-semibold">

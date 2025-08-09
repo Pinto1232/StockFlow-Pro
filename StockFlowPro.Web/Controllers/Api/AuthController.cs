@@ -18,12 +18,24 @@ public class AuthController : ControllerBase
     private readonly IUserAuthenticationService _authenticationService;
     private readonly IRoleService _roleService;
     private readonly ILogger<AuthController> _logger;
+    private readonly IPendingSubscriptionStore _pendingStore;
+    private readonly StockFlowPro.Domain.Repositories.ISubscriptionPlanRepository _planRepository;
+    private readonly StockFlowPro.Domain.Repositories.ISubscriptionRepository _subscriptionRepository;
 
-    public AuthController(IUserAuthenticationService authenticationService, IRoleService roleService, ILogger<AuthController> logger)
+    public AuthController(
+        IUserAuthenticationService authenticationService,
+        IRoleService roleService,
+        ILogger<AuthController> logger,
+        IPendingSubscriptionStore pendingStore,
+        StockFlowPro.Domain.Repositories.ISubscriptionPlanRepository planRepository,
+        StockFlowPro.Domain.Repositories.ISubscriptionRepository subscriptionRepository)
     {
         _authenticationService = authenticationService;
         _roleService = roleService;
         _logger = logger;
+        _pendingStore = pendingStore;
+        _planRepository = planRepository;
+        _subscriptionRepository = subscriptionRepository;
     }
 
     [HttpPost("login")]
@@ -60,6 +72,51 @@ public class AuthController : ControllerBase
             
             Console.WriteLine($"[AUTH DEBUG] Signing in user with cookie scheme: {EnvironmentConfig.CookieAuthName}");
             await HttpContext.SignInAsync(EnvironmentConfig.CookieAuthName, new ClaimsPrincipal(claimsIdentity), authProperties);
+            
+            // Attach pending subscription by email if exists (placeholder)
+            var pending = _pendingStore.TryGetLatestByEmail(user.Email);
+            if (pending.HasValue)
+            {
+                _logger.LogInformation("[CHECKOUT] Found pending subscription for {Email}. PlanId={PlanId}", user.Email, pending.Value.PlanId);
+
+                // Attempt to parse Guid plan id
+                if (Guid.TryParse(pending.Value.PlanId, out var planGuid))
+                {
+                    var plan = await _planRepository.GetByIdAsync(planGuid);
+                    if (plan != null)
+                    {
+                        // Create subscription starting now; respect trial period if defined on plan
+                        var startDate = DateTime.UtcNow;
+                        DateTime? trialEnd = null;
+                        if (plan.TrialPeriodDays.HasValue && plan.TrialPeriodDays.Value > 0)
+                        {
+                            trialEnd = startDate.AddDays(plan.TrialPeriodDays.Value);
+                        }
+
+                        var subscription = new StockFlowPro.Domain.Entities.Subscription(
+                            user.Id,
+                            plan.Id,
+                            startDate,
+                            plan.Price,
+                            plan.Currency,
+                            trialEnd);
+
+                        // Provider fields can be attached later when processor confirms
+                        await _subscriptionRepository.AddAsync(subscription);
+                        _logger.LogInformation("[CHECKOUT] Created subscription {SubscriptionId} for user {UserId} on plan {PlanId}", subscription.Id, user.Id, plan.Id);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("[CHECKOUT] Pending subscription references unknown plan {PlanId}", planGuid);
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("[CHECKOUT] Invalid PlanId format in pending subscription: {PlanId}", pending.Value.PlanId);
+                }
+
+                _pendingStore.RemoveByEmail(user.Email);
+            }
             
             Console.WriteLine("[AUTH DEBUG] Cookie authentication completed successfully");
             _logger.LogInformation("User signed in successfully: {UserId}", user.Id);

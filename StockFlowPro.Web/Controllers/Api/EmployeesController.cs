@@ -15,10 +15,12 @@ namespace StockFlowPro.Web.Controllers.Api;
 public class EmployeesController : ApiBaseController
 {
     private readonly IMediator _mediator;
+    private readonly IWebHostEnvironment _env;
 
-    public EmployeesController(IMediator mediator)
+    public EmployeesController(IMediator mediator, IWebHostEnvironment env)
     {
         _mediator = mediator;
+        _env = env;
     }
 
     [HttpGet]
@@ -30,7 +32,7 @@ public class EmployeesController : ApiBaseController
     }
 
     [HttpGet("{id:guid}")]
-    [AnyPermission(Permissions.Users.View, Permissions.Users.ViewAll)]
+    [Permission(Permissions.Users.ViewAll)]
     public async Task<ActionResult<EmployeeDto>> GetById(Guid id)
     {
         var item = await _mediator.Send(new GetEmployeeByIdQuery(id));
@@ -59,6 +61,35 @@ public class EmployeesController : ApiBaseController
     {
         var ok = await _mediator.Send(new DeleteEmployeeCommand(id));
         return ok ? NoContent() : NotFound();
+    }
+
+    // Image upload
+    [HttpPost("{id:guid}/image")]
+    [RequestSizeLimit(10 * 1024 * 1024)] // 10MB
+    [Consumes("multipart/form-data")]
+    [Permission(Permissions.Users.Edit)]
+    public async Task<ActionResult> UploadImage(Guid id, [FromForm] UploadEmployeeImageRequest request)
+    {
+        if (request.File == null || request.File.Length == 0)
+        {
+            return BadRequest(new { message = "No file uploaded" });
+        }
+
+        var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "employees");
+        Directory.CreateDirectory(uploadsDir);
+
+        var safeFileName = $"{id}_{DateTime.UtcNow:yyyyMMddHHmmss}_{Path.GetFileName(request.File.FileName)}";
+        var filePath = Path.Combine(uploadsDir, safeFileName);
+        await using (var stream = System.IO.File.Create(filePath))
+        {
+            await request.File.CopyToAsync(stream);
+        }
+
+        var relativeUrl = $"/uploads/employees/{safeFileName}";
+
+        // Persist image URL via dedicated command
+        var item = await _mediator.Send(new UpdateEmployeeImageCommand(id, relativeUrl));
+        return Ok(new { imageUrl = item.ImageUrl });
     }
 
     // Documents
@@ -110,6 +141,12 @@ public class EmployeesController : ApiBaseController
         var item = await _mediator.Send(new CompleteOffboardingTaskCommand(id, request.Code));
         return Ok(item);
     }
+}
+
+[ApiExplorerSettings(IgnoreApi = false)]
+public class UploadEmployeeImageRequest
+{
+    public IFormFile? File { get; set; }
 }
 
 public record AddEmployeeDocumentRequest(string FileName, DocumentType Type, string StoragePath, long SizeBytes, string ContentType, DateTime? IssuedAt, DateTime? ExpiresAt);

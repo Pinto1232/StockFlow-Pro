@@ -11,7 +11,7 @@ interface PermissionRouteProps {
 const PermissionRoute: React.FC<PermissionRouteProps> = ({
     children,
     permission,
-    fallback = "/dashboard",
+            fallback = "/app/dashboard",
 }) => {
     const { hasPermission } = usePermissions();
 

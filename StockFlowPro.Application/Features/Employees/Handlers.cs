@@ -14,6 +14,7 @@ public record DeleteEmployeeCommand(Guid Id) : IRequest<bool>;
 public record GetEmployeeByIdQuery(Guid Id) : IRequest<EmployeeDto?>;
 public record GetEmployeesQuery(bool ActiveOnly = false, Guid? DepartmentId = null, string? Search = null) : IRequest<IEnumerable<EmployeeDto>>;
 public record AddEmployeeDocumentCommand(Guid EmployeeId, string FileName, DocumentType Type, string StoragePath, long SizeBytes, string ContentType, DateTime? IssuedAt = null, DateTime? ExpiresAt = null) : IRequest<EmployeeDocumentDto>;
+public record UpdateEmployeeImageCommand(Guid Id, string? ImageUrl) : IRequest<EmployeeDto>;
 public record ArchiveEmployeeDocumentCommand(Guid EmployeeId, Guid DocumentId, string Reason) : IRequest<bool>;
 public record StartOnboardingCommand(Guid EmployeeId) : IRequest<EmployeeDto>;
 public record CompleteOnboardingTaskCommand(Guid EmployeeId, string Code) : IRequest<EmployeeDto>;
@@ -80,6 +81,26 @@ public class UpdateEmployeeHandler : IRequestHandler<UpdateEmployeeCommand, Empl
         }
         await _repo.UpdateAsync(entity, cancellationToken);
         return _mapper.Map<EmployeeDto>(entity);
+    }
+}
+
+public class UpdateEmployeeImageHandler : IRequestHandler<UpdateEmployeeImageCommand, EmployeeDto>
+{
+    private readonly IEmployeeRepository _repo;
+    private readonly IMapper _mapper;
+
+    public UpdateEmployeeImageHandler(IEmployeeRepository repo, IMapper mapper)
+    {
+        _repo = repo;
+        _mapper = mapper;
+    }
+
+    public async Task<EmployeeDto> Handle(UpdateEmployeeImageCommand request, CancellationToken cancellationToken)
+    {
+        var e = await _repo.GetByIdAsync(request.Id, cancellationToken) ?? throw new KeyNotFoundException();
+        e.UpdateImage(request.ImageUrl);
+        await _repo.UpdateAsync(e, cancellationToken);
+        return _mapper.Map<EmployeeDto>(e);
     }
 }
 

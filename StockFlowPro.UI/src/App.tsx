@@ -47,11 +47,13 @@ import ProjectReports from "./pages/ProjectManagement/ProjectReports.tsx";
 import HR from "./pages/HR/HR.tsx";
 import EmployeeDirectory from "./pages/HR/EmployeeDirectory.tsx";
 import EmployeePerformance from "./pages/HR/EmployeePerformance.tsx";
+import EmployeeProfile from "./pages/HR/EmployeeProfile.tsx";
 import Payslip from "./pages/HR/Payslip.tsx";
 import HRAttendance from "./pages/HR/Attendance.tsx";
 import Holidays from "./pages/HR/Holidays.tsx";
 import Income from "./pages/Income/Income.tsx";
 import Leaves from "./pages/Leaves/Leaves.tsx";
+import Landing from "./pages/Pricing/Landing.tsx";
 
 function App() {
     return (
@@ -61,12 +63,14 @@ function App() {
                     <div className="min-h-screen bg-gray-50">
                         <Routes>
                             {/* Public routes */}
+                            <Route path="/" element={<Landing />} />
+                            <Route path="/pricing" element={<Landing />} />
                             <Route path="/login" element={<Login />} />
                             <Route path="/register" element={<Register />} />
 
                             {/* Protected routes */}
                             <Route
-                                path="/"
+                                path="/app"
                                 element={
                                     <ProtectedRoute>
                                         <Layout />
@@ -76,7 +80,7 @@ function App() {
                                 <Route
                                     index
                                     element={
-                                        <Navigate to="/dashboard" replace />
+                                        <Navigate to="/app/dashboard" replace />
                                     }
                                 />
                                 <Route
@@ -267,6 +271,7 @@ function App() {
                                 {/* Human Resources */}
                                 <Route path="hr" element={<HR />} />
                                 <Route path="hr/employee-directory" element={<EmployeeDirectory />} />
+                                <Route path="hr/employees/:id" element={<EmployeeProfile />} />
                                 <Route path="hr/employee-performance" element={<EmployeePerformance />} />
                                 <Route path="hr/payslip" element={<Payslip />} />
                                 <Route path="hr/attendance" element={<HRAttendance />} />

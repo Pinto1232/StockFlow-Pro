@@ -19,6 +19,8 @@ import { useRealTimeUpdates } from "../../hooks/useRealTimeUpdates";
 import { formatCurrency } from "../../utils/currency";
 import Snackbar from "../../components/ui/Snackbar";
 import { createNavigationHandlers } from "./dashboardLinks";
+import { useFeatures } from "../../hooks/useFeatures";
+import { FeatureGate } from "../../components/FeatureGate";
 
 // Import modular components
 import {
@@ -49,6 +51,19 @@ const Dashboard: React.FC = () => {
     // Custom hooks for data and UI state
     const { userStats, refreshUserStats } = useDashboardData();
     const { snackbar, showSnackbar, hideSnackbar } = useSnackbar();
+
+    // Entitlements and plan metadata
+    const { data: entitlements } = useFeatures();
+    const planName = entitlements?.planName;
+    const isTrial = entitlements?.isTrial;
+    const trialEnd = entitlements?.trialEndDate ? new Date(entitlements.trialEndDate) : null;
+    const billingLabel = entitlements?.billingInterval;
+    const price = entitlements?.price;
+    const currency = entitlements?.currency;
+    const maxUsers = entitlements?.maxUsers ?? null;
+    const maxProjects = entitlements?.maxProjects ?? null;
+    const maxStorageGB = entitlements?.maxStorageGB ?? null;
+    const userLimitReached = typeof maxUsers === 'number' && userStats.activeUsers >= maxUsers;
 
     // Modal state
     const [showQuickAddRoleModal, setShowQuickAddRoleModal] = useState(false);
@@ -110,7 +125,7 @@ const Dashboard: React.FC = () => {
                     <ol className="flex items-center gap-2 text-sm">
                         <li className="flex items-center gap-2">
                             <Link
-                                to="/dashboard"
+                                to="/app/dashboard"
                                 className="flex items-center gap-2 text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors font-medium"
                             >
                                 <Home className="h-4 w-4" />
@@ -134,6 +149,32 @@ const Dashboard: React.FC = () => {
             </div>
 
             <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+                {/* Plan & Trial Banner */}
+                {entitlements && (
+                    <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-4">
+                            <div>
+                                <div className="text-sm text-blue-700">Current plan</div>
+                                <div className="text-lg font-semibold text-blue-900">
+                                    {planName} • {billingLabel}
+                                </div>
+                                <div className="text-sm text-blue-700">
+                                    {currency} {price?.toLocaleString()} {isTrial ? `(Trial ends ${trialEnd?.toLocaleDateString()})` : ''}
+                                </div>
+                                <div className="mt-2 text-xs text-blue-700">
+                                    {maxUsers !== null ? `Users: up to ${maxUsers}` : 'Users: Unlimited'} • {maxProjects !== null ? `Projects: up to ${maxProjects}` : 'Projects: Unlimited'} • {maxStorageGB !== null ? `Storage: ${maxStorageGB}GB` : 'Storage: Unlimited'}
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => navigate('/pricing')}
+                                className="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-700"
+                            >
+                                Upgrade
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {/* System Status Banner */}
                 <SystemStatusBanner />
 
@@ -215,8 +256,8 @@ const Dashboard: React.FC = () => {
                                     isLoading: userStats.isLoading 
                                 },
                                 { 
-                                    label: "ROLES", 
-                                    value: userStats.totalRoles,
+                                    label: maxUsers !== null ? "USER LIMIT" : "USER LIMIT",
+                                    value: maxUsers !== null ? `${userStats.activeUsers}/${maxUsers}` : "Unlimited",
                                     isLoading: userStats.isLoading 
                                 },
                             ]}
@@ -232,6 +273,12 @@ const Dashboard: React.FC = () => {
                                 variant: "secondary",
                             }}
                         />
+
+                        {userLimitReached && (
+                            <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-amber-800">
+                                You’ve reached your plan’s user limit ({userStats.activeUsers}/{maxUsers}). Upgrade to add more users.
+                            </div>
+                        )}
 
                         {/* Invoices & Revenue Card */}
                         <DashboardCard
@@ -256,6 +303,78 @@ const Dashboard: React.FC = () => {
                                 variant: "secondary",
                             }}
                         />
+
+                        {/* Advanced Analytics (Feature-gated) */}
+                        <FeatureGate
+                            feature="AdvancedReporting"
+                            fallback={
+                                <DashboardCard
+                                    title="Advanced Analytics"
+                                    description="Unlock deep insights with advanced reporting."
+                                    category="REPORTS"
+                                    icon={BarChart3}
+                                    stats={[{ label: "STATUS", value: "Locked" }]}
+                                    primaryAction={{
+                                        label: "Upgrade",
+                                        icon: BarChart3,
+                                        onClick: () => navigate('/pricing'),
+                                    }}
+                                    gradient="from-yellow-50 to-orange-50"
+                                    iconGradient="from-yellow-500 to-orange-600"
+                                    badgeColor="yellow"
+                                />
+                            }
+                        >
+                            <DashboardCard
+                                title="Advanced Analytics"
+                                description="Custom reports, forecasting, and advanced KPIs."
+                                category="REPORTS"
+                                icon={BarChart3}
+                                stats={[{ label: "STATUS", value: "Enabled" }]}
+                                primaryAction={{
+                                    label: "Open Reports",
+                                    icon: BarChart3,
+                                    onClick: navigationHandlers.navigateToReports,
+                                    color: "from-indigo-500 to-indigo-600",
+                                }}
+                            />
+                        </FeatureGate>
+
+                        {/* API & Integrations (Feature-gated) */}
+                        <FeatureGate
+                            feature="ApiAccess"
+                            fallback={
+                                <DashboardCard
+                                    title="API & Integrations"
+                                    description="Automate workflows and connect external systems."
+                                    category="DEVELOPER"
+                                    icon={Cog}
+                                    stats={[{ label: "STATUS", value: "Locked" }]}
+                                    primaryAction={{
+                                        label: "Upgrade",
+                                        icon: Settings,
+                                        onClick: () => navigate('/pricing'),
+                                    }}
+                                    gradient="from-red-50 to-rose-50"
+                                    iconGradient="from-red-500 to-rose-600"
+                                    badgeColor="red"
+                                />
+                            }
+                        >
+                            <DashboardCard
+                                title="API & Integrations"
+                                description="Connect external systems and automate workflows."
+                                category="DEVELOPER"
+                                icon={Cog}
+                                stats={[{ label: "STATUS", value: "Enabled" }]}
+                                primaryAction={{
+                                    label: "Open Settings",
+                                    icon: Settings,
+                                    onClick: navigationHandlers.navigateToSettings,
+                                    color: "from-green-500 to-green-600",
+                                }}
+                            />
+                        </FeatureGate>
 
                         {/* Low Stock Alerts Card */}
                         <LowStockAlertsCard
