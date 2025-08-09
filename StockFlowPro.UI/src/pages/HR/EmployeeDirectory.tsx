@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { createPortal } from "react-dom";
 import {
     Home,
     Briefcase,
@@ -176,25 +177,38 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
     const [isOpen, setIsOpen] = useState(false);
     const selectedOption = options.find(opt => opt.value === value);
 
-    // Disable page scroll while dropdown is open
-    useEffect(() => {
-        if (!isOpen) return;
-        const previousOverflow = document.body.style.overflow;
-        document.body.style.overflow = "hidden";
-        return () => {
-            document.body.style.overflow = previousOverflow;
-        };
-    }, [isOpen]);
-
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Escape') {
             setIsOpen(false);
         }
     };
 
+    // Positioning for portal menu
+    const triggerRef = React.useRef<HTMLButtonElement | null>(null);
+    const [menuPos, setMenuPos] = useState<{ left: number; top: number; width: number }>({ left: 0, top: 0, width: 0 });
+    const updateMenuPos = () => {
+        const el = triggerRef.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        setMenuPos({ left: rect.left + window.scrollX, top: rect.bottom + window.scrollY + 8, width: rect.width });
+    };
+    useEffect(() => {
+        if (!isOpen) return;
+        updateMenuPos();
+        const onScroll = () => updateMenuPos();
+        const onResize = () => updateMenuPos();
+        window.addEventListener('scroll', onScroll, true);
+        window.addEventListener('resize', onResize);
+        return () => {
+            window.removeEventListener('scroll', onScroll, true);
+            window.removeEventListener('resize', onResize);
+        };
+    }, [isOpen]);
+
     return (
         <div className={`relative ${className}`} onKeyDown={handleKeyDown}>
             <button
+                ref={triggerRef}
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 aria-expanded={isOpen}
@@ -210,13 +224,16 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
                 <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'transform rotate-180' : ''}`} />
             </button>
             
-            {isOpen && (
+            {isOpen && createPortal(
                 <>
-                    <div 
-                        className="fixed inset-0 z-10" 
+                    <div
+                        className="fixed inset-0 z-[1000]"
                         onClick={() => setIsOpen(false)}
                     />
-                    <div className="absolute z-20 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto ring-1 ring-black ring-opacity-5">
+                    <div
+                        className="fixed z-[1001] bg-white border border-gray-200 rounded-lg shadow-2xl max-h-60 overflow-auto ring-1 ring-black ring-opacity-5"
+                        style={{ left: menuPos.left, top: menuPos.top, minWidth: menuPos.width }}
+                    >
                         {options.map((option, index) => (
                             <button
                                 key={option.value}
@@ -247,7 +264,8 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
                             </button>
                         ))}
                     </div>
-                </>
+                </>,
+                document.body
             )}
         </div>
     );
