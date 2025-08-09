@@ -16,6 +16,7 @@ import {
     ChevronDown,
     Building2,
     UserCheck,
+    GripVertical,
 } from "lucide-react";
 import { useCreateEmployee, useEmployees, useUploadEmployeeImage, type EmployeeDto } from "../../hooks/employees";
 
@@ -281,6 +282,36 @@ const EmployeeDirectory: React.FC = () => {
     });
     const [activeViewId, setActiveViewId] = useState<string | null>(() => localStorage.getItem("sf_dir_active_view") || null);
 
+    // Reorder mode toggle (persisted)
+    const [reorderMode, setReorderMode] = useState<boolean>(() => (localStorage.getItem("sf_dir_reorder") === "1"));
+    useEffect(() => { localStorage.setItem("sf_dir_reorder", reorderMode ? "1" : "0"); }, [reorderMode]);
+
+    // Per-view order persistence
+    const orderStorageKey = React.useMemo(() => `sf_dir_order_${activeViewId ?? "default"}`, [activeViewId]);
+    const [orderedIds, setOrderedIds] = useState<string[]>([]);
+    useEffect(() => {
+        const raw = localStorage.getItem(orderStorageKey);
+        setOrderedIds(raw ? (JSON.parse(raw) as string[]) : []);
+    }, [orderStorageKey]);
+    useEffect(() => {
+        localStorage.setItem(orderStorageKey, JSON.stringify(orderedIds));
+    }, [orderStorageKey, orderedIds]);
+
+    // DnD helpers
+    const dragFromId = React.useRef<string | null>(null);
+    const [dragOverId, setDragOverId] = useState<string | null>(null);
+
+    function reorderIds(list: string[], fromId: string, toId: string): string[] {
+        const arr = list.slice();
+        if (!arr.includes(fromId)) arr.push(fromId);
+        if (!arr.includes(toId)) arr.push(toId);
+        const fromIndex = arr.indexOf(fromId);
+        arr.splice(fromIndex, 1);
+        const toIndex = arr.indexOf(toId);
+        arr.splice(toIndex, 0, fromId);
+        return arr;
+    }
+
     useEffect(() => {
         localStorage.setItem("sf_dir_views", JSON.stringify(views));
     }, [views]);
@@ -405,6 +436,20 @@ const EmployeeDirectory: React.FC = () => {
             return matchesSearch && matchesDept && matchesPos;
         });
     }, [employees, search, departmentFilter, positionFilter]);
+
+    // Apply card ordering
+    const orderedFiltered = useMemo(() => {
+        const index = new Map<string, number>();
+        orderedIds.forEach((id, i) => index.set(id, i));
+        return (filtered ?? []).slice().sort((a, b) => {
+            const ai = index.has(a.id) ? index.get(a.id)! : Number.MAX_SAFE_INTEGER;
+            const bi = index.has(b.id) ? index.get(b.id)! : Number.MAX_SAFE_INTEGER;
+            if (ai !== bi) return ai - bi;
+            const an = a.fullName ?? buildFullName(a.firstName, a.lastName);
+            const bn = b.fullName ?? buildFullName(b.firstName, b.lastName);
+            return an.localeCompare(bn);
+        });
+    }, [filtered, orderedIds]);
 
     const departmentCounts = useMemo(() => {
         const counts = new Map<string, number>();
@@ -563,6 +608,11 @@ const EmployeeDirectory: React.FC = () => {
                                 onClick={clearSelection}
                                 className="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
                             >Clear Selection</button>
+                            <button
+                                onClick={() => setReorderMode(v=>!v)}
+                                className={`px-3 py-2 rounded-lg border ${reorderMode ? 'border-blue-300 text-blue-700 bg-blue-50' : 'border-gray-300 text-gray-700'}`}
+                                title="Toggle reorder mode"
+                            >{reorderMode ? 'Reorder: On' : 'Reorder: Off'}</button>
                         </div>
                     </div>
                 </div>
@@ -649,11 +699,18 @@ const EmployeeDirectory: React.FC = () => {
 
                 {/* Employee Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                    {(filtered ?? []).map((e) => {
+                    {(orderedFiltered ?? []).map((e) => {
                         const label = statusToLabel(e.status);
                         const checked = selectedIds.has(e.id);
+                        const isDragOver = dragOverId === e.id;
                         return (
-                            <div key={e.id} className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+                            <div
+                                key={e.id}
+                                className={`bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 ${isDragOver ? 'ring-2 ring-blue-400' : ''}`}
+                                onDragOver={reorderMode ? (ev) => { ev.preventDefault(); setDragOverId(e.id); } : undefined}
+                                onDragLeave={reorderMode ? () => setDragOverId(prev => (prev === e.id ? null : prev)) : undefined}
+                                onDrop={reorderMode ? () => { if (dragFromId.current && dragFromId.current !== e.id) { setOrderedIds(prev => reorderIds(prev, dragFromId.current!, e.id)); } setDragOverId(null); dragFromId.current=null; } : undefined}
+                            >
                                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 text-center">
                                     <div className="relative w-20 h-20 mx-auto mb-4 group">
                                         {e.imageUrl ? (
@@ -670,6 +727,17 @@ const EmployeeDirectory: React.FC = () => {
                                         <EmployeeImageUpload employee={e} />
                                     </div>
                                     <div className="flex items-center justify-center gap-3 mb-1">
+                                        {reorderMode && (
+                                            <span
+                                                draggable
+                                                onDragStart={() => { dragFromId.current = e.id; }}
+                                                className="inline-flex items-center justify-center h-6 w-6 rounded-md text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing"
+                                                title="Drag to reorder"
+                                                aria-label="Drag to reorder"
+                                            >
+                                                <GripVertical className="w-4 h-4" />
+                                            </span>
+                                        )}
                                         <ModernCheckbox
                                             checked={checked}
                                             onChange={() => toggleSelected(e.id)}
