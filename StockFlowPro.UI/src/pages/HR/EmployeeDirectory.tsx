@@ -17,6 +17,7 @@ import {
     Building2,
     UserCheck,
     GripVertical,
+    Bookmark,
 } from "lucide-react";
 import { useCreateEmployee, useEmployees, useUploadEmployeeImage, type EmployeeDto } from "../../hooks/employees";
 
@@ -558,17 +559,15 @@ const EmployeeDirectory: React.FC = () => {
                 {/* Views and Settings Bar */}
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     <div className="flex items-center gap-3 flex-nowrap whitespace-nowrap">
-                        <label className="text-sm text-gray-600 whitespace-nowrap">Saved View</label>
-                        <select
+                        <span className="text-sm text-gray-600 whitespace-nowrap">Saved View</span>
+                        <CustomDropdown
                             value={activeViewId ?? ""}
-                            onChange={(e) => setActiveViewId(e.target.value || null)}
-                            className="px-3 py-2 border border-gray-300 rounded-lg whitespace-nowrap"
-                        >
-                            <option value="">— None —</option>
-                            {views.map(v => (
-                                <option key={v.id} value={v.id}>{v.name}</option>
-                            ))}
-                        </select>
+                            onChange={(v) => setActiveViewId(v || null)}
+                            options={[{ value: "", label: "None" }, ...views.map(v => ({ value: v.id, label: v.name }))]}
+                            placeholder="None"
+                            icon={<Bookmark className="w-4 h-4" />}
+                            className="w-56"
+                        />
                         <button
                             onClick={() => {
                                 const name = prompt("View name?");
