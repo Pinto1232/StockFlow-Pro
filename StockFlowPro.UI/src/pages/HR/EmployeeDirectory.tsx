@@ -190,7 +190,8 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
         const el = triggerRef.current;
         if (!el) return;
         const rect = el.getBoundingClientRect();
-        setMenuPos({ left: rect.left + window.scrollX, top: rect.bottom + window.scrollY + 8, width: rect.width });
+        // For fixed positioning, use viewport coordinates directly
+        setMenuPos({ left: rect.left, top: rect.bottom + 8, width: rect.width });
     };
     useEffect(() => {
         if (!isOpen) return;
