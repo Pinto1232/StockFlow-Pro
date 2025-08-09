@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:local": "vite",
-    "dev:docker": "cross-env VITE_API_BASE_URL=http://localhost:5131/api VITE_WS_URL=ws://localhost:5131 vite",
+    "dev:docker": "cross-env VITE_API_BASE_URL=http://localhost:5000/api VITE_WS_URL=ws://localhost:5000 vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

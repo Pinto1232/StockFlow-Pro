@@ -15,13 +15,25 @@ function initials(first?: string | null, last?: string | null) {
   return (fi + li || "??").toUpperCase();
 }
 
-function resolveImageUrl(url?: string | null) {
+function resolveImageUrl(url?: string | null, cacheBusting: boolean = false) {
   if (!url) return undefined;
-  if (/^https?:\/\//i.test(url)) return url;
+  if (/^https?:\/\//i.test(url)) {
+    if (cacheBusting) {
+      const separator = url.includes('?') ? '&' : '?';
+      return `${url}${separator}t=${Date.now()}`;
+    }
+    return url;
+  }
   const base = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '');
   const origin = base.endsWith('/api') ? base.slice(0, -4) : base;
   if (!origin) return url; // same-origin fallback in dev proxy setups
-  return url.startsWith('/') ? `${origin}${url}` : `${origin}/${url}`;
+  const fullUrl = url.startsWith('/') ? `${origin}${url}` : `${origin}/${url}`;
+  
+  if (cacheBusting) {
+    const separator = fullUrl.includes('?') ? '&' : '?';
+    return `${fullUrl}${separator}t=${Date.now()}`;
+  }
+  return fullUrl;
 }
 
 function statusToLabel(status: EmployeeDto['status'] | number): string {
@@ -71,7 +83,7 @@ const EmployeeProfile: React.FC = () => {
         <ol className="flex items-center gap-2 text-sm">
           <li className="flex items-center gap-2 text-gray-500">
             <Home className="h-4 w-4" />
-            <Link to="/dashboard" className="hover:text-gray-700">Dashboard</Link>
+                            <Link to="/app/dashboard" className="hover:text-gray-700">Dashboard</Link>
           </li>
           <li className="text-gray-400">/</li>
           <li className="flex items-center gap-2 text-gray-500">
@@ -116,7 +128,7 @@ const EmployeeProfile: React.FC = () => {
               <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
                 <div className="flex items-start gap-6">
                   {employee.imageUrl ? (
-                    <img src={resolveImageUrl(employee.imageUrl)} alt={employee.fullName ?? buildFullName(employee.firstName, employee.lastName)} className="w-24 h-24 rounded-full object-cover" />
+                    <img src={resolveImageUrl(employee.imageUrl, true)} alt={employee.fullName ?? buildFullName(employee.firstName, employee.lastName)} className="w-24 h-24 rounded-full object-cover" />
                   ) : (
                     <div className="w-24 h-24 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white flex items-center justify-center text-2xl font-bold">
                       {initials(employee.firstName, employee.lastName)}

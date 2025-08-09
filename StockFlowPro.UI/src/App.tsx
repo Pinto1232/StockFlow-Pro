@@ -63,14 +63,14 @@ function App() {
                     <div className="min-h-screen bg-gray-50">
                         <Routes>
                             {/* Public routes */}
-                            <Route path="/pricing" element={<Landing />} />
                             <Route path="/" element={<Landing />} />
+                            <Route path="/pricing" element={<Landing />} />
                             <Route path="/login" element={<Login />} />
                             <Route path="/register" element={<Register />} />
 
                             {/* Protected routes */}
                             <Route
-                                path="/"
+                                path="/app"
                                 element={
                                     <ProtectedRoute>
                                         <Layout />
@@ -80,7 +80,7 @@ function App() {
                                 <Route
                                     index
                                     element={
-                                        <Navigate to="/dashboard" replace />
+                                        <Navigate to="/app/dashboard" replace />
                                     }
                                 />
                                 <Route

@@ -23,7 +23,7 @@ const Layout: React.FC = () => {
     // Define pages that need special content padding
     const isProducts = location.pathname.startsWith("/products");
     const isInvoices = location.pathname.startsWith("/invoices");
-    const isDashboard = location.pathname === "/dashboard";
+    const isDashboard = location.pathname === "/app/dashboard";
 
     if (isFullWidthPage) {
         return (

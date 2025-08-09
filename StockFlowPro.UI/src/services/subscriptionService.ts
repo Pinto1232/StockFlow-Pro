@@ -12,6 +12,33 @@ export type SubscriptionPlan = {
   isPopular?: boolean;
 };
 
+// Backend response type
+type BackendSubscriptionPlan = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  currency: string;
+  billingInterval: number; // 1 = Monthly, 4 = Annual
+  billingIntervalCount: number;
+  isActive: boolean;
+  isPublic: boolean;
+  trialPeriodDays?: number;
+  maxUsers?: number;
+  maxProjects?: number;
+  maxStorageGB?: number;
+  hasAdvancedReporting: boolean;
+  hasApiAccess: boolean;
+  hasPrioritySupport: boolean;
+  createdAt: string;
+  updatedAt?: string;
+  sortOrder: number;
+  monthlyEquivalentPrice: number;
+  hasTrial: boolean;
+};
+
+type SubscriptionPlansResponse = BackendSubscriptionPlan[] | { items: BackendSubscriptionPlan[] };
+
 const mockPlans: SubscriptionPlan[] = [
   {
     id: 'basic',
@@ -46,16 +73,66 @@ const mockPlans: SubscriptionPlan[] = [
   },
 ];
 
+// Helper function to convert backend plan to frontend format
+function mapBackendPlanToFrontend(backendPlan: BackendSubscriptionPlan): SubscriptionPlan {
+  const features: string[] = [];
+  
+  // Add features based on backend flags
+  if (backendPlan.maxUsers) {
+    features.push(`Up to ${backendPlan.maxUsers} users`);
+  } else if (backendPlan.maxUsers === null) {
+    features.push('Unlimited users');
+  }
+  
+  if (backendPlan.hasAdvancedReporting) {
+    features.push('Advanced reports');
+  }
+  
+  if (backendPlan.hasApiAccess) {
+    features.push('API access');
+  }
+  
+  if (backendPlan.hasPrioritySupport) {
+    features.push('Priority support');
+  }
+  
+  if (backendPlan.maxStorageGB) {
+    features.push(`${backendPlan.maxStorageGB}GB storage`);
+  }
+  
+  if (backendPlan.maxProjects) {
+    features.push(`Up to ${backendPlan.maxProjects} projects`);
+  }
+  
+  // Determine if this is a popular plan (Professional is usually popular)
+  const isPopular = backendPlan.name.toLowerCase().includes('professional');
+  
+  return {
+    id: backendPlan.id,
+    name: backendPlan.name,
+    description: backendPlan.description,
+    price: backendPlan.monthlyEquivalentPrice, // Use monthly equivalent for comparison
+    interval: backendPlan.billingInterval === 4 ? 'Annual' : 'Monthly',
+    currency: backendPlan.currency,
+    sortOrder: backendPlan.sortOrder,
+    features,
+    isPopular,
+  };
+}
+
 export async function getPublicPlans(): Promise<SubscriptionPlan[]> {
   try {
     // Try a few common endpoints; backend may not expose yet
     const endpoints = ['/api/subscription-plans', '/api/plans', '/api/subscriptions/plans'];
     for (const ep of endpoints) {
       try {
-        const data = await http.get<SubscriptionPlan[] | { items: SubscriptionPlan[] }>(ep);
+        const data = await http.get<SubscriptionPlansResponse>(ep);
         // Handle possible envelope
-        const plans = Array.isArray(data) ? data : (data as any).items;
-        if (plans && plans.length) return plans as SubscriptionPlan[];
+        const backendPlans = Array.isArray(data) ? data : data.items;
+        if (backendPlans && backendPlans.length) {
+          // Map backend plans to frontend format
+          return backendPlans.map(mapBackendPlanToFrontend);
+        }
       } catch { /* try next */ }
     }
     // Fallback to mock if no endpoint is available

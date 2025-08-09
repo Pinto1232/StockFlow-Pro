@@ -122,19 +122,70 @@ export function useUploadEmployeeImage(id: string) {
       formData.append('file', file);
       return http.post<{ imageUrl: string }>(`/api/employees/${id}/image`, formData);
     },
-    onSuccess: ({ imageUrl }) => {
-      // Update detail cache
-      queryClient.setQueryData<EmployeeDto>(employeeKeys.detail(id), (prev) => (prev ? { ...prev, imageUrl } : prev));
-      // Update list caches
+    onMutate: async (file: File) => {
+      // Optimistic update with a temporary URL
+      const tempImageUrl = URL.createObjectURL(file);
+      
+      // Cancel ongoing queries to prevent them from overwriting our optimistic update
+      await queryClient.cancelQueries({ queryKey: employeeKeys.details() });
+      await queryClient.cancelQueries({ queryKey: employeeKeys.lists() });
+      
+      // Store previous data for rollback
+      const previousDetail = queryClient.getQueryData<EmployeeDto>(employeeKeys.detail(id));
+      const previousLists = queryClient.getQueriesData<EmployeeDto[]>({ queryKey: employeeKeys.lists() });
+      
+      // Optimistically update detail cache
+      queryClient.setQueryData<EmployeeDto>(employeeKeys.detail(id), (prev) => 
+        prev ? { ...prev, imageUrl: tempImageUrl } : prev
+      );
+      
+      // Optimistically update list caches
+      previousLists.forEach(([key, data]) => {
+        if (!data) return;
+        const updated = data.map((e) => (e.id === id ? { ...e, imageUrl: tempImageUrl } : e));
+        queryClient.setQueryData<EmployeeDto[]>(key, updated);
+      });
+      
+      return { previousDetail, previousLists, tempImageUrl };
+    },
+    onSuccess: ({ imageUrl }, file, context) => {
+      // Clean up the temporary URL
+      if (context?.tempImageUrl) {
+        URL.revokeObjectURL(context.tempImageUrl);
+      }
+      
+      // Update detail cache with real image URL
+      queryClient.setQueryData<EmployeeDto>(employeeKeys.detail(id), (prev) => 
+        prev ? { ...prev, imageUrl, updatedAt: new Date().toISOString() } : prev
+      );
+      
+      // Update list caches with real image URL
       const lists = queryClient.getQueriesData<EmployeeDto[]>({ queryKey: employeeKeys.lists() });
       lists.forEach(([key, data]) => {
         if (!data) return;
-        const updated = data.map((e) => (e.id === id ? { ...e, imageUrl } : e));
-        queryClient.setQueryData<EmployeeDto[]>(key, updated as EmployeeDto[]);
+        const updated = data.map((e) => 
+          e.id === id ? { ...e, imageUrl, updatedAt: new Date().toISOString() } : e
+        );
+        queryClient.setQueryData<EmployeeDto[]>(key, updated);
+      });
+    },
+    onError: (error, file, context) => {
+      // Clean up the temporary URL
+      if (context?.tempImageUrl) {
+        URL.revokeObjectURL(context.tempImageUrl);
+      }
+      
+      // Rollback optimistic updates
+      if (context?.previousDetail) {
+        queryClient.setQueryData(employeeKeys.detail(id), context.previousDetail);
+      }
+      
+      context?.previousLists?.forEach(([key, data]) => {
+        queryClient.setQueryData(key, data);
       });
     },
     onSettled: () => {
-      // Ensure fresh data (e.g., updatedAt, other fields) is pulled from server
+      // Force fresh data fetch to ensure consistency
       queryClient.invalidateQueries({ queryKey: employeeKeys.details() });
       queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
     },

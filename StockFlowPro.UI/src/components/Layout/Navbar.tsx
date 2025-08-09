@@ -79,24 +79,24 @@ const Navbar: React.FC<NavbarProps> = ({
                 switch (event.key.toLowerCase()) {
                     case "p":
                         event.preventDefault();
-                        navigate("/profile");
+                        navigate("/app/profile");
                         break;
                     case "a":
                         if (hasPermission(Permissions.System.ViewAdminPanel)) {
                             event.preventDefault();
-                            navigate("/admin");
+                            navigate("/app/admin");
                         }
                         break;
                     case "g":
                         if (hasPermission(Permissions.System.ManageSettings)) {
                             event.preventDefault();
-                            navigate("/settings");
+                            navigate("/app/settings");
                         }
                         break;
                     case "s":
                         if (hasPermission(Permissions.System.SyncData)) {
                             event.preventDefault();
-                            navigate("/sync");
+                            navigate("/app/sync");
                         }
                         break;
                     case "l":
@@ -124,19 +124,19 @@ const Navbar: React.FC<NavbarProps> = ({
     const navigationItems = [
         {
             name: "Dashboard",
-            href: "/dashboard",
+                            href: "/app/dashboard",
             icon: Home,
             show: true,
         },
         {
             name: "Products",
-            href: "/products",
+            href: "/app/products",
             icon: Package,
             show: true,
         },
         {
             name: "Invoices",
-            href: "/invoices",
+            href: "/app/invoices",
             icon: FileText,
             show: hasPermission(Permissions.Invoice.ViewInvoices),
         },
@@ -145,7 +145,7 @@ const Navbar: React.FC<NavbarProps> = ({
     const userMenuItems = [
         {
             name: "Edit Profile",
-            href: "/profile",
+            href: "/app/profile",
             icon: User,
             description: "Update your personal information",
             shortcut: "Ctrl+P",
@@ -153,7 +153,7 @@ const Navbar: React.FC<NavbarProps> = ({
         },
         {
             name: "Account Sync",
-            href: "/sync",
+            href: "/app/sync",
             icon: RefreshCw,
             description: "Synchronize account data",
             shortcut: "Ctrl+S",
@@ -161,7 +161,7 @@ const Navbar: React.FC<NavbarProps> = ({
         },
         {
             name: "Admin Panel",
-            href: "/admin",
+            href: "/app/admin",
             icon: Shield,
             description: "System overview and management",
             shortcut: "Ctrl+A",
@@ -170,7 +170,7 @@ const Navbar: React.FC<NavbarProps> = ({
         },
         {
             name: "System Settings",
-            href: "/settings",
+            href: "/app/settings",
             icon: Settings,
             description: "Configure system preferences",
             shortcut: "Ctrl+G",

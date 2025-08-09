@@ -63,19 +63,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
     const navigationItems: NavigationItem[] = [
         {
             name: "Overview",
-            href: "/dashboard",
+            href: "/app/dashboard",
             icon: Home,
             roles: [UserRole.Admin, UserRole.Manager, UserRole.User],
         },
         {
             name: "Income",
-            href: "/income",
+            href: "/app/income",
             icon: DollarSign,
             roles: [UserRole.Admin, UserRole.Manager],
         },
         {
             name: "Leaves",
-            href: "/leaves",
+            href: "/app/leaves",
             icon: CalendarX,
             roles: [UserRole.Admin, UserRole.Manager],
         },
@@ -85,25 +85,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
     const projectSubItems = [
         {
             name: "Task Management",
-            href: "/project-management/task-management",
+            href: "/app/project-management/task-management",
             icon: CheckSquare,
             roles: [UserRole.Admin, UserRole.Manager, UserRole.User],
         },
         {
             name: "Reports",
-            href: "/project-management/reports",
+            href: "/app/project-management/reports",
             icon: BarChart3,
             roles: [UserRole.Admin, UserRole.Manager],
         },
         {
             name: "Team Collaboration",
-            href: "/project-management/team-collaboration",
+            href: "/app/project-management/team-collaboration",
             icon: MessageSquare,
             roles: [UserRole.Admin, UserRole.Manager, UserRole.User],
         },
         {
             name: "Milestones & Deadlines",
-            href: "/project-management/milestones-deadlines",
+            href: "/app/project-management/milestones-deadlines",
             icon: Target,
             roles: [UserRole.Admin, UserRole.Manager],
         },
@@ -113,25 +113,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
     const accountSubItems = [
         {
             name: "Financial Reports",
-            href: "/account/financial-reports",
+            href: "/app/account/financial-reports",
             icon: BarChart3,
             roles: [UserRole.Admin, UserRole.Manager],
         },
         {
             name: "Payroll",
-            href: "/account/payroll",
+            href: "/app/account/payroll",
             icon: Banknote,
             roles: [UserRole.Admin, UserRole.Manager],
         },
         {
             name: "Expense Tracking",
-            href: "/account/expense-tracking",
+            href: "/app/account/expense-tracking",
             icon: CreditCard,
             roles: [UserRole.Admin, UserRole.Manager],
         },
         {
             name: "Invoicing & Billing",
-            href: "/account/invoicing-billing",
+            href: "/app/account/invoicing-billing",
             icon: FileText,
             roles: [UserRole.Admin, UserRole.Manager],
         },
@@ -141,31 +141,31 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
     const hrSubItems = [
         {
             name: "Employee Directory",
-            href: "/hr/employee-directory",
+            href: "/app/hr/employee-directory",
             icon: Users,
             roles: [UserRole.Admin, UserRole.Manager],
         },
         {
             name: "Employee Performance",
-            href: "/hr/employee-performance",
+            href: "/app/hr/employee-performance",
             icon: UserCheck,
             roles: [UserRole.Admin, UserRole.Manager],
         },
         {
             name: "Payslip",
-            href: "/hr/payslip",
+            href: "/app/hr/payslip",
             icon: Receipt,
             roles: [UserRole.Admin, UserRole.Manager],
         },
         {
             name: "Attendance",
-            href: "/hr/attendance",
+            href: "/app/hr/attendance",
             icon: Clock,
             roles: [UserRole.Admin, UserRole.Manager],
         },
         {
             name: "Holidays",
-            href: "/hr/holidays",
+            href: "/app/hr/holidays",
             icon: Calendar,
             roles: [UserRole.Admin, UserRole.Manager],
         },
@@ -284,7 +284,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
                                 </button>
                             ) : (
                                 <NavLink
-                                    to="/project-management"
+                                    to="/app/project-management"
                                     className={({ isActive }) =>
                                         `group flex items-center justify-center px-3 py-3 text-sm font-medium transition-all duration-300 relative overflow-hidden ${
                                             isActive
@@ -402,17 +402,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
                                         )}
                                     </button>
                                 ) : (
-                                    <NavLink
-                                        to="/hr"
-                                        className={({ isActive }) =>
-                                            `group flex items-center justify-center px-3 py-3 text-sm font-medium transition-all duration-300 relative overflow-hidden ${
-                                                isActive
-                                                    ? "bg-white/15 text-white font-semibold shadow-lg transform translate-x-1"
-                                                    : "text-white/85 hover:bg-white/10 hover:text-white hover:transform hover:translate-x-1"
-                                            }`
-                                        }
-                                        title="Human Resources"
-                                    >
+                                                                    <NavLink
+                                    to="/app/hr"
+                                    className={({ isActive }) =>
+                                        `group flex items-center justify-center px-3 py-3 text-sm font-medium transition-all duration-300 relative overflow-hidden ${
+                                            isActive
+                                                ? "bg-white/15 text-white font-semibold shadow-lg transform translate-x-1"
+                                                : "text-white/85 hover:bg-white/10 hover:text-white hover:transform hover:translate-x-1"
+                                        }`
+                                    }
+                                    title="Human Resources"
+                                >
                                         {({ isActive }) => (
                                             <>
                                                 <div
@@ -521,17 +521,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false }) => {
                                         )}
                                     </button>
                                 ) : (
-                                    <NavLink
-                                        to="/account"
-                                        className={({ isActive }) =>
-                                            `group flex items-center justify-center px-3 py-3 text-sm font-medium transition-all duration-300 relative overflow-hidden ${
-                                                isActive
-                                                    ? "bg-white/15 text-white font-semibold shadow-lg transform translate-x-1"
-                                                    : "text-white/85 hover:bg-white/10 hover:text-white hover:transform hover:translate-x-1"
-                                            }`
-                                        }
-                                        title="Account"
-                                    >
+                                                                    <NavLink
+                                    to="/app/account"
+                                    className={({ isActive }) =>
+                                        `group flex items-center justify-center px-3 py-3 text-sm font-medium transition-all duration-300 relative overflow-hidden ${
+                                            isActive
+                                                ? "bg-white/15 text-white font-semibold shadow-lg transform translate-x-1"
+                                                : "text-white/85 hover:bg-white/10 hover:text-white hover:transform hover:translate-x-1"
+                                        }`
+                                    }
+                                    title="Account"
+                                >
                                         {({ isActive }) => (
                                             <>
                                                 <div

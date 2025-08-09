@@ -157,7 +157,7 @@ const Users: React.FC = () => {
                     <ol className="flex items-center gap-2 text-sm">
                         <li className="flex items-center gap-2">
                             <Link
-                                to="/dashboard"
+                                to="/app/dashboard"
                                 className="flex items-center gap-2 text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors font-medium"
                             >
                                 <Home className="h-4 w-4" />
@@ -190,7 +190,7 @@ const Users: React.FC = () => {
                         </div>
                         <div className="flex flex-wrap gap-3">
                             <Link
-                                to="/dashboard"
+                                to="/app/dashboard"
                                 className="flex items-center gap-2 px-4 py-2 border-2 border-gray-400 text-gray-600 rounded-lg hover:bg-gray-400 hover:text-white transition-all duration-200 font-medium"
                             >
                                 <ArrowLeft className="h-4 w-4" />

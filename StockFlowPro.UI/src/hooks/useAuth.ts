@@ -35,7 +35,7 @@ export const useLogin = () => {
             
             // Redirect to dashboard after successful login
             console.log("[AUTH DEBUG] Redirecting to dashboard...");
-            window.location.href = "/dashboard";
+            window.location.href = "/app/dashboard";
         },
         onError: (error) => {
             console.error("[AUTH DEBUG] Login mutation failed:", error);
