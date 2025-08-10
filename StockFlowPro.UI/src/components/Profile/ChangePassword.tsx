@@ -97,8 +97,8 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ className = '' }) => {
       });
       
       setSuccessMessage('Password changed successfully');
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to change password';
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to change password';
       setErrors(prev => ({
         ...prev,
         submit: errorMessage

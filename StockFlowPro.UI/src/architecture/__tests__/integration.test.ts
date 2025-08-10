@@ -16,6 +16,7 @@ import { DependencyContainer } from '../shared/DependencyContainer';
 // Mock implementations for testing
 class MockApiClient extends AxiosApiClientAdapter {
   private mockData: Record<string, unknown> = {};
+  public cookies: Map<string, string> = new Map();
 
   constructor() {
     super('http://localhost:5131/api');
@@ -34,6 +35,18 @@ class MockApiClient extends AxiosApiClientAdapter {
   }
 
   async post<T>(url: string, data?: unknown): Promise<T> {
+    if (url === '/auth/login') {
+        this.cookies.set('XSRF-TOKEN', 'mock-xsrf-token');
+    }
+    if (url === '/auth/logout') {
+        this.cookies.delete('XSRF-TOKEN');
+    }
+    if (url.includes('adjust-stock')) {
+        const { adjustment } = data as { adjustment: number };
+        if (adjustment < 0) {
+            throw new Error('Invalid stock adjustment');
+        }
+    }
     // Check if we have mock data for this URL
     const mockData = this.mockData[url];
     if (mockData) {
@@ -65,8 +78,12 @@ class MockApiClient extends AxiosApiClientAdapter {
 
   setBaseUrl(): void {}
   setDefaultHeaders(): void {}
-  setAuthToken(): void {}
-  clearAuthToken(): void {}
+  setAuthToken(): void {
+    // No-op: Authentication is handled by cookies
+  }
+  clearAuthToken(): void {
+    // No-op: Authentication is handled by cookies
+  }
   addRequestInterceptor(): void {}
   addResponseInterceptor(): void {}
 }
@@ -196,18 +213,18 @@ describe('Hexagonal Architecture Integration', () => {
 
       expect(result).toBeInstanceOf(UserEntity);
       expect(mockStorage.hasItem('currentUser')).toBe(true);
-      expect(mockStorage.hasItem('authToken')).toBe(true);
+      expect(mockApiClient.cookies.has('XSRF-TOKEN')).toBe(true);
     });
 
     it('should clear storage on logout', async () => {
       // Setup some stored data
       mockStorage.setItem('currentUser', JSON.stringify({ id: 1 }));
-      mockStorage.setItem('authToken', 'token');
+      mockApiClient.cookies.set('XSRF-TOKEN', 'mock-xsrf-token');
 
       await userService.logout();
 
       expect(mockStorage.hasItem('currentUser')).toBe(false);
-      expect(mockStorage.hasItem('authToken')).toBe(false);
+      expect(mockApiClient.cookies.has('XSRF-TOKEN')).toBe(false);
     });
   });
 
