@@ -1,30 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { getPlansByInterval, createCheckoutSession, confirmCheckout, type SubscriptionPlan, attachPendingSubscription } from '../../services/subscriptionService';
+import { getPlansByInterval, type SubscriptionPlan } from '../../services/subscriptionService';
 import { Check, Zap, Crown, Star, ArrowRight, Shield, Clock, Users, BarChart3 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCurrentUser } from '../../hooks/useAuth';
-import { useQueryClient } from '@tanstack/react-query';
-import { featuresQueryKey } from '../../hooks/useFeatures';
 
 const formatPrice = (price: number, currency: string) => new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(price);
-
-type CheckoutStep = 'plan' | 'details' | 'confirm' | 'success';
 
 const Landing: React.FC = () => {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [yearly, setYearly] = useState(false);
   const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
-  const { data: currentUser } = useCurrentUser();
-  const queryClient = useQueryClient();
-
-  // modal state
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [step, setStep] = useState<CheckoutStep>('plan');
-  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
-  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
-  const [email, setEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [appliedNow, setAppliedNow] = useState(false);
   const navigate = useNavigate();
 
   const loadPlans = async (interval: 'Monthly' | 'Annual') => {
@@ -38,78 +22,8 @@ const Landing: React.FC = () => {
     })();
   }, [yearly]);
 
-  // Prefill email if authenticated
-  useEffect(() => {
-    if (currentUser?.email) setEmail(currentUser.email);
-  }, [currentUser?.email]);
-
-  const openModalForPlan = async (plan: SubscriptionPlan) => {
-    setSelectedPlan(plan);
-    setIsModalOpen(true);
-    setStep('plan');
-    setLoadingPlanId(plan.id);
-    try {
-      const res = await createCheckoutSession(plan.id, yearly);
-      const sid = res.sessionId;
-      setSessionId(sid);
-
-      // If user is authenticated, confirm + attach automatically and refresh features
-      if (sid && currentUser?.email) {
-        await confirmCheckout(sid, currentUser.email);
-        const attach = await attachPendingSubscription();
-        if (attach.attached && attach.entitlements) {
-          // Update client-side entitlements cache so dashboard reflects immediately
-          queryClient.setQueryData(featuresQueryKey, attach.entitlements);
-          setAppliedNow(true);
-          setStep('success');
-          // Redirect to dashboard
-          navigate('/app/dashboard');
-          return;
-        }
-      }
-
-      // Otherwise go to manual email confirmation step
-      setStep('details');
-    } catch (e) {
-      console.error(e);
-      alert('Failed to initialize checkout.');
-      setIsModalOpen(false);
-    } finally {
-      setLoadingPlanId(null);
-    }
-  };
-
-  const onConfirm = async () => {
-    if (!sessionId || !email) {
-      alert('Please enter your email.');
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      const res = await confirmCheckout(sessionId, email);
-      if (res && res.status === 'confirmed') {
-        // If the viewer is authenticated, try to attach immediately
-        if (currentUser?.email) {
-          const attach = await attachPendingSubscription();
-          if (attach.attached && attach.entitlements) {
-            queryClient.setQueryData(featuresQueryKey, attach.entitlements);
-            setAppliedNow(true);
-            setStep('success');
-            navigate('/app/dashboard');
-            return;
-          }
-        }
-        // Fallback: show success and guide the user
-        setStep('success');
-      } else {
-        alert('Checkout could not be confirmed.');
-      }
-    } catch (e) {
-      console.error(e);
-      alert('Failed to confirm checkout.');
-    } finally {
-      setIsSubmitting(false);
-    }
+  const openCheckoutPage = (plan: SubscriptionPlan) => {
+    navigate(`/checkout?plan=${plan.id}&cadence=${yearly ? 'annual' : 'monthly'}`);
   };
 
   return (
@@ -225,7 +139,7 @@ const Landing: React.FC = () => {
                   </ul>
                   
                   <button
-                    onClick={() => openModalForPlan(plan)}
+                    onClick={() => openCheckoutPage(plan)}
                     className={`w-full py-4 px-6 rounded-2xl font-semibold text-lg transition-all duration-200 transform hover:scale-105 ${
                       plan.isPopular 
                         ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl' 
@@ -284,84 +198,6 @@ const Landing: React.FC = () => {
           </p>
         </div>
       </footer>
-
-      {/* Checkout Modal */}
-      {isModalOpen && selectedPlan && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-xl mx-4 overflow-hidden">
-            <div className="px-6 py-5 border-b">
-              <h3 className="text-xl font-bold">Subscribe to {selectedPlan.name}</h3>
-              <p className="text-sm text-gray-500">{yearly ? 'Yearly billing (save 20%)' : 'Monthly billing'}</p>
-            </div>
-
-            <div className="p-6 space-y-6">
-              {step === 'plan' && (
-                <div className="text-center py-8">Initializing checkout...</div>
-              )}
-
-              {step === 'details' && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@example.com"
-                      className="w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                      disabled={!!currentUser?.email}
-                    />
-                  </div>
-                  <button
-                    onClick={onConfirm}
-                    className="w-full py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50"
-                    disabled={isSubmitting || !email}
-                  >
-                    {isSubmitting ? 'Processing...' : 'Confirm subscription'}
-                  </button>
-                </div>
-              )}
-
-              {step === 'confirm' && (
-                <div className="text-center py-8">Processing...</div>
-              )}
-
-              {step === 'success' && (
-                <div className="text-center py-8">
-                  <div className="mx-auto w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mb-4">
-                    <Check className="w-7 h-7 text-green-600" />
-                  </div>
-                  <h4 className="text-xl font-bold mb-2">You're all set!</h4>
-                  <p className="text-gray-600 mb-6">
-                    {currentUser?.email
-                      ? (appliedNow
-                          ? 'Your subscription has been applied to your account. Redirecting to dashboard...'
-                          : 'Subscription confirmed. Please log out and log in to apply it to your current session, or continue to the dashboard.')
-                      : 'Your subscription has been initialized. You can now sign in and start using StockFlow Pro.'}
-                  </p>
-                  {!currentUser?.email && (
-                    <div className="flex items-center justify-center gap-3">
-                      <button
-                        onClick={() => navigate('/login')}
-                        className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold hover:from-blue-700 hover:to-indigo-700"
-                      >
-                        Sign in now
-                      </button>
-                      <button
-                        onClick={() => setIsModalOpen(false)}
-                        className="px-5 py-2.5 rounded-lg bg-gray-900 text-white font-semibold hover:bg-gray-800"
-                      >
-                        Close
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
