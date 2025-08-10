@@ -18,58 +18,43 @@ const Success: React.FC = () => {
   useEffect(() => {
     // Wait until we know if the user is logged in or not.
     if (isUserLoading) {
-      console.log('[SuccessPage] Waiting for user authentication to resolve...');
       return;
     }
 
     const confirmSubscription = async () => {
-      console.log('[SuccessPage] useEffect triggered, user auth resolved.');
-
       if (processedRef.current) {
-        console.log('[SuccessPage] Aborting: processedRef.current is true.');
         return; // guard against React StrictMode double-invoke in dev
       }
       processedRef.current = true;
-      console.log('[SuccessPage] processedRef.current set to true.');
 
-      console.log(`[SuccessPage] Session ID: ${sessionId}`);
       if (!sessionId) {
-        console.error('[SuccessPage] No session ID found.');
         setStatus('error');
         setMessage('No session ID found. Please return to the pricing page and try again.');
         return;
       }
 
-      console.log(`[SuccessPage] Current user:`, currentUser);
       try {
         // If user not authenticated (no email), we can't attach now; finish with login instruction
         if (!currentUser?.email) {
-          console.log('[SuccessPage] User not authenticated or has no email. Showing login message.');
           await queryClient.invalidateQueries({ queryKey: featuresQueryKey });
           setStatus('success');
           setMessage('Your payment was successful. Please log in to activate your subscription and access your new plan features.');
           return;
         }
 
-        console.log(`[SuccessPage] Linking session ${sessionId} to email ${currentUser.email}`);
         // Link the session to the authenticated user's email
         await confirmCheckout(sessionId, currentUser.email);
-        console.log('[SuccessPage] Session linked successfully.');
 
-        console.log(`[SuccessPage] Attaching pending subscription for session ${sessionId}`);
         // Attempt to attach the pending subscription to the current user
         const attachResult = await attachPendingSubscription(sessionId);
-        console.log('[SuccessPage] Attach result:', attachResult);
 
         if (attachResult.attached && attachResult.entitlements) {
-          console.log('[SuccessPage] Attach successful. Updating cache and invalidating queries.');
           // Update cache immediately and also force a refetch to ensure freshness
           queryClient.setQueryData(featuresQueryKey, attachResult.entitlements);
           await queryClient.invalidateQueries({ queryKey: featuresQueryKey });
           setStatus('success');
           setMessage('Your subscription is now active! A confirmation email has been sent.');
         } else {
-          console.log('[SuccessPage] Attach did not complete as expected. Invalidating queries.');
           // If not attached, it means the user might be a guest or already has the subscription
           await queryClient.invalidateQueries({ queryKey: featuresQueryKey });
           setStatus('success');
