@@ -30,6 +30,59 @@ const Checkout: React.FC = () => {
   const [monthlyPlans, setMonthlyPlans] = useState<SubscriptionPlan[]>([]);
   const [annualPlans, setAnnualPlans] = useState<SubscriptionPlan[]>([]);
 
+  // Robust plan pairing across cadences using a normalized key derived from plan name
+  const normalizeKey = (s: string) => s.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+
+  type PlanGroup = { key: string; displayName: string; monthly?: SubscriptionPlan; annual?: SubscriptionPlan };
+  const planGroups = useMemo<Record<string, PlanGroup>>(() => {
+    const map: Record<string, PlanGroup> = {};
+    for (const p of monthlyPlans) {
+      const k = normalizeKey(p.name);
+      map[k] = map[k] ?? { key: k, displayName: p.name };
+      map[k].monthly = p;
+    }
+    for (const p of annualPlans) {
+      const k = normalizeKey(p.name);
+      const existing = map[k];
+      map[k] = existing ?? { key: k, displayName: p.name };
+      map[k].annual = p;
+      // Prefer a more user-friendly display name if one side differs only by casing/spacing
+      if (!existing) map[k].displayName = p.name;
+    }
+    return map;
+  }, [monthlyPlans, annualPlans]);
+
+  // Sorted groups for UI selection
+  const planGroupList = useMemo(() => {
+    const list = Object.values(planGroups);
+    // Try to sort by known sortOrder where available, then by name
+    const sortOrderOf = (g: PlanGroup) => {
+      const so: number[] = [];
+      if (g.monthly?.sortOrder != null) so.push(g.monthly.sortOrder);
+      if (g.annual?.sortOrder != null) so.push(g.annual.sortOrder);
+      return so.length ? Math.min(...so) : 9999;
+    };
+    return list.sort((a, b) => sortOrderOf(a) - sortOrderOf(b) || a.displayName.localeCompare(b.displayName));
+  }, [planGroups]);
+
+  // Determine initial plan selection from query param id or fallback to first available group
+  const initialPlanKey = useMemo(() => {
+    if (planId) {
+      const m = monthlyPlans.find(p => p.id === planId);
+      if (m) return normalizeKey(m.name);
+      const a = annualPlans.find(p => p.id === planId);
+      if (a) return normalizeKey(a.name);
+      // try name match in case planId is actually a name
+      const byNameKey = normalizeKey(planId);
+      if (planGroups[byNameKey]) return byNameKey;
+    }
+    const firstKey = Object.keys(planGroups)[0];
+    return firstKey ?? '';
+  }, [planId, monthlyPlans, annualPlans, planGroups]);
+
+  const [selectedPlanKey, setSelectedPlanKey] = useState<string>('');
+  useEffect(() => { if (initialPlanKey && initialPlanKey !== selectedPlanKey) setSelectedPlanKey(initialPlanKey); }, [initialPlanKey]);
+
   useEffect(() => {
     // Prefill email if authenticated
     if (currentUser?.email) setEmail(currentUser.email);
@@ -59,21 +112,28 @@ const Checkout: React.FC = () => {
     return () => { cancelled = true; };
   }, []);
 
-  const monthlyPlan = useMemo(() => monthlyPlans.find(p => p.id === planId) ?? null, [monthlyPlans, planId]);
-  // Try to find annual plan by same name (common convention) or same id if backend maps 1:1
-  const annualPlan = useMemo(() => {
-    if (!monthlyPlan) return annualPlans.find(p => p.id === planId) ?? null;
-    const byName = annualPlans.find(p => p.name.toLowerCase() === monthlyPlan.name.toLowerCase());
-    return byName ?? (annualPlans.find(p => p.id === planId) ?? null);
-  }, [annualPlans, monthlyPlan, planId]);
+  // Chosen plan based on selected group and cadence, with graceful fallback to the other cadence if missing
+  const chosenPlan: SubscriptionPlan | null = useMemo(() => {
+    if (!selectedPlanKey) return null;
+    const group = planGroups[selectedPlanKey];
+    if (!group) return null;
+    if (cadence === 'annual') return group.annual ?? group.monthly ?? null;
+    return group.monthly ?? group.annual ?? null;
+  }, [selectedPlanKey, planGroups, cadence]);
 
-  const chosenPlan: SubscriptionPlan | null = cadence === 'annual' ? (annualPlan ?? null) : (monthlyPlan ?? null);
-
+  // Keep URL in sync with current selection (plan id and cadence) for shareability and refresh stability
   useEffect(() => {
-    if (!planId) {
-      navigate('/pricing', { replace: true });
-    }
-  }, [planId, navigate]);
+    if (!chosenPlan) return;
+    const params = new URLSearchParams(window.location.search);
+    params.set('plan', chosenPlan.id);
+    params.set('cadence', cadence);
+    navigate({ pathname: '/checkout', search: params.toString() }, { replace: true });
+  }, [chosenPlan?.id, cadence, navigate]);
+
+  // No redirect if planId missing; we default to the first available plan group
+  useEffect(() => {
+    // noop: selection handled by initialPlanKey effect
+  }, []);
 
   const canProceed = !!chosenPlan && (selectedMethod === 'card' || selectedMethod === 'applepay');
 
@@ -162,8 +222,21 @@ const Checkout: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Plan Summary */}
+            {/* Plan Summary with Plan Selector */}
             <div className="md:col-span-2 bg-white rounded-2xl shadow p-6">
+              {/* Plan selector */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Plan</label>
+                <select
+                  value={selectedPlanKey}
+                  onChange={(e) => setSelectedPlanKey(e.target.value)}
+                  className="w-full md:w-72 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {planGroupList.map(g => (
+                    <option key={g.key} value={g.key}>{g.displayName}</option>
+                  ))}
+                </select>
+              </div>
               <div className="flex items-start justify-between mb-6">
                 <div>
                   <h2 className="text-xl font-bold text-gray-900">{chosenPlan.name}</h2>

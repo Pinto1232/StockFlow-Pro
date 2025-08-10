@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using StockFlowPro.Domain.Repositories;
 using StockFlowPro.Application.DTOs;
+using StockFlowPro.Application.Interfaces;
 
 namespace StockFlowPro.Web.Controllers.Api;
 
@@ -16,17 +17,20 @@ public class CheckoutController : ControllerBase
     private readonly Services.IPendingSubscriptionStore _pendingStore;
     private readonly ISubscriptionPlanRepository _planRepository;
     private readonly ISubscriptionRepository _subscriptionRepository;
+    private readonly IEntitlementService _entitlementService;
 
     public CheckoutController(
         ILogger<CheckoutController> logger,
         Services.IPendingSubscriptionStore pendingStore,
         ISubscriptionPlanRepository planRepository,
-        ISubscriptionRepository subscriptionRepository)
+        ISubscriptionRepository subscriptionRepository,
+        IEntitlementService entitlementService)
     {
         _logger = logger;
         _pendingStore = pendingStore;
         _planRepository = planRepository;
         _subscriptionRepository = subscriptionRepository;
+        _entitlementService = entitlementService;
     }
 
     public record CheckoutRequest([Required] string PlanId, [Required] string Cadence); // cadence: "monthly" | "annual"
@@ -64,6 +68,7 @@ public class CheckoutController : ControllerBase
     public record CheckoutConfirmResponse(string SessionId, string Status);
 
     public record CheckoutAttachResponse(bool Attached, EntitlementsDto? Entitlements = null, string? Message = null);
+    public record CheckoutAttachRequest(string? SessionId = null);
 
     [HttpPost("confirm")]
     [AllowAnonymous]
@@ -81,7 +86,7 @@ public class CheckoutController : ControllerBase
     [HttpPost("attach")]
     [Authorize]
     [ProducesResponseType(typeof(CheckoutAttachResponse), 200)]
-    public async Task<ActionResult<CheckoutAttachResponse>> AttachForCurrentUser()
+    public async Task<ActionResult<CheckoutAttachResponse>> AttachForCurrentUser([FromBody] CheckoutAttachRequest? request)
     {
         var email = User.FindFirst(ClaimTypes.Email)?.Value;
         var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -90,7 +95,17 @@ public class CheckoutController : ControllerBase
             return Unauthorized(new CheckoutAttachResponse(false, null, "Invalid user session"));
         }
 
-        var pending = _pendingStore.TryGetLatestByEmail(email);
+        // Prefer explicit session id when supplied, fallback to latest by email
+        (string SessionId, string PlanId, string? Email, DateTime CreatedAt)? pending;
+        if (!string.IsNullOrWhiteSpace(request?.SessionId))
+        {
+            pending = _pendingStore.TryGetBySessionId(request!.SessionId!);
+        }
+        else
+        {
+            var byEmail = _pendingStore.TryGetLatestByEmail(email);
+            pending = byEmail.HasValue ? (byEmail.Value.SessionId, byEmail.Value.PlanId, byEmail.Value.Email, byEmail.Value.CreatedAt) : null;
+        }
         if (!pending.HasValue)
         {
             return NotFound(new CheckoutAttachResponse(false, null, "No pending subscription found for this user"));
@@ -124,6 +139,9 @@ public class CheckoutController : ControllerBase
 
         await _subscriptionRepository.AddAsync(subscription);
         _logger.LogInformation("[CHECKOUT] Attached subscription {SubscriptionId} for user {UserId} on plan {PlanId}", subscription.Id, userId, plan.Id);
+
+        // Invalidate server-side entitlements cache so next fetch returns fresh plan
+        _entitlementService.InvalidateEntitlementsForUser(userId);
 
         // Clear pending entry
         _pendingStore.RemoveByEmail(email);

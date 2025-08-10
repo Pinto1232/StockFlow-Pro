@@ -34,6 +34,16 @@ public class InMemoryPendingSubscriptionStore : IPendingSubscriptionStore
         }
     }
 
+    public (string SessionId, string PlanId, string? Email, DateTime CreatedAt)? TryGetBySessionId(string sessionId)
+    {
+        lock (_lock)
+        {
+            var row = _items.FirstOrDefault(x => x.SessionId == sessionId);
+            if (row == null) return null;
+            return (row.SessionId, row.PlanId, row.Email, row.CreatedAt);
+        }
+    }
+
     public (string SessionId, string PlanId, string Email, DateTime CreatedAt)? TryGetLatestByEmail(string email)
     {
         var normalized = email.ToLowerInvariant();

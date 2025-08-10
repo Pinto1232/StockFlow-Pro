@@ -99,4 +99,10 @@ public class EntitlementService : IEntitlementService
         _cache.Set(cacheKey, ent, TimeSpan.FromMinutes(5));
         return ent;
     }
+
+    public void InvalidateEntitlementsForUser(Guid userId)
+    {
+        var cacheKey = $"entitlements:{userId}";
+        _cache.Remove(cacheKey);
+    }
 }

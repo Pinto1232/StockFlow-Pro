@@ -23,6 +23,9 @@ export function useFeatures() {
   return useQuery({
     queryKey: featuresQueryKey,
     queryFn: async (): Promise<Entitlements> => await http.get<Entitlements>('/api/profile/features'),
-    staleTime: 5 * 60 * 1000,
+    // Ensure dashboard reflects plan changes immediately when user returns
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 }

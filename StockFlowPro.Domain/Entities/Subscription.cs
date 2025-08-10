@@ -41,7 +41,7 @@ public class Subscription : IEntity
     
     // Metadata and notes
     public string? Notes { get; private set; }
-    public string? Metadata { get; private set; } // JSON string for extensibility
+    public string? Metadata { get; private set; } 
 
     // Navigation properties
     public virtual User User { get; private set; } = null!;

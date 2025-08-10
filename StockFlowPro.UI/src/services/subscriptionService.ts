@@ -211,12 +211,12 @@ export async function confirmCheckout(sessionId: string, email: string): Promise
 
 // Attach pending subscription to authenticated user and return fresh entitlements
 export type AttachResponse = { attached: boolean; entitlements?: Entitlements; message?: string };
-export async function attachPendingSubscription(): Promise<AttachResponse>
+export async function attachPendingSubscription(sessionId?: string): Promise<AttachResponse>
 {
   try {
     const res = await http.post<AttachResponse>(
       '/api/checkout/attach',
-      {}
+      sessionId ? { sessionId } : {}
     );
     return res;
   } catch {
