@@ -145,35 +145,22 @@ const Dashboard: React.FC = () => {
                     currentUser={currentUser}
                     onRefresh={refreshDashboard}
                     onSettings={navigationHandlers.navigateToSettings}
+                    entitlements={{
+                        planName: entitlements?.planName,
+                        isTrial: entitlements?.isTrial,
+                        trialEndDate: entitlements?.trialEndDate,
+                        billingInterval: entitlements?.billingInterval,
+                        price: entitlements?.price,
+                        currency: entitlements?.currency,
+                        maxUsers: entitlements?.maxUsers,
+                        maxProjects: entitlements?.maxProjects,
+                        maxStorageGB: entitlements?.maxStorageGB
+                    }}
                 />
             </div>
 
             <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
-                {/* Plan & Trial Banner */}
-                {entitlements && (
-                    <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
-                        <div className="flex flex-wrap items-center justify-between gap-4">
-                            <div>
-                                <div className="text-sm text-blue-700">Current plan</div>
-                                <div className="text-lg font-semibold text-blue-900">
-                                    {planName} • {billingLabel}
-                                </div>
-                                <div className="text-sm text-blue-700">
-                                    {currency} {price?.toLocaleString()} {isTrial ? `(Trial ends ${trialEnd?.toLocaleDateString()})` : ''}
-                                </div>
-                                <div className="mt-2 text-xs text-blue-700">
-                                    {maxUsers !== null ? `Users: up to ${maxUsers}` : 'Users: Unlimited'} • {maxProjects !== null ? `Projects: up to ${maxProjects}` : 'Projects: Unlimited'} • {maxStorageGB !== null ? `Storage: ${maxStorageGB}GB` : 'Storage: Unlimited'}
-                                </div>
-                            </div>
-                            <button
-                                onClick={() => navigate('/pricing')}
-                                className="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-700"
-                            >
-                                Upgrade
-                            </button>
-                        </div>
-                    </div>
-                )}
+           
 
                 {/* System Status Banner */}
                 <SystemStatusBanner />
