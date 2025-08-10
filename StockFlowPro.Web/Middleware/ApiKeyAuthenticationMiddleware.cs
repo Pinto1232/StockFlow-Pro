@@ -41,7 +41,8 @@ public class ApiKeyAuthenticationMiddleware
 
         // Skip API key validation for authentication and checkout endpoints
         if (context.Request.Path.StartsWithSegments("/api/auth") ||
-            context.Request.Path.StartsWithSegments("/api/checkout"))
+            context.Request.Path.StartsWithSegments("/api/checkout") ||
+            context.Request.Path.StartsWithSegments("/api/billing"))
         {
             await _next(context);
             return;

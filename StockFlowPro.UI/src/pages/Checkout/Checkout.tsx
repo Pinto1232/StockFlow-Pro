@@ -121,8 +121,12 @@ const Checkout: React.FC = () => {
         window.location.href = sess.redirectUrl;
         return;
       }
-      // Fallback: guide user
-      navigate('/checkout/success');
+      // Fallback: navigate to success with session id if available so Success page can proceed
+      if (sess.sessionId) {
+        navigate(`/checkout/success?session_id=${encodeURIComponent(sess.sessionId)}`);
+      } else {
+        navigate('/checkout/success');
+      }
     } catch {
       setError('Payment initialization failed.');
     } finally {

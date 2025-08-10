@@ -114,7 +114,7 @@ public class SubscriptionPlanService : ISubscriptionPlanService
     public async Task<SubscriptionPlanDto?> GetCheapestPlanAsync()
     {
         var plan = await _subscriptionPlanRepository.GetCheapestPlanAsync();
-        if (plan == null) return null;
+        if (plan == null) {return null;}
 
         return new SubscriptionPlanDto
         {
@@ -148,8 +148,8 @@ public class SubscriptionPlanService : ISubscriptionPlanService
     public async Task<SubscriptionPlanDto?> GetMostExpensivePlanAsync()
     {
         var plan = await _subscriptionPlanRepository.GetMostExpensivePlanAsync();
-        if (plan == null) return null;
-
+        if (plan == null) {return null;
+}
         return new SubscriptionPlanDto
         {
             Id = plan.Id,
@@ -182,7 +182,7 @@ public class SubscriptionPlanService : ISubscriptionPlanService
     public async Task<SubscriptionPlanDto?> GetByStripeProductIdAsync(string stripeProductId)
     {
         var plan = await _subscriptionPlanRepository.GetByStripeProductIdAsync(stripeProductId);
-        if (plan == null) return null;
+        if (plan == null) {return null;}
 
         return new SubscriptionPlanDto
         {
@@ -216,7 +216,7 @@ public class SubscriptionPlanService : ISubscriptionPlanService
     public async Task<SubscriptionPlanDto?> GetByStripePriceIdAsync(string stripePriceId)
     {
         var plan = await _subscriptionPlanRepository.GetByStripePriceIdAsync(stripePriceId);
-        if (plan == null) return null;
+        if (plan == null) {return null;}
 
         return new SubscriptionPlanDto
         {
@@ -250,7 +250,7 @@ public class SubscriptionPlanService : ISubscriptionPlanService
     public async Task<SubscriptionPlanDto?> GetByPayPalPlanIdAsync(string payPalPlanId)
     {
         var plan = await _subscriptionPlanRepository.GetByPayPalPlanIdAsync(payPalPlanId);
-        if (plan == null) return null;
+        if (plan == null) {return null;}
 
         return new SubscriptionPlanDto
         {
