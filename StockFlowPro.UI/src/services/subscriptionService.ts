@@ -223,3 +223,18 @@ export async function attachPendingSubscription(): Promise<AttachResponse>
     return { attached: false, message: 'Attach failed' };
   }
 }
+
+// Start hosted Stripe checkout for authenticated user
+export async function startHostedCheckout(planId: string, yearly: boolean): Promise<{ url?: string }>
+{
+  try {
+    const cadence = yearly ? 'annual' : 'monthly';
+    const res = await http.post<{ url?: string }>(
+      '/api/billing/checkout',
+      { planId, cadence }
+    );
+    return res ?? {};
+  } catch {
+    return {};
+  }
+}
