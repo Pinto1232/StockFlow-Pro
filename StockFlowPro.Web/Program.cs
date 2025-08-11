@@ -165,6 +165,8 @@ builder.Services.AddCors(options =>
                 "http://localhost:8081", 
                 "http://localhost:3000", 
                 "http://localhost:5173",
+                "http://localhost:8080",
+                "http://127.0.0.1:8080",
                 "http://localhost:8081/", // Expo web
                 "http://localhost:19000", // Expo DevTools
                 "exp://localhost:19000",  // Expo protocol
@@ -189,7 +191,7 @@ builder.Services.AddCors(options =>
             if (origin.StartsWith("http://localhost:") || 
                 origin.StartsWith("https://localhost:"))
             {
-                var allowedPorts = new[] { "3000", "5173", "8081", "19000", "19006" };
+                var allowedPorts = new[] { "3000", "5173", "8080", "8081", "19000", "19006" };
                 return allowedPorts.Any(port => origin.Contains($":{port}"));
             }
                 

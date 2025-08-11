@@ -1,6 +1,35 @@
 # Simple SQL Server container for development
 FROM mcr.microsoft.com/mssql/server:2022-latest
 
+# Switch to root to install required tools
+USER root
+
+# Install required tools and sqlcmd (mssql-tools18)
+RUN apt-get update && \
+    apt-get install -y curl gnupg2 apt-transport-https software-properties-common dos2unix && \
+    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+    apt-get update && \
+    ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev && \
+    mkdir -p /opt/mssql-tools/bin && \
+    ln -s /opt/mssql-tools18/bin/sqlcmd /opt/mssql-tools/bin/sqlcmd && \
+    ln -s /opt/mssql-tools18/bin/bcp /opt/mssql-tools/bin/bcp && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Ensure sqlcmd is on PATH for convenience
+ENV PATH="/opt/mssql-tools18/bin:/opt/mssql-tools/bin:${PATH}"
+
+# Copy the wait script
+COPY database/wait-for-db.sh /wait-for-db.sh
+RUN chmod +x /wait-for-db.sh && \
+    dos2unix /wait-for-db.sh
+
+# Set the entrypoint to run SQL Server and then our script
+ENTRYPOINT ["/bin/bash", "-c", "/opt/mssql/bin/sqlservr & /wait-for-db.sh"]
+
+# Switch back to mssql user
+USER mssql
+
 # Set environment variables
 ENV ACCEPT_EULA=Y
 ENV SA_PASSWORD=StockFlow123!

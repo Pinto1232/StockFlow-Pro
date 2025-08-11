@@ -16,7 +16,7 @@
   "css.lint.unknownAtRules": "ignore",
   "scss.lint.unknownAtRules": "ignore",
   "less.lint.unknownAtRules": "ignore",
-  "codium.codeCompletion.enable": true,
+  "codium.codeCompletion.enable": false,
   "window.autoDetectColorScheme": true,
   "workbench.colorTheme": "Default Dark Modern"
 }
