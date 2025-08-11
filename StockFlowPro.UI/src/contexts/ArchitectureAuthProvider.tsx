@@ -81,10 +81,13 @@ export const ArchitectureAuthProvider: React.FC<ArchitectureAuthProviderProps> =
         return new Promise<void>((resolve) => {
             architectureLogout(undefined, {
                 onSuccess: () => {
+                    // Redirect to home page after successful logout
+                    window.location.href = "/";
                     resolve();
                 },
                 onError: () => {
-                    // Even if logout fails, clear local state
+                    // Even if logout fails, clear local state and redirect
+                    window.location.href = "/";
                     resolve();
                 },
             });

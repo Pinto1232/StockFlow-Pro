@@ -108,6 +108,8 @@ export const useUserManagement = ({ userService, enableUsersQuery = false }: Use
     mutationFn: () => userService.logout(),
     onSuccess: () => {
       queryClient.clear();
+      // Redirect to home page after successful logout
+      window.location.href = "/";
     },
   });
 

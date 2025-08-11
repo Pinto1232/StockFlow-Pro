@@ -59,6 +59,8 @@ const LegacyAuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
             await authService.logout();
             setUser(null);
+            // Redirect to home page after successful logout
+            window.location.href = "/";
         } finally {
             setIsLoading(false);
         }
