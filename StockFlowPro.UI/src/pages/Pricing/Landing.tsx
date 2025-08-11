@@ -7,6 +7,7 @@ import {
   CheckCircle, Globe, Smartphone, Lock, HeadphonesIcon
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import DemoScheduler from '../../components/DemoScheduler';
 
 const formatPrice = (price: number, currency: string) => new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(price);
 
@@ -16,6 +17,7 @@ const Landing: React.FC = () => {
   const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
   const [activeFeature, setActiveFeature] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const [isDemoSchedulerOpen, setIsDemoSchedulerOpen] = useState(false);
   const navigate = useNavigate();
 
   const loadPlans = async (interval: 'Monthly' | 'Annual') => {
@@ -504,7 +506,10 @@ const Landing: React.FC = () => {
               Start Your Free Trial
               <ArrowRight className="w-5 h-5" />
             </Link>
-            <button className="px-8 py-4 rounded-full border-2 border-white text-white font-semibold text-lg hover:bg-white hover:text-blue-600 transition-all duration-200 flex items-center justify-center gap-2">
+            <button 
+              onClick={() => setIsDemoSchedulerOpen(true)}
+              className="px-8 py-4 rounded-full border-2 border-white text-white font-semibold text-lg hover:bg-white hover:text-blue-600 transition-all duration-200 flex items-center justify-center gap-2"
+            >
               Schedule Demo
               <Calendar className="w-5 h-5" />
             </button>
@@ -574,6 +579,12 @@ const Landing: React.FC = () => {
           </div>
         </div>
       </footer>
+
+      {/* Demo Scheduler Modal */}
+      <DemoScheduler 
+        isOpen={isDemoSchedulerOpen} 
+        onClose={() => setIsDemoSchedulerOpen(false)} 
+      />
 
       {/* Custom Styles */}
       <style>{`
