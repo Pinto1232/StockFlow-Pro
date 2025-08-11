@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { getPlansByInterval, type SubscriptionPlan } from '../../services/subscriptionService';
-import { Check, Zap, Crown, Star, ArrowRight, Shield, Clock, Users, BarChart3 } from 'lucide-react';
+import { 
+  Check, Zap, Crown, Star, ArrowRight, Shield, Clock, Users, BarChart3,
+  UserCheck, Calendar, DollarSign, FileText, Award, TrendingUp, 
+  ChevronDown, Play, Quote, Building2, Briefcase, Target,
+  CheckCircle, Globe, Smartphone, Lock, HeadphonesIcon
+} from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const formatPrice = (price: number, currency: string) => new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(price);
@@ -9,6 +14,8 @@ const Landing: React.FC = () => {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [yearly, setYearly] = useState(false);
   const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
+  const [activeFeature, setActiveFeature] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
 
   const loadPlans = async (interval: 'Monthly' | 'Annual') => {
@@ -22,43 +29,330 @@ const Landing: React.FC = () => {
     })();
   }, [yearly]);
 
+  useEffect(() => {
+    setIsVisible(true);
+    const interval = setInterval(() => {
+      setActiveFeature(prev => (prev + 1) % 4);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   const openCheckoutPage = (plan: SubscriptionPlan) => {
     navigate(`/checkout?plan=${plan.id}&cadence=${yearly ? 'annual' : 'monthly'}`);
   };
 
+  const features = [
+    {
+      icon: UserCheck,
+      title: "Employee Management",
+      description: "Comprehensive employee profiles, onboarding workflows, and organizational charts",
+      color: "from-blue-500 to-cyan-500"
+    },
+    {
+      icon: Calendar,
+      title: "Leave & Attendance",
+      description: "Smart leave management, time tracking, and automated attendance monitoring",
+      color: "from-green-500 to-emerald-500"
+    },
+    {
+      icon: DollarSign,
+      title: "Payroll Integration",
+      description: "Seamless payroll processing with tax calculations and compliance reporting",
+      color: "from-purple-500 to-pink-500"
+    },
+    {
+      icon: FileText,
+      title: "Compliance & Reporting",
+      description: "Automated compliance checks and comprehensive HR analytics dashboard",
+      color: "from-orange-500 to-red-500"
+    }
+  ];
+
+  const testimonials = [
+    {
+      name: "Sarah Johnson",
+      role: "HR Director",
+      company: "TechCorp Solutions",
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=64&h=64&fit=crop&crop=face",
+      quote: "StockFlow Pro HR transformed our people management. We reduced administrative time by 60% and improved employee satisfaction significantly."
+    },
+    {
+      name: "Michael Chen",
+      role: "Operations Manager",
+      company: "GrowthStart Inc",
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=64&h=64&fit=crop&crop=face",
+      quote: "The automated compliance features saved us from potential legal issues. The reporting dashboard gives us insights we never had before."
+    },
+    {
+      name: "Emily Rodriguez",
+      role: "CEO",
+      company: "InnovateLab",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=64&h=64&fit=crop&crop=face",
+      quote: "As a growing company, we needed HR tools that could scale with us. StockFlow Pro delivered exactly that and more."
+    }
+  ];
+
+  const stats = [
+    { number: "10,000+", label: "Employees Managed", icon: Users },
+    { number: "500+", label: "Companies Trust Us", icon: Building2 },
+    { number: "99.9%", label: "Uptime Guarantee", icon: Shield },
+    { number: "24/7", label: "Expert Support", icon: HeadphonesIcon }
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       {/* Header */}
-      <header className="relative z-10 max-w-7xl mx-auto px-6 py-8">
-        <div className="flex items-center justify-between">
-          <Link to="/login" className="flex items-center space-x-2 text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-              <BarChart3 className="w-5 h-5 text-white" />
-            </div>
-            <span>StockFlow Pro</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link to="/login" className="text-gray-700 hover:text-gray-900 font-medium transition-colors">Sign in</Link>
-            <Link to="/register" className="px-6 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-              Get started
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <Link to="/login" className="flex items-center space-x-3 group">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+                <Users className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  StockFlow Pro
+                </span>
+                <div className="text-xs text-gray-500 font-medium">HR Module</div>
+              </div>
             </Link>
+            
+            <nav className="hidden md:flex items-center space-x-8">
+              <a href="#features" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">Features</a>
+              <a href="#pricing" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">Pricing</a>
+              <a href="#testimonials" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">Reviews</a>
+              <Link to="/login" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">Sign in</Link>
+              <Link to="/register" className="px-6 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                Start Free Trial
+              </Link>
+            </nav>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <main className="relative z-0">
-        <div className="max-w-7xl mx-auto px-6 py-16">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-semibold mb-6 border border-blue-200">
-              <Zap className="w-4 h-4" />
-              Powerful inventory management
+      <section className="relative pt-20 pb-32 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute top-40 right-10 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+
+        <div className="relative max-w-7xl mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className={`transform transition-all duration-1000 ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'}`}>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 text-sm font-semibold mb-8 border border-blue-200">
+                <Zap className="w-4 h-4" />
+                Complete HR Management Solution
+              </div>
+              
+              <h1 className="text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 mb-6 leading-tight">
+                Streamline Your
+                <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  HR Operations
+                </span>
+              </h1>
+              
+              <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-2xl">
+                Empower your team with comprehensive HR tools designed for small to medium businesses. 
+                From employee management to payroll integration—everything you need in one platform.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 mb-12">
+                <Link 
+                  to="/register" 
+                  className="px-8 py-4 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-2"
+                >
+                  Start Free Trial
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+                <button className="px-8 py-4 rounded-full border-2 border-gray-300 text-gray-700 font-semibold text-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-2 group">
+                  <Play className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  Watch Demo
+                </button>
+              </div>
+              
+              <div className="flex items-center gap-8 text-sm text-gray-500">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  14-day free trial
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  No credit card required
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  Cancel anytime
+                </div>
+              </div>
             </div>
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 mb-6 leading-tight">
-              Simple pricing for
-              <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"> every stage</span>
-            </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            
+            <div className={`transform transition-all duration-1000 delay-300 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'}`}>
+              <div className="relative">
+                <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
+                  <div className="space-y-6">
+                    {features.map((feature, index) => (
+                      <div 
+                        key={index}
+                        className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-300 cursor-pointer ${
+                          activeFeature === index 
+                            ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 scale-105' 
+                            : 'hover:bg-gray-50 border-2 border-transparent'
+                        }`}
+                        onClick={() => setActiveFeature(index)}
+                      >
+                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${feature.color} flex items-center justify-center shadow-lg`}>
+                          <feature.icon className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 mb-1">{feature.title}</h3>
+                          <p className="text-sm text-gray-600">{feature.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <div key={index} className="text-center group">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-200">
+                  <stat.icon className="w-8 h-8 text-white" />
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-2">{stat.number}</div>
+                <div className="text-gray-600 font-medium">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Everything You Need for
+              <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Modern HR Management
+              </span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Comprehensive tools designed to streamline your HR processes and empower your workforce
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                icon: UserCheck,
+                title: "Employee Profiles",
+                description: "Complete employee database with custom fields, documents, and organizational hierarchy",
+                features: ["Digital onboarding", "Document management", "Role-based access"]
+              },
+              {
+                icon: Calendar,
+                title: "Leave Management",
+                description: "Automated leave tracking with approval workflows and calendar integration",
+                features: ["Multiple leave types", "Approval workflows", "Calendar sync"]
+              },
+              {
+                icon: Clock,
+                title: "Time & Attendance",
+                description: "Smart time tracking with mobile check-in and automated timesheet generation",
+                features: ["Mobile check-in", "Overtime tracking", "Shift scheduling"]
+              },
+              {
+                icon: DollarSign,
+                title: "Payroll Integration",
+                description: "Seamless payroll processing with tax calculations and direct deposit",
+                features: ["Tax calculations", "Direct deposit", "Pay stub generation"]
+              },
+              {
+                icon: Award,
+                title: "Performance Reviews",
+                description: "360-degree feedback system with goal tracking and performance analytics",
+                features: ["Goal setting", "Peer reviews", "Performance metrics"]
+              },
+              {
+                icon: FileText,
+                title: "Compliance Reporting",
+                description: "Automated compliance checks and comprehensive reporting dashboard",
+                features: ["Regulatory compliance", "Custom reports", "Audit trails"]
+              }
+            ].map((feature, index) => (
+              <div key={index} className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group hover:-translate-y-2">
+                <div className="w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-200">
+                  <feature.icon className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
+                <p className="text-gray-600 mb-4 leading-relaxed">{feature.description}</p>
+                <ul className="space-y-2">
+                  {feature.features.map((item, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm text-gray-500">
+                      <Check className="w-4 h-4 text-green-500" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section id="testimonials" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Trusted by Growing Companies
+            </h2>
+            <p className="text-xl text-gray-600">
+              See what our customers say about transforming their HR operations
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <div key={index} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 hover:shadow-lg transition-all duration-300">
+                <Quote className="w-8 h-8 text-blue-600 mb-4" />
+                <p className="text-gray-700 mb-6 leading-relaxed italic">"{testimonial.quote}"</p>
+                <div className="flex items-center gap-4">
+                  <img 
+                    src={testimonial.image} 
+                    alt={testimonial.name}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                  <div>
+                    <div className="font-semibold text-gray-900">{testimonial.name}</div>
+                    <div className="text-sm text-gray-600">{testimonial.role}</div>
+                    <div className="text-sm text-blue-600 font-medium">{testimonial.company}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="py-20 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Simple, Transparent Pricing
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Choose a plan that fits your business and scale confidently. 
               Change or cancel anytime with our flexible subscription options.
             </p>
@@ -71,7 +365,7 @@ const Landing: React.FC = () => {
             </span>
             <button 
               onClick={() => setYearly(v => !v)} 
-              className="relative inline-flex h-8 w-14 items-center rounded-full bg-gray-200 transition-colors hover:bg-gray-300"
+              className="relative inline-flex h-8 w-14 items-center rounded-full bg-gray-200 transition-colors hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-md transition-all duration-200 ${yearly ? 'translate-x-7' : 'translate-x-1'}`} />
             </button>
@@ -90,14 +384,13 @@ const Landing: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {plans.map((plan) => {
               const isAnnual = plan.interval === 'Annual';
-              const base = plan.price;
-              const price = base;
+              const price = plan.price;
               return (
                 <div 
                   key={plan.id} 
                   className={`relative rounded-3xl border-2 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 ${
                     plan.isPopular 
-                      ? 'border-blue-500 bg-white shadow-xl' 
+                      ? 'border-blue-500 bg-white shadow-xl scale-105' 
                       : 'border-gray-200 bg-white/80 backdrop-blur-sm hover:border-gray-300'
                   } p-8 flex flex-col`}
                 >
@@ -105,7 +398,7 @@ const Landing: React.FC = () => {
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                       <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold shadow-lg">
                         <Crown className="w-4 h-4" />
-                        Most popular
+                        Most Popular
                       </div>
                     </div>
                   )}
@@ -144,7 +437,7 @@ const Landing: React.FC = () => {
                       plan.isPopular 
                         ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl' 
                         : 'bg-gray-900 text-white hover:bg-gray-800 shadow-lg hover:shadow-xl'
-                    } disabled:opacity-50 disabled:transform-none`}
+                    } disabled:opacity-50 disabled:transform-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
                     disabled={loadingPlanId === plan.id}
                   >
                     {loadingPlanId === plan.id ? (
@@ -166,18 +459,22 @@ const Landing: React.FC = () => {
 
           {/* Trust Indicators */}
           <div className="mt-16 text-center">
-            <div className="flex items-center justify-center gap-8 text-gray-500 mb-6">
+            <div className="flex flex-wrap items-center justify-center gap-8 text-gray-500 mb-6">
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5" />
-                <span className="font-medium">Secure payments</span>
+                <span className="font-medium">Enterprise Security</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="w-5 h-5" />
-                <span className="font-medium">Cancel anytime</span>
+                <Globe className="w-5 h-5" />
+                <span className="font-medium">Global Compliance</span>
               </div>
               <div className="flex items-center gap-2">
-                <Users className="w-5 h-5" />
-                <span className="font-medium">24/7 support</span>
+                <Smartphone className="w-5 h-5" />
+                <span className="font-medium">Mobile Ready</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <HeadphonesIcon className="w-5 h-5" />
+                <span className="font-medium">24/7 Support</span>
               </div>
             </div>
             <p className="text-sm text-gray-500">
@@ -188,16 +485,118 @@ const Landing: React.FC = () => {
             </p>
           </div>
         </div>
-      </main>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h2 className="text-4xl font-bold text-white mb-6">
+            Ready to Transform Your HR Operations?
+          </h2>
+          <p className="text-xl text-blue-100 mb-8 leading-relaxed">
+            Join thousands of companies already using StockFlow Pro HR to streamline their people management.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link 
+              to="/register" 
+              className="px-8 py-4 rounded-full bg-white text-blue-600 font-semibold text-lg hover:bg-gray-50 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-2"
+            >
+              Start Your Free Trial
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+            <button className="px-8 py-4 rounded-full border-2 border-white text-white font-semibold text-lg hover:bg-white hover:text-blue-600 transition-all duration-200 flex items-center justify-center gap-2">
+              Schedule Demo
+              <Calendar className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
-      <footer className="relative z-10 max-w-7xl mx-auto px-6 py-12 text-center">
-        <div className="border-t border-gray-200 pt-8">
-          <p className="text-gray-500">
-            © {new Date().getFullYear()} StockFlow Pro. All rights reserved.
-          </p>
+      <footer className="bg-gray-900 text-white py-16">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <span className="text-xl font-bold">StockFlow Pro</span>
+                  <div className="text-xs text-gray-400">HR Module</div>
+                </div>
+              </div>
+              <p className="text-gray-400 leading-relaxed">
+                Comprehensive HR management solution designed for growing businesses.
+              </p>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Product</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Security</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Integrations</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Company</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Support</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">API Reference</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Status</a></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+            <p className="text-gray-400">
+              © {new Date().getFullYear()} StockFlow Pro. All rights reserved.
+            </p>
+            <div className="flex items-center gap-6 mt-4 md:mt-0">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">Cookie Policy</a>
+            </div>
+          </div>
         </div>
       </footer>
+
+      {/* Custom Styles */}
+      <style>{`
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+        .bg-grid-pattern {
+          background-image: radial-gradient(circle, #e5e7eb 1px, transparent 1px);
+          background-size: 20px 20px;
+        }
+      `}</style>
     </div>
   );
 };
