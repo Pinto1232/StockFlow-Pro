@@ -80,6 +80,12 @@ export default defineConfig({
           });
         },
       },
+      // Proxy backend health endpoint for connectivity checks
+      '/health': {
+        target: backendConfig.apiTarget,
+        secure: false,
+        changeOrigin: true,
+      },
       '/stockflowhub': {
         target: backendConfig.wsTarget,
         secure: false,
