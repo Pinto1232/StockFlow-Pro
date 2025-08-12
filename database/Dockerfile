@@ -31,7 +31,6 @@ USER mssql
 
 # Set environment variables
 ENV ACCEPT_EULA=Y
-ENV SA_PASSWORD=StockFlow123!
 
 # Expose the default SQL Server port
 EXPOSE 1433

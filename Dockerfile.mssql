@@ -3,7 +3,6 @@ FROM mcr.microsoft.com/mssql/server:2022-latest
 
 # Switch to root to install required tools
 USER root
-
 # Install required tools and sqlcmd (mssql-tools18)
 RUN apt-get update && \
     apt-get install -y curl gnupg2 apt-transport-https software-properties-common dos2unix && \
@@ -19,14 +18,18 @@ RUN apt-get update && \
 # Ensure sqlcmd is on PATH for convenience
 ENV PATH="/opt/mssql-tools18/bin:/opt/mssql-tools/bin:${PATH}"
 
-# Copy the wait script
+# Copy the enhanced wait script
 COPY database/wait-for-db.sh /wait-for-db.sh
 RUN chmod +x /wait-for-db.sh && \
     dos2unix /wait-for-db.sh
+
+# Create init directory
 RUN mkdir -p /docker-entrypoint-initdb.d
+
+# Copy the optimized init script
 COPY database/init.sql /docker-entrypoint-initdb.d/init.sql
 
-# Set the entrypoint to run SQL Server and then our script
+# Set the entrypoint to run SQL Server and then our enhanced script
 ENTRYPOINT ["/bin/bash", "-c", "/opt/mssql/bin/sqlservr & /wait-for-db.sh"]
 
 # Switch back to mssql user
@@ -34,7 +37,6 @@ USER mssql
 
 # Set environment variables
 ENV ACCEPT_EULA=Y
-ENV SA_PASSWORD=StockFlow123!
 ENV MSSQL_PID=Developer
 
 # Expose the default SQL Server port

@@ -34,3 +34,7 @@ obj/
 *.cache
 *.bak
 cookies.txt
+
+# Environment files (hold secrets locally)
+.env
+.env.*

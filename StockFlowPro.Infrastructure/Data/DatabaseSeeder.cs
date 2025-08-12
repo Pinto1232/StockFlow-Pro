@@ -24,9 +24,43 @@ public class DatabaseSeeder(ApplicationDbContext context, ILogger<DatabaseSeeder
     {
         try
         {
-            await _context.Database.EnsureCreatedAsync();
+            _logger.LogInformation("Starting database initialization...");
+            
+            // First, try to apply migrations
+            try
+            {
+                _logger.LogInformation("Applying database migrations...");
+                await _context.Database.MigrateAsync();
+                _logger.LogInformation("Database migrations applied successfully.");
+            }
+            catch (Exception migrationEx)
+            {
+                _logger.LogWarning(migrationEx, "Migration failed, attempting to ensure database is created...");
+                await _context.Database.EnsureCreatedAsync();
+                _logger.LogInformation("Database created using EnsureCreatedAsync.");
+            }
+            
+            // Verify database is ready
+            if (!await _context.Database.CanConnectAsync())
+            {
+                throw new InvalidOperationException("Cannot connect to database after initialization");
+            }
 
-            if (await _context.Users.CountAsync() > 0)
+            // Check if Users table exists and is accessible
+            bool usersTableExists = false;
+            try
+            {
+                var userCount = await _context.Users.CountAsync();
+                usersTableExists = true;
+                _logger.LogInformation("Users table exists with {Count} records", userCount);
+            }
+            catch (Exception)
+            {
+                _logger.LogWarning("Users table does not exist or is not accessible");
+                usersTableExists = false;
+            }
+
+            if (usersTableExists && await _context.Users.CountAsync() > 0)
             {
                 var usersWithoutPasswords = await _context.Users
                     .Where(u => string.IsNullOrEmpty(u.PasswordHash))
@@ -68,6 +102,26 @@ public class DatabaseSeeder(ApplicationDbContext context, ILogger<DatabaseSeeder
                 await SeedSubscriptionSystemAsync();
                 await SeedNotificationSystemAsync();
                 return;
+            }
+            else if (!usersTableExists)
+            {
+                _logger.LogWarning("Users table does not exist. Database schema may not be properly initialized.");
+                _logger.LogInformation("Attempting to create database schema...");
+                
+                // Try to ensure database and schema are created
+                await _context.Database.EnsureCreatedAsync();
+                
+                // Verify the Users table now exists
+                try
+                {
+                    await _context.Users.CountAsync();
+                    _logger.LogInformation("Database schema created successfully. Proceeding with seeding...");
+                }
+                catch (Exception schemaEx)
+                {
+                    _logger.LogError(schemaEx, "Failed to create database schema");
+                    throw new InvalidOperationException("Could not create database schema", schemaEx);
+                }
             }
 
             _logger.LogInformation("Seeding database with initial users...");

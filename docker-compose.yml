@@ -1,4 +1,3 @@
-
 services:
   stockflow-db:
     build:
@@ -7,12 +6,13 @@ services:
     container_name: stockflow-db
     hostname: stockflow-db
     environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=StockFlow123!
-      - MSSQL_PID=Developer
-      - MSSQL_COLLATION=SQL_Latin1_General_CP1_CI_AS
-      - MSSQL_LCID=1033
-      - MEMORY_LIMIT_MB=2048
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "${DB_PASSWORD:-StockFlow123!}"
+      MSSQL_PID: "Developer"
+      MSSQL_COLLATION: "SQL_Latin1_General_CP1_CI_AS"
+      MSSQL_LCID: "1033"
+      MEMORY_LIMIT_MB: "2048"
+      DB_APP_USER_PASSWORD: "${DB_APP_USER_PASSWORD:-ChangeMe_StrongAppPwd123!}"
     volumes:
       - mssql-data:/var/opt/mssql
     ports:
@@ -27,7 +27,7 @@ services:
         reservations:
           memory: 1G
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'StockFlow123!' -Q 'SELECT 1' -C -b || exit 1"]
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P '${DB_PASSWORD:-StockFlow123!}' -Q 'SELECT 1' -C -b || exit 1"]
       interval: 20s
       retries: 15
       start_period: 360s
@@ -82,22 +82,22 @@ services:
     container_name: stockflow-api
     hostname: stockflow-api
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
-      - ASPNETCORE_HTTP_PORTS=8080
-      - DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER=0
-      - DOTNET_RUNNING_IN_CONTAINER=true
-      - DOTNET_EnableDiagnostics=0
-      - ConnectionStrings__DefaultConnection=Server=stockflow-db,1433;Database=StockFlowProDb;User ID=sa;Password=StockFlow123!;TrustServerCertificate=True;Connect Timeout=60;Command Timeout=300;Encrypt=False;MultipleActiveResultSets=true;Pooling=true;Max Pool Size=100;
-      - Redis__Configuration=redis:6379
-      - Redis__InstanceName=StockFlowPro
-      - Jwt__Key=your-very-secure-jwt-key-that-is-at-least-32-characters-long-for-security
-      - Jwt__Issuer=StockFlowPro
-      - Jwt__Audience=StockFlowPro-Client
-      - Jwt__ExpiryInMinutes=60
-      - Logging__LogLevel__Default=Information
-      - Logging__LogLevel__Microsoft=Warning
-      - Logging__LogLevel__Microsoft.Hosting.Lifetime=Information
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ASPNETCORE_URLS: "http://+:8080"
+      ASPNETCORE_HTTP_PORTS: "8080"
+      DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER: "0"
+      DOTNET_RUNNING_IN_CONTAINER: "true"
+      DOTNET_EnableDiagnostics: "0"
+      ConnectionStrings__DefaultConnection: "Server=stockflow-db,1433;Database=StockFlowProDB;User ID=sa;Password=${DB_PASSWORD:-StockFlow123!};TrustServerCertificate=True;Connect Timeout=60;Command Timeout=300;Encrypt=False;MultipleActiveResultSets=true;Pooling=true;Max Pool Size=100;"
+      Redis__Configuration: "redis:6379"
+      Redis__InstanceName: "StockFlowPro"
+      Jwt__Key: "your-very-secure-jwt-key-that-is-at-least-32-characters-long-for-security"
+      Jwt__Issuer: "StockFlowPro"
+      Jwt__Audience: "StockFlowPro-Client"
+      Jwt__ExpiryInMinutes: "60"
+      Logging__LogLevel__Default: "Information"
+      Logging__LogLevel__Microsoft: "Warning"
+      Logging__LogLevel__Microsoft.Hosting.Lifetime: "Information"
     ports:
       - "5000:8080"
     volumes:
@@ -130,9 +130,9 @@ services:
     hostname: stockflow-frontend
     working_dir: /app
     environment:
-      - NODE_ENV=development
-      - VITE_API_BASE_URL=/api
-      - VITE_WS_URL=ws://localhost:8080
+      NODE_ENV: "development"
+      VITE_API_BASE_URL: "/api"
+      VITE_WS_URL: "ws://localhost:8080"
     ports:
       - "5173:5173"
     volumes:

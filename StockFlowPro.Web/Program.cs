@@ -297,6 +297,7 @@ builder.Services.AddScoped<StockFlowPro.Application.Interfaces.INotificationTemp
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.INotificationPreferenceService, StockFlowPro.Application.Services.NotificationPreferenceService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IEntitlementService, StockFlowPro.Application.Services.EntitlementService>();
 builder.Services.AddHostedService<DatabaseInitializationService>();
+// Temporarily disabled to prevent interference with database initialization
 builder.Services.AddHostedService<StockFlowPro.Web.Services.NotificationBackgroundService>();
 
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();

@@ -21,6 +21,22 @@ Username: sa
 Password: StockFlow123!
 Database: StockFlowProDb
 
+Note: localhost:1433 is a SQL Server port, not a web page. Opening it in a browser will show connection reset/ERR_EMPTY_RESPONSE. Use a database client (Azure Data Studio/SSMS) or sqlcmd to connect.
+
+Quick test (from host):
+- Server: localhost,1433
+- Auth: SQL Login
+- User: sa
+- Password: StockFlow123!
+
+Optional terminal check:
+```
+docker compose ps
+docker exec -it stockflow-db /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$DB_PASSWORD" -Q "SELECT @@VERSION;"
+```
+
+Security tip: set DB_PASSWORD (SA password) and DB_APP_USER_PASSWORD in a local .env file. Example in .env.example.
+
 📧 Email Testing (MailHog)
 SMTP: localhost:1025
 Web UI: http://localhost:8025/

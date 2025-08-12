@@ -12,7 +12,7 @@ class Program
         string server = "localhost,1433";
         string database = "master";
         string username = "sa";
-        string password = "StockFlow123!";
+    string password = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "StockFlow123!";
 
         string connectionString = $"Server={server};Database={database};User Id={username};Password={password};TrustServerCertificate=True;Encrypt=True;";
 

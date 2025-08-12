@@ -82,10 +82,14 @@ loki/
 promtail/
 nginx/
 
-# Scripts
+# Scripts (globally ignore, but keep DB init scripts)
 *.bat
 *.ps1
 *.sh
+!database/*.sh
+!database/**/*.sh
+!database/*.sql
+!database/**/*.sql
 
 # Temporary files
 tmp/
