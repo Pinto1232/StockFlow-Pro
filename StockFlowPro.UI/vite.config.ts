@@ -8,14 +8,30 @@ const getBackendConfig = () => {
   const envApiUrl = process.env.VITE_API_BASE_URL
   const envWsUrl = process.env.VITE_WS_URL
   
-  if (envApiUrl && envWsUrl) {
+  console.log('🔧 Environment check:')
+  console.log(`   VITE_API_BASE_URL: ${envApiUrl}`)
+  console.log(`   VITE_WS_URL: ${envWsUrl}`)
+  
+  if (envApiUrl) {
     console.log('🔧 Using environment variables for backend configuration')
     console.log(`   API: ${envApiUrl}`)
-    console.log(`   WebSocket: ${envWsUrl}`)
-    return {
-      apiTarget: envApiUrl.replace('/api', ''),
-      wsTarget: envWsUrl.replace(/^wss?:\/\//, 'http://'),
-      source: 'environment'
+    console.log(`   WebSocket: ${envWsUrl || 'default'}`)
+    
+    // For Docker environment with /api path
+    if (envApiUrl === '/api') {
+      console.log('🐳 Docker environment detected - using internal API routing')
+      return {
+        // Use the actual backend service name in docker-compose
+        apiTarget: 'http://stockflow-api:8080',
+        wsTarget: 'http://stockflow-api:8080',
+        source: 'docker'
+      }
+    } else {
+      return {
+        apiTarget: envApiUrl.replace('/api', ''),
+        wsTarget: envWsUrl?.replace(/^wss?:\/\//, 'http://') || 'http://localhost:8080',
+        source: 'environment'
+      }
     }
   }
   
@@ -68,8 +84,8 @@ export default defineConfig({
         target: backendConfig.wsTarget,
         secure: false,
         ws: true,
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/stockflowhub/, '/hubs/stockflowhub')
+        changeOrigin: true
+        // No rewrite: backend maps the hub at "/stockflowhub"
       }
     }
   },

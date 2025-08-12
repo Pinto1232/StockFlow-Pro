@@ -28,9 +28,9 @@ services:
           memory: 1G
     healthcheck:
       test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'StockFlow123!' -Q 'SELECT 1' -C -b || exit 1"]
-      interval: 15s
-      retries: 10
-      start_period: 120s
+      interval: 20s
+      retries: 15
+      start_period: 360s
       timeout: 10s
 
   redis:
@@ -132,6 +132,7 @@ services:
     environment:
       - NODE_ENV=development
       - VITE_API_BASE_URL=/api
+      - VITE_WS_URL=ws://localhost:8080
     ports:
       - "5173:5173"
     volumes:

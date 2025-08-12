@@ -23,6 +23,8 @@ ENV PATH="/opt/mssql-tools18/bin:/opt/mssql-tools/bin:${PATH}"
 COPY database/wait-for-db.sh /wait-for-db.sh
 RUN chmod +x /wait-for-db.sh && \
     dos2unix /wait-for-db.sh
+RUN mkdir -p /docker-entrypoint-initdb.d
+COPY database/init.sql /docker-entrypoint-initdb.d/init.sql
 
 # Set the entrypoint to run SQL Server and then our script
 ENTRYPOINT ["/bin/bash", "-c", "/opt/mssql/bin/sqlservr & /wait-for-db.sh"]
