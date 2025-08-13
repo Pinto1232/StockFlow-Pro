@@ -1,11 +1,12 @@
-# Simple SQL Server container for development
-FROM mcr.microsoft.com/mssql/server:2022-latest
+# Secure SQL Server container for development
+FROM mcr.microsoft.com/mssql/server:2022-CU16-ubuntu-22.04
 
 # Switch to root to install required tools
 USER root
-# Install required tools and sqlcmd (mssql-tools18)
+# Install required tools and sqlcmd (mssql-tools18) with security updates
 RUN apt-get update && \
-    apt-get install -y curl gnupg2 apt-transport-https software-properties-common dos2unix && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends curl gnupg2 apt-transport-https software-properties-common dos2unix ca-certificates && \
     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
     apt-get update && \
@@ -13,7 +14,9 @@ RUN apt-get update && \
     mkdir -p /opt/mssql-tools/bin && \
     ln -s /opt/mssql-tools18/bin/sqlcmd /opt/mssql-tools/bin/sqlcmd && \
     ln -s /opt/mssql-tools18/bin/bcp /opt/mssql-tools/bin/bcp && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/apt/archives/*
 
 # Ensure sqlcmd is on PATH for convenience
 ENV PATH="/opt/mssql-tools18/bin:/opt/mssql-tools/bin:${PATH}"
@@ -38,6 +41,11 @@ USER mssql
 # Set environment variables
 ENV ACCEPT_EULA=Y
 ENV MSSQL_PID=Developer
+
+# Add security labels
+LABEL security.scan="enabled" \
+      security.updates="2025-01-25" \
+      maintainer="StockFlow-Pro Team"
 
 # Expose the default SQL Server port
 EXPOSE 1433

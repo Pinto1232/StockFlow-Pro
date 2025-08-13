@@ -21,6 +21,8 @@ services:
       - JWT_AUDIENCE=StockFlowPro-Users
       - JWT_EXPIRY_MINUTES=60
       - REDIS_CONNECTION_STRING=stockflow-redis:6379,password=${REDIS_PASSWORD}
+    security_opt:
+      - no-new-privileges:true
     deploy:
       replicas: 2
       resources:
@@ -48,6 +50,11 @@ services:
       target: production
     environment:
       - NODE_ENV=production
+      - NGINX_USER=nginxuser
+      - NGINX_UID=1001
+      - NGINX_GID=1001
+    ports:
+      - "8080:8080"
     deploy:
       replicas: 2
       resources:
@@ -61,6 +68,19 @@ services:
         condition: on-failure
         delay: 5s
         max_attempts: 3
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
 
   stockflow-db:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -91,10 +111,12 @@ services:
       start_period: 60s
 
   redis:
-    image: redis:7-alpine
+    image: redis:7.4-alpine
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     volumes:
       - redis-data:/data
+    security_opt:
+      - no-new-privileges:true
     deploy:
       resources:
         limits:
@@ -109,14 +131,21 @@ services:
         max_attempts: 3
 
   nginx:
-    image: nginx:alpine
+    image: nginx:1.27.3-alpine
     ports:
-      - "80:80"
-      - "443:443"
+      - "80:8080"
+      - "443:8443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - ./nginx/logs:/var/log/nginx
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
     deploy:
       resources:
         limits:

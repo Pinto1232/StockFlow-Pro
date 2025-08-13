@@ -15,7 +15,13 @@
     "clean": "rm -rf dist node_modules/.vite",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:integration": "vitest run src/architecture/__tests__/integration.test.ts"
+    "test:integration": "vitest run src/architecture/__tests__/integration.test.ts",
+    "audit": "npm audit --audit-level moderate",
+    "audit:fix": "npm audit fix --audit-level moderate --force",
+    "security:check": "npm audit && npm run lint",
+    "security:update": "npm update && npm audit fix",
+    "deps:check": "npm outdated",
+    "deps:update": "npm update"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

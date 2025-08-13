@@ -1,0 +1,56 @@
+# Development Dockerfile for React TypeScript application
+# Use latest LTS version with security updates (January 2025)
+FROM node:20.18.2-bullseye-slim
+
+# Create a non-root user with home directory
+RUN groupadd -r nodeuser && useradd -r -g nodeuser -m nodeuser
+
+# Apply security updates and install curl for health checks
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends curl ca-certificates && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/apt/archives/*
+
+# Set working directory and change ownership
+WORKDIR /app
+RUN chown -R nodeuser:nodeuser /app && \
+    chown -R nodeuser:nodeuser /home/nodeuser
+
+# Switch to non-root user for package installation
+USER nodeuser
+
+# Copy package files for dependency installation
+COPY --chown=nodeuser:nodeuser package*.json ./
+
+# Install all dependencies with security audit and fix vulnerabilities
+RUN npm install --audit-level moderate && \
+    npm audit fix --audit-level moderate --force && \
+    npm cache clean --force
+
+# Copy application code
+COPY --chown=nodeuser:nodeuser . .
+
+# Expose the Vite development server port
+EXPOSE 5173
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:5173/ || exit 1
+
+# Set security-focused environment variables
+ENV NODE_ENV=development
+ENV NPM_CONFIG_UPDATE_NOTIFIER=false
+ENV NPM_CONFIG_FUND=false
+ENV NPM_CONFIG_AUDIT_LEVEL=moderate
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+
+# Add security labels
+LABEL security.scan="enabled" \
+      security.non-root="true" \
+      security.updates="2025-01-25" \
+      maintainer="StockFlow-Pro Team"
+
+# The actual npm commands will be run via docker-compose command
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

@@ -34,7 +34,7 @@ services:
       timeout: 10s
 
   redis:
-    image: redis:7-alpine
+    image: redis:7.4-alpine
     container_name: stockflow-redis
     hostname: redis
     command: redis-server --appendonly yes
@@ -45,6 +45,8 @@ services:
     networks:
       - stockflow-network
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     deploy:
       resources:
         limits:
@@ -57,9 +59,9 @@ services:
       retries: 5
       start_period: 30s
       timeout: 5s
-      
+
   mailhog:
-    image: mailhog/mailhog:latest
+    image: mailhog/mailhog:v1.0.1
     container_name: stockflow-mailhog
     hostname: mailhog
     ports:
@@ -68,13 +70,15 @@ services:
     networks:
       - stockflow-network
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     deploy:
       resources:
         limits:
           memory: 256M
         reservations:
           memory: 64M
-      
+
   stockflow-api:
     build:
       context: .
@@ -111,6 +115,8 @@ services:
     networks:
       - stockflow-network
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     deploy:
       resources:
         limits:
@@ -123,9 +129,71 @@ services:
       retries: 5
       start_period: 60s
       timeout: 15s
+    develop:
+      watch:
+        # Rebuild when C# source files change
+        - action: rebuild
+          path: ./StockFlowPro.Web
+          ignore:
+            - bin/
+            - obj/
+            - App_Data/
+        - action: rebuild
+          path: ./StockFlowPro.Application
+          ignore:
+            - bin/
+            - obj/
+        - action: rebuild
+          path: ./StockFlowPro.Domain
+          ignore:
+            - bin/
+            - obj/
+        - action: rebuild
+          path: ./StockFlowPro.Infrastructure
+          ignore:
+            - bin/
+            - obj/
+        - action: rebuild
+          path: ./StockFlowPro.Shared
+          ignore:
+            - bin/
+            - obj/
+        # Rebuild when project files change
+        - action: rebuild
+          path: ./*.sln
+        - action: rebuild
+          path: ./StockFlowPro.Web/*.csproj
+        - action: rebuild
+          path: ./StockFlowPro.Application/*.csproj
+        - action: rebuild
+          path: ./StockFlowPro.Domain/*.csproj
+        - action: rebuild
+          path: ./StockFlowPro.Infrastructure/*.csproj
+        - action: rebuild
+          path: ./StockFlowPro.Shared/*.csproj
+        - action: rebuild
+          path: ./Directory.*.props
+        - action: rebuild
+          path: ./global.json
+        - action: rebuild
+          path: ./nuget.config
+        - action: rebuild
+          path: ./StockFlowPro.Web/Dockerfile
+        - action: rebuild
+          path: ./StockFlowPro.Web/Vite.config.ts
+        - action: rebuild
+          path: ./StockFlowPro.Web/tsconfig*.json
+        - action: rebuild
+          path: ./StockFlowPro.Web/tailwind.config.js
+        - action: rebuild
+          path: ./StockFlowPro.Web/postcss.config.js
+        - action: rebuild
+          path: ./StockFlowPro.Web/eslint.config.js
 
   stockflow-frontend:
-    image: node:20-alpine
+    build:
+      context: ./StockFlowPro.UI  # Point to the frontend directory
+      dockerfile: Dockerfile.dev  # Use the development Dockerfile
     container_name: stockflow-frontend
     hostname: stockflow-frontend
     working_dir: /app
@@ -133,10 +201,21 @@ services:
       NODE_ENV: "development"
       VITE_API_BASE_URL: "/api"
       VITE_WS_URL: "ws://localhost:8080"
+      NPM_CONFIG_UPDATE_NOTIFIER: "false"
+      NPM_CONFIG_FUND: "false"
     ports:
       - "5173:5173"
     volumes:
-      - ./StockFlowPro.UI:/app
+      - ./StockFlowPro.UI/package.json:/app/package.json
+      - ./StockFlowPro.UI/package-lock.json:/app/package-lock.json
+      - ./StockFlowPro.UI/vite.config.ts:/app/vite.config.ts
+      - ./StockFlowPro.UI/tsconfig.json:/app/tsconfig.json
+      - ./StockFlowPro.UI/tsconfig.app.json:/app/tsconfig.app.json
+      - ./StockFlowPro.UI/tsconfig.node.json:/app/tsconfig.node.json
+      - ./StockFlowPro.UI/tailwind.config.js:/app/tailwind.config.js
+      - ./StockFlowPro.UI/postcss.config.js:/app/postcss.config.js
+      - ./StockFlowPro.UI/eslint.config.js:/app/eslint.config.js
+      - ./StockFlowPro.UI/index.html:/app/index.html
       - /app/node_modules
     networks:
       - stockflow-network
@@ -145,17 +224,54 @@ services:
         condition: service_started
     restart: unless-stopped
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5173/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    develop:
+      watch:
+        # Sync TypeScript/JavaScript source files (hot reload)
+        - action: sync
+          path: ./StockFlowPro.UI/src
+          target: /app/src
+          ignore:
+            - "**/*.test.ts"
+            - "**/*.test.tsx"
+            - "**/*.spec.ts"
+            - "**/*.spec.tsx"
+        # Sync public assets
+        - action: sync
+          path: ./StockFlowPro.UI/public
+          target: /app/public
+        # Rebuild when package files change
+        - action: rebuild
+          path: ./StockFlowPro.UI/package.json
+        - action: rebuild
+          path: ./StockFlowPro.UI/package-lock.json
+        - action: rebuild
+          path: ./StockFlowPro.UI/vite.config.ts
+        - action: rebuild
+          path: ./StockFlowPro.UI/tsconfig*.json
+        - action: rebuild
+          path: ./StockFlowPro.UI/tailwind.config.js
+        - action: rebuild
+          path: ./StockFlowPro.UI/postcss.config.js
+        - action: rebuild
+          path: ./StockFlowPro.UI/eslint.config.js
 
-  nginx:
-    image: nginx:alpine
+  stockflow-nginx:
+    image: nginx:1.27.3-alpine
     container_name: stockflow-nginx
     hostname: nginx
     ports:
-      - "8080:80"
+      - "8080:8080"
       - "8443:443"
     volumes:
       - ./StockFlowPro.UI/nginx.conf:/etc/nginx/nginx.conf:ro
-      - nginx-cache:/var/cache/nginx
       - nginx-logs:/var/log/nginx
     depends_on:
       - stockflow-api
@@ -163,6 +279,13 @@ services:
     networks:
       - stockflow-network
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
     deploy:
       resources:
         limits:
@@ -170,7 +293,7 @@ services:
         reservations:
           memory: 64M
     healthcheck:
-      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:80 || exit 1"]
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8080 || exit 1"]
       interval: 30s
       retries: 3
       start_period: 30s
@@ -186,9 +309,6 @@ volumes:
   backend-logs:
     driver: local
     name: backend-logs
-  nginx-cache:
-    driver: local
-    name: nginx-cache
   nginx-logs:
     driver: local
     name: nginx-logs
