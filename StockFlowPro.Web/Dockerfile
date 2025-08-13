@@ -8,9 +8,10 @@ EXPOSE 8081
 USER root
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends curl && \
+    apt-get install -y --no-install-recommends curl ca-certificates && \
+    apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/apt/archives/*
 
 # Use the latest .NET 8 SDK for building
 FROM mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim AS build
@@ -57,6 +58,12 @@ RUN mkdir -p /app/App_Data /app/wwwroot/uploads
 # Set permissions
 RUN chown -R app:app /app
 USER app
+
+# Add security labels
+LABEL security.scan="enabled" \
+      security.non-root="true" \
+      security.updates="2025-01-25" \
+      maintainer="StockFlow-Pro Team"
 
 # Health check endpoint
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \

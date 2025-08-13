@@ -86,9 +86,10 @@ If you see `ERR_CONNECTION_REFUSED` errors:
 
 ### Port Conflicts
 
-- **Frontend**: Runs on `http://localhost:5173` (Vite default)
-- **Docker API**: Runs on `http://localhost:5000`
-- **Local .NET API**: Runs on `https://localhost:7046`
+- Frontend dev: http://localhost:5173 (locked)
+- Frontend preview (prod build): http://localhost:4173 (locked)
+- Docker API: http://localhost:5000
+- Local .NET API: https://localhost:7046
 
 ### HTTPS/SSL Issues
 
@@ -103,6 +104,7 @@ When using local .NET development:
 1. Start Docker stack: `docker-compose up -d`
 2. Start frontend: `.\start-dev-docker.bat`
 3. Access app: `http://localhost:5173`
+4. Preview production build locally: `npm run build && npm run preview` then open `http://localhost:4173`
 
 ### Local .NET Development
 1. Start .NET backend: `cd StockFlowPro.Web && dotnet run --launch-profile https`

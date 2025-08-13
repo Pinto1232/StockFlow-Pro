@@ -74,27 +74,20 @@ Username: admin@stockflowpro.com
 Password: SecureAdmin2024!
 
 
-Start the Complete Stack
-docker-compose up -d
-
-Start with Build (if you made changes)
-docker-compose up --build -d
-
-View Logs (Real-time)
-docker-compose logs -f
-
-Check Container Status
-docker-compose ps
-
-
-Stop All Services
+# Stop the containers
 docker-compose down
 
-Stop and Remove Volumes (Complete Reset)
-docker-compose down -v
+# Rebuild the images with your changes
+docker-compose build
 
-Start Docker Stack:
+# Start the containers again
 docker-compose up -d
 
 
-docker-compose up
+# Rebuild and restart in one go
+docker-compose up --build -d
+
+
+# docker-compose build --no-cache
+
+# docker compose watch

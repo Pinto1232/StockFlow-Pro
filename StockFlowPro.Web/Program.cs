@@ -166,6 +166,7 @@ builder.Services.AddCors(options =>
                 "http://localhost:3000", 
                 "http://localhost:5173",
                 "http://localhost:5174",  // Add Vite dev server port
+                "http://localhost:4173",  // Vite preview port (local prod preview)
                 "http://localhost:8080",
                 "http://127.0.0.1:8080",
                 "http://localhost:8081/", // Expo web
@@ -192,7 +193,7 @@ builder.Services.AddCors(options =>
             if (origin.StartsWith("http://localhost:") || 
                 origin.StartsWith("https://localhost:"))
             {
-                var allowedPorts = new[] { "3000", "5173", "5174", "8080", "8081", "19000", "19006" };
+                var allowedPorts = new[] { "3000", "5173", "5174", "4173", "8080", "8081", "19000", "19006" };
                 return allowedPorts.Any(port => origin.Contains($":{port}"));
             }
                 
