@@ -1,0 +1,40 @@
+name: UI Preview (PR)
+
+on:
+  pull_request:
+    paths:
+      - "StockFlowPro.UI/**"
+      - ".github/workflows/ui-preview.yml"
+
+jobs:
+  build-preview:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push UI (PR tag)
+        env:
+          TAG: pr-${{ github.event.number }}
+        run: |
+          docker build -f StockFlowPro.UI/Dockerfile -t ghcr.io/${{ github.repository_owner }}/stockflowpro-ui:${TAG} .
+          docker push ghcr.io/${{ github.repository_owner }}/stockflowpro-ui:${TAG}
+
+      - name: Comment PR with image tag
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: preview
+          message: |
+            UI preview image published:
+            ghcr.io/${{ github.repository_owner }}/stockflowpro-ui:pr-${{ github.event.number }}

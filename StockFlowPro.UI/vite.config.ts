@@ -49,10 +49,35 @@ const getBackendConfig = () => {
 
 const backendConfig = getBackendConfig()
 
+console.log('🚀 Frontend Configuration:')
+console.log(`   Frontend Dev Server: http://localhost:5173`)
+console.log(`   Frontend Preview: http://localhost:4173 (after npm run build && npm run preview)`)
+console.log(`   Docker Full Stack: http://localhost:8080 (docker-compose up -d)`)
+console.log(`   Backend Target: ${backendConfig.apiTarget}`)
+console.log(`   WebSocket Target: ${backendConfig.wsTarget}`)
+console.log(`   Configuration Source: ${backendConfig.source}`)
+console.log('')
+console.log('🌐 Environment URLs:')
+console.log(`   🏠 Local Development: http://localhost:5173`)
+console.log(`   🔍 Local Preview: http://localhost:4173`)
+console.log(`   🐳 Docker Local: http://localhost:8080`)
+console.log(`   🚀 Staging: https://staging.stockflow.pro (when deployed)`)
+console.log(`   🌍 Production: https://app.stockflow.pro (when deployed)`)
+console.log('')
+console.log('🔌 Backend URLs:')
+console.log(`   🏠 Local Dev Backend: http://localhost:5131`)
+console.log(`   🐳 Docker Backend: http://localhost:5000`)
+console.log(`   🚀 Staging Backend: https://api-staging.stockflow.pro (when deployed)`)
+console.log(`   🌍 Production Backend: https://api.stockflow.pro (when deployed)`)
+console.log('')
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   server: {
+  port: 5173,
+  strictPort: true,
+  host: true, // Expose to network and show all URLs
     proxy: {
       '/api': {
         target: backendConfig.apiTarget,
@@ -94,6 +119,10 @@ export default defineConfig({
         // No rewrite: backend maps the hub at "/stockflowhub"
       }
     }
+  },
+  preview: {
+    port: 4173,
+    strictPort: true
   },
   build: {
     rollupOptions: {

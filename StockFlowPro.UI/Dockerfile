@@ -1,6 +1,6 @@
 # Multi-stage build for React TypeScript application
-# Use latest LTS version with security updates (January 2025)
-FROM node:20.18.2-alpine AS build
+# Use latest LTS version with security updates (August 2025)
+FROM node:20.17.0-alpine3.20 AS build
 
 # Create a non-root user with home directory
 RUN addgroup -g 1001 -S nodeuser && \
@@ -8,7 +8,7 @@ RUN addgroup -g 1001 -S nodeuser && \
 
 # Apply security updates and install necessary packages
 RUN apk update && apk upgrade && \
-    apk add --no-cache curl ca-certificates && \
+    apk add --no-cache curl ca-certificates dumb-init && \
     rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
 # Set working directory and change ownership
@@ -22,21 +22,20 @@ USER nodeuser
 COPY --chown=nodeuser:nodeuser package*.json ./
 
 # Install dependencies with security audit and fix vulnerabilities
-RUN npm ci --audit-level moderate && \
-    npm audit fix --audit-level moderate --force && \
+RUN npm ci --only=production --no-audit --no-fund && \
     npm cache clean --force
 
 # Copy source code
 COPY --chown=nodeuser:nodeuser . .
 
-# Use Docker-specific environment configuration
-COPY --chown=nodeuser:nodeuser .env.development.docker .env.local
+# Use staging environment configuration for production builds
+COPY --chown=nodeuser:nodeuser .env.staging .env.local
 
 # Build the application
 RUN npm run build
 
 # Production stage with Nginx - use latest stable alpine version with security updates
-FROM nginx:1.27.3-alpine
+FROM nginx:1.27.3-alpine3.20
 
 # Create a non-root user for nginx with home directory
 RUN addgroup -g 1001 -S nginxuser && \
@@ -44,7 +43,7 @@ RUN addgroup -g 1001 -S nginxuser && \
 
 # Apply security updates and install curl for health checks
 RUN apk update && apk upgrade && \
-    apk add --no-cache curl ca-certificates && \
+    apk add --no-cache curl ca-certificates dumb-init && \
     rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
 # Remove default nginx website
@@ -53,8 +52,8 @@ RUN rm -rf /usr/share/nginx/html/*
 # Copy built application from build stage
 COPY --from=build --chown=nginxuser:nginxuser /app/dist /usr/share/nginx/html
 
-# Copy custom nginx configuration
-COPY --chown=nginxuser:nginxuser nginx.conf /etc/nginx/nginx.conf
+# Copy production nginx configuration
+COPY --chown=nginxuser:nginxuser nginx.prod.conf /etc/nginx/nginx.conf
 
 # Create necessary directories and set permissions for nginx to run as non-root
 RUN mkdir -p /var/cache/nginx/client_temp /var/cache/nginx/proxy_temp \
@@ -83,11 +82,12 @@ ENV NGINX_GID=1001
 # Add security labels
 LABEL security.scan="enabled" \
       security.non-root="true" \
-      security.updates="2025-01-25" \
-      maintainer="StockFlow-Pro Team"
+      security.updates="2025-08-13" \
+      maintainer="StockFlow-Pro Team" \
+      org.opencontainers.image.source="https://github.com/Pinto1232/StockFlow-Pro"
 
-# Explicitly override any entrypoint that might be causing issues
-ENTRYPOINT []
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 
-# Start nginx directly
+# Start nginx directly with non-root user
 CMD ["nginx", "-g", "daemon off;"]
