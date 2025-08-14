@@ -248,7 +248,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         b => b.MigrationsAssembly("StockFlowPro.Infrastructure")));
 
 builder.Services.AddMediatR(typeof(StockFlowPro.Application.Commands.Users.CreateUserCommand).Assembly);
-builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(StockFlowPro.Application.Mappings.ProductMappingProfile), typeof(StockFlowPro.Application.Mappings.SubscriptionPlanMappingProfile), typeof(StockFlowPro.Application.Mappings.PermissionMappingProfile), typeof(StockFlowPro.Application.Mappings.EmployeeMappingProfile));
+builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(StockFlowPro.Application.Mappings.ProductMappingProfile), typeof(StockFlowPro.Application.Mappings.SubscriptionPlanMappingProfile), typeof(StockFlowPro.Application.Mappings.PermissionMappingProfile), typeof(StockFlowPro.Application.Mappings.EmployeeMappingProfile), typeof(StockFlowPro.Application.Mappings.LandingContentMappingProfile));
 builder.Services.AddValidatorsFromAssembly(typeof(StockFlowPro.Application.Validators.CreateUserCommandValidator).Assembly);
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
@@ -258,6 +258,10 @@ builder.Services.AddScoped<StockFlowPro.Domain.Repositories.IEmployeeRepository,
 builder.Services.AddScoped<StockFlowPro.Domain.Repositories.IInvoiceRepository, StockFlowPro.Infrastructure.Repositories.InvoiceRepository>();
 builder.Services.AddScoped<StockFlowPro.Domain.Repositories.ISubscriptionPlanRepository, StockFlowPro.Infrastructure.Repositories.SubscriptionPlanRepository>();
 builder.Services.AddScoped<StockFlowPro.Domain.Repositories.ISubscriptionRepository, StockFlowPro.Infrastructure.Repositories.SubscriptionRepository>();
+// Landing content repositories
+builder.Services.AddScoped<StockFlowPro.Domain.Repositories.ILandingFeatureRepository, StockFlowPro.Infrastructure.Repositories.LandingFeatureRepository>();
+builder.Services.AddScoped<StockFlowPro.Domain.Repositories.ILandingTestimonialRepository, StockFlowPro.Infrastructure.Repositories.LandingTestimonialRepository>();
+builder.Services.AddScoped<StockFlowPro.Domain.Repositories.ILandingStatRepository, StockFlowPro.Infrastructure.Repositories.LandingStatRepository>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
