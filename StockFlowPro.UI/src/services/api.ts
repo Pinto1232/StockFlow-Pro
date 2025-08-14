@@ -31,12 +31,22 @@ api.interceptors.response.use(
     },
     (error) => {
         if (error.response?.status === 401) {
-            // Only redirect to login if we're not already on the login page
-            if (!window.location.pathname.includes("/login")) {
-                console.warn("Authentication failed, redirecting to login");
-                localStorage.removeItem("authToken");
-                localStorage.removeItem("refreshToken");
-                localStorage.removeItem("user");
+            // Clear any client-side auth remnants
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("user");
+
+            // Determine if the current route is public; if so, do not force redirect
+            const path = window.location.pathname;
+            const isPublicRoute =
+                path === "/" ||
+                path.startsWith("/pricing") ||
+                path.startsWith("/checkout") ||
+                path.startsWith("/login") ||
+                path.startsWith("/register");
+
+            if (!isPublicRoute) {
+                console.warn("Authentication failed on a protected route, redirecting to login");
                 window.location.href = "/login";
             }
         }

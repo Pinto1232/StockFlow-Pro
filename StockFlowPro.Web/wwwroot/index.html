@@ -1481,7 +1481,8 @@
                 if (response.ok) {
                     showSuccess('Logged out successfully. Redirecting...');
                     setTimeout(() => {
-                        window.location.href = '/login.html';
+                        // Redirect to home page after successful logout
+                        window.location.href = '/';
                     }, 1000);
                 } else {
                     showError('Logout failed. Please try again.');
