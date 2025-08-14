@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { getPlansByInterval, type SubscriptionPlan } from '../../services/subscriptionService';
+import { landingService, type LandingFeature, type LandingTestimonial, type LandingStat } from '../../services/landingService';
 import { 
-  Check, Zap, Crown, Star, ArrowRight, Shield, Clock, Users, BarChart3,
-  UserCheck, Calendar, DollarSign, FileText, Award, TrendingUp, 
-  ChevronDown, Play, Quote, Building2, Briefcase, Target,
-  CheckCircle, Globe, Smartphone, Lock, HeadphonesIcon
+  Check, Zap, Crown, Star, ArrowRight, Shield, Clock, Users,
+  UserCheck, Calendar, DollarSign, FileText, Award,
+  Play, Quote, Building2,
+  CheckCircle, Globe, Smartphone, HeadphonesIcon
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import DemoScheduler from '../../components/DemoScheduler';
@@ -14,10 +15,13 @@ const formatPrice = (price: number, currency: string) => new Intl.NumberFormat(u
 const Landing: React.FC = () => {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [yearly, setYearly] = useState(false);
-  const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
   const [activeFeature, setActiveFeature] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [isDemoSchedulerOpen, setIsDemoSchedulerOpen] = useState(false);
+  const [features, setFeatures] = useState<LandingFeature[]>([]);
+  const [testimonials, setTestimonials] = useState<LandingTestimonial[]>([]);
+  const [stats, setStats] = useState<LandingStat[]>([]);
+  const [isLoadingContent, setIsLoadingContent] = useState(true);
   const navigate = useNavigate();
 
   const loadPlans = async (interval: 'Monthly' | 'Annual') => {
@@ -25,11 +29,113 @@ const Landing: React.FC = () => {
     setPlans(p.slice().sort((a,b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999) || a.name.localeCompare(b.name)));
   };
 
+  const loadLandingContent = async () => {
+    try {
+      setIsLoadingContent(true);
+      const content = await landingService.getLandingContent();
+      setFeatures(content.features);
+      setTestimonials(content.testimonials);
+      setStats(content.stats);
+    } catch (error) {
+      console.error('Failed to load landing content:', error);
+      // Fallback to hardcoded data if API fails
+      setFeatures([
+        {
+          id: '1',
+          title: "Employee Management",
+          description: "Comprehensive employee profiles, onboarding workflows, and organizational charts",
+          iconName: "UserCheck",
+          colorClass: "from-blue-500 to-cyan-500",
+          sortOrder: 1,
+          isActive: true,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: '2',
+          title: "Leave & Attendance",
+          description: "Smart leave management, time tracking, and automated attendance monitoring",
+          iconName: "Calendar",
+          colorClass: "from-green-500 to-emerald-500",
+          sortOrder: 2,
+          isActive: true,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: '3',
+          title: "Payroll Integration",
+          description: "Seamless payroll processing with tax calculations and compliance reporting",
+          iconName: "DollarSign",
+          colorClass: "from-purple-500 to-pink-500",
+          sortOrder: 3,
+          isActive: true,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: '4',
+          title: "Compliance & Reporting",
+          description: "Automated compliance checks and comprehensive HR analytics dashboard",
+          iconName: "FileText",
+          colorClass: "from-orange-500 to-red-500",
+          sortOrder: 4,
+          isActive: true,
+          createdAt: new Date().toISOString()
+        }
+      ]);
+      setTestimonials([
+        {
+          id: '1',
+          name: "Sarah Johnson",
+          role: "HR Director",
+          company: "TechCorp Solutions",
+          imageUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=64&h=64&fit=crop&crop=face",
+          quote: "StockFlow Pro HR transformed our people management. We reduced administrative time by 60% and improved employee satisfaction significantly.",
+          sortOrder: 1,
+          isActive: true,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: '2',
+          name: "Michael Chen",
+          role: "Operations Manager",
+          company: "GrowthStart Inc",
+          imageUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=64&h=64&fit=crop&crop=face",
+          quote: "The automated compliance features saved us from potential legal issues. The reporting dashboard gives us insights we never had before.",
+          sortOrder: 2,
+          isActive: true,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: '3',
+          name: "Emily Rodriguez",
+          role: "CEO",
+          company: "InnovateLab",
+          imageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=64&h=64&fit=crop&crop=face",
+          quote: "As a growing company, we needed HR tools that could scale with us. StockFlow Pro delivered exactly that and more.",
+          sortOrder: 3,
+          isActive: true,
+          createdAt: new Date().toISOString()
+        }
+      ]);
+      setStats([
+        { id: '1', number: "10,000+", label: "Employees Managed", iconName: "Users", sortOrder: 1, isActive: true, createdAt: new Date().toISOString() },
+        { id: '2', number: "500+", label: "Companies Trust Us", iconName: "Building2", sortOrder: 2, isActive: true, createdAt: new Date().toISOString() },
+        { id: '3', number: "99.9%", label: "Uptime Guarantee", iconName: "Shield", sortOrder: 3, isActive: true, createdAt: new Date().toISOString() },
+        { id: '4', number: "24/7", label: "Expert Support", iconName: "HeadphonesIcon", sortOrder: 4, isActive: true, createdAt: new Date().toISOString() }
+      ]);
+    } finally {
+      setIsLoadingContent(false);
+    }
+  };
+
   useEffect(() => {
     (async () => {
       await loadPlans(yearly ? 'Annual' : 'Monthly');
     })();
   }, [yearly]);
+
+  useEffect(() => {
+    loadLandingContent();
+  }, []);
 
   useEffect(() => {
     setIsVisible(true);
@@ -43,63 +149,12 @@ const Landing: React.FC = () => {
     navigate(`/checkout?plan=${plan.id}&cadence=${yearly ? 'annual' : 'monthly'}`);
   };
 
-  const features = [
-    {
-      icon: UserCheck,
-      title: "Employee Management",
-      description: "Comprehensive employee profiles, onboarding workflows, and organizational charts",
-      color: "from-blue-500 to-cyan-500"
-    },
-    {
-      icon: Calendar,
-      title: "Leave & Attendance",
-      description: "Smart leave management, time tracking, and automated attendance monitoring",
-      color: "from-green-500 to-emerald-500"
-    },
-    {
-      icon: DollarSign,
-      title: "Payroll Integration",
-      description: "Seamless payroll processing with tax calculations and compliance reporting",
-      color: "from-purple-500 to-pink-500"
-    },
-    {
-      icon: FileText,
-      title: "Compliance & Reporting",
-      description: "Automated compliance checks and comprehensive HR analytics dashboard",
-      color: "from-orange-500 to-red-500"
-    }
-  ];
-
-  const testimonials = [
-    {
-      name: "Sarah Johnson",
-      role: "HR Director",
-      company: "TechCorp Solutions",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=64&h=64&fit=crop&crop=face",
-      quote: "StockFlow Pro HR transformed our people management. We reduced administrative time by 60% and improved employee satisfaction significantly."
-    },
-    {
-      name: "Michael Chen",
-      role: "Operations Manager",
-      company: "GrowthStart Inc",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=64&h=64&fit=crop&crop=face",
-      quote: "The automated compliance features saved us from potential legal issues. The reporting dashboard gives us insights we never had before."
-    },
-    {
-      name: "Emily Rodriguez",
-      role: "CEO",
-      company: "InnovateLab",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=64&h=64&fit=crop&crop=face",
-      quote: "As a growing company, we needed HR tools that could scale with us. StockFlow Pro delivered exactly that and more."
-    }
-  ];
-
-  const stats = [
-    { number: "10,000+", label: "Employees Managed", icon: Users },
-    { number: "500+", label: "Companies Trust Us", icon: Building2 },
-    { number: "99.9%", label: "Uptime Guarantee", icon: Shield },
-    { number: "24/7", label: "Expert Support", icon: HeadphonesIcon }
-  ];
+  const getIconComponent = (iconName: string) => {
+    const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
+      UserCheck, Calendar, DollarSign, FileText, Users, Building2, Shield, HeadphonesIcon
+    };
+    return iconMap[iconName] || FileText;
+  };
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
@@ -194,25 +249,41 @@ const Landing: React.FC = () => {
               <div className="relative">
                 <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
                   <div className="space-y-6">
-                    {features.map((feature, index) => (
-                      <div 
-                        key={index}
-                        className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-300 cursor-pointer ${
-                          activeFeature === index 
-                            ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 scale-105' 
-                            : 'hover:bg-gray-50 border-2 border-transparent'
-                        }`}
-                        onClick={() => setActiveFeature(index)}
-                      >
-                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${feature.color} flex items-center justify-center shadow-lg`}>
-                          <feature.icon className="w-6 h-6 text-white" />
+                    {isLoadingContent ? (
+                      // Loading skeleton
+                      Array.from({ length: 4 }).map((_, index) => (
+                        <div key={index} className="flex items-center gap-4 p-4 rounded-xl">
+                          <div className="w-12 h-12 rounded-xl bg-gray-200 animate-pulse"></div>
+                          <div className="flex-1">
+                            <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                            <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900 mb-1">{feature.title}</h3>
-                          <p className="text-sm text-gray-600">{feature.description}</p>
-                        </div>
-                      </div>
-                    ))}
+                      ))
+                    ) : (
+                      features.map((feature, index) => {
+                        const IconComponent = getIconComponent(feature.iconName);
+                        return (
+                          <div 
+                            key={feature.id}
+                            className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-300 cursor-pointer ${
+                              activeFeature === index 
+                                ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 scale-105' 
+                                : 'hover:bg-gray-50 border-2 border-transparent'
+                            }`}
+                            onClick={() => setActiveFeature(index)}
+                          >
+                            <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${feature.colorClass} flex items-center justify-center shadow-lg`}>
+                              <IconComponent className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-gray-900 mb-1">{feature.title}</h3>
+                              <p className="text-sm text-gray-600">{feature.description}</p>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               </div>
@@ -225,15 +296,29 @@ const Landing: React.FC = () => {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center group">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-200">
-                  <stat.icon className="w-8 h-8 text-white" />
+            {isLoadingContent ? (
+              // Loading skeleton for stats
+              Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="text-center group">
+                  <div className="w-16 h-16 bg-gray-200 rounded-2xl mx-auto mb-4 animate-pulse"></div>
+                  <div className="h-8 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
                 </div>
-                <div className="text-3xl font-bold text-gray-900 mb-2">{stat.number}</div>
-                <div className="text-gray-600 font-medium">{stat.label}</div>
-              </div>
-            ))}
+              ))
+            ) : (
+              stats.map((stat) => {
+                const IconComponent = getIconComponent(stat.iconName);
+                return (
+                  <div key={stat.id} className="text-center group">
+                    <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-200">
+                      <IconComponent className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="text-3xl font-bold text-gray-900 mb-2">{stat.number}</div>
+                    <div className="text-gray-600 font-medium">{stat.label}</div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </section>
@@ -325,24 +410,43 @@ const Landing: React.FC = () => {
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 hover:shadow-lg transition-all duration-300">
-                <Quote className="w-8 h-8 text-blue-600 mb-4" />
-                <p className="text-gray-700 mb-6 leading-relaxed italic">"{testimonial.quote}"</p>
-                <div className="flex items-center gap-4">
-                  <img 
-                    src={testimonial.image} 
-                    alt={testimonial.name}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                  <div>
-                    <div className="font-semibold text-gray-900">{testimonial.name}</div>
-                    <div className="text-sm text-gray-600">{testimonial.role}</div>
-                    <div className="text-sm text-blue-600 font-medium">{testimonial.company}</div>
+            {isLoadingContent ? (
+              // Loading skeleton for testimonials
+              Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100">
+                  <div className="w-8 h-8 bg-gray-200 rounded mb-4 animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-6 animate-pulse"></div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gray-200 rounded-full animate-pulse"></div>
+                    <div className="flex-1">
+                      <div className="h-4 bg-gray-200 rounded mb-1 animate-pulse"></div>
+                      <div className="h-3 bg-gray-200 rounded mb-1 animate-pulse"></div>
+                      <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              testimonials.map((testimonial) => (
+                <div key={testimonial.id} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 hover:shadow-lg transition-all duration-300">
+                  <Quote className="w-8 h-8 text-blue-600 mb-4" />
+                  <p className="text-gray-700 mb-6 leading-relaxed italic">"{testimonial.quote}"</p>
+                  <div className="flex items-center gap-4">
+                    <img 
+                      src={testimonial.imageUrl} 
+                      alt={testimonial.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div>
+                      <div className="font-semibold text-gray-900">{testimonial.name}</div>
+                      <div className="text-sm text-gray-600">{testimonial.role}</div>
+                      <div className="text-sm text-blue-600 font-medium">{testimonial.company}</div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -439,20 +543,12 @@ const Landing: React.FC = () => {
                       plan.isPopular 
                         ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl' 
                         : 'bg-gray-900 text-white hover:bg-gray-800 shadow-lg hover:shadow-xl'
-                    } disabled:opacity-50 disabled:transform-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
-                    disabled={loadingPlanId === plan.id}
+                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
                   >
-                    {loadingPlanId === plan.id ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Processing...
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center gap-2">
-                        Choose {plan.name}
-                        <ArrowRight className="w-5 h-5" />
-                      </div>
-                    )}
+                    <div className="flex items-center justify-center gap-2">
+                      Choose {plan.name}
+                      <ArrowRight className="w-5 h-5" />
+                    </div>
                   </button>
                 </div>
               );

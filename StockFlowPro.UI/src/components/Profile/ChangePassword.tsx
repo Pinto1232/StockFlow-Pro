@@ -51,8 +51,8 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ className = '' }) => {
     
     if (!formData.newPassword) {
       newErrors.newPassword = 'New password is required';
-    } else if (formData.newPassword.length < 12) {
-      newErrors.newPassword = 'New password must be at least 12 characters long';
+    } else if (formData.newPassword.length < 6) {
+      newErrors.newPassword = 'New password must be at least 6 characters long';
     } else if (!/[A-Z]/.test(formData.newPassword)) {
       newErrors.newPassword = 'New password must contain at least one uppercase letter';
     } else if (!/[a-z]/.test(formData.newPassword)) {

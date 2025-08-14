@@ -129,7 +129,7 @@ public class UserAuthenticationService : IUserAuthenticationService
             if (!await ValidatePasswordAsync(registerUserDto.Password))
             {
                 _logger.LogWarning("Password validation failed for user: {Email}", registerUserDto.Email);
-                throw new ArgumentException("Password does not meet the specified requirements. Password must be at least 6 characters long.");
+                throw new ArgumentException($"Password does not meet the specified requirements. Password must be at least {EnvironmentConfig.PasswordMinLength} characters long and contain uppercase, lowercase, number, and special character.");
             }
 
             if (registerUserDto.Password != registerUserDto.ConfirmPassword)

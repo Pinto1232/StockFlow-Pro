@@ -83,6 +83,8 @@ const mockPlans: SubscriptionPlan[] = [
 
 // Helper function to convert backend plan to frontend format
 function mapBackendPlanToFrontend(backendPlan: BackendSubscriptionPlan): SubscriptionPlan {
+  console.log('🔄 Mapping backend plan:', backendPlan);
+  
   const features: string[] = [];
   
   // Add features based on backend flags
@@ -112,41 +114,69 @@ function mapBackendPlanToFrontend(backendPlan: BackendSubscriptionPlan): Subscri
     features.push(`Up to ${backendPlan.maxProjects} projects`);
   }
   
-  // Determine if this is a popular plan (Professional is usually popular)
-  const isPopular = backendPlan.name.toLowerCase().includes('professional');
+  if (backendPlan.trialPeriodDays) {
+    features.push(`${backendPlan.trialPeriodDays}-day free trial`);
+  }
   
-  return {
+  // Add basic features if none are specified
+  if (features.length === 0) {
+    features.push('Essential features', 'Email support', 'Standard reporting');
+  }
+  
+  // Determine if this is a popular plan (Professional is usually popular)
+  const isPopular = backendPlan.name.toLowerCase().includes('professional') || 
+                   backendPlan.name.toLowerCase().includes('pro');
+  
+  const mappedPlan = {
     id: backendPlan.id,
     name: backendPlan.name,
     description: backendPlan.description,
-    price: backendPlan.price, // Use backend plan price for the chosen interval
-    interval: backendPlan.billingInterval === 4 ? 'Annual' : 'Monthly',
-    currency: backendPlan.currency,
-    sortOrder: backendPlan.sortOrder,
+    price: backendPlan.price,
+    interval: backendPlan.billingInterval === 4 ? 'Annual' : 'Monthly' as 'Monthly' | 'Annual',
+    currency: backendPlan.currency || 'USD',
+    sortOrder: backendPlan.sortOrder || 999,
     features,
     isPopular,
     monthlyEquivalentPrice: backendPlan.monthlyEquivalentPrice,
   };
+  
+  console.log('✅ Mapped plan:', mappedPlan);
+  return mappedPlan;
 }
 
 export async function getPublicPlans(): Promise<SubscriptionPlan[]> {
   try {
-    // Try a few common endpoints; backend may not expose yet
+    // Try primary endpoint first
     const endpoints = ['/api/subscription-plans', '/api/plans', '/api/subscriptions/plans'];
+    
     for (const ep of endpoints) {
       try {
+        console.log(`🔍 Trying subscription plans endpoint: ${ep}`);
         const data = await http.get<SubscriptionPlansResponse>(ep);
+        
         // Handle possible envelope
         const backendPlans = Array.isArray(data) ? data : data.items;
+        
         if (backendPlans && backendPlans.length) {
+          console.log(`✅ Successfully fetched ${backendPlans.length} plans from ${ep}`);
+          console.log('📊 Backend plans:', backendPlans);
+          
           // Map backend plans to frontend format
-          return backendPlans.map(mapBackendPlanToFrontend);
+          const mappedPlans = backendPlans.map(mapBackendPlanToFrontend);
+          console.log('🎯 Mapped plans for frontend:', mappedPlans);
+          return mappedPlans;
+        } else {
+          console.warn(`⚠️ Endpoint ${ep} returned empty data:`, data);
         }
-      } catch { /* try next */ }
+      } catch (error) {
+        console.warn(`❌ Failed to fetch from ${ep}:`, error);
+      }
     }
-    // Fallback to mock if no endpoint is available
+    
+    console.warn('🚨 All endpoints failed, falling back to mock data');
     return mockPlans;
-  } catch {
+  } catch (error) {
+    console.error('🚨 Critical error in getPublicPlans:', error);
     return mockPlans;
   }
 }
@@ -154,28 +184,46 @@ export async function getPublicPlans(): Promise<SubscriptionPlan[]> {
 // Fetch plans by billing interval (Monthly or Annual)
 export async function getPlansByInterval(interval: 'Monthly' | 'Annual'): Promise<SubscriptionPlan[]> {
   try {
-    // Prefer explicit interval endpoints first
-    const endpoints = interval === 'Annual'
-      ? ['/api/subscription-plans/billing-interval/Annual']
-      : ['/api/subscription-plans'];
+    console.log(`🔍 Fetching plans for interval: ${interval}`);
+    
+    // Try backend-specific interval endpoints first
+    const billingIntervalEndpoints = interval === 'Annual'
+      ? ['/api/subscription-plans/billing-interval/Annual', '/api/subscription-plans/billing-interval/4']
+      : ['/api/subscription-plans/billing-interval/Monthly', '/api/subscription-plans/billing-interval/1'];
 
-    // Fallbacks if needed
-    endpoints.push('/api/plans', '/api/subscriptions/plans');
+    // Add fallback endpoints
+    const fallbackEndpoints = ['/api/subscription-plans', '/api/plans', '/api/subscriptions/plans'];
+    const allEndpoints = [...billingIntervalEndpoints, ...fallbackEndpoints];
 
-    for (const ep of endpoints) {
+    for (const ep of allEndpoints) {
       try {
+        console.log(`🔍 Trying endpoint: ${ep}`);
         const data = await http.get<SubscriptionPlansResponse>(ep);
         const backendPlans = Array.isArray(data) ? data : data.items;
+        
         if (backendPlans && backendPlans.length) {
+          console.log(`✅ Fetched ${backendPlans.length} plans from ${ep}`);
+          
           const mapped = backendPlans
             .map(mapBackendPlanToFrontend)
             .filter(p => p.interval === interval);
-          if (mapped.length) return mapped;
+            
+          if (mapped.length) {
+            console.log(`🎯 Found ${mapped.length} ${interval} plans:`, mapped);
+            return mapped;
+          } else {
+            console.warn(`⚠️ No ${interval} plans found in response from ${ep}`);
+          }
         }
-      } catch { /* try next */ }
+      } catch (error) {
+        console.warn(`❌ Failed to fetch from ${ep}:`, error);
+      }
     }
+    
+    console.warn(`🚨 All endpoints failed, using mock ${interval} plans`);
     return mockPlans.filter(p => p.interval === interval);
-  } catch {
+  } catch (error) {
+    console.error(`🚨 Critical error in getPlansByInterval for ${interval}:`, error);
     return mockPlans.filter(p => p.interval === interval);
   }
 }

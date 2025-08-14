@@ -101,6 +101,7 @@ public class DatabaseSeeder(ApplicationDbContext context, ILogger<DatabaseSeeder
                 await SeedEmployeesAsync();
                 await SeedSubscriptionSystemAsync();
                 await SeedNotificationSystemAsync();
+                await SeedLandingContentAsync();
                 return;
             }
             else if (!usersTableExists)
@@ -200,6 +201,9 @@ public class DatabaseSeeder(ApplicationDbContext context, ILogger<DatabaseSeeder
 
             // Seed Notification System
             await SeedNotificationSystemAsync();
+
+            // Seed Landing Content
+            await SeedLandingContentAsync();
         }
         catch (Exception ex)
         {
@@ -1600,5 +1604,96 @@ public class DatabaseSeeder(ApplicationDbContext context, ILogger<DatabaseSeeder
                 _ => false
             }
         };
+    }
+
+    private async Task SeedLandingContentAsync()
+    {
+        try
+        {
+            _logger.LogInformation("Seeding landing content...");
+
+            // Seed Landing Features
+            if (!await _context.LandingFeatures.AnyAsync())
+            {
+                var features = new List<LandingFeature>
+                {
+                    new("Employee Management", 
+                        "Comprehensive employee profiles, onboarding workflows, and organizational charts",
+                        "UserCheck", 
+                        "from-blue-500 to-cyan-500", 
+                        1),
+                    new("Leave & Attendance", 
+                        "Smart leave management, time tracking, and automated attendance monitoring",
+                        "Calendar", 
+                        "from-green-500 to-emerald-500", 
+                        2),
+                    new("Payroll Integration", 
+                        "Seamless payroll processing with tax calculations and compliance reporting",
+                        "DollarSign", 
+                        "from-purple-500 to-pink-500", 
+                        3),
+                    new("Compliance & Reporting", 
+                        "Automated compliance checks and comprehensive HR analytics dashboard",
+                        "FileText", 
+                        "from-orange-500 to-red-500", 
+                        4)
+                };
+
+                await _context.LandingFeatures.AddRangeAsync(features);
+                _logger.LogInformation("Added {Count} landing features", features.Count);
+            }
+
+            // Seed Landing Testimonials
+            if (!await _context.LandingTestimonials.AnyAsync())
+            {
+                var testimonials = new List<LandingTestimonial>
+                {
+                    new("Sarah Johnson", 
+                        "HR Director", 
+                        "TechCorp Solutions",
+                        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=64&h=64&fit=crop&crop=face",
+                        "StockFlow Pro HR transformed our people management. We reduced administrative time by 60% and improved employee satisfaction significantly.",
+                        1),
+                    new("Michael Chen", 
+                        "Operations Manager", 
+                        "GrowthStart Inc",
+                        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=64&h=64&fit=crop&crop=face",
+                        "The automated compliance features saved us from potential legal issues. The reporting dashboard gives us insights we never had before.",
+                        2),
+                    new("Emily Rodriguez", 
+                        "CEO", 
+                        "InnovateLab",
+                        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=64&h=64&fit=crop&crop=face",
+                        "As a growing company, we needed HR tools that could scale with us. StockFlow Pro delivered exactly that and more.",
+                        3)
+                };
+
+                await _context.LandingTestimonials.AddRangeAsync(testimonials);
+                _logger.LogInformation("Added {Count} landing testimonials", testimonials.Count);
+            }
+
+            // Seed Landing Stats
+            if (!await _context.LandingStats.AnyAsync())
+            {
+                var stats = new List<LandingStat>
+                {
+                    new("10,000+", "Employees Managed", "Users", 1),
+                    new("500+", "Companies Trust Us", "Building2", 2),
+                    new("99.9%", "Uptime Guarantee", "Shield", 3),
+                    new("24/7", "Expert Support", "HeadphonesIcon", 4)
+                };
+
+                await _context.LandingStats.AddRangeAsync(stats);
+                _logger.LogInformation("Added {Count} landing stats", stats.Count);
+            }
+
+            await _context.SaveChangesAsync();
+            _logger.LogInformation("Landing content seeding completed successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while seeding landing content");
+            throw;
+        }
     }
 }

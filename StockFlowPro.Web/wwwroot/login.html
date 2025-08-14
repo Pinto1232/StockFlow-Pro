@@ -480,7 +480,7 @@
             email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
             name: /^[a-zA-Z\s'-]{2,50}$/,
             phone: /^(\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$/,
-            password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/
+            password: /^.{6,}$/
         };
 
         // Validation functions
@@ -623,7 +623,7 @@
                 setFieldError('register-password', 'Password is required'); 
                 ok = false; 
             } else if (!validatePassword(password)) { 
-                setFieldError('register-password', 'Password must be at least 12 characters with uppercase, lowercase, number, and special character (@$!%*?&)'); 
+                setFieldError('register-password', 'Password must be at least 6 characters'); 
                 ok = false; 
             } else { 
                 setFieldError('register-password', ''); 
@@ -801,7 +801,7 @@
             $('#registerPassword').addEventListener('input', function() {
                 const value = this.value;
                 if (value && !validatePassword(value)) {
-                    setFieldError('register-password', 'Password must be at least 12 characters with uppercase, lowercase, number, and special character (@$!%*?&)');
+                    setFieldError('register-password', 'Password must be at least 6 characters');
                 } else if (value) {
                     setFieldError('register-password', '');
                 }

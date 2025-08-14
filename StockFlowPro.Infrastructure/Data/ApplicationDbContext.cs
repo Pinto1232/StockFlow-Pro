@@ -29,6 +29,11 @@ namespace StockFlowPro.Infrastructure.Data
             NotificationPreferences = Set<NotificationPreference>();
 
             Employees = Set<Employee>();
+            
+            // Landing content entities
+            LandingFeatures = Set<LandingFeature>();
+            LandingTestimonials = Set<LandingTestimonial>();
+            LandingStats = Set<LandingStat>();
         }
         
         public DbSet<User> Users { get; set; }
@@ -56,6 +61,11 @@ namespace StockFlowPro.Infrastructure.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<NotificationTemplate> NotificationTemplates { get; set; }
         public DbSet<NotificationPreference> NotificationPreferences { get; set; }
+        
+        // Landing content entities
+        public DbSet<LandingFeature> LandingFeatures { get; set; }
+        public DbSet<LandingTestimonial> LandingTestimonials { get; set; }
+        public DbSet<LandingStat> LandingStats { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -88,6 +98,11 @@ namespace StockFlowPro.Infrastructure.Data
 
             // Employee configurations
             modelBuilder.ApplyConfiguration(new EmployeeConfiguration());
+            
+            // Landing content configurations
+            modelBuilder.ApplyConfiguration(new LandingFeatureConfiguration());
+            modelBuilder.ApplyConfiguration(new LandingTestimonialConfiguration());
+            modelBuilder.ApplyConfiguration(new LandingStatConfiguration());
         }
     }
 }
