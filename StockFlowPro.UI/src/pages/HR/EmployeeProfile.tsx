@@ -1,7 +1,38 @@
 import React, { useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Home, Briefcase, Users, Mail, Phone, BadgeCheck, ArrowLeft, Building2, IdCard } from "lucide-react";
-import { useEmployee, useEmployees, useUploadEmployeeImage, useUpdateEmployee, useAddEmployeeDocument, useArchiveEmployeeDocument, useStartOnboarding, useCompleteOnboardingTask, useInitiateOffboarding, useCompleteOffboardingTask, type EmployeeDto } from "../../hooks/employees";
+import {
+  Home,
+  Briefcase,
+  Users,
+  Mail,
+  Phone,
+  BadgeCheck,
+  ArrowLeft,
+  Building2,
+  IdCard,
+  Upload,
+  Search as SearchIcon,
+  FileText,
+  Image as ImageIcon,
+  Video as VideoIcon,
+  Package,
+  Trash2,
+  Pencil,
+} from "lucide-react";
+import {
+  useEmployee,
+  useEmployees,
+  useUploadEmployeeImage,
+  useUpdateEmployee,
+  useAddEmployeeDocument,
+  useArchiveEmployeeDocument,
+  useStartOnboarding,
+  useCompleteOnboardingTask,
+  useInitiateOffboarding,
+  useCompleteOffboardingTask,
+  type EmployeeDto,
+  type EmployeeDocumentDto,
+} from "../../hooks/employees";
 
 function buildFullName(first?: string | null, last?: string | null) {
   return `${first ?? ""} ${last ?? ""}`.trim();
@@ -61,6 +92,256 @@ function statusClasses(label: string): string {
     default: return 'bg-gray-100 text-gray-800';
   }
 }
+
+// Guess a document category from content-type or filename
+function categorize(contentType?: string, fileName?: string): 'video' | 'image' | 'document' | 'install' | 'other' {
+  const name = (fileName || '').toLowerCase();
+  const ct = (contentType || '').toLowerCase();
+  if (ct.startsWith('image/') || /(png|jpe?g|gif|bmp|webp|svg)$/.test(name)) return 'image';
+  if (ct.startsWith('video/') || /(mp4|mov|avi|mkv|webm)$/.test(name)) return 'video';
+  if (/(msi|exe|dmg|pkg|apk)$/.test(name)) return 'install';
+  if (/(pdf|docx?|xlsx?|pptx?)$/.test(name) || /text\//.test(ct) || ct === 'application/pdf') return 'document';
+  return 'other';
+}
+
+function bytesToHuman(bytes?: number): string {
+  const b = bytes ?? 0;
+  if (b < 1024) return `${b} B`;
+  const kb = b / 1024;
+  if (kb < 1024) return `${kb.toFixed(0)} KB`;
+  const mb = kb / 1024;
+  if (mb < 1024) return `${mb.toFixed(1)} MB`;
+  const gb = mb / 1024;
+  return `${gb.toFixed(1)} GB`;
+}
+
+// A dashboard-like documents UI that mirrors the provided design
+const DocumentsDashboard: React.FC<{
+  employee: EmployeeDto;
+  addDoc: ReturnType<typeof useAddEmployeeDocument>;
+  archiveDoc: ReturnType<typeof useArchiveEmployeeDocument>;
+}> = ({ employee, addDoc, archiveDoc }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [search, setSearch] = useState('');
+  const [selected, setSelected] = useState<EmployeeDocumentDto | null>(null);
+  const docs = useMemo(() => employee.documents || [], [employee.documents]);
+
+  const totals = useMemo(() => {
+    const byCat: Record<string, number> = { video: 0, image: 0, document: 0, install: 0, other: 0 };
+    let size = 0;
+    docs.forEach((d) => {
+      const cat = categorize(d.contentType, d.fileName);
+      byCat[cat] = (byCat[cat] || 0) + 1;
+      size += d.sizeBytes || 0;
+    });
+    return { count: docs.length, size, byCat };
+  }, [docs]);
+
+  // Assume a soft quota so the bar has context (adjust easily later)
+  const SOFT_QUOTA = 150 * 1024 * 1024 * 1024; // 150 GB
+  const usedPct = Math.min(100, (totals.size / SOFT_QUOTA) * 100);
+
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return docs;
+    return docs.filter((d) =>
+      d.fileName.toLowerCase().includes(term) ||
+      (d.contentType || '').toLowerCase().includes(term)
+    );
+  }, [docs, search]);
+
+  const onFilesChosen = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    // Iterate reversed because our cache update prepends; this preserves the user's selection order
+    const ordered = Array.from(files).reverse();
+    for (const file of ordered) {
+      const storagePath = `/uploads/employees/${employee.id}/${Date.now()}_${file.name}`;
+      const contentType = file.type || 'application/octet-stream';
+      const sizeBytes = file.size;
+      // map to backend numeric type; default to 99 (Other)
+      const type = (() => {
+        const cat = categorize(contentType, file.name);
+        if (cat === 'document') return 1; // Contract/Doc
+        if (cat === 'image') return 3; // Certification/Image-ish
+        return 99; // Other
+      })();
+      try {
+        await addDoc.mutateAsync({ fileName: file.name, type, storagePath, sizeBytes, contentType });
+      } catch {
+        // errors handled globally; continue with next file
+      }
+    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  return (
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="text-xl font-semibold text-gray-900">Documents</h3>
+          <p className="text-sm text-gray-500">Effortlessly upload and manage files for this employee</p>
+        </div>
+        <button onClick={() => fileInputRef.current?.click()} className="inline-flex items-center gap-2 px-3 py-2 bg-gray-900 text-white rounded-lg text-sm">
+          <Upload className="w-4 h-4" /> Quick Upload
+        </button>
+      </div>
+
+      {/* Upload area */}
+      <div
+        className="relative border-2 border-dashed border-gray-300 rounded-xl p-8 mb-6 text-center bg-gray-50 hover:bg-gray-100 transition"
+        onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+        onDrop={(e) => { e.preventDefault(); onFilesChosen(e.dataTransfer?.files || null); }}
+        onClick={() => fileInputRef.current?.click()}
+        role="button"
+        tabIndex={0}
+      >
+        <input ref={fileInputRef} className="hidden" type="file" multiple onChange={(e) => onFilesChosen(e.currentTarget.files)} />
+        <div className="mx-auto inline-flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-sm mb-3">
+          <Upload className="w-5 h-5 text-gray-700" />
+        </div>
+        <div className="text-gray-700 font-medium">Click to upload or drag and drop</div>
+        <div className="text-xs text-gray-500 mt-1">PDF, images, videos or installers</div>
+      </div>
+
+      {/* Usage bar */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
+          <div>{bytesToHuman(SOFT_QUOTA - totals.size)} available from 150GB</div>
+          <div>{bytesToHuman(totals.size)} used</div>
+        </div>
+        <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-full bg-blue-500" style={{ width: `${usedPct}%` }} />
+        </div>
+        <div className="flex items-center gap-4 mt-2 text-xs text-gray-600">
+          <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500 inline-block"/> Video</span>
+          <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block"/> Image</span>
+          <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-indigo-500 inline-block"/> Document</span>
+          <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sky-300 inline-block"/> Installation</span>
+        </div>
+      </div>
+
+      {/* Categories */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="border rounded-xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3"><VideoIcon className="w-5 h-5 text-blue-600"/><div className="text-sm"><div className="font-medium">Video</div><div className="text-gray-500 text-xs">{totals.byCat.video || 0} Files</div></div></div>
+        </div>
+        <div className="border rounded-xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3"><ImageIcon className="w-5 h-5 text-green-600"/><div className="text-sm"><div className="font-medium">Image</div><div className="text-gray-500 text-xs">{totals.byCat.image || 0} Files</div></div></div>
+        </div>
+        <div className="border rounded-xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3"><FileText className="w-5 h-5 text-indigo-600"/><div className="text-sm"><div className="font-medium">Document</div><div className="text-gray-500 text-xs">{totals.byCat.document || 0} Files</div></div></div>
+        </div>
+        <div className="border rounded-xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3"><Package className="w-5 h-5 text-sky-500"/><div className="text-sm"><div className="font-medium">Installation Files</div><div className="text-gray-500 text-xs">{totals.byCat.install || 0} Files</div></div></div>
+        </div>
+      </div>
+
+      {/* List + Details */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <div className="flex items-center justify-between mb-3">
+            <div className="relative w-72 max-w-full">
+              <SearchIcon className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"/>
+              <input value={search} onChange={(e)=>setSearch(e.target.value)} className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm" placeholder="Search"/>
+            </div>
+          </div>
+          <div className="overflow-hidden border rounded-xl">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-50 text-gray-600">
+                <tr>
+                  <th className="text-left px-4 py-2 font-medium">File name</th>
+                  <th className="text-left px-4 py-2 font-medium">Date uploaded</th>
+                  <th className="text-left px-4 py-2 font-medium">File size</th>
+                  <th className="text-left px-4 py-2 font-medium">Uploaded by</th>
+                  <th className="text-right px-4 py-2 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {filtered.map((d) => {
+                  const cat = categorize(d.contentType, d.fileName);
+                  const Icon = cat === 'image' ? ImageIcon : cat === 'video' ? VideoIcon : cat === 'install' ? Package : FileText;
+                  return (
+                    <tr key={d.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-2">
+                        <div className="flex items-center gap-2">
+                          <Icon className="w-4 h-4 text-gray-600"/>
+                          <button className="text-gray-900 font-medium hover:underline" onClick={()=>setSelected(d)}>{d.fileName}</button>
+                        </div>
+                      </td>
+                      <td className="px-4 py-2 text-gray-600">{d.createdAt ? new Date(d.createdAt).toLocaleDateString() : '—'}</td>
+                      <td className="px-4 py-2 text-gray-600">{bytesToHuman(d.sizeBytes)}</td>
+                      <td className="px-4 py-2 text-gray-600">{employee.fullName ?? `${employee.firstName} ${employee.lastName}`}</td>
+                      <td className="px-4 py-2">
+                        <div className="flex items-center justify-end gap-2">
+                          {!d.isArchived && (
+                            <button
+                              className="p-2 rounded hover:bg-gray-100"
+                              title="Archive"
+                              onClick={() => archiveDoc.mutate({ documentId: d.id, reason: 'Archived by user' })}
+                            >
+                              <Trash2 className="w-4 h-4 text-red-600"/>
+                            </button>
+                          )}
+                          <button className="p-2 rounded hover:bg-gray-100" title="Rename (coming soon)" disabled>
+                            <Pencil className="w-4 h-4 text-gray-500"/>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {filtered.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-4 py-6 text-center text-gray-500">No files found.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Details sidebar */}
+        <div className="border rounded-xl p-4 h-full">
+          <div className="text-sm font-semibold text-gray-900 mb-3">Details File</div>
+          {!selected ? (
+            <div className="text-sm text-gray-500">Select a file to see details.</div>
+          ) : (
+            <div className="space-y-3">
+              <div className="w-full h-32 bg-gray-50 border rounded-lg flex items-center justify-center">
+                <FileText className="w-10 h-10 text-red-500" />
+              </div>
+              <div className="text-sm text-gray-700">
+                <div className="text-gray-500">File Name</div>
+                <div className="font-medium break-words">{selected.fileName}</div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <div className="text-gray-500">Date Uploaded</div>
+                  <div className="font-medium">{selected.createdAt ? new Date(selected.createdAt).toLocaleDateString() : '—'}</div>
+                </div>
+                <div>
+                  <div className="text-gray-500">File size</div>
+                  <div className="font-medium">{bytesToHuman(selected.sizeBytes)}</div>
+                </div>
+                <div>
+                  <div className="text-gray-500">Content Type</div>
+                  <div className="font-medium">{selected.contentType || '—'}</div>
+                </div>
+                <div>
+                  <div className="text-gray-500">Version</div>
+                  <div className="font-medium">v{selected.version ?? 1}</div>
+                </div>
+              </div>
+              {selected.isArchived && (
+                <div className="text-xs text-red-600">Archived {selected.archivedAt ? new Date(selected.archivedAt).toLocaleDateString() : ''}</div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const EmployeeProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -327,48 +608,8 @@ const EmployeeProfile: React.FC = () => {
                 </div>
               </div>
 
-              {/* Documents */}
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Documents</h3>
-                  <button
-                    onClick={async () => {
-                      const fileName = prompt('File name?');
-                      if (!fileName) return;
-                      const typeStr = prompt('Type (1=Contract,2=Identification,3=Certification,99=Other)?', '1');
-                      const type = Number(typeStr ?? '1') || 1;
-                      const storagePath = prompt('Storage path (e.g., /uploads/employees/docs/file.pdf)?', `/uploads/employees/${employee.id}/${Date.now()}_${fileName}`);
-                      if (!storagePath) return;
-                      await addDoc.mutateAsync({ fileName, type, storagePath, sizeBytes: 1, contentType: 'application/octet-stream' }).catch(()=>{});
-                    }}
-                    className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
-                  >Add Document</button>
-                </div>
-                <div className="divide-y divide-gray-100">
-                  {(employee.documents || []).map((d) => (
-                    <div key={d.id} className="py-3 flex items-center justify-between">
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium text-gray-900 truncate">{d.fileName}</div>
-                        <div className="text-xs text-gray-500">Type {d.type} • v{d.version} • {d.isArchived ? 'Archived' : 'Active'}</div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {!d.isArchived && (
-                          <button
-                            onClick={() => {
-                              const reason = prompt('Archive reason?') || 'Archived by user';
-                              archiveDoc.mutate({ documentId: d.id, reason });
-                            }}
-                            className="px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50"
-                          >Archive</button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                  {(employee.documents || []).length === 0 && (
-                    <div className="text-sm text-gray-500">No documents uploaded.</div>
-                  )}
-                </div>
-              </div>
+              {/* Documents Dashboard */}
+              <DocumentsDashboard employee={employee} addDoc={addDoc} archiveDoc={archiveDoc} />
             </div>
 
             {/* Right: Department Overview for this employee */}

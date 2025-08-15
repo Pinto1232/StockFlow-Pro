@@ -81,7 +81,10 @@ const Checkout: React.FC = () => {
   }, [planId, monthlyPlans, annualPlans, planGroups]);
 
   const [selectedPlanKey, setSelectedPlanKey] = useState<string>('');
-  useEffect(() => { if (initialPlanKey && initialPlanKey !== selectedPlanKey) setSelectedPlanKey(initialPlanKey); }, [initialPlanKey]);
+  useEffect(() => {
+    if (!initialPlanKey) return;
+    setSelectedPlanKey(prev => (prev === initialPlanKey ? prev : initialPlanKey));
+  }, [initialPlanKey]);
 
   useEffect(() => {
     // Prefill email if authenticated
@@ -128,7 +131,7 @@ const Checkout: React.FC = () => {
     params.set('plan', chosenPlan.id);
     params.set('cadence', cadence);
     navigate({ pathname: '/checkout', search: params.toString() }, { replace: true });
-  }, [chosenPlan?.id, cadence, navigate]);
+  }, [chosenPlan?.id, cadence, navigate, chosenPlan]);
 
   // No redirect if planId missing; we default to the first available plan group
   useEffect(() => {

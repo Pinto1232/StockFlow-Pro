@@ -54,15 +54,7 @@ const Dashboard: React.FC = () => {
 
     // Entitlements and plan metadata
     const { data: entitlements } = useFeatures();
-    const planName = entitlements?.planName;
-    const isTrial = entitlements?.isTrial;
-    const trialEnd = entitlements?.trialEndDate ? new Date(entitlements.trialEndDate) : null;
-    const billingLabel = entitlements?.billingInterval;
-    const price = entitlements?.price;
-    const currency = entitlements?.currency;
     const maxUsers = entitlements?.maxUsers ?? null;
-    const maxProjects = entitlements?.maxProjects ?? null;
-    const maxStorageGB = entitlements?.maxStorageGB ?? null;
     const userLimitReached = typeof maxUsers === 'number' && userStats.activeUsers >= maxUsers;
 
     // Modal state
