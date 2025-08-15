@@ -17,9 +17,11 @@ const handleApiResponse = async (response: Response) => {
         const errorData = await response
             .json()
             .catch(() => ({ message: "An error occurred" }));
-        throw new Error(
+        const err = new Error(
             errorData.message || `HTTP error! status: ${response.status}`,
-        );
+        ) as Error & { status?: number };
+        err.status = response.status;
+        throw err;
     }
     return response.json();
 };
@@ -32,6 +34,8 @@ const getAuthHeaders = () => {
         ...(token && { Authorization: `Bearer ${token}` }),
     };
 };
+
+type ErrorWithStatus = Error & { status?: number };
 
 export const rolesService = {
     // Get all roles
@@ -46,6 +50,10 @@ export const rolesService = {
             const data = await handleApiResponse(response);
             return data.data || data; // Handle both wrapped and unwrapped responses
         } catch (error) {
+            const status = (error as ErrorWithStatus)?.status;
+            if (status === 401 || status === 403) {
+                return [];
+            }
             console.error("Error fetching roles:", error);
             throw error;
         }
@@ -63,6 +71,10 @@ export const rolesService = {
             const data = await handleApiResponse(response);
             return data.data || data;
         } catch (error) {
+            const status = (error as ErrorWithStatus)?.status;
+            if (status === 401 || status === 403) {
+                throw new Error("Not authorized to view role");
+            }
             console.error("Error fetching role:", error);
             throw error;
         }
@@ -164,6 +176,10 @@ export const rolesService = {
             const data = await handleApiResponse(response);
             return data.data || data;
         } catch (error) {
+            const status = (error as ErrorWithStatus)?.status;
+            if (status === 401 || status === 403) {
+                throw new Error("Not authorized to view role permissions");
+            }
             console.error("Error fetching role with permissions:", error);
             throw error;
         }
@@ -181,6 +197,11 @@ export const rolesService = {
             const data = await handleApiResponse(response);
             return data.data || data;
         } catch (error) {
+            const status = (error as ErrorWithStatus)?.status;
+            if (status === 401 || status === 403) {
+                // Pre-auth state; return empty to avoid UI noise
+                return [] as unknown as RoleDto[];
+            }
             console.error("Error fetching available roles:", error);
             // Fallback to all roles if endpoint doesn't exist
             return rolesService.getRoles();

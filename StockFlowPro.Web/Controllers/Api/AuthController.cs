@@ -17,6 +17,7 @@ public class AuthController : ControllerBase
 {
     private readonly IUserAuthenticationService _authenticationService;
     private readonly IRoleService _roleService;
+    private readonly IDataSourceService _dataSourceService;
     private readonly ILogger<AuthController> _logger;
     private readonly IPendingSubscriptionStore _pendingStore;
     private readonly StockFlowPro.Domain.Repositories.ISubscriptionPlanRepository _planRepository;
@@ -25,6 +26,7 @@ public class AuthController : ControllerBase
     public AuthController(
         IUserAuthenticationService authenticationService,
         IRoleService roleService,
+        IDataSourceService dataSourceService,
         ILogger<AuthController> logger,
         IPendingSubscriptionStore pendingStore,
         StockFlowPro.Domain.Repositories.ISubscriptionPlanRepository planRepository,
@@ -32,6 +34,7 @@ public class AuthController : ControllerBase
     {
         _authenticationService = authenticationService;
         _roleService = roleService;
+        _dataSourceService = dataSourceService;
         _logger = logger;
         _pendingStore = pendingStore;
         _planRepository = planRepository;
@@ -389,13 +392,26 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var roleOptions = await _roleService.GetRoleOptionsAsync();
-            var roles = roleOptions.Select(r => new { 
-                value = r.Name, 
-                label = r.DisplayName 
-            });
+            // Prefer roles observed in the Users table to reflect actual usage
+            var users = await _dataSourceService.GetAllUsersAsync(activeOnly: true);
+            var distinctRoleNames = users
+                .Select(u => u.Role.ToString())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(r => r);
 
-            return Ok(roles);
+            var userDerivedRoles = distinctRoleNames
+                .Select(r => new { value = r, label = r })
+                .ToList();
+
+            if (userDerivedRoles.Count > 0)
+            {
+                return Ok(userDerivedRoles);
+            }
+
+            // Fallback to Roles table if no users found or no roles present
+            var roleOptions = await _roleService.GetRoleOptionsAsync();
+            var rolesFromTable = roleOptions.Select(r => new { value = r.Name, label = r.DisplayName });
+            return Ok(rolesFromTable);
         }
         catch (Exception ex)
         {

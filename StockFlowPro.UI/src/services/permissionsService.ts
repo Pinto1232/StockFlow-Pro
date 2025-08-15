@@ -21,9 +21,11 @@ const handleApiResponse = async (response: Response) => {
         const errorData = await response
             .json()
             .catch(() => ({ message: "An error occurred" }));
-        throw new Error(
+        const err = new Error(
             errorData.message || `HTTP error! status: ${response.status}`,
-        );
+        ) as Error & { status?: number };
+        err.status = response.status;
+        throw err;
     }
     return response.json();
 };
@@ -36,6 +38,8 @@ const getAuthHeaders = () => {
         ...(token && { Authorization: `Bearer ${token}` }),
     };
 };
+
+type ErrorWithStatus = Error & { status?: number };
 
 export const permissionsService = {
     // Get all permissions
@@ -50,6 +54,11 @@ export const permissionsService = {
             const data = await handleApiResponse(response);
             return data.data || data; // Handle both wrapped and unwrapped responses
         } catch (error) {
+            const status = (error as ErrorWithStatus)?.status;
+            if (status === 401 || status === 403) {
+                // Not authenticated/authorized; return empty to avoid noisy errors pre-login
+                return [];
+            }
             console.error("Error fetching permissions:", error);
             throw error;
         }
@@ -95,6 +104,10 @@ export const permissionsService = {
             const data = await handleApiResponse(response);
             return data.data || data;
         } catch (error) {
+            const status = (error as ErrorWithStatus)?.status;
+            if (status === 401 || status === 403) {
+                throw new Error("Not authorized to view permission");
+            }
             console.error("Error fetching permission:", error);
             throw error;
         }
@@ -168,6 +181,10 @@ export const permissionsService = {
             const data = await handleApiResponse(response);
             return data.data || data;
         } catch (error) {
+            const status = (error as ErrorWithStatus)?.status;
+            if (status === 401 || status === 403) {
+                return [];
+            }
             console.error("Error fetching role permissions:", error);
             throw error;
         }
@@ -226,6 +243,11 @@ export const permissionsService = {
             const data = await handleApiResponse(response);
             return data.data || data;
         } catch (error) {
+            const status = (error as ErrorWithStatus)?.status;
+            if (status === 401 || status === 403) {
+                // If not logged in, treat as no permissions
+                return { userId: userId || "me", permissions: [] } as UserPermissionsDto;
+            }
             console.error("Error fetching user permissions:", error);
             throw error;
         }

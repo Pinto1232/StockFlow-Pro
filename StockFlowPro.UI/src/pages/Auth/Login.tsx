@@ -34,8 +34,11 @@ const Login: React.FC = () => {
     useEffect(() => {
         rolesService
             .getAvailableRoles()
-            .then((data) => setRoles(data))
-            .catch((error) => console.error("Failed to fetch roles:", error));
+            .then((data) => setRoles(Array.isArray(data) ? data : []))
+            .catch((error) => {
+                console.error("Failed to fetch roles:", error);
+                setRoles([]);
+            });
     }, []);
 
     const loginMutation = useLogin();
@@ -563,9 +566,10 @@ const Login: React.FC = () => {
                                                         : ""
                                                 }
                                             >
-                                                <option value="">
-                                                    Select a role...
-                                                </option>
+                                                <option value="">Select a role...</option>
+                                                {roles.length === 0 && (
+                                                    <option value="User">User</option>
+                                                )}
                                                 {roles.map((role) => (
                                                     <option
                                                         key={role.value}

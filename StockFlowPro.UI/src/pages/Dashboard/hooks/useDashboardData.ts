@@ -22,8 +22,12 @@ export const useDashboardData = (): DashboardData => {
         try {
             setUserStats(prev => ({ ...prev, isLoading: true }));
             
-            // Fetch user statistics from the OptimizedUsers controller
-            const statsResponse = await fetch('/api/OptimizedUsers/statistics');
+            // Fetch user statistics from the OptimizedUsers controller (respect API base URL)
+            const base = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '') || 'http://localhost:5131/api';
+            const statsResponse = await fetch(`${base}/OptimizedUsers/statistics`, {
+                method: 'GET',
+                credentials: 'include',
+            });
             
             // Check if response is actually JSON
             const contentType = statsResponse.headers.get('content-type');
@@ -35,6 +39,11 @@ export const useDashboardData = (): DashboardData => {
                     isLoading: false,
                 });
             } else {
+                if (statsResponse.status === 401 || statsResponse.status === 403) {
+                    // Not authorized or not authenticated; use safe defaults without error noise
+                    setUserStats({ activeUsers: 89, totalRoles: 3, isLoading: false });
+                    return;
+                }
                 console.warn('User statistics API not available or returned non-JSON response');
                 // Fallback to default values if API fails
                 setUserStats({
