@@ -26,6 +26,7 @@ export interface EmployeeDto {
   fullName: string;
   email: string;
   phoneNumber: string;
+  dateOfBirth?: string | null;
   jobTitle: string;
   departmentId?: string | null;
   departmentName?: string | null;
@@ -187,6 +188,92 @@ export function useUploadEmployeeImage(id: string) {
     onSettled: () => {
       // Force fresh data fetch to ensure consistency
       queryClient.invalidateQueries({ queryKey: employeeKeys.details() });
+      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+    },
+  });
+}
+
+// Documents
+export function useAddEmployeeDocument(id: string) {
+  return useMutation({
+    mutationFn: (payload: { fileName: string; type: number; storagePath: string; sizeBytes: number; contentType: string; issuedAt?: string | null; expiresAt?: string | null }) =>
+      http.post<EmployeeDocumentDto>(`/api/employees/${id}/documents`, payload),
+    onSuccess: (doc) => {
+      // Update detail cache
+      queryClient.setQueryData<EmployeeDto>(employeeKeys.detail(id), (prev) => prev ? { ...prev, documents: [doc, ...(prev.documents || [])] } : prev);
+      // Update lists caches
+      const lists = queryClient.getQueriesData<EmployeeDto[]>({ queryKey: employeeKeys.lists() });
+      lists.forEach(([key, data]) => {
+        if (!data) return;
+        const updated = data.map((e) => e.id === id ? { ...e, documents: [doc, ...(e.documents || [])] } : e);
+        queryClient.setQueryData<EmployeeDto[]>(key, updated);
+      });
+    },
+  });
+}
+
+export function useArchiveEmployeeDocument(id: string) {
+  return useMutation({
+    mutationFn: (vars: { documentId: string; reason: string }) => http.post<void>(`/api/employees/${id}/documents/${vars.documentId}/archive`, { reason: vars.reason }),
+    onMutate: async ({ documentId }) => {
+      await queryClient.cancelQueries({ queryKey: employeeKeys.details() });
+      const prevDetail = queryClient.getQueryData<EmployeeDto>(employeeKeys.detail(id));
+      if (prevDetail) {
+        queryClient.setQueryData<EmployeeDto>(employeeKeys.detail(id), {
+          ...prevDetail,
+          documents: (prevDetail.documents || []).map((d) => d.id === documentId ? { ...d, isArchived: true, archivedAt: new Date().toISOString() } : d),
+        });
+      }
+      return { prevDetail };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prevDetail) {
+        queryClient.setQueryData(employeeKeys.detail(id), ctx.prevDetail);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: employeeKeys.details() });
+      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+    },
+  });
+}
+
+// Onboarding / Offboarding
+export function useStartOnboarding(id: string) {
+  return useMutation({
+    mutationFn: () => http.post<EmployeeDto>(`/api/employees/${id}/onboarding/start`, {}),
+    onSuccess: (updated) => {
+      queryClient.setQueryData<EmployeeDto>(employeeKeys.detail(id), updated);
+      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+    },
+  });
+}
+
+export function useCompleteOnboardingTask(id: string) {
+  return useMutation({
+    mutationFn: (code: string) => http.post<EmployeeDto>(`/api/employees/${id}/onboarding/complete`, { code }),
+    onSuccess: (updated) => {
+      queryClient.setQueryData<EmployeeDto>(employeeKeys.detail(id), updated);
+      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+    },
+  });
+}
+
+export function useInitiateOffboarding(id: string) {
+  return useMutation({
+    mutationFn: (reason: string) => http.post<EmployeeDto>(`/api/employees/${id}/offboarding/initiate`, { reason }),
+    onSuccess: (updated) => {
+      queryClient.setQueryData<EmployeeDto>(employeeKeys.detail(id), updated);
+      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+    },
+  });
+}
+
+export function useCompleteOffboardingTask(id: string) {
+  return useMutation({
+    mutationFn: (code: string) => http.post<EmployeeDto>(`/api/employees/${id}/offboarding/complete`, { code }),
+    onSuccess: (updated) => {
+      queryClient.setQueryData<EmployeeDto>(employeeKeys.detail(id), updated);
       queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
     },
   });
