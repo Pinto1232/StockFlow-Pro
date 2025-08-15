@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { getPlansByInterval, type SubscriptionPlan } from '../../services/subscriptionService';
 import { landingService, type LandingFeature, type LandingTestimonial, type LandingStat } from '../../services/landingService';
 import { 
@@ -23,6 +23,51 @@ const Landing: React.FC = () => {
   const [stats, setStats] = useState<LandingStat[]>([]);
   const [isLoadingContent, setIsLoadingContent] = useState(true);
   const navigate = useNavigate();
+
+  // Resilient avatar component with fallback to DiceBear initials
+  const AvatarImage: React.FC<{ name: string; src?: string; size?: number; className?: string }> = ({ name, src, size = 48, className }) => {
+    // Normalize Unsplash URLs to a consistent parameter set to avoid 404s and aborts
+    const normalize = (u?: string): string | undefined => {
+      if (!u) return u;
+      try {
+        const url = new URL(u);
+        if (url.hostname.endsWith('images.unsplash.com')) {
+          // Clear existing parameters to avoid conflicts
+          url.search = '';
+          // Set consistent parameters
+          url.searchParams.set('auto', 'format');
+          url.searchParams.set('fit', 'crop');
+          url.searchParams.set('w', String(size));
+          url.searchParams.set('h', String(size));
+          url.searchParams.set('crop', 'faces');
+          url.searchParams.set('q', '80');
+          return url.toString();
+        }
+      } catch {
+        /* Ignore invalid URL values; fallback logic will handle image errors. */
+      }
+      return u;
+    };
+    const [imgSrc, setImgSrc] = useState<string | undefined>(normalize(src));
+    const fallback = useMemo(() => {
+      const seed = encodeURIComponent(name || 'User');
+      // DiceBear initials (no auth, cacheable)
+      return `https://api.dicebear.com/7.x/initials/svg?seed=${seed}&radius=8&backgroundType=gradientLinear&fontWeight=600`;
+    }, [name]);
+    const onError = () => setImgSrc(fallback);
+    return (
+      <img
+        src={imgSrc || fallback}
+        onError={onError}
+        width={size}
+        height={size}
+        alt={name}
+        className={className}
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
+    );
+  };
 
   const loadPlans = async (interval: 'Monthly' | 'Annual') => {
     const p = await getPlansByInterval(interval);
@@ -81,13 +126,13 @@ const Landing: React.FC = () => {
           createdAt: new Date().toISOString()
         }
       ]);
-      setTestimonials([
+    setTestimonials([
         {
           id: '1',
           name: "Sarah Johnson",
           role: "HR Director",
           company: "TechCorp Solutions",
-          imageUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=64&h=64&fit=crop&crop=face",
+          imageUrl: undefined, // Use DiceBear fallback directly
           quote: "StockFlow Pro HR transformed our people management. We reduced administrative time by 60% and improved employee satisfaction significantly.",
           sortOrder: 1,
           isActive: true,
@@ -98,7 +143,7 @@ const Landing: React.FC = () => {
           name: "Michael Chen",
           role: "Operations Manager",
           company: "GrowthStart Inc",
-          imageUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=64&h=64&fit=crop&crop=face",
+          imageUrl: undefined, // Use DiceBear fallback directly
           quote: "The automated compliance features saved us from potential legal issues. The reporting dashboard gives us insights we never had before.",
           sortOrder: 2,
           isActive: true,
@@ -109,7 +154,7 @@ const Landing: React.FC = () => {
           name: "Emily Rodriguez",
           role: "CEO",
           company: "InnovateLab",
-          imageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=64&h=64&fit=crop&crop=face",
+          imageUrl: undefined, // Use DiceBear fallback directly
           quote: "As a growing company, we needed HR tools that could scale with us. StockFlow Pro delivered exactly that and more.",
           sortOrder: 3,
           isActive: true,
@@ -433,9 +478,10 @@ const Landing: React.FC = () => {
                   <Quote className="w-8 h-8 text-blue-600 mb-4" />
                   <p className="text-gray-700 mb-6 leading-relaxed italic">"{testimonial.quote}"</p>
                   <div className="flex items-center gap-4">
-                    <img 
-                      src={testimonial.imageUrl} 
-                      alt={testimonial.name}
+                    <AvatarImage 
+                      name={testimonial.name}
+                      src={testimonial.imageUrl}
+                      size={48}
                       className="w-12 h-12 rounded-full object-cover"
                     />
                     <div>
