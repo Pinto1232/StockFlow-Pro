@@ -1,3 +1,5 @@
+using StockFlowPro.Application.DTOs;
+
 namespace StockFlowPro.Application.Interfaces;
 
 public interface IRealTimeService
@@ -6,6 +8,10 @@ public interface IRealTimeService
     Task BroadcastInvoiceUpdateAsync(int invoiceId, string status, string userId);
     Task BroadcastUserActivityAsync(string userId, string activity);
     Task BroadcastSystemMetricsAsync(Dictionary<string, object> metrics);
+
+    // Employee documents real-time updates
+    Task BroadcastEmployeeDocumentAddedAsync(Guid employeeId, EmployeeDocumentDto document);
+
     Task JoinUserGroupAsync(string connectionId, string userId);
     Task LeaveUserGroupAsync(string connectionId, string userId);
     Task JoinRoleGroupAsync(string connectionId, string role);

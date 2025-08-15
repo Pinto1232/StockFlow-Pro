@@ -120,6 +120,11 @@ class SignalRServiceImpl implements SignalRService {
         });
 
         // Handle specific hub methods
+        this.connection.on('ConnectionEstablished', (connectionId) => {
+            console.log('SignalR connection established with ID:', connectionId);
+            this.updateConnectionState(ConnectionState.Connected);
+        });
+
         this.connection.on('UserNotification', (notification) => {
             console.log('Received user notification:', notification);
             
@@ -211,6 +216,19 @@ class SignalRServiceImpl implements SignalRService {
                     type: 'LowStockAlert',
                     entityId: data.id || data.productId,
                     data: data,
+                    timestamp: new Date().toISOString()
+                }
+            }));
+        });
+
+        // Employee documents
+        this.connection.on('EmployeeDocumentAdded', (payload) => {
+            console.log('Received EmployeeDocumentAdded:', payload);
+            window.dispatchEvent(new CustomEvent('signalr-employee-event', {
+                detail: {
+                    type: 'EmployeeDocumentAdded',
+                    employeeId: payload.employeeId,
+                    document: payload.document,
                     timestamp: new Date().toISOString()
                 }
             }));
@@ -345,7 +363,7 @@ class SignalRServiceImpl implements SignalRService {
                 // Add timeout to prevent hanging connections
                 const connectionPromise = this.connection!.start();
                 const timeoutPromise = new Promise((_, reject) => {
-                    setTimeout(() => reject(new Error('Connection timeout')), 15000);
+                    setTimeout(() => reject(new Error('Connection timeout after 15 seconds')), 15000);
                 });
                 
                 await Promise.race([connectionPromise, timeoutPromise]);
@@ -420,20 +438,32 @@ class SignalRServiceImpl implements SignalRService {
 
     // Method to send messages to the hub
     public async sendMessage(methodName: string, ...args: unknown[]): Promise<void> {
-        if (this.connection?.state === signalR.HubConnectionState.Connected) {
-            try {
-                await this.connection.invoke(methodName, ...args);
-            } catch (error) {
-                console.error(`Error sending message ${methodName}:`, error);
-                throw error;
-            }
-        } else {
+        if (!this.connection) {
+            throw new Error('SignalR connection not initialized');
+        }
+        
+        if (this.connection.state !== signalR.HubConnectionState.Connected) {
             throw new Error('SignalR connection is not established');
+        }
+        
+        try {
+            await this.connection.invoke(methodName, ...args);
+        } catch (error) {
+            console.error(`Error sending message ${methodName}:`, error);
+            throw error;
         }
     }
 
     // Method to join a group
     public async joinGroup(groupName: string): Promise<void> {
+        if (!this.connection) {
+            throw new Error('SignalR connection not initialized');
+        }
+        
+        if (this.connection.state !== signalR.HubConnectionState.Connected) {
+            throw new Error('SignalR connection is not established');
+        }
+        
         return this.sendMessage('JoinGroup', groupName);
     }
 

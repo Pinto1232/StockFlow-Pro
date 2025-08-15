@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockFlowPro.Application.DTOs;
 using StockFlowPro.Application.Features.Employees;
+using StockFlowPro.Application.Interfaces;
 using StockFlowPro.Domain.Entities;
 using StockFlowPro.Domain.Exceptions;
 using StockFlowPro.Web.Authorization;
@@ -17,11 +18,13 @@ public class EmployeesController : ApiBaseController
 {
     private readonly IMediator _mediator;
     private readonly IWebHostEnvironment _env;
+    private readonly IRealTimeService _realTime;
 
-    public EmployeesController(IMediator mediator, IWebHostEnvironment env)
+    public EmployeesController(IMediator mediator, IWebHostEnvironment env, IRealTimeService realTime)
     {
         _mediator = mediator;
         _env = env;
+        _realTime = realTime;
     }
 
     [HttpGet]
@@ -93,14 +96,40 @@ public class EmployeesController : ApiBaseController
         return Ok(new { imageUrl = item.ImageUrl });
     }
 
-    // Documents
+    // Documents - accept multipart/form-data file uploads
     [HttpPost("{id:guid}/documents")]
+    [RequestSizeLimit(100 * 1024 * 1024)] // 100MB
+    [Consumes("multipart/form-data")]
     [Permission(Permissions.Users.Edit)]
-    public async Task<ActionResult<EmployeeDocumentDto>> AddDocument(Guid id, [FromBody] AddEmployeeDocumentRequest request)
+    public async Task<ActionResult<EmployeeDocumentDto>> AddDocument(Guid id, [FromForm] IFormFile? file, [FromForm] DocumentType? type, [FromForm] DateTime? issuedAt, [FromForm] DateTime? expiresAt)
     {
         try
         {
-            var doc = await _mediator.Send(new AddEmployeeDocumentCommand(id, request.FileName, request.Type, request.StoragePath, request.SizeBytes, request.ContentType, request.IssuedAt, request.ExpiresAt));
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { message = "No file uploaded" });
+            }
+
+            var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "employees");
+            Directory.CreateDirectory(uploadsDir);
+
+            var safeFileName = $"{id}_{DateTime.UtcNow:yyyyMMddHHmmss}_{Path.GetFileName(file.FileName)}";
+            var filePath = Path.Combine(uploadsDir, safeFileName);
+            await using (var stream = System.IO.File.Create(filePath))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var relativeUrl = $"/uploads/employees/{safeFileName}";
+
+            // Use provided type or default to Other if missing
+            var docType = type ?? DocumentType.Other;
+
+            var doc = await _mediator.Send(new AddEmployeeDocumentCommand(id, file.FileName, docType, relativeUrl, file.Length, file.ContentType ?? "application/octet-stream", issuedAt, expiresAt));
+
+            // Broadcast real-time update so UI can refresh automatically
+            await _realTime.BroadcastEmployeeDocumentAddedAsync(id, doc);
+
             return Ok(doc);
         }
         catch (KeyNotFoundException)
@@ -134,6 +163,29 @@ public class EmployeesController : ApiBaseController
     {
         var ok = await _mediator.Send(new ArchiveEmployeeDocumentCommand(id, documentId, request.Reason));
         return ok ? NoContent() : NotFound();
+    }
+
+    [HttpDelete("{id:guid}/documents/{documentId:guid}")]
+    [Permission(Permissions.Users.Edit)]
+    public async Task<IActionResult> DeleteDocument(Guid id, Guid documentId)
+    {
+        try
+        {
+            var ok = await _mediator.Send(new DeleteEmployeeDocumentCommand(id, documentId));
+            return ok ? NoContent() : NotFound();
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+        catch (DomainException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return Problem(title: "Unexpected error while deleting document", detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+        }
     }
 
     // Onboarding/Offboarding

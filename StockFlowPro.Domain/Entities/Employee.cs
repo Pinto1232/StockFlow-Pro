@@ -294,6 +294,14 @@ public class Employee : IEntity
         Touch();
     }
 
+    public void DeleteDocument(Guid documentId)
+    {
+        var doc = _documents.FirstOrDefault(d => d.Id == documentId)
+                  ?? throw new DomainException("Document not found.");
+        _documents.Remove(doc);
+        Touch();
+    }
+
     public void ReplaceDocument(Guid documentId, string newFileName, string newStoragePath, long sizeBytes, string contentType)
     {
         var doc = _documents.FirstOrDefault(d => d.Id == documentId)

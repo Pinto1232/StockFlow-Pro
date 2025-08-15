@@ -454,8 +454,8 @@ app.MapControllers();
 // Map health check endpoint for Docker containers
 app.MapHealthChecks("/health");
 
-// Map SignalR hub
-app.MapHub<StockFlowHub>("/stockflowhub");
+// Map SignalR hub with CORS policy
+app.MapHub<StockFlowHub>("/stockflowhub").RequireCors("SignalRPolicy");
 
 await app.RunAsync();
 

@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   Home,
@@ -17,7 +17,10 @@ import {
   Video as VideoIcon,
   Package,
   Trash2,
-  Pencil,
+  Archive,
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
 } from "lucide-react";
 import {
   useEmployee,
@@ -26,13 +29,18 @@ import {
   useUpdateEmployee,
   useAddEmployeeDocument,
   useArchiveEmployeeDocument,
+  useDeleteEmployeeDocument,
   useStartOnboarding,
   useCompleteOnboardingTask,
   useInitiateOffboarding,
   useCompleteOffboardingTask,
-  type EmployeeDto,
-  type EmployeeDocumentDto,
-} from "../../hooks/employees";
+  EmployeeDto,
+  EmployeeDocumentDto,
+} from '../../hooks/employees';
+
+import { queryClient } from '../../services/queryClient';
+import { employeeKeys } from '../../services/queryKeys';
+import MessagingPanel from '../../components/MessagingPanel';
 
 function buildFullName(first?: string | null, last?: string | null) {
   return `${first ?? ""} ${last ?? ""}`.trim();
@@ -57,9 +65,8 @@ function resolveImageUrl(url?: string | null, cacheBusting: boolean = false) {
   }
   const base = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '');
   const origin = base.endsWith('/api') ? base.slice(0, -4) : base;
-  if (!origin) return url; // same-origin fallback in dev proxy setups
+  if (!origin) return url;
   const fullUrl = url.startsWith('/') ? `${origin}${url}` : `${origin}/${url}`;
-  
   if (cacheBusting) {
     const separator = fullUrl.includes('?') ? '&' : '?';
     return `${fullUrl}${separator}t=${Date.now()}`;
@@ -120,11 +127,109 @@ const DocumentsDashboard: React.FC<{
   employee: EmployeeDto;
   addDoc: ReturnType<typeof useAddEmployeeDocument>;
   archiveDoc: ReturnType<typeof useArchiveEmployeeDocument>;
-}> = ({ employee, addDoc, archiveDoc }) => {
+  deleteDoc: ReturnType<typeof useDeleteEmployeeDocument>;
+}> = ({ employee, addDoc, archiveDoc, deleteDoc }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<EmployeeDocumentDto | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const itemsPerPage = 4;
   const docs = useMemo(() => employee.documents || [], [employee.documents]);
+
+  // Helpers: delete/archive with confirmation and selection fallback
+  const handleDelete = (doc: EmployeeDocumentDto) => {
+    if (!confirm(`Are you sure you want to delete "${doc.fileName}"? This action cannot be undone.`)) return;
+    deleteDoc.mutate(doc.id, {
+      onSuccess: () => {
+        // Update selection
+        if (selected?.id === doc.id) {
+          const idx = paginatedDocs.findIndex((x) => x.id === doc.id);
+          const next = paginatedDocs[idx + 1] || paginatedDocs[idx - 1] || null;
+          setSelected(next);
+        }
+        // Refresh the employee data to get updated documents list
+        queryClient.invalidateQueries({ queryKey: employeeKeys.detail(employee.id) });
+      },
+    });
+  };
+
+  const handleArchive = (doc: EmployeeDocumentDto) => {
+    const reason = prompt(`Archive "${doc.fileName}"? Enter reason (optional):`) || 'Archived by user';
+    archiveDoc.mutate({ documentId: doc.id, reason }, {
+      onSuccess: () => {
+        // Update selection
+        if (selected?.id === doc.id) {
+          const idx = paginatedDocs.findIndex((x) => x.id === doc.id);
+          let next: EmployeeDocumentDto | null = null;
+          for (let i = idx + 1; i < paginatedDocs.length; i++) {
+            if (!paginatedDocs[i].isArchived) { next = paginatedDocs[i]; break; }
+          }
+          if (!next) {
+            for (let i = idx - 1; i >= 0; i--) {
+              if (!paginatedDocs[i].isArchived) { next = paginatedDocs[i]; break; }
+            }
+          }
+          setSelected(next);
+        }
+        // Refresh the employee data to get updated documents list
+        queryClient.invalidateQueries({ queryKey: employeeKeys.detail(employee.id) });
+      },
+    });
+  };
+
+  // Auto-refresh mechanism for documents
+  useEffect(() => {
+    if (!employee?.id) return;
+
+    // Comprehensive refresh function
+    const refreshDocs = async () => {
+      try {
+        await queryClient.invalidateQueries({ queryKey: employeeKeys.detail(employee.id) });
+        await queryClient.refetchQueries({ queryKey: employeeKeys.detail(employee.id) });
+      } catch (error) {
+        console.error('Failed to refresh documents:', error);
+      }
+    };
+
+    // Listen to successful document uploads
+    const handleDocumentAdded = (evt: Event) => {
+      const detail = (evt as CustomEvent).detail as { type: string; employeeId: string; document: EmployeeDocumentDto };
+      if (detail?.type === 'EmployeeDocumentAdded' && detail.employeeId === employee.id) {
+        // Optimistically update the cache first
+        queryClient.setQueryData<EmployeeDto>(employeeKeys.detail(employee.id), (prev) =>
+          prev ? { ...prev, documents: [detail.document, ...(prev.documents || [])] } : prev
+        );
+        // Then refresh to ensure consistency
+        setTimeout(refreshDocs, 200);
+      }
+    };
+
+    // Listen to document deletion/archival
+    const handleDocumentUpdated = (evt: Event) => {
+      const detail = (evt as CustomEvent).detail as { type: string; employeeId: string };
+      if ((detail?.type === 'EmployeeDocumentDeleted' || detail?.type === 'EmployeeDocumentArchived') && detail.employeeId === employee.id) {
+        refreshDocs();
+      }
+    };
+
+    // Set up event listeners
+    window.addEventListener('signalr-employee-event', handleDocumentAdded as EventListener);
+    window.addEventListener('signalr-employee-event', handleDocumentUpdated as EventListener);
+
+    return () => {
+      window.removeEventListener('signalr-employee-event', handleDocumentAdded as EventListener);
+      window.removeEventListener('signalr-employee-event', handleDocumentUpdated as EventListener);
+    };
+  }, [employee?.id]);
+
+  // Auto-select the first document when the list first appears (but don't override a user selection)
+  useEffect(() => {
+    if (!selected && docs.length > 0) {
+      setSelected(docs[0]);
+    }
+  }, [docs, selected]);
 
   const totals = useMemo(() => {
     const byCat: Record<string, number> = { video: 0, image: 0, document: 0, install: 0, other: 0 };
@@ -139,7 +244,6 @@ const DocumentsDashboard: React.FC<{
 
   // Assume a soft quota so the bar has context (adjust easily later)
   const SOFT_QUOTA = 150 * 1024 * 1024 * 1024; // 150 GB
-  const usedPct = Math.min(100, (totals.size / SOFT_QUOTA) * 100);
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -150,28 +254,75 @@ const DocumentsDashboard: React.FC<{
     );
   }, [docs, search]);
 
+  // Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const showPagination = filtered.length > itemsPerPage;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedDocs = filtered.slice(startIndex, endIndex);
+
   const onFilesChosen = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
+    
     // Iterate reversed because our cache update prepends; this preserves the user's selection order
     const ordered = Array.from(files).reverse();
-    for (const file of ordered) {
-      const storagePath = `/uploads/employees/${employee.id}/${Date.now()}_${file.name}`;
-      const contentType = file.type || 'application/octet-stream';
-      const sizeBytes = file.size;
+    
+    // Process files concurrently for better UX (optimistic updates will show immediately)
+    const uploadPromises = ordered.map(async (file) => {
       // map to backend numeric type; default to 99 (Other)
       const type = (() => {
-        const cat = categorize(contentType, file.name);
+        const cat = categorize(file.type, file.name);
         if (cat === 'document') return 1; // Contract/Doc
         if (cat === 'image') return 3; // Certification/Image-ish
         return 99; // Other
       })();
+      
       try {
-        await addDoc.mutateAsync({ fileName: file.name, type, storagePath, sizeBytes, contentType });
-      } catch {
-        // errors handled globally; continue with next file
+        await addDoc.mutateAsync({ file, type });
+      } catch (error) {
+        // Error handling is done in the mutation's onError callback
+        console.error(`Failed to upload ${file.name}:`, error);
       }
-    }
+    });
+    
+    // Wait for all uploads to complete
+    await Promise.allSettled(uploadPromises);
+    
+    // Force refresh after all uploads
+    setTimeout(() => {
+      queryClient.invalidateQueries({ queryKey: employeeKeys.detail(employee.id) });
+    }, 500);
+    
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  // Manual refresh function with visual feedback
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      // Clear the current cache to force fresh data
+      await queryClient.invalidateQueries({ queryKey: employeeKeys.detail(employee.id) });
+      
+      // Also refetch immediately to ensure we get the latest data
+      await queryClient.refetchQueries({ queryKey: employeeKeys.detail(employee.id) });
+      
+      // Reset pagination to first page to show newest data
+      setCurrentPage(1);
+      
+      // Clear search to show all documents
+      setSearch('');
+      
+    } catch (error) {
+      console.error('Failed to refresh documents:', error);
+    } finally {
+      // Add a small delay to show the loading state
+      setTimeout(() => setIsRefreshing(false), 300);
+    }
   };
 
   return (
@@ -181,26 +332,76 @@ const DocumentsDashboard: React.FC<{
           <h3 className="text-xl font-semibold text-gray-900">Documents</h3>
           <p className="text-sm text-gray-500">Effortlessly upload and manage files for this employee</p>
         </div>
-        <button onClick={() => fileInputRef.current?.click()} className="inline-flex items-center gap-2 px-3 py-2 bg-gray-900 text-white rounded-lg text-sm">
-          <Upload className="w-4 h-4" /> Quick Upload
+        <button 
+          onClick={() => fileInputRef.current?.click()} 
+          className={`inline-flex items-center gap-2 px-3 py-2 bg-gray-900 text-white rounded-lg text-sm ${addDoc.isPending ? 'opacity-75 cursor-not-allowed' : 'hover:bg-gray-800'}`}
+          disabled={addDoc.isPending}
+        >
+          {addDoc.isPending ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              Uploading...
+            </>
+          ) : (
+            <>
+              <Upload className="w-4 h-4" /> Quick Upload
+            </>
+          )}
         </button>
       </div>
 
       {/* Upload area */}
       <div
-        className="relative border-2 border-dashed border-gray-300 rounded-xl p-8 mb-6 text-center bg-gray-50 hover:bg-gray-100 transition"
+        className={`relative border-2 border-dashed rounded-xl p-8 mb-6 text-center transition-all duration-200 cursor-pointer ${
+          isDragOver 
+            ? 'border-blue-400 bg-blue-50 scale-[1.02]' 
+            : addDoc.isPending 
+              ? 'border-blue-300 bg-blue-50' 
+              : 'border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400'
+        }`}
+        onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(true); }}
+        onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); }}
         onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-        onDrop={(e) => { e.preventDefault(); onFilesChosen(e.dataTransfer?.files || null); }}
-        onClick={() => fileInputRef.current?.click()}
+        onDrop={(e) => { 
+          e.preventDefault(); 
+          e.stopPropagation(); 
+          setIsDragOver(false); 
+          onFilesChosen(e.dataTransfer?.files || null); 
+        }}
+        onClick={() => !addDoc.isPending && fileInputRef.current?.click()}
         role="button"
         tabIndex={0}
       >
         <input ref={fileInputRef} className="hidden" type="file" multiple onChange={(e) => onFilesChosen(e.currentTarget.files)} />
-        <div className="mx-auto inline-flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-sm mb-3">
-          <Upload className="w-5 h-5 text-gray-700" />
+        <div className={`mx-auto inline-flex items-center justify-center w-12 h-12 rounded-full shadow-sm mb-3 transition-all duration-200 ${
+          isDragOver ? 'bg-blue-100 scale-110' : addDoc.isPending ? 'bg-blue-100' : 'bg-white'
+        }`}>
+          {addDoc.isPending ? (
+            <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          ) : (
+            <Upload className={`w-5 h-5 transition-colors ${isDragOver ? 'text-blue-600' : 'text-gray-700'}`} />
+          )}
         </div>
-        <div className="text-gray-700 font-medium">Click to upload or drag and drop</div>
-        <div className="text-xs text-gray-500 mt-1">PDF, images, videos or installers</div>
+        <div className={`font-medium transition-colors ${
+          isDragOver ? 'text-blue-700' : addDoc.isPending ? 'text-blue-600' : 'text-gray-700'
+        }`}>
+          {addDoc.isPending ? 'Processing files...' : isDragOver ? 'Drop files here' : 'Click to upload or drag and drop'}
+        </div>
+        <div className={`text-xs mt-1 transition-colors ${
+          isDragOver ? 'text-blue-600' : addDoc.isPending ? 'text-blue-500' : 'text-gray-500'
+        }`}>
+          {addDoc.isPending ? 'Please wait while files are being uploaded' : 'PDF, images, videos or installers'}
+        </div>
+        
+        {/* Upload progress indicator */}
+        {addDoc.isPending && (
+          <div className="absolute inset-0 bg-blue-50 bg-opacity-90 rounded-xl flex items-center justify-center">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              <div className="text-blue-700 font-medium">Uploading documents...</div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Usage bar */}
@@ -209,8 +410,52 @@ const DocumentsDashboard: React.FC<{
           <div>{bytesToHuman(SOFT_QUOTA - totals.size)} available from 150GB</div>
           <div>{bytesToHuman(totals.size)} used</div>
         </div>
-        <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-          <div className="h-full bg-blue-500" style={{ width: `${usedPct}%` }} />
+        <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden flex">
+          {/* Video files segment */}
+          {totals.byCat.video > 0 && (
+            <div 
+              className="h-full bg-blue-500" 
+              style={{ 
+                width: `${Math.max(0.5, (docs.filter(d => categorize(d.contentType, d.fileName) === 'video').reduce((sum, d) => sum + (d.sizeBytes || 0), 0) / totals.size) * 100)}%` 
+              }} 
+            />
+          )}
+          {/* Image files segment */}
+          {totals.byCat.image > 0 && (
+            <div 
+              className="h-full bg-green-500" 
+              style={{ 
+                width: `${Math.max(0.5, (docs.filter(d => categorize(d.contentType, d.fileName) === 'image').reduce((sum, d) => sum + (d.sizeBytes || 0), 0) / totals.size) * 100)}%` 
+              }} 
+            />
+          )}
+          {/* Document files segment */}
+          {totals.byCat.document > 0 && (
+            <div 
+              className="h-full bg-indigo-500" 
+              style={{ 
+                width: `${Math.max(0.5, (docs.filter(d => categorize(d.contentType, d.fileName) === 'document').reduce((sum, d) => sum + (d.sizeBytes || 0), 0) / totals.size) * 100)}%` 
+              }} 
+            />
+          )}
+          {/* Installation files segment */}
+          {totals.byCat.install > 0 && (
+            <div 
+              className="h-full bg-sky-300" 
+              style={{ 
+                width: `${Math.max(0.5, (docs.filter(d => categorize(d.contentType, d.fileName) === 'install').reduce((sum, d) => sum + (d.sizeBytes || 0), 0) / totals.size) * 100)}%` 
+              }} 
+            />
+          )}
+          {/* Other files segment */}
+          {totals.byCat.other > 0 && (
+            <div 
+              className="h-full bg-gray-400" 
+              style={{ 
+                width: `${Math.max(0.5, (docs.filter(d => categorize(d.contentType, d.fileName) === 'other').reduce((sum, d) => sum + (d.sizeBytes || 0), 0) / totals.size) * 100)}%` 
+              }} 
+            />
+          )}
         </div>
         <div className="flex items-center gap-4 mt-2 text-xs text-gray-600">
           <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500 inline-block"/> Video</span>
@@ -244,60 +489,121 @@ const DocumentsDashboard: React.FC<{
               <SearchIcon className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"/>
               <input value={search} onChange={(e)=>setSearch(e.target.value)} className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm" placeholder="Search"/>
             </div>
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className={`inline-flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors ${
+                isRefreshing ? 'opacity-75 cursor-not-allowed' : ''
+              }`}
+              title="Refresh documents"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="text-sm">{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
+            </button>
           </div>
-          <div className="overflow-hidden border rounded-xl">
-            <table className="min-w-full text-sm">
-              <thead className="bg-gray-50 text-gray-600">
-                <tr>
-                  <th className="text-left px-4 py-2 font-medium">File name</th>
-                  <th className="text-left px-4 py-2 font-medium">Date uploaded</th>
-                  <th className="text-left px-4 py-2 font-medium">File size</th>
-                  <th className="text-left px-4 py-2 font-medium">Uploaded by</th>
-                  <th className="text-right px-4 py-2 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {filtered.map((d) => {
-                  const cat = categorize(d.contentType, d.fileName);
-                  const Icon = cat === 'image' ? ImageIcon : cat === 'video' ? VideoIcon : cat === 'install' ? Package : FileText;
-                  return (
-                    <tr key={d.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-2">
-                        <div className="flex items-center gap-2">
-                          <Icon className="w-4 h-4 text-gray-600"/>
-                          <button className="text-gray-900 font-medium hover:underline" onClick={()=>setSelected(d)}>{d.fileName}</button>
-                        </div>
-                      </td>
-                      <td className="px-4 py-2 text-gray-600">{d.createdAt ? new Date(d.createdAt).toLocaleDateString() : '—'}</td>
-                      <td className="px-4 py-2 text-gray-600">{bytesToHuman(d.sizeBytes)}</td>
-                      <td className="px-4 py-2 text-gray-600">{employee.fullName ?? `${employee.firstName} ${employee.lastName}`}</td>
-                      <td className="px-4 py-2">
-                        <div className="flex items-center justify-end gap-2">
-                          {!d.isArchived && (
-                            <button
-                              className="p-2 rounded hover:bg-gray-100"
-                              title="Archive"
-                              onClick={() => archiveDoc.mutate({ documentId: d.id, reason: 'Archived by user' })}
-                            >
-                              <Trash2 className="w-4 h-4 text-red-600"/>
-                            </button>
-                          )}
-                          <button className="p-2 rounded hover:bg-gray-100" title="Rename (coming soon)" disabled>
-                            <Pencil className="w-4 h-4 text-gray-500"/>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {filtered.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="px-4 py-6 text-center text-gray-500">No files found.</td>
+            <div className="overflow-auto border rounded-xl max-h-96">
+              <table className="min-w-full text-sm table-fixed">
+                <thead>
+                  <tr className="bg-gray-50 text-left text-xs text-gray-500">
+                    <th className="p-3 whitespace-nowrap">File name</th>
+                    <th className="p-3 whitespace-nowrap">Date uploaded</th>
+                    <th className="p-3 whitespace-nowrap">File size</th>
+                    <th className="p-3 text-right whitespace-nowrap">Actions</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y bg-white">
+                  {paginatedDocs.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="p-6 text-center text-gray-500">No files found.</td>
+                    </tr>
+                  )}
+                  {paginatedDocs.map((doc) => {
+                    const isSel = selected?.id === doc.id;
+                    const category = categorize(doc.contentType, doc.fileName);
+                    const displayDate = doc.createdAt ? new Date(doc.createdAt).toLocaleDateString() : '-';
+                    return (
+                      <tr
+                        key={doc.id}
+                        onClick={() => setSelected(doc)}
+                        className={`cursor-pointer ${isSel ? 'bg-gray-50' : 'hover:bg-gray-50'}`}
+                      >
+                        <td className="p-3 align-top">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 flex-shrink-0 rounded-md bg-gray-100 flex items-center justify-center">
+                              {category === 'image' ? (
+                                <ImageIcon className="w-5 h-5 text-green-600" />
+                              ) : category === 'video' ? (
+                                <VideoIcon className="w-5 h-5 text-blue-600" />
+                              ) : category === 'document' ? (
+                                <FileText className="w-5 h-5 text-indigo-600" />
+                              ) : category === 'install' ? (
+                                <Package className="w-5 h-5 text-sky-500" />
+                              ) : (
+                                <FileText className="w-5 h-5 text-gray-500" />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-medium text-gray-900 truncate">{doc.fileName}</div>
+                              <div className="text-xs text-gray-500 truncate">{doc.contentType || ''}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-3 align-top text-sm text-gray-600">{displayDate}</td>
+                        <td className="p-3 align-top text-sm text-gray-600">{bytesToHuman(doc.sizeBytes)}</td>
+                        <td className="p-3 align-top text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {!doc.isArchived && (
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); handleArchive(doc); }} 
+                                className="p-2 rounded transition-colors hover:bg-gray-100"
+                                title="Archive"
+                              >
+                                <Archive className="w-4 h-4 text-orange-600" />
+                              </button>
+                            )}
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); handleDelete(doc); }} 
+                              className="p-2 rounded transition-colors hover:bg-gray-100"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4 text-red-600" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* Pagination */}
+            {showPagination && (
+              <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
+                <div className="flex items-center text-sm text-gray-500">
+                  Showing {startIndex + 1} to {Math.min(endIndex, filtered.length)} of {filtered.length} files
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="p-2 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="px-3 py-1 text-sm font-medium">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="p-2 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
         </div>
 
         {/* Details sidebar */}
@@ -346,11 +652,30 @@ const DocumentsDashboard: React.FC<{
 const EmployeeProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { data: employee, isLoading, isError } = useEmployee(id);
+
+  // Listen to real-time document events and update query cache
+  useEffect(() => {
+    if (!id) return;
+
+    const handler = (evt: Event) => {
+      const detail = (evt as CustomEvent).detail as { type: string; employeeId: string; document: EmployeeDocumentDto };
+      if (detail?.type === 'EmployeeDocumentAdded' && detail.employeeId === id) {
+        // Prepend to detail cache
+        queryClient.setQueryData<EmployeeDto>(employeeKeys.detail(id), (prev) =>
+          prev ? { ...prev, documents: [detail.document, ...(prev.documents || [])] } : prev
+        );
+      }
+    };
+
+    window.addEventListener('signalr-employee-event', handler as EventListener);
+    return () => window.removeEventListener('signalr-employee-event', handler as EventListener);
+  }, [id]);
   const { data: allEmployees } = useEmployees();
   const { mutateAsync: uploadImage, isPending: isUploading } = useUploadEmployeeImage(id ?? "");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const addDoc = useAddEmployeeDocument(id ?? "");
   const archiveDoc = useArchiveEmployeeDocument(id ?? "");
+  const deleteDoc = useDeleteEmployeeDocument(id ?? "");
   const startOnboarding = useStartOnboarding(id ?? "");
   const completeOnboardingTask = useCompleteOnboardingTask(id ?? "");
   const initiateOffboarding = useInitiateOffboarding(id ?? "");
@@ -609,10 +934,10 @@ const EmployeeProfile: React.FC = () => {
               </div>
 
               {/* Documents Dashboard */}
-              <DocumentsDashboard employee={employee} addDoc={addDoc} archiveDoc={archiveDoc} />
+              <DocumentsDashboard employee={employee} addDoc={addDoc} archiveDoc={archiveDoc} deleteDoc={deleteDoc} />
             </div>
 
-            {/* Right: Department Overview for this employee */}
+            {/* Right: Department Overview + Lifecycle + Messaging */}
             <div className="space-y-6">
               <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Department Overview</h3>
@@ -674,6 +999,11 @@ const EmployeeProfile: React.FC = () => {
                   <div>Status: <span className="font-medium">{statusToLabel(employee.status)}</span></div>
                   {employee.hireDate && (<div>Hired: {new Date(employee.hireDate).toLocaleDateString()}</div>)}
                 </div>
+              </div>
+
+              {/* Messaging Panel */}
+              <div className="h-[500px]">
+                <MessagingPanel />
               </div>
             </div>
           </div>
