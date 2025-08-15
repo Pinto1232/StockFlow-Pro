@@ -184,6 +184,13 @@ public class AuthController : ControllerBase
             }
 
             // Convert to RegisterUserDto
+            var selectedRole = Domain.Enums.UserRole.User;
+            if (!string.IsNullOrWhiteSpace(request.Role)
+                && Enum.TryParse<Domain.Enums.UserRole>(request.Role, true, out var parsedRole))
+            {
+                selectedRole = parsedRole;
+            }
+
             var registerUserDto = new RegisterUserDto
             {
                 FirstName = request.FirstName,
@@ -193,7 +200,7 @@ public class AuthController : ControllerBase
                 DateOfBirth = request.DateOfBirth,
                 Password = request.Password,
                 ConfirmPassword = request.ConfirmPassword,
-                Role = Domain.Enums.UserRole.User // Default role for public registration
+                Role = selectedRole
             };
 
             // Register the user
@@ -443,6 +450,11 @@ public class RegisterRequest
     [Required(ErrorMessage = "Password confirmation is required")]
     [Compare("Password", ErrorMessage = "Password and confirmation password do not match")]
     public string ConfirmPassword { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Optional role name selected during registration (e.g., User, Manager, Admin, Supervisor)
+    /// </summary>
+    public string? Role { get; set; }
 }
 
 public class ForgotPasswordRequest

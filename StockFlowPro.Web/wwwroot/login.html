@@ -338,8 +338,6 @@
                                     <label for="role">Role</label>
                                     <select id="role" name="role">
                                         <option value="">Select a role...</option>
-                                        <option value="User">User</option>
-                                        <option value="Admin">Admin</option>
                                     </select>
                                 </div>
                                 <div id="role-error" class="form-error" style="display:none;">
@@ -505,8 +503,9 @@
         function validateDateOfBirth(value) {
             if (!value) return false;
             const birthDate = new Date(value);
+            if (Number.isNaN(birthDate.getTime())) return false;
             const today = new Date();
-            const age = today.getFullYear() - birthDate.getFullYear();
+            let age = today.getFullYear() - birthDate.getFullYear();
             const monthDiff = today.getMonth() - birthDate.getMonth();
             
             if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
@@ -738,6 +737,46 @@
                 show(alert);
             }
             $('#email').focus();
+
+            // Populate roles from backend
+            (async () => {
+                try {
+                    const resp = await fetch('/api/auth/available-roles', { credentials: 'include' });
+                    if (!resp.ok) throw new Error('Failed to fetch roles');
+                    const roles = await resp.json(); // Expect [{ value, label }]
+                    const select = document.getElementById('role');
+                    if (select && Array.isArray(roles)) {
+                        // Clear any existing options except the first placeholder
+                        while (select.options.length > 1) select.remove(1);
+                        roles.forEach(r => {
+                            if (r && r.value && r.label) {
+                                const opt = document.createElement('option');
+                                opt.value = r.value;
+                                opt.textContent = r.label;
+                                select.appendChild(opt);
+                            }
+                        });
+                    }
+                } catch (e) {
+                    // Fallback to common roles if backend not available
+                    const fallback = [
+                        { value: 'User', label: 'User' },
+                        { value: 'Manager', label: 'Manager' },
+                        { value: 'Admin', label: 'Admin' },
+                        { value: 'Supervisor', label: 'Supervisor' }
+                    ];
+                    const select = document.getElementById('role');
+                    if (select) {
+                        while (select.options.length > 1) select.remove(1);
+                        fallback.forEach(r => {
+                            const opt = document.createElement('option');
+                            opt.value = r.value;
+                            opt.textContent = r.label;
+                            select.appendChild(opt);
+                        });
+                    }
+                }
+            })();
         });
 
         // Real-time validation

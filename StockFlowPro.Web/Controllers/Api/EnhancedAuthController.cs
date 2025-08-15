@@ -79,6 +79,13 @@ public class EnhancedAuthController : ControllerBase
                 registrationId, request.Email);
 
             // Step 3: Convert to RegisterUserDto
+            var selectedRole = Domain.Enums.UserRole.User;
+            if (!string.IsNullOrWhiteSpace(request.Role)
+                && Enum.TryParse<Domain.Enums.UserRole>(request.Role, true, out var parsedRole))
+            {
+                selectedRole = parsedRole;
+            }
+
             var registerUserDto = new RegisterUserDto
             {
                 FirstName = request.FirstName,
@@ -88,7 +95,7 @@ public class EnhancedAuthController : ControllerBase
                 DateOfBirth = request.DateOfBirth,
                 Password = request.Password,
                 ConfirmPassword = request.ConfirmPassword,
-                Role = Domain.Enums.UserRole.User
+                Role = selectedRole
             };
 
             // Step 4: Register the user
@@ -319,4 +326,9 @@ public class EnhancedRegisterRequest
     [Required(ErrorMessage = "Password confirmation is required")]
     [Compare("Password", ErrorMessage = "Password and confirmation password do not match")]
     public string ConfirmPassword { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Optional role name selected during registration (e.g., User, Manager, Admin, Supervisor)
+    /// </summary>
+    public string? Role { get; set; }
 }

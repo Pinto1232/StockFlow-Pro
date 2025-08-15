@@ -240,6 +240,7 @@ export const authService = {
                     dateOfBirth: userData.dateOfBirth,
                     password: userData.password,
                     confirmPassword: userData.confirmPassword,
+                    role: userData.role,
                 }),
             });
 
