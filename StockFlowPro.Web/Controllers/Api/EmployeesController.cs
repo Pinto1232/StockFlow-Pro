@@ -165,6 +165,14 @@ public class EmployeesController : ApiBaseController
         return ok ? NoContent() : NotFound();
     }
 
+    [HttpPost("{id:guid}/documents/{documentId:guid}/unarchive")]
+    [Permission(Permissions.Users.Edit)]
+    public async Task<IActionResult> UnarchiveDocument(Guid id, Guid documentId)
+    {
+        var ok = await _mediator.Send(new UnarchiveEmployeeDocumentCommand(id, documentId));
+        return ok ? NoContent() : NotFound();
+    }
+
     [HttpDelete("{id:guid}/documents/{documentId:guid}")]
     [Permission(Permissions.Users.Edit)]
     public async Task<IActionResult> DeleteDocument(Guid id, Guid documentId)

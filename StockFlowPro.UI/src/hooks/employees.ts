@@ -347,6 +347,35 @@ export function useStartOnboarding(id: string) {
   });
 }
 
+export function useUnarchiveEmployeeDocument(id: string) {
+  return useMutation({
+    mutationFn: (documentId: string) => http.post<void>(`/api/employees/${id}/documents/${documentId}/unarchive`),
+    onMutate: async (documentId) => {
+      await queryClient.cancelQueries({ queryKey: employeeKeys.details() });
+      const prevDetail = queryClient.getQueryData<EmployeeDto>(employeeKeys.detail(id));
+      if (prevDetail) {
+        queryClient.setQueryData<EmployeeDto>(employeeKeys.detail(id), {
+          ...prevDetail,
+          documents: (prevDetail.documents || []).map((d) => d.id === documentId ? { ...d, isArchived: false, archivedAt: null } : d),
+        });
+      }
+      return { prevDetail };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prevDetail) {
+        queryClient.setQueryData(employeeKeys.detail(id), ctx.prevDetail);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: employeeKeys.details() });
+      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+      
+      // Also refetch the specific employee to ensure fresh data
+      queryClient.refetchQueries({ queryKey: employeeKeys.detail(id) });
+    },
+  });
+}
+
 export function useCompleteOnboardingTask(id: string) {
   return useMutation({
     mutationFn: (code: string) => http.post<EmployeeDto>(`/api/employees/${id}/onboarding/complete`, { code }),

@@ -294,6 +294,14 @@ public class Employee : IEntity
         Touch();
     }
 
+    public void UnarchiveDocument(Guid documentId)
+    {
+        var doc = _documents.FirstOrDefault(d => d.Id == documentId)
+                  ?? throw new DomainException("Document not found.");
+        doc.Unarchive();
+        Touch();
+    }
+
     public void DeleteDocument(Guid documentId)
     {
         var doc = _documents.FirstOrDefault(d => d.Id == documentId)
@@ -424,6 +432,17 @@ public class EmployeeDocument : IEntity
         IsArchived = true;
         ArchiveReason = reason;
         ArchivedAt = DateTime.UtcNow;
+    }
+
+    public void Unarchive()
+    {
+        if (!IsArchived)
+        {
+            return;
+        }
+        IsArchived = false;
+        ArchiveReason = null;
+        ArchivedAt = null;
     }
 
     public void Replace(string newFileName, string newStoragePath, long sizeBytes, string contentType)

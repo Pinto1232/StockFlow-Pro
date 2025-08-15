@@ -29,6 +29,7 @@ import {
   useUpdateEmployee,
   useAddEmployeeDocument,
   useArchiveEmployeeDocument,
+  useUnarchiveEmployeeDocument,
   useDeleteEmployeeDocument,
   useStartOnboarding,
   useCompleteOnboardingTask,
@@ -41,6 +42,7 @@ import {
 import { queryClient } from '../../services/queryClient';
 import { employeeKeys } from '../../services/queryKeys';
 import MessagingPanel from '../../components/MessagingPanel';
+import { useToast } from '../../hooks/useToast';
 
 function buildFullName(first?: string | null, last?: string | null) {
   return `${first ?? ""} ${last ?? ""}`.trim();
@@ -127,8 +129,10 @@ const DocumentsDashboard: React.FC<{
   employee: EmployeeDto;
   addDoc: ReturnType<typeof useAddEmployeeDocument>;
   archiveDoc: ReturnType<typeof useArchiveEmployeeDocument>;
+  unarchiveDoc: ReturnType<typeof useUnarchiveEmployeeDocument>;
   deleteDoc: ReturnType<typeof useDeleteEmployeeDocument>;
-}> = ({ employee, addDoc, archiveDoc, deleteDoc }) => {
+}> = ({ employee, addDoc, archiveDoc, unarchiveDoc, deleteDoc }) => {
+  const { toast, hideToast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<EmployeeDocumentDto | null>(null);
@@ -143,6 +147,12 @@ const DocumentsDashboard: React.FC<{
     if (!confirm(`Are you sure you want to delete "${doc.fileName}"? This action cannot be undone.`)) return;
     deleteDoc.mutate(doc.id, {
       onSuccess: () => {
+        // Show warning toast for deletion (destructive action)
+        toast.warning(`"${doc.fileName}" has been deleted successfully`, {
+          title: 'File Deleted',
+          duration: 4000,
+        });
+        
         // Update selection
         if (selected?.id === doc.id) {
           const idx = paginatedDocs.findIndex((x) => x.id === doc.id);
@@ -152,6 +162,20 @@ const DocumentsDashboard: React.FC<{
         // Refresh the employee data to get updated documents list
         queryClient.invalidateQueries({ queryKey: employeeKeys.detail(employee.id) });
       },
+      onError: () => {
+        // Show error toast
+        toast.error(`Failed to delete "${doc.fileName}". Please try again.`, {
+          title: 'Delete Failed',
+          duration: 6000,
+          actions: [
+            {
+              label: 'Retry',
+              onClick: () => handleDelete(doc),
+              variant: 'primary',
+            },
+          ],
+        });
+      },
     });
   };
 
@@ -159,6 +183,36 @@ const DocumentsDashboard: React.FC<{
     const reason = prompt(`Archive "${doc.fileName}"? Enter reason (optional):`) || 'Archived by user';
     archiveDoc.mutate({ documentId: doc.id, reason }, {
       onSuccess: () => {
+        // Show info toast for archiving (informational action) with undo option
+        toast.info(`"${doc.fileName}" has been archived successfully`, {
+          title: 'File Archived',
+          duration: 6000, // Longer duration to give time for undo
+          actions: [
+            {
+              label: 'Undo',
+              onClick: () => {
+                unarchiveDoc.mutate(doc.id, {
+                  onSuccess: () => {
+                    toast.success(`"${doc.fileName}" has been restored successfully`, {
+                      title: 'File Restored',
+                      duration: 3000,
+                    });
+                    // Refresh the employee data
+                    queryClient.invalidateQueries({ queryKey: employeeKeys.detail(employee.id) });
+                  },
+                  onError: () => {
+                    toast.error(`Failed to restore "${doc.fileName}". Please try again.`, {
+                      title: 'Restore Failed',
+                      duration: 5000,
+                    });
+                  },
+                });
+              },
+              variant: 'primary',
+            },
+          ],
+        });
+        
         // Update selection
         if (selected?.id === doc.id) {
           const idx = paginatedDocs.findIndex((x) => x.id === doc.id);
@@ -175,6 +229,20 @@ const DocumentsDashboard: React.FC<{
         }
         // Refresh the employee data to get updated documents list
         queryClient.invalidateQueries({ queryKey: employeeKeys.detail(employee.id) });
+      },
+      onError: () => {
+        // Show error toast
+        toast.error(`Failed to archive "${doc.fileName}". Please try again.`, {
+          title: 'Archive Failed',
+          duration: 6000,
+          actions: [
+            {
+              label: 'Retry',
+              onClick: () => handleArchive(doc),
+              variant: 'primary',
+            },
+          ],
+        });
       },
     });
   };
@@ -269,8 +337,26 @@ const DocumentsDashboard: React.FC<{
   const onFilesChosen = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     
+    const fileCount = files.length;
+    const fileNames = Array.from(files).map(f => f.name);
+    
+    // Show initial upload toast
+    const uploadToastId = toast.loading(
+      fileCount === 1 
+        ? `Uploading "${fileNames[0]}"...` 
+        : `Uploading ${fileCount} files...`, 
+      {
+        title: 'Upload in Progress',
+        persistent: true,
+      }
+    );
+    
     // Iterate reversed because our cache update prepends; this preserves the user's selection order
     const ordered = Array.from(files).reverse();
+    
+    let successCount = 0;
+    let errorCount = 0;
+    const errors: string[] = [];
     
     // Process files concurrently for better UX (optimistic updates will show immediately)
     const uploadPromises = ordered.map(async (file) => {
@@ -284,14 +370,59 @@ const DocumentsDashboard: React.FC<{
       
       try {
         await addDoc.mutateAsync({ file, type });
+        successCount++;
       } catch (error) {
-        // Error handling is done in the mutation's onError callback
+        errorCount++;
+        errors.push(file.name);
         console.error(`Failed to upload ${file.name}:`, error);
       }
     });
     
     // Wait for all uploads to complete
     await Promise.allSettled(uploadPromises);
+    
+    // Hide the loading toast
+    hideToast(uploadToastId);
+    
+    // Show result toasts
+    if (successCount > 0) {
+      toast.success(
+        successCount === 1 
+          ? `"${fileNames.find(name => !errors.includes(name))}" uploaded successfully`
+          : `${successCount} file${successCount > 1 ? 's' : ''} uploaded successfully`,
+        {
+          title: 'Upload Complete',
+          duration: 4000,
+        }
+      );
+    }
+    
+    if (errorCount > 0) {
+      toast.error(
+        errorCount === 1 
+          ? `Failed to upload "${errors[0]}"`
+          : `Failed to upload ${errorCount} file${errorCount > 1 ? 's' : ''}`,
+        {
+          title: 'Upload Failed',
+          duration: 6000,
+          actions: [
+            {
+              label: 'Retry Failed',
+              onClick: () => {
+                // Create a new FileList with only the failed files
+                const failedFiles = Array.from(files).filter(file => errors.includes(file.name));
+                if (failedFiles.length > 0) {
+                  const dataTransfer = new DataTransfer();
+                  failedFiles.forEach(file => dataTransfer.items.add(file));
+                  onFilesChosen(dataTransfer.files);
+                }
+              },
+              variant: 'primary',
+            },
+          ],
+        }
+      );
+    }
     
     // Force refresh after all uploads
     setTimeout(() => {
@@ -317,8 +448,27 @@ const DocumentsDashboard: React.FC<{
       // Clear search to show all documents
       setSearch('');
       
+      // Show notification toast for refresh action
+      toast.notification('Documents refreshed successfully', {
+        title: 'Refresh Complete',
+        duration: 3000,
+      });
+      
     } catch (error) {
       console.error('Failed to refresh documents:', error);
+      
+      // Show error toast
+      toast.error('Failed to refresh documents. Please try again.', {
+        title: 'Refresh Failed',
+        duration: 5000,
+        actions: [
+          {
+            label: 'Retry',
+            onClick: () => handleRefresh(),
+            variant: 'primary',
+          },
+        ],
+      });
     } finally {
       // Add a small delay to show the loading state
       setTimeout(() => setIsRefreshing(false), 300);
@@ -525,7 +675,7 @@ const DocumentsDashboard: React.FC<{
                       <tr
                         key={doc.id}
                         onClick={() => setSelected(doc)}
-                        className={`cursor-pointer ${isSel ? 'bg-gray-50' : 'hover:bg-gray-50'}`}
+                        className={`cursor-pointer ${isSel ? 'bg-gray-50' : 'hover:bg-gray-50'} ${doc.isArchived ? 'opacity-60 bg-gray-25' : ''}`}
                       >
                         <td className="p-3 align-top">
                           <div className="flex items-center gap-3 min-w-0">
@@ -542,8 +692,15 @@ const DocumentsDashboard: React.FC<{
                                 <FileText className="w-5 h-5 text-gray-500" />
                               )}
                             </div>
-                            <div className="min-w-0">
-                              <div className="font-medium text-gray-900 truncate">{doc.fileName}</div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <div className="font-medium text-gray-900 truncate">{doc.fileName}</div>
+                                {doc.isArchived && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                    Archived
+                                  </span>
+                                )}
+                              </div>
                               <div className="text-xs text-gray-500 truncate">{doc.contentType || ''}</div>
                             </div>
                           </div>
@@ -552,13 +709,38 @@ const DocumentsDashboard: React.FC<{
                         <td className="p-3 align-top text-sm text-gray-600">{bytesToHuman(doc.sizeBytes)}</td>
                         <td className="p-3 align-top text-right">
                           <div className="flex items-center justify-end gap-2">
-                            {!doc.isArchived && (
+                            {!doc.isArchived ? (
                               <button 
                                 onClick={(e) => { e.stopPropagation(); handleArchive(doc); }} 
                                 className="p-2 rounded transition-colors hover:bg-gray-100"
                                 title="Archive"
                               >
                                 <Archive className="w-4 h-4 text-orange-600" />
+                              </button>
+                            ) : (
+                              <button 
+                                onClick={(e) => { 
+                                  e.stopPropagation(); 
+                                  unarchiveDoc.mutate(doc.id, {
+                                    onSuccess: () => {
+                                      toast.success(`"${doc.fileName}" has been restored successfully`, {
+                                        title: 'File Restored',
+                                        duration: 3000,
+                                      });
+                                    },
+                                    onError: () => {
+                                      toast.error(`Failed to restore "${doc.fileName}". Please try again.`, {
+                                        title: 'Restore Failed',
+                                        duration: 5000,
+                                      });
+                                    },
+                                  });
+                                }} 
+                                className="p-2 rounded transition-colors hover:bg-gray-100"
+                                title="Restore from Archive"
+                                disabled={unarchiveDoc.isPending}
+                              >
+                                <Archive className="w-4 h-4 text-blue-600" />
                               </button>
                             )}
                             <button 
@@ -639,7 +821,33 @@ const DocumentsDashboard: React.FC<{
                 </div>
               </div>
               {selected.isArchived && (
-                <div className="text-xs text-red-600">Archived {selected.archivedAt ? new Date(selected.archivedAt).toLocaleDateString() : ''}</div>
+                <div className="flex items-center justify-between">
+                  <div className="text-xs text-red-600">Archived {selected.archivedAt ? new Date(selected.archivedAt).toLocaleDateString() : ''}</div>
+                  <button
+                    onClick={() => {
+                      unarchiveDoc.mutate(selected.id, {
+                        onSuccess: () => {
+                          toast.success(`"${selected.fileName}" has been restored successfully`, {
+                            title: 'File Restored',
+                            duration: 3000,
+                          });
+                          // Update selection to reflect the change
+                          setSelected({ ...selected, isArchived: false, archivedAt: null });
+                        },
+                        onError: () => {
+                          toast.error(`Failed to restore "${selected.fileName}". Please try again.`, {
+                            title: 'Restore Failed',
+                            duration: 5000,
+                          });
+                        },
+                      });
+                    }}
+                    className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+                    disabled={unarchiveDoc.isPending}
+                  >
+                    {unarchiveDoc.isPending ? 'Restoring...' : 'Restore'}
+                  </button>
+                </div>
               )}
             </div>
           )}
@@ -652,6 +860,7 @@ const DocumentsDashboard: React.FC<{
 const EmployeeProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { data: employee, isLoading, isError } = useEmployee(id);
+  const { toast } = useToast();
 
   // Listen to real-time document events and update query cache
   useEffect(() => {
@@ -675,6 +884,7 @@ const EmployeeProfile: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const addDoc = useAddEmployeeDocument(id ?? "");
   const archiveDoc = useArchiveEmployeeDocument(id ?? "");
+  const unarchiveDoc = useUnarchiveEmployeeDocument(id ?? "");
   const deleteDoc = useDeleteEmployeeDocument(id ?? "");
   const startOnboarding = useStartOnboarding(id ?? "");
   const completeOnboardingTask = useCompleteOnboardingTask(id ?? "");
@@ -715,7 +925,25 @@ const EmployeeProfile: React.FC = () => {
     try {
       await updateEmployee(payload);
       setIsEditing(false);
+      
+      // Show success toast
+      toast.success('Employee profile updated successfully', {
+        title: 'Profile Updated',
+        duration: 4000,
+      });
     } catch {
+      // Show error toast
+      toast.error('Failed to update employee profile. Please try again.', {
+        title: 'Update Failed',
+        duration: 6000,
+        actions: [
+          {
+            label: 'Retry',
+            onClick: () => saveEdit(),
+            variant: 'primary',
+          },
+        ],
+      });
       // errors surfaced by global handlers; keep in edit mode
     }
   };
@@ -848,7 +1076,25 @@ const EmployeeProfile: React.FC = () => {
                     onChange={async () => {
                       const file = fileInputRef.current?.files?.[0] ?? null;
                       if (file && id) {
-                        await uploadImage(file).catch(() => {});
+                        try {
+                          await uploadImage(file);
+                          toast.success('Profile image updated successfully', {
+                            title: 'Image Updated',
+                            duration: 4000,
+                          });
+                        } catch {
+                          toast.error('Failed to upload image. Please try again.', {
+                            title: 'Upload Failed',
+                            duration: 5000,
+                            actions: [
+                              {
+                                label: 'Try Again',
+                                onClick: () => fileInputRef.current?.click(),
+                                variant: 'primary',
+                              },
+                            ],
+                          });
+                        }
                       }
                       if (fileInputRef.current) {
                         fileInputRef.current.value = "";
@@ -934,7 +1180,7 @@ const EmployeeProfile: React.FC = () => {
               </div>
 
               {/* Documents Dashboard */}
-              <DocumentsDashboard employee={employee} addDoc={addDoc} archiveDoc={archiveDoc} deleteDoc={deleteDoc} />
+              <DocumentsDashboard employee={employee} addDoc={addDoc} archiveDoc={archiveDoc} unarchiveDoc={unarchiveDoc} deleteDoc={deleteDoc} />
             </div>
 
             {/* Right: Department Overview + Lifecycle + Messaging */}
