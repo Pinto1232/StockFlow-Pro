@@ -18,6 +18,7 @@ import {
   Send
 } from 'lucide-react';
 import { useEmployees, EmployeeDto } from '../hooks/employees';
+import { useToast } from '../components/ui';
 
 // Utility functions from EmployeeProfile
 function buildFullName(first?: string | null, last?: string | null) {
@@ -128,8 +129,10 @@ const EmployeeAvatar: React.FC<EmployeeAvatarProps> = ({
 
 const MessagingPanel: React.FC = () => {
   const { data: employees = [] } = useEmployees();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<'All' | 'Unread'>('All');
   const [isComposing, setIsComposing] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   
   // Create a map of employee ID to employee data for quick lookup
   const employeeMap = useMemo(() => {
@@ -252,9 +255,63 @@ Linda M.`);
     setCcRecipients(prev => prev.filter(r => r.email !== email));
   };
 
+  const handleMessageClick = (message: Message) => {
+    setSelectedMessage(message);
+  };
+
+  const handleBackToList = () => {
+    setSelectedMessage(null);
+  };
+
+  const handleReply = () => {
+    if (selectedMessage) {
+      const employee = employeeMap.get(selectedMessage.employeeId);
+      if (employee) {
+        // Add the sender to recipients
+        setRecipients([{
+          email: employee.email,
+          employeeId: employee.id
+        }]);
+        // Set subject with "Re:" prefix
+        setSubject(`Re: ${subject}`);
+        // Clear message content for reply
+        setMessageContent('');
+        setSelectedMessage(null);
+        setIsComposing(true);
+        toast.info('Reply started');
+      }
+    }
+  };
+
+  const handleForward = () => {
+    if (selectedMessage) {
+      // Clear recipients for forwarding
+      setRecipients([]);
+      // Set subject with "Fwd:" prefix
+      setSubject(`Fwd: ${subject}`);
+      // Include original message in content
+      const employee = employeeMap.get(selectedMessage.employeeId);
+      const senderName = employee ? buildFullName(employee.firstName, employee.lastName) : 'Unknown User';
+      setMessageContent(`\n\n--- Forwarded Message ---\nFrom: ${senderName}\nDate: ${selectedMessage.date}\n\n${selectedMessage.content}`);
+      setSelectedMessage(null);
+      setIsComposing(true);
+      toast.info('Message forwarded to compose');
+    }
+  };
+
+  const handleDelete = () => {
+    if (selectedMessage) {
+      // In a real app, you would make an API call to delete the message
+      // For now, we'll just show a success toast and go back to list
+      setSelectedMessage(null);
+      toast.success('Message deleted successfully');
+      // Here you could also remove the message from the messages array if managing state locally
+    }
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-200 h-full flex flex-col">
-      {!isComposing ? (
+        {!isComposing && !selectedMessage ? (
         <>
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
@@ -287,7 +344,11 @@ Linda M.`);
             {messages.map((message) => {
               const employee = employeeMap.get(message.employeeId);
               return (
-                <div key={message.id} className="flex items-start gap-3 p-4 hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
+                <div 
+                  key={message.id} 
+                  className="flex items-start gap-3 p-4 hover:bg-gray-50 border-b border-gray-100 cursor-pointer"
+                  onClick={() => handleMessageClick(message)}
+                >
                   <EmployeeAvatar 
                     employee={employee}
                     fallbackAvatar={employee ? initials(employee.firstName, employee.lastName) : '?'}
@@ -335,6 +396,104 @@ Linda M.`);
             >
               New Message
             </button>
+          </div>
+        </>
+      ) : selectedMessage ? (
+        <>
+          {/* Email View Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={handleBackToList}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <X className="w-4 h-4 text-gray-600" />
+              </button>
+              <h3 className="text-lg font-semibold text-gray-900">Message</h3>
+            </div>
+            <div className="flex items-center gap-2">
+              <button className="p-1 hover:bg-gray-100 rounded">
+                <MoreHorizontal className="w-4 h-4 text-gray-600" />
+              </button>
+            </div>
+          </div>
+
+          {/* Email Content */}
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="mb-4">
+              {(() => {
+                const employee = employeeMap.get(selectedMessage.employeeId);
+                return (
+                  <div className="flex items-start gap-3 mb-4">
+                    <EmployeeAvatar 
+                      employee={employee}
+                      fallbackAvatar={employee ? initials(employee.firstName, employee.lastName) : '?'}
+                      size="lg"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-900">
+                            {employee ? buildFullName(employee.firstName, employee.lastName) : 'Unknown User'}
+                          </h4>
+                          {employee?.jobTitle && (
+                            <p className="text-sm text-gray-500">{employee.jobTitle}</p>
+                          )}
+                          {employee?.departmentName && (
+                            <p className="text-sm text-blue-600">{employee.departmentName}</p>
+                          )}
+                          {employee?.status !== undefined && (
+                            <span className={`text-xs px-2 py-1 rounded-full mt-1 inline-block ${
+                              employee.status === 1 ? 'bg-green-100 text-green-800' :
+                              employee.status === 0 ? 'bg-blue-100 text-blue-800' :
+                              employee.status === 2 ? 'bg-yellow-100 text-yellow-800' :
+                              employee.status === 3 ? 'bg-purple-100 text-purple-800' :
+                              employee.status === 4 ? 'bg-red-100 text-red-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {typeof employee.status === 'number' ? statusToLabel(employee.status) : employee.status}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-sm text-gray-500">{selectedMessage.date}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+            
+            {/* Message Content */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                {selectedMessage.content}
+              </div>
+            </div>
+          </div>
+
+          {/* Email Actions Footer */}
+          <div className="p-4 border-t border-gray-200">
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={handleReply}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+              >
+                Reply
+              </button>
+              <button 
+                onClick={handleForward}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium"
+              >
+                Forward
+              </button>
+              <button 
+                onClick={handleDelete}
+                className="p-2 hover:bg-red-50 rounded text-red-600 hover:text-red-700"
+                title="Delete message"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </>
       ) : (

@@ -896,6 +896,23 @@ const EmployeeProfile: React.FC = () => {
   const [form, setForm] = useState<{ firstName?: string; lastName?: string; phoneNumber?: string; jobTitle?: string; departmentName?: string; dateOfBirth?: string | null }>();
   const { mutateAsync: updateEmployee, isPending: isSaving } = useUpdateEmployee(id ?? "");
 
+  // Lifecycle filter state - tracks which lifecycle stage is selected for display (single selection)
+  const [selectedLifecycleStage, setSelectedLifecycleStage] = useState<number | null>(null); // null means show all stages
+
+  // Lifecycle stage definitions
+  const lifecycleStages = [
+    { value: 0, label: 'Onboarding', bgColor: 'bg-blue-100', textColor: 'text-blue-800', selectedBg: 'bg-blue-200' },
+    { value: 1, label: 'Active', bgColor: 'bg-green-100', textColor: 'text-green-800', selectedBg: 'bg-green-200' },
+    { value: 2, label: 'Suspended', bgColor: 'bg-yellow-100', textColor: 'text-yellow-800', selectedBg: 'bg-yellow-200' },
+    { value: 3, label: 'Offboarding', bgColor: 'bg-purple-100', textColor: 'text-purple-800', selectedBg: 'bg-purple-200' },
+    { value: 4, label: 'Terminated', bgColor: 'bg-red-100', textColor: 'text-red-800', selectedBg: 'bg-red-200' }
+  ];
+
+  // Toggle lifecycle stage selection (single selection)
+  const toggleLifecycleStage = (stageId: number) => {
+    setSelectedLifecycleStage(prev => prev === stageId ? null : stageId);
+  };
+
   const beginEdit = () => {
     if (!employee) return;
     setForm({
@@ -950,8 +967,17 @@ const EmployeeProfile: React.FC = () => {
 
   const departmentPeers = useMemo(() => {
     if (!employee || !allEmployees) return [] as EmployeeDto[];
-    return allEmployees.filter(e => e.departmentName === employee.departmentName && e.id !== employee.id);
-  }, [employee, allEmployees]);
+    return allEmployees.filter(e => {
+      const isSameDepartment = e.departmentName === employee.departmentName && e.id !== employee.id;
+      if (!isSameDepartment) return false;
+      
+      // If no lifecycle stage is selected, show all department peers
+      if (selectedLifecycleStage === null) return true;
+      
+      const employeeLifecycleStage = typeof e.status === 'number' ? e.status : 1; // Default to Active if string
+      return employeeLifecycleStage === selectedLifecycleStage;
+    });
+  }, [employee, allEmployees, selectedLifecycleStage]);
 
   const deptCount = departmentPeers.length + (employee ? 1 : 0);
 
@@ -1212,6 +1238,44 @@ const EmployeeProfile: React.FC = () => {
               {/* Lifecycle controls */}
               <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Lifecycle</h3>
+                
+                {/* Lifecycle Stage Filters */}
+                <div className="mb-6">
+                  <div className="text-sm font-medium text-gray-700 mb-3">
+                    Filter Department by Lifecycle Stage 
+                    <span className="text-xs text-gray-500 ml-1">
+                      ({selectedLifecycleStage !== null ? '1 selected' : 'All stages'})
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {lifecycleStages.map((stage) => {
+                      const isSelected = selectedLifecycleStage === stage.value;
+                      return (
+                        <button
+                          key={stage.value}
+                          onClick={() => toggleLifecycleStage(stage.value)}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 border ${
+                            isSelected 
+                              ? `${stage.selectedBg} ${stage.textColor} border-transparent` 
+                              : `${stage.bgColor} ${stage.textColor} border-gray-200 hover:border-gray-300`
+                          }`}
+                        >
+                          {stage.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    Showing {departmentPeers.length} of {allEmployees?.filter(e => e.departmentName === employee?.departmentName && e.id !== employee?.id).length || 0} department colleagues
+                    {selectedLifecycleStage !== null && (
+                      <span className="ml-1">
+                        • Filtered by {lifecycleStages.find(s => s.value === selectedLifecycleStage)?.label}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
                 <div className="flex flex-wrap gap-2 mb-4">
                   <button
                     onClick={() => startOnboarding.mutate()}
