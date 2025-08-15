@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using StockFlowPro.Application.DTOs;
 using StockFlowPro.Application.Features.Employees;
 using StockFlowPro.Domain.Entities;
+using StockFlowPro.Domain.Exceptions;
 using StockFlowPro.Web.Authorization;
 using StockFlowPro.Web.Attributes;
 
@@ -97,8 +98,34 @@ public class EmployeesController : ApiBaseController
     [Permission(Permissions.Users.Edit)]
     public async Task<ActionResult<EmployeeDocumentDto>> AddDocument(Guid id, [FromBody] AddEmployeeDocumentRequest request)
     {
-        var doc = await _mediator.Send(new AddEmployeeDocumentCommand(id, request.FileName, request.Type, request.StoragePath, request.SizeBytes, request.ContentType, request.IssuedAt, request.ExpiresAt));
-        return Ok(doc);
+        try
+        {
+            var doc = await _mediator.Send(new AddEmployeeDocumentCommand(id, request.FileName, request.Type, request.StoragePath, request.SizeBytes, request.ContentType, request.IssuedAt, request.ExpiresAt));
+            return Ok(doc);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message, param = ex.ParamName });
+        }
+        catch (DomainException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+        {
+            // Surface EF constraint issues as 400 with detail
+            var msg = ex.InnerException?.Message ?? ex.Message;
+            return BadRequest(new { message = "Unable to save document", detail = msg });
+        }
+        catch (Exception ex)
+        {
+            // As a last resort, return a Problem with minimal details to aid debugging
+            return Problem(title: "Unexpected error while adding document", detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+        }
     }
 
     [HttpPost("{id:guid}/documents/{documentId:guid}/archive")]

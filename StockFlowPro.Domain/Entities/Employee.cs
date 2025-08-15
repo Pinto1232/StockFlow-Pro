@@ -257,11 +257,30 @@ public class Employee : IEntity
             throw new ArgumentException("Document size must be positive", nameof(sizeBytes));
         }
 
+        // Normalize and guard against null/oversized values to satisfy EF constraints
+        // EF configuration: FileName <= 260, StoragePath <= 512, ContentType <= 100
+        var safeFileName = (fileName ?? string.Empty).Trim();
+        var safeStoragePath = (storagePath ?? string.Empty).Trim();
+        var safeContentType = (contentType ?? "application/octet-stream").Trim();
+
+        if (safeFileName.Length > 260)
+        {
+            safeFileName = safeFileName.Substring(0, 260);
+        }
+        if (safeStoragePath.Length > 512)
+        {
+            safeStoragePath = safeStoragePath.Substring(0, 512);
+        }
+        if (safeContentType.Length > 100)
+        {
+            safeContentType = safeContentType.Substring(0, 100);
+        }
+
         // Versioning: increment version for same type
         var version = _documents.Where(d => d.Type == type).Select(d => d.Version).DefaultIfEmpty(0).Max() + 1;
 
         var doc = new EmployeeDocument(
-            Guid.NewGuid(), Id, fileName.Trim(), type, storagePath.Trim(), sizeBytes, contentType.Trim(), version, issuedAt, expiresAt);
+            Guid.NewGuid(), Id, safeFileName, type, safeStoragePath, sizeBytes, safeContentType, version, issuedAt, expiresAt);
         _documents.Add(doc);
         Touch();
         return doc;
