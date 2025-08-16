@@ -997,6 +997,8 @@ export default EmployeeDirectory;
 // Create Employee Modal (inline component for simplicity)
 const CreateEmployeeModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const { mutateAsync: createEmployee, isPending } = useCreateEmployee();
+    // Load active departments for the dropdown
+    const { data: activeDepartments = [] } = useDepartments(true);
     const [form, setForm] = useState<Partial<EmployeeDto>>({
         firstName: "",
         lastName: "",
@@ -1092,11 +1094,16 @@ const CreateEmployeeModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                            <input
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            <select
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 value={form.departmentName ?? ""}
                                 onChange={(e) => setForm(f => ({ ...f, departmentName: e.target.value }))}
-                            />
+                            >
+                                <option value="">Unassigned</option>
+                                {activeDepartments.map(d => (
+                                    <option key={d.id} value={d.name}>{d.name}</option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                     <div className="flex items-center justify-end gap-3 pt-4">
