@@ -60,14 +60,16 @@ public class EmployeeRepository : IEmployeeRepository
     {
         search = (search ?? string.Empty).Trim().ToLowerInvariant();
         if (string.IsNullOrEmpty(search))
+        {
             return await GetAllAsync(cancellationToken);
+        }
 
         return await _context.Set<Employee>()
-            .Where(e => e.FirstName.ToLower().Contains(search) ||
-                        e.LastName.ToLower().Contains(search) ||
-                        e.Email.ToLower().Contains(search) ||
-                        e.JobTitle.ToLower().Contains(search) ||
-                        (e.DepartmentName != null && e.DepartmentName.ToLower().Contains(search)))
+            .Where(e => (e.FirstName ?? string.Empty).ToLower().Contains(search) ||
+                        (e.LastName ?? string.Empty).ToLower().Contains(search) ||
+                        (e.Email ?? string.Empty).ToLower().Contains(search) ||
+                        (e.JobTitle ?? string.Empty).ToLower().Contains(search) ||
+                        ((e.DepartmentName ?? string.Empty).ToLower().Contains(search)))
             .ToListAsync(cancellationToken);
     }
 
@@ -76,7 +78,10 @@ public class EmployeeRepository : IEmployeeRepository
         var normalized = email.Trim().ToLowerInvariant();
         var query = _context.Set<Employee>().Where(e => e.Email == normalized);
         if (excludeId.HasValue)
+        {
             query = query.Where(e => e.Id != excludeId.Value);
+        }
+
         return await query.AnyAsync(cancellationToken);
     }
 }
