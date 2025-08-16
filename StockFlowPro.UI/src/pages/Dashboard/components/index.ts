@@ -4,3 +4,4 @@ export { default as QuickActionsBar } from './QuickActionsBar';
 export { default as DashboardCard } from './DashboardCard';
 export { default as LowStockAlertsCard } from './LowStockAlertsCard';
 export { default as RecentActivityCard } from './RecentActivityCard';
+export { default as OverviewPerformanceChart } from './OverviewPerformanceChart';

@@ -1,6 +1,7 @@
 import React from "react";
 import { ArrowUp, RefreshCw, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import OverviewPerformanceChart from "./OverviewPerformanceChart";
 
 interface User {
     fullName?: string;
@@ -112,6 +113,12 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                             </p>
                         </div>
                     </div>
+
+                       
+                    {/* Overview Performance Chart */}
+                    <div className="mt-6">
+                        <OverviewPerformanceChart />
+                    </div>
                     
                     {/* Current Plan Section */}
                     <div className="p-5 rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100">
@@ -177,6 +184,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                             </div>
                         )}
                     </div>
+                 
                 </div>
             </div>
         </div>
