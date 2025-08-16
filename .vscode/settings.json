@@ -19,5 +19,5 @@
   "codium.codeCompletion.enable": false,
   "window.autoDetectColorScheme": true,
   "workbench.colorTheme": "Default Dark Modern",
-  "chat.mcp.autostart": "never"
+  "chat.mcp.autostart": "newAndOutdated"
 }

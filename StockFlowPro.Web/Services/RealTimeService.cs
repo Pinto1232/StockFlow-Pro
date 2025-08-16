@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
+using StockFlowPro.Application.DTOs;
 using StockFlowPro.Application.Interfaces;
 using StockFlowPro.Web.Hubs;
 
@@ -81,6 +82,22 @@ public class RealTimeService : IRealTimeService
             .SendAsync("SystemMetrics", metricsData);
 
         _logger.LogInformation("System metrics broadcasted with {MetricCount} metrics", metrics.Count);
+    }
+
+    // Employee documents
+    public async Task BroadcastEmployeeDocumentAddedAsync(Guid employeeId, EmployeeDocumentDto document)
+    {
+        var payload = new
+        {
+            EmployeeId = employeeId,
+            Document = document,
+            Timestamp = DateTime.UtcNow
+        };
+
+        // Broadcast to all clients; optionally target per-employee group if you add grouping
+        await _hubContext.Clients.All.SendAsync("EmployeeDocumentAdded", payload);
+        _logger.LogInformation("Employee document added broadcasted for employee {EmployeeId}: {DocumentId}", 
+            employeeId, document.Id);
     }
 
     public async Task JoinUserGroupAsync(string connectionId, string userId)

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { getPlansByInterval, type SubscriptionPlan } from '../../services/subscriptionService';
-import { landingService, type LandingFeature, type LandingTestimonial, type LandingStat } from '../../services/landingService';
+import { landingService, type LandingFeature, type LandingTestimonial, type LandingStat, type LandingHero } from '../../services/landingService';
 import { 
   Check, Zap, Crown, Star, ArrowRight, Shield, Clock, Users,
   UserCheck, Calendar, DollarSign, FileText, Award,
@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import DemoScheduler from '../../components/DemoScheduler';
+import { useDepartments, useCreateDepartment, useUpdateDepartment, useDeleteDepartment } from '../../hooks/departments';
 
 const formatPrice = (price: number, currency: string) => new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(price);
 
@@ -21,13 +22,103 @@ const Landing: React.FC = () => {
   const [features, setFeatures] = useState<LandingFeature[]>([]);
   const [testimonials, setTestimonials] = useState<LandingTestimonial[]>([]);
   const [stats, setStats] = useState<LandingStat[]>([]);
+  const [hero, setHero] = useState<LandingHero | null>(null);
   const [isLoadingContent, setIsLoadingContent] = useState(true);
   const navigate = useNavigate();
+
+  // Departments CRUD state/hooks
+  const { data: departments = [], isLoading: isLoadingDepartments } = useDepartments(false);
+  const createDepartmentMutation = useCreateDepartment();
+  const updateDepartmentMutation = useUpdateDepartment();
+  const deleteDepartmentMutation = useDeleteDepartment();
+  const [newDept, setNewDept] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+
+  const handleCreateDepartment: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    const name = newDept.trim();
+    if (!name) return;
+    createDepartmentMutation.mutate(
+      { name },
+      { onSuccess: () => setNewDept("") },
+    );
+  };
+
+  const startEdit = (id: string, currentName: string) => {
+    setEditingId(id);
+    setEditName(currentName);
+  };
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditName("");
+  };
+  const saveEdit = (id: string, currentIsActive: boolean) => {
+    const name = editName.trim();
+    if (!name) return;
+    updateDepartmentMutation.mutate(
+      { id, dto: { name, isActive: currentIsActive } },
+      { onSuccess: () => cancelEdit() },
+    );
+  };
+  const toggleActive = (id: string, name: string, isActive: boolean) => {
+    updateDepartmentMutation.mutate({ id, dto: { name, isActive: !isActive } });
+  };
+  const removeDepartment = (id: string) => {
+    deleteDepartmentMutation.mutate(id);
+  };
+
+  // Resilient avatar component with fallback to DiceBear initials
+  const AvatarImage: React.FC<{ name: string; src?: string; size?: number; className?: string }> = ({ name, src, size = 48, className }) => {
+    // Normalize Unsplash URLs to a consistent parameter set to avoid 404s and aborts
+    const normalize = (u?: string): string | undefined => {
+      if (!u) return u;
+      try {
+        const url = new URL(u);
+        if (url.hostname.endsWith('images.unsplash.com')) {
+          // Clear existing parameters to avoid conflicts
+          url.search = '';
+          // Set consistent parameters
+          url.searchParams.set('auto', 'format');
+          url.searchParams.set('fit', 'crop');
+          url.searchParams.set('w', String(size));
+          url.searchParams.set('h', String(size));
+          url.searchParams.set('crop', 'faces');
+          url.searchParams.set('q', '80');
+          return url.toString();
+        }
+      } catch {
+        /* Ignore invalid URL values; fallback logic will handle image errors. */
+      }
+      return u;
+    };
+    const [imgSrc, setImgSrc] = useState<string | undefined>(normalize(src));
+    const fallback = useMemo(() => {
+      const seed = encodeURIComponent(name || 'User');
+      // DiceBear initials (no auth, cacheable)
+      return `https://api.dicebear.com/7.x/initials/svg?seed=${seed}&radius=8&backgroundType=gradientLinear&fontWeight=600`;
+    }, [name]);
+    const onError = () => setImgSrc(fallback);
+    return (
+      <img
+        src={imgSrc || fallback}
+        onError={onError}
+        width={size}
+        height={size}
+        alt={name}
+        className={className}
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
+    );
+  };
 
   const loadPlans = async (interval: 'Monthly' | 'Annual') => {
     const p = await getPlansByInterval(interval);
     setPlans(p.slice().sort((a,b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999) || a.name.localeCompare(b.name)));
   };
+
+ 
 
   const loadLandingContent = async () => {
     try {
@@ -36,92 +127,14 @@ const Landing: React.FC = () => {
       setFeatures(content.features);
       setTestimonials(content.testimonials);
       setStats(content.stats);
+      setHero(content.hero || null);
     } catch (error) {
       console.error('Failed to load landing content:', error);
-      // Fallback to hardcoded data if API fails
-      setFeatures([
-        {
-          id: '1',
-          title: "Employee Management",
-          description: "Comprehensive employee profiles, onboarding workflows, and organizational charts",
-          iconName: "UserCheck",
-          colorClass: "from-blue-500 to-cyan-500",
-          sortOrder: 1,
-          isActive: true,
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: '2',
-          title: "Leave & Attendance",
-          description: "Smart leave management, time tracking, and automated attendance monitoring",
-          iconName: "Calendar",
-          colorClass: "from-green-500 to-emerald-500",
-          sortOrder: 2,
-          isActive: true,
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: '3',
-          title: "Payroll Integration",
-          description: "Seamless payroll processing with tax calculations and compliance reporting",
-          iconName: "DollarSign",
-          colorClass: "from-purple-500 to-pink-500",
-          sortOrder: 3,
-          isActive: true,
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: '4',
-          title: "Compliance & Reporting",
-          description: "Automated compliance checks and comprehensive HR analytics dashboard",
-          iconName: "FileText",
-          colorClass: "from-orange-500 to-red-500",
-          sortOrder: 4,
-          isActive: true,
-          createdAt: new Date().toISOString()
-        }
-      ]);
-      setTestimonials([
-        {
-          id: '1',
-          name: "Sarah Johnson",
-          role: "HR Director",
-          company: "TechCorp Solutions",
-          imageUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=64&h=64&fit=crop&crop=face",
-          quote: "StockFlow Pro HR transformed our people management. We reduced administrative time by 60% and improved employee satisfaction significantly.",
-          sortOrder: 1,
-          isActive: true,
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: '2',
-          name: "Michael Chen",
-          role: "Operations Manager",
-          company: "GrowthStart Inc",
-          imageUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=64&h=64&fit=crop&crop=face",
-          quote: "The automated compliance features saved us from potential legal issues. The reporting dashboard gives us insights we never had before.",
-          sortOrder: 2,
-          isActive: true,
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: '3',
-          name: "Emily Rodriguez",
-          role: "CEO",
-          company: "InnovateLab",
-          imageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=64&h=64&fit=crop&crop=face",
-          quote: "As a growing company, we needed HR tools that could scale with us. StockFlow Pro delivered exactly that and more.",
-          sortOrder: 3,
-          isActive: true,
-          createdAt: new Date().toISOString()
-        }
-      ]);
-      setStats([
-        { id: '1', number: "10,000+", label: "Employees Managed", iconName: "Users", sortOrder: 1, isActive: true, createdAt: new Date().toISOString() },
-        { id: '2', number: "500+", label: "Companies Trust Us", iconName: "Building2", sortOrder: 2, isActive: true, createdAt: new Date().toISOString() },
-        { id: '3', number: "99.9%", label: "Uptime Guarantee", iconName: "Shield", sortOrder: 3, isActive: true, createdAt: new Date().toISOString() },
-        { id: '4', number: "24/7", label: "Expert Support", iconName: "HeadphonesIcon", sortOrder: 4, isActive: true, createdAt: new Date().toISOString() }
-      ]);
+      // Remove hardcoded fallback; rely on backend data only
+      setFeatures([]);
+      setTestimonials([]);
+      setStats([]);
+      setHero(null);
     } finally {
       setIsLoadingContent(false);
     }
@@ -198,34 +211,44 @@ const Landing: React.FC = () => {
         <div className="relative max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className={`transform transition-all duration-1000 ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'}`}>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 text-sm font-semibold mb-8 border border-blue-200">
-                <Zap className="w-4 h-4" />
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 text-[9px] font-medium mb-8 border border-blue-200">
+                <Zap className="w-3 h-3" />
                 Complete HR Management Solution
               </div>
               
               <h1 className="text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 mb-6 leading-tight">
-                Streamline Your
-                <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  HR Operations
+                {hero?.title || "Streamline Your"}
+                <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent text-[32px] md:text-[40px] lg:text-[44px] leading-tight mt-1">
+                  {hero?.subtitle || "HR Operations"}
                 </span>
               </h1>
               
               <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-2xl">
-                Empower your team with comprehensive HR tools designed for small to medium businesses. 
-                From employee management to payroll integration—everything you need in one platform.
+                {hero?.description || "Empower your team with comprehensive HR tools designed for small to medium businesses. From employee management to payroll integration—everything you need in one platform."}
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 mb-12">
                 <Link 
-                  to="/register" 
+                  to={hero?.primaryButtonUrl || "/register"}
                   className="px-8 py-4 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-2"
                 >
-                  Start Free Trial
+                  {hero?.primaryButtonText || "Start Free Trial"}
                   <ArrowRight className="w-5 h-5" />
                 </Link>
-                <button className="px-8 py-4 rounded-full border-2 border-gray-300 text-gray-700 font-semibold text-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-2 group">
+                <button 
+                  onClick={() => {
+                    if (hero?.secondaryButtonUrl?.startsWith('http')) {
+                      window.open(hero.secondaryButtonUrl, '_blank');
+                    } else if (hero?.secondaryButtonUrl) {
+                      navigate(hero.secondaryButtonUrl);
+                    } else {
+                      setIsDemoSchedulerOpen(true);
+                    }
+                  }}
+                  className="px-8 py-4 rounded-full border-2 border-gray-300 text-gray-700 font-semibold text-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-2 group"
+                >
                   <Play className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                  Watch Demo
+                  {hero?.secondaryButtonText || "Watch Demo"}
                 </button>
               </div>
               
@@ -288,6 +311,115 @@ const Landing: React.FC = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Department Overview - CRUD */}
+      <section id="departments" className="py-20 bg-white border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900">Department Overview</h2>
+              <p className="text-gray-600">Create, rename, activate/deactivate, and delete departments.</p>
+            </div>
+          </div>
+
+          <form onSubmit={handleCreateDepartment} className="mb-8 flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              value={newDept}
+              onChange={(e) => setNewDept(e.target.value)}
+              placeholder="New department name"
+              className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="submit"
+              disabled={createDepartmentMutation.isPending}
+              className="px-5 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50"
+            >
+              {createDepartmentMutation.isPending ? 'Adding…' : 'Add Department'}
+            </button>
+          </form>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {isLoadingDepartments ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="p-5 rounded-xl border border-gray-200 bg-gray-50 animate-pulse h-28" />
+              ))
+            ) : departments.length === 0 ? (
+              <div className="col-span-full text-gray-500">No departments yet.</div>
+            ) : (
+              departments.map((d) => (
+                <div key={d.id} className="p-5 rounded-xl border border-gray-200 bg-white shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      {editingId === d.id ? (
+                        <input
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      ) : (
+                        <h3 className="text-lg font-semibold text-gray-900">{d.name}</h3>
+                      )}
+                      <div className="mt-1">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${d.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                          {d.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2 w-36">
+                      {editingId === d.id ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => saveEdit(d.id, d.isActive)}
+                            disabled={updateDepartmentMutation.isPending}
+                            className="px-3 py-1.5 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:opacity-50"
+                          >
+                            {updateDepartmentMutation.isPending ? 'Saving…' : 'Save'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={cancelEdit}
+                            className="px-3 py-1.5 rounded-md border border-gray-300 text-sm"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => startEdit(d.id, d.name)}
+                            className="px-3 py-1.5 rounded-md border border-gray-300 text-sm hover:bg-gray-50"
+                          >
+                            Rename
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => toggleActive(d.id, d.name, d.isActive)}
+                            disabled={updateDepartmentMutation.isPending}
+                            className="px-3 py-1.5 rounded-md text-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                          >
+                            {d.isActive ? 'Deactivate' : 'Activate'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeDepartment(d.id)}
+                            disabled={deleteDepartmentMutation.isPending}
+                            className="px-3 py-1.5 rounded-md text-sm bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-50"
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -433,9 +565,10 @@ const Landing: React.FC = () => {
                   <Quote className="w-8 h-8 text-blue-600 mb-4" />
                   <p className="text-gray-700 mb-6 leading-relaxed italic">"{testimonial.quote}"</p>
                   <div className="flex items-center gap-4">
-                    <img 
-                      src={testimonial.imageUrl} 
-                      alt={testimonial.name}
+                    <AvatarImage 
+                      name={testimonial.name}
+                      src={testimonial.imageUrl}
+                      size={48}
                       className="w-12 h-12 rounded-full object-cover"
                     />
                     <div>

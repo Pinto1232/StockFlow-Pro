@@ -1,3 +1,17 @@
+export interface LandingHero {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  primaryButtonText: string;
+  primaryButtonUrl: string;
+  secondaryButtonText: string;
+  secondaryButtonUrl: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface LandingFeature {
   id: string;
   title: string;
@@ -35,12 +49,14 @@ export interface LandingStat {
 }
 
 export interface LandingContent {
+  hero?: LandingHero;
   features: LandingFeature[];
   testimonials: LandingTestimonial[];
   stats: LandingStat[];
 }
 
-const API_BASE_URL = '/api/landing';
+// Backend route is implemented as api/legacy/landing
+const API_BASE_URL = '/api/legacy/landing';
 
 export const landingService = {
   async getLandingContent(activeOnly: boolean = true): Promise<LandingContent> {

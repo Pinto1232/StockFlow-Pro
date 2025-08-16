@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import DateTime from 'react-datetime';
 import moment from 'moment';
-import { X, Calendar, Clock, User, Mail, Building, Phone, CheckCircle, AlertCircle, Zap, Coffee, Sun } from 'lucide-react';
+import { X, Calendar, Clock, User, Mail, Building, CheckCircle, AlertCircle, Zap, Coffee, Sun } from 'lucide-react';
 import 'react-datetime/css/react-datetime.css';
 
 interface DemoSchedulerProps {
@@ -50,6 +50,14 @@ const DemoScheduler: React.FC<DemoSchedulerProps> = ({ isOpen, onClose, theme = 
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [dateFormat, setDateFormat] = useState<'US' | 'EU' | 'ISO'>('US');
   const [showQuickSelect, setShowQuickSelect] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const hasFocusedRef = useRef(false);
+  const onCloseRef = useRef<() => void>(onClose);
+
+  // Keep latest onClose in a ref so keyboard handler always calls the current function
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   // Theme configurations
   const themes = {
@@ -128,7 +136,7 @@ const DemoScheduler: React.FC<DemoSchedulerProps> = ({ isOpen, onClose, theme = 
 
     if (!formData.selectedDateTime) {
       newErrors.dateTime = 'Please select a date and time for your demo';
-    } else if (!isValidDateTime(formData.selectedDateTime)) {
+    } else if (!isValidBusinessDay(formData.selectedDateTime) || !isValidBusinessTime(formData.selectedDateTime)) {
       newErrors.dateTime = 'Please select a valid business day and time (Mon-Fri, 9AM-5PM)';
     }
 
@@ -154,7 +162,7 @@ const DemoScheduler: React.FC<DemoSchedulerProps> = ({ isOpen, onClose, theme = 
 
   const handleQuickSelect = (option: QuickSelectOption) => {
     const dateTime = option.getValue();
-    if (isValidDateTime(dateTime)) {
+    if (isValidBusinessDay(dateTime) && isValidBusinessTime(dateTime)) {
       setFormData(prev => ({ ...prev, selectedDateTime: dateTime }));
       setShowQuickSelect(false);
       if (errors.dateTime) {
@@ -163,13 +171,19 @@ const DemoScheduler: React.FC<DemoSchedulerProps> = ({ isOpen, onClose, theme = 
     }
   };
 
-  const isValidDateTime = (current: moment.Moment) => {
-    const now = moment();
+  // Allow selecting any future weekday on the calendar
+  const isValidBusinessDay = (current: moment.Moment) => {
+    const today = moment().startOf('day');
     const isWeekday = current.day() !== 0 && current.day() !== 6;
-    const isBusinessHours = current.hour() >= 9 && current.hour() < 17;
+    return isWeekday && current.isSameOrAfter(today, 'day');
+  };
+
+  // Validate business hours and future time for the selected datetime
+  const isValidBusinessTime = (current: moment.Moment) => {
+    const now = moment();
     const isFuture = current.isAfter(now);
-    
-    return isFuture && isWeekday && isBusinessHours;
+    const isBusinessHours = current.hour() >= 9 && current.hour() < 17;
+    return isFuture && isBusinessHours;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -205,7 +219,7 @@ const DemoScheduler: React.FC<DemoSchedulerProps> = ({ isOpen, onClose, theme = 
         setErrors({});
         onClose();
       }, 3000);
-    } catch (error) {
+  } catch {
       setIsSubmitting(false);
       setErrors({ dateTime: 'Failed to schedule demo. Please try again.' });
     }
@@ -232,27 +246,34 @@ const DemoScheduler: React.FC<DemoSchedulerProps> = ({ isOpen, onClose, theme = 
     return dateTime.format(formats[dateFormat]);
   };
 
-  // Keyboard navigation support
+  // Keyboard navigation and focus management (focus only once per open)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
-        onClose();
+        onCloseRef.current?.();
       }
     };
 
     if (isOpen) {
       document.addEventListener('keydown', handleKeyDown);
-      // Focus management for accessibility
-      const firstInput = document.querySelector('input[type="text"]') as HTMLInputElement;
-      if (firstInput) {
-        setTimeout(() => firstInput.focus(), 100);
+      if (!hasFocusedRef.current) {
+        const firstFocusable = containerRef.current?.querySelector(
+          'input, textarea, select, button, [tabindex]'
+        ) as HTMLElement | null;
+        if (firstFocusable) {
+          firstFocusable.focus();
+          hasFocusedRef.current = true;
+        }
       }
+    } else {
+      // Reset for next open
+      hasFocusedRef.current = false;
     }
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -267,7 +288,7 @@ const DemoScheduler: React.FC<DemoSchedulerProps> = ({ isOpen, onClose, theme = 
       
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
-        <div className={`relative ${currentTheme.bg} rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100`}>
+        <div ref={containerRef} className={`relative ${currentTheme.bg} rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100`}>
           {/* Header */}
           <div className={`sticky top-0 ${currentTheme.bg} ${currentTheme.border} border-b px-6 py-4 rounded-t-2xl`}>
             <div className="flex items-center justify-between">
@@ -500,7 +521,7 @@ const DemoScheduler: React.FC<DemoSchedulerProps> = ({ isOpen, onClose, theme = 
                     <DateTime
                       value={formData.selectedDateTime}
                       onChange={handleDateTimeChange}
-                      isValidDate={isValidDateTime}
+                      isValidDate={isValidBusinessDay}
                       input={false}
                       className="w-full"
                       timeConstraints={{

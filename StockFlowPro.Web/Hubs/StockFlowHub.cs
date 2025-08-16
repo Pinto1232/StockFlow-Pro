@@ -140,7 +140,7 @@ public class StockFlowHub : Hub
     {
         var senderId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
-        await Clients.Group($"user_{targetUserId}").SendAsync("ReceiveNotification", new
+        await Clients.Group($"User_{targetUserId}").SendAsync("ReceiveNotification", new
         {
             Title = title,
             Message = message,

@@ -8,17 +8,20 @@ namespace StockFlowPro.Application.Features.Landing;
 
 public class GetLandingContentHandler : IRequestHandler<GetLandingContentQuery, LandingContentDto>
 {
+    private readonly ILandingHeroRepository _heroRepository;
     private readonly ILandingFeatureRepository _featureRepository;
     private readonly ILandingTestimonialRepository _testimonialRepository;
     private readonly ILandingStatRepository _statRepository;
     private readonly IMapper _mapper;
 
     public GetLandingContentHandler(
+        ILandingHeroRepository heroRepository,
         ILandingFeatureRepository featureRepository,
         ILandingTestimonialRepository testimonialRepository,
         ILandingStatRepository statRepository,
         IMapper mapper)
     {
+        _heroRepository = heroRepository;
         _featureRepository = featureRepository;
         _testimonialRepository = testimonialRepository;
         _statRepository = statRepository;
@@ -30,6 +33,8 @@ public class GetLandingContentHandler : IRequestHandler<GetLandingContentQuery, 
         ArgumentNullException.ThrowIfNull(request);
 
         // Execute operations sequentially to avoid DbContext threading issues
+        var hero = await _heroRepository.GetActiveHeroAsync(cancellationToken);
+
         var features = request.ActiveOnly
             ? await _featureRepository.GetActiveFeaturesByOrderAsync(cancellationToken)
             : await _featureRepository.GetAllByOrderAsync(cancellationToken);
@@ -44,6 +49,7 @@ public class GetLandingContentHandler : IRequestHandler<GetLandingContentQuery, 
 
         return new LandingContentDto
         {
+            Hero = hero != null ? _mapper.Map<LandingHeroDto>(hero) : null,
             Features = _mapper.Map<IEnumerable<LandingFeatureDto>>(features),
             Testimonials = _mapper.Map<IEnumerable<LandingTestimonialDto>>(testimonials),
             Stats = _mapper.Map<IEnumerable<LandingStatDto>>(stats)

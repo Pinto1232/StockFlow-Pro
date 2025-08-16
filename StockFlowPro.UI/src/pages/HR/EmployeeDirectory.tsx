@@ -19,8 +19,12 @@ import {
     UserCheck,
     GripVertical,
     Bookmark,
+    Trash2,
+    ToggleLeft,
+    ToggleRight,
 } from "lucide-react";
 import { useCreateEmployee, useEmployees, useUploadEmployeeImage, type EmployeeDto } from "../../hooks/employees";
+import { useCreateDepartment, useDeleteDepartment, useDepartments, useUpdateDepartment } from "../../hooks/departments";
 
 // Modern, accessible checkbox for selection
 interface ModernCheckboxProps {
@@ -282,6 +286,12 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
 
 const EmployeeDirectory: React.FC = () => {
     const { data: employees, isLoading, isError } = useEmployees();
+    // Departments data + CRUD hooks for Department Overview
+    const { data: deptList } = useDepartments(true);
+    const { mutateAsync: createDepartment, isPending: isCreatingDept } = useCreateDepartment();
+    const { mutateAsync: updateDepartment, isPending: isUpdatingDept } = useUpdateDepartment();
+    const { mutateAsync: deleteDepartment, isPending: isDeletingDept } = useDeleteDepartment();
+    const [newDeptName, setNewDeptName] = useState("");
 
     const [search, setSearch] = useState("");
     const [departmentFilter, setDepartmentFilter] = useState<string>("All");
@@ -433,13 +443,13 @@ const EmployeeDirectory: React.FC = () => {
         }
     }, [employees]);
 
-    const departments = useMemo(() => {
+    // Department filter options: union of API departments and any names present on employees
+    const departmentOptions = useMemo(() => {
         const set = new Set<string>();
-        (employees ?? []).forEach(e => {
-            if (e.departmentName) set.add(e.departmentName);
-        });
+        (deptList ?? []).forEach(d => { if (d.name?.trim()) set.add(d.name.trim()); });
+        (employees ?? []).forEach(e => { const n = (e.departmentName ?? "").trim(); if (n) set.add(n); });
         return ["All", ...Array.from(set.values()).sort()];
-    }, [employees]);
+    }, [deptList, employees]);
 
     const filtered = useMemo(() => {
         const term = normalize(search);
@@ -479,14 +489,48 @@ const EmployeeDirectory: React.FC = () => {
         });
     }, [filtered, orderedIds]);
 
-    const departmentCounts = useMemo(() => {
-        const counts = new Map<string, number>();
-        (employees ?? []).forEach(e => {
-            const key = e.departmentName ?? "Unassigned";
-            counts.set(key, (counts.get(key) ?? 0) + 1);
+    // Join employees with active departments for counts; also compute "Unassigned/Other"
+    const departmentTiles = useMemo(() => {
+        const depts = deptList ?? [];
+        const activeNameSet = new Set(
+            depts.map(d => (d.name ?? "").trim().toLowerCase()).filter(n => n !== "")
+        );
+        const norm = (s?: string | null) => (s ?? "").trim().toLowerCase();
+        const employeesList = employees ?? [];
+        const tiles = depts.map(d => {
+            const n = norm(d.name);
+            const count = employeesList.filter(e => norm(e.departmentName) === n).length;
+            return { dept: d, count };
         });
-        return Array.from(counts.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-    }, [employees]);
+        const unassigned = employeesList.filter(e => {
+            const n = norm(e.departmentName);
+            return n === "" || !activeNameSet.has(n);
+        }).length;
+        return { tiles, unassigned };
+    }, [deptList, employees]);
+
+    // Department actions
+    const handleAddDepartment = async () => {
+        const name = newDeptName.trim();
+        if (!name) return;
+        await createDepartment({ name });
+        setNewDeptName("");
+    };
+
+    const handleRenameDepartment = async (id: string, currentName: string) => {
+        const next = window.prompt("Rename department", currentName)?.trim();
+        if (!next || next === currentName) return;
+        await updateDepartment({ id, dto: { name: next } });
+    };
+
+    const handleToggleDepartment = async (id: string, name: string, isActive: boolean) => {
+        await updateDepartment({ id, dto: { name, isActive: !isActive } });
+    };
+
+    const handleDeleteDepartment = async (id: string, name: string) => {
+        if (!window.confirm(`Delete department "${name}"?`)) return;
+        await deleteDepartment(id);
+    };
 
     // Create a component for individual employee image upload
     const EmployeeImageUpload: React.FC<{ employee: EmployeeDto }> = ({ employee }) => {
@@ -697,7 +741,7 @@ const EmployeeDirectory: React.FC = () => {
                             <CustomDropdown
                                 value={departmentFilter}
                                 onChange={setDepartmentFilter}
-                                options={departments.map((d) => ({
+                                options={departmentOptions.map((d) => ({
                                     value: d,
                                     label: d === "All" ? "All Departments" : d
                                 }))}
@@ -843,7 +887,7 @@ const EmployeeDirectory: React.FC = () => {
                                         )}
                                     </div>
                                     <Link
-                                        to={`/hr/employees/${e.id}`}
+                                        to={`/app/hr/employees/${e.id}`}
                                         className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200"
                                     >
                                         <Edit className="w-4 h-4" />
@@ -858,11 +902,32 @@ const EmployeeDirectory: React.FC = () => {
                 {/* Department Summary */}
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
                     <h3 className="text-xl font-bold text-gray-900 mb-6">Department Overview</h3>
+                    {/* Add Department */}
+                    <div className="mb-6 flex flex-col sm:flex-row gap-3 sm:items-center">
+                        <div className="flex-1 flex gap-2">
+                            <input
+                                type="text"
+                                value={newDeptName}
+                                onChange={e => setNewDeptName(e.target.value)}
+                                placeholder="New department name"
+                                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            <button
+                                onClick={handleAddDepartment}
+                                disabled={!newDeptName.trim() || isCreatingDept}
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50 hover:bg-blue-700"
+                                title="Add Department"
+                            >
+                                <Plus className="w-4 h-4" /> Add
+                            </button>
+                        </div>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                        {departmentCounts.length === 0 && (
+                        {departmentTiles.tiles.length === 0 && (
                             <div className="col-span-full text-gray-500">No departments to display.</div>
                         )}
-                        {departmentCounts.map(([dept, count], idx) => {
+                        {departmentTiles.tiles.map(({ dept, count }, idx) => {
                             const palette = [
                                 "from-blue-50 to-blue-100 text-blue-700",
                                 "from-green-50 to-green-100 text-green-700",
@@ -876,12 +941,44 @@ const EmployeeDirectory: React.FC = () => {
                                 color.includes("purple") ? "text-purple-600" :
                                 color.includes("orange") ? "text-orange-600" : "text-teal-600";
                             return (
-                                <div key={dept} className={`text-center p-4 bg-gradient-to-r ${color} rounded-xl`}>
+                                <div key={dept.id} className={`relative text-center p-4 bg-gradient-to-r ${color} rounded-xl group`}>
                                     <div className={`text-2xl font-bold mb-1 ${numberColor}`}>{count}</div>
-                                    <div className="text-sm font-medium">{dept}</div>
+                                    <div className="text-sm font-medium break-words">{dept.name}</div>
+                                    <div className="absolute top-2 right-2 flex gap-2 opacity-100">
+                                        <button
+                                            className="p-1 rounded bg-white/80 hover:bg-white"
+                                            title={dept.isActive ? "Deactivate" : "Activate"}
+                                            onClick={() => handleToggleDepartment(dept.id, dept.name, dept.isActive)}
+                                            disabled={isUpdatingDept}
+                                        >
+                                            {dept.isActive ? <ToggleLeft className="w-4 h-4 text-gray-700" /> : <ToggleRight className="w-4 h-4 text-green-600" />}
+                                        </button>
+                                        <button
+                                            className="p-1 rounded bg-white/80 hover:bg-white"
+                                            title="Rename"
+                                            onClick={() => handleRenameDepartment(dept.id, dept.name)}
+                                            disabled={isUpdatingDept}
+                                        >
+                                            <Edit className="w-4 h-4 text-gray-700" />
+                                        </button>
+                                        <button
+                                            className="p-1 rounded bg-white/80 hover:bg-white"
+                                            title="Delete"
+                                            onClick={() => handleDeleteDepartment(dept.id, dept.name)}
+                                            disabled={isDeletingDept}
+                                        >
+                                            <Trash2 className="w-4 h-4 text-red-600" />
+                                        </button>
+                                    </div>
                                 </div>
                             );
                         })}
+                        {departmentTiles.unassigned > 0 && (
+                            <div className={`text-center p-4 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 rounded-xl`}>
+                                <div className={`text-2xl font-bold mb-1 text-gray-600`}>{departmentTiles.unassigned}</div>
+                                <div className="text-sm font-medium">Unassigned</div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

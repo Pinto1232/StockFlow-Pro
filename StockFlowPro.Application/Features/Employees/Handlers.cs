@@ -16,6 +16,8 @@ public record GetEmployeesQuery(bool ActiveOnly = false, Guid? DepartmentId = nu
 public record AddEmployeeDocumentCommand(Guid EmployeeId, string FileName, DocumentType Type, string StoragePath, long SizeBytes, string ContentType, DateTime? IssuedAt = null, DateTime? ExpiresAt = null) : IRequest<EmployeeDocumentDto>;
 public record UpdateEmployeeImageCommand(Guid Id, string? ImageUrl) : IRequest<EmployeeDto>;
 public record ArchiveEmployeeDocumentCommand(Guid EmployeeId, Guid DocumentId, string Reason) : IRequest<bool>;
+public record UnarchiveEmployeeDocumentCommand(Guid EmployeeId, Guid DocumentId) : IRequest<bool>;
+public record DeleteEmployeeDocumentCommand(Guid EmployeeId, Guid DocumentId) : IRequest<bool>;
 public record StartOnboardingCommand(Guid EmployeeId) : IRequest<EmployeeDto>;
 public record CompleteOnboardingTaskCommand(Guid EmployeeId, string Code) : IRequest<EmployeeDto>;
 public record InitiateOffboardingCommand(Guid EmployeeId, string Reason) : IRequest<EmployeeDto>;
@@ -209,6 +211,47 @@ public class ArchiveEmployeeDocumentHandler : IRequestHandler<ArchiveEmployeeDoc
         var e = await _repo.GetByIdAsync(request.EmployeeId, cancellationToken);
         if (e == null) {return false;}
         e.ArchiveDocument(request.DocumentId, request.Reason);
+        await _repo.UpdateAsync(e, cancellationToken);
+        return true;
+    }
+}
+
+public class UnarchiveEmployeeDocumentHandler : IRequestHandler<UnarchiveEmployeeDocumentCommand, bool>
+{
+    private readonly IEmployeeRepository _repo;
+
+    public UnarchiveEmployeeDocumentHandler(IEmployeeRepository repo)
+    {
+        _repo = repo;
+    }
+
+    public async Task<bool> Handle(UnarchiveEmployeeDocumentCommand request, CancellationToken cancellationToken)
+    {
+        var e = await _repo.GetByIdAsync(request.EmployeeId, cancellationToken);
+        if (e == null) 
+        {
+            return false;
+        }
+        e.UnarchiveDocument(request.DocumentId);
+        await _repo.UpdateAsync(e, cancellationToken);
+        return true;
+    }
+}
+
+public class DeleteEmployeeDocumentHandler : IRequestHandler<DeleteEmployeeDocumentCommand, bool>
+{
+    private readonly IEmployeeRepository _repo;
+
+    public DeleteEmployeeDocumentHandler(IEmployeeRepository repo)
+    {
+        _repo = repo;
+    }
+
+    public async Task<bool> Handle(DeleteEmployeeDocumentCommand request, CancellationToken cancellationToken)
+    {
+        var e = await _repo.GetByIdAsync(request.EmployeeId, cancellationToken);
+        if (e == null) {return false;}
+        e.DeleteDocument(request.DocumentId);
         await _repo.UpdateAsync(e, cancellationToken);
         return true;
     }

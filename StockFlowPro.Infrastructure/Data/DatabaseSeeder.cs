@@ -99,6 +99,7 @@ public class DatabaseSeeder(ApplicationDbContext context, ILogger<DatabaseSeeder
                 await SeedPermissionsAsync();
                 await SeedProductsAsync();
                 await SeedEmployeesAsync();
+                await SeedDepartmentsIfMissingAsync();
                 await SeedSubscriptionSystemAsync();
                 await SeedNotificationSystemAsync();
                 await SeedLandingContentAsync();
@@ -209,6 +210,36 @@ public class DatabaseSeeder(ApplicationDbContext context, ILogger<DatabaseSeeder
         {
             _logger.LogError(ex, "An error occurred while seeding the database");
             throw new InvalidOperationException("Failed to seed database with initial data", ex);
+        }
+    }
+
+    private async Task SeedDepartmentsIfMissingAsync()
+    {
+        try
+        {
+            // If Departments table exists and is empty, seed a few defaults
+            var canQuery = false;
+            try { _ = await _context.Departments.CountAsync(); canQuery = true; } catch { canQuery = false; }
+            if (!canQuery)
+            {
+                return;
+            }
+
+            if (!await _context.Departments.AnyAsync())
+            {
+                _logger.LogInformation("Seeding default departments...");
+                var names = new[] { "Engineering", "Sales", "Marketing", "Operations", "HR", "Support" };
+                foreach (var name in names)
+                {
+                    _context.Departments.Add(new Department(name));
+                }
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Seeded {Count} departments", names.Length);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Skipping department seed due to error");
         }
     }
 
@@ -1611,6 +1642,23 @@ public class DatabaseSeeder(ApplicationDbContext context, ILogger<DatabaseSeeder
         try
         {
             _logger.LogInformation("Seeding landing content...");
+
+            // Seed Landing Hero
+            if (!await _context.LandingHeroes.AnyAsync())
+            {
+                var hero = new LandingHero(
+                    "Streamline Your HR Operations",
+                    "Complete HR Management Solution", 
+                    "Empower your team with comprehensive HR tools designed for small to medium businesses. From employee management to payroll integration—everything you need in one platform.",
+                    "Start Free Trial",
+                    "/register",
+                    "Watch Demo",
+                    "#demo"
+                );
+
+                await _context.LandingHeroes.AddAsync(hero);
+                _logger.LogInformation("Added landing hero content");
+            }
 
             // Seed Landing Features
             if (!await _context.LandingFeatures.AnyAsync())

@@ -54,9 +54,10 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         builder.OwnsMany<EmployeeDocument>("_documents", db =>
         {
             db.ToTable("EmployeeDocuments");
-            db.WithOwner().HasForeignKey("EmployeeId");
-            db.Property<Guid>("Id");
-            db.HasKey("Id");
+            // Use the actual entity properties for FK and PK (avoid shadow keys)
+            db.WithOwner().HasForeignKey(d => d.EmployeeId);
+            db.HasKey(d => d.Id);
+            db.Property(d => d.Id).ValueGeneratedNever(); // we set Guid in domain
             db.Property(d => d.FileName).IsRequired().HasMaxLength(260);
             db.Property(d => d.StoragePath).IsRequired().HasMaxLength(512);
             db.Property(d => d.ContentType).IsRequired().HasMaxLength(100);

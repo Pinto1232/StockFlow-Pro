@@ -60,7 +60,7 @@ public class SecurityHeadersMiddleware
                     "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
                     "frame-src 'self'; " +
                     "frame-ancestors 'self'; " +
-                    "img-src 'self' data: blob:; " +
+                    "img-src 'self' data: blob: https://images.unsplash.com https://api.dicebear.com; " +
                     "font-src 'self'; " +
                     "connect-src 'self'; " +
                     "media-src 'self'";
@@ -91,7 +91,7 @@ public class SecurityHeadersMiddleware
                     "script-src 'self' 'unsafe-inline'; " +
                     "frame-src 'self'; " +
                     "frame-ancestors 'self'; " +
-                    "img-src 'self' data:; " +
+                    "img-src 'self' data: https://images.unsplash.com https://api.dicebear.com; " +
                     "font-src 'self'";
                 
                 _logger.LogDebug("Applied default CSP headers");
