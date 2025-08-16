@@ -49,17 +49,14 @@ export const useSignalR = (): UseSignalRReturn => {
                     console.log('Attempting to connect to SignalR for user:', currentUser.id);
                     await signalRService.start();
                     
-                    // Wait a bit for connection to stabilize, then join user group
-                    setTimeout(async () => {
-                        try {
-                            if (signalRService.connectionState === ConnectionState.Connected) {
-                                await signalRService.joinGroup(`User_${currentUser.id}`);
-                                console.log(`Joined user group: User_${currentUser.id}`);
-                            }
-                        } catch (error) {
-                            console.error('Failed to join user group:', error);
-                        }
-                    }, 500); // Give connection time to stabilize
+                    // Ask the service to join the user group; service will queue if connection
+                    // isn't ready and process when connected
+                    try {
+                        await signalRService.joinGroup(`User_${currentUser.id}`);
+                        console.log(`Requested join for user group: User_${currentUser.id}`);
+                    } catch (error) {
+                        console.error('Failed to request joining user group:', error);
+                    }
                     
                 } catch (error) {
                     console.error('Failed to connect to SignalR:', error);
@@ -147,7 +144,8 @@ export const useSignalR = (): UseSignalRReturn => {
             await signalRService.joinGroup(groupName);
         } catch (error) {
             console.error(`Failed to join group ${groupName}:`, error);
-            throw error;
+            // swallow non-fatal join errors; service will retry/queue as needed
+            return;
         }
     }, []);
 
@@ -156,7 +154,8 @@ export const useSignalR = (): UseSignalRReturn => {
             await signalRService.leaveGroup(groupName);
         } catch (error) {
             console.error(`Failed to leave group ${groupName}:`, error);
-            throw error;
+            // don't throw for leave failures
+            return;
         }
     }, []);
 

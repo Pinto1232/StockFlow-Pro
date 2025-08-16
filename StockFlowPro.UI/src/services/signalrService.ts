@@ -285,6 +285,8 @@ class SignalRServiceImpl implements SignalRService {
     }
 
     private connectionPromise: Promise<void> | null = null;
+    // Queue for pending group joins when connection is not yet established
+    private pendingJoins: Set<string> = new Set();
 
     public async start(): Promise<void> {
         // If there's already a connection attempt in progress, wait for it
@@ -376,6 +378,20 @@ class SignalRServiceImpl implements SignalRService {
                 notificationSoundService.playConnectionSound().catch(error => {
                     console.warn('Failed to play connection sound:', error);
                 });
+
+                // Process any pending join requests
+                if (this.pendingJoins.size > 0) {
+                    const pending = Array.from(this.pendingJoins);
+                    this.pendingJoins.clear();
+                    for (const group of pending) {
+                        try {
+                            await this.joinGroup(group);
+                            console.log(`Processed pending join for group: ${group}`);
+                        } catch (err) {
+                            console.error(`Failed to process pending join for ${group}:`, err);
+                        }
+                    }
+                }
             } catch (error) {
                 console.error('Error starting SignalR connection:', error);
                 this.updateConnectionState(ConnectionState.Disconnected);
@@ -456,14 +472,13 @@ class SignalRServiceImpl implements SignalRService {
 
     // Method to join a group
     public async joinGroup(groupName: string): Promise<void> {
-        if (!this.connection) {
-            throw new Error('SignalR connection not initialized');
+        // If the connection isn't initialized or connected yet, queue the join
+        if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) {
+            console.debug(`Connection not ready, queuing join for group: ${groupName}`);
+            this.pendingJoins.add(groupName);
+            return Promise.resolve();
         }
-        
-        if (this.connection.state !== signalR.HubConnectionState.Connected) {
-            throw new Error('SignalR connection is not established');
-        }
-        
+
         return this.sendMessage('JoinGroup', groupName);
     }
 
