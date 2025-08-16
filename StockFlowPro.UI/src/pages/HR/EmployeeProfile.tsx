@@ -1031,15 +1031,20 @@ const EmployeeProfile: React.FC = () => {
             {/* Left: Profile Summary + Documents */}
             <div className="lg:col-span-2 space-y-6">
               <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-                <div className="flex items-start gap-6">
-                  {employee.imageUrl ? (
-                    <img src={resolveImageUrl(employee.imageUrl, true)} alt={employee.fullName ?? buildFullName(employee.firstName, employee.lastName)} className="w-24 h-24 rounded-full object-cover" />
-                  ) : (
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white flex items-center justify-center text-2xl font-bold">
-                      {initials(employee.firstName, employee.lastName)}
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                  {/* Avatar */}
+                  <div className="md:col-span-2 flex md:block justify-center">
+                    {employee.imageUrl ? (
+                      <img src={resolveImageUrl(employee.imageUrl, true)} alt={employee.fullName ?? buildFullName(employee.firstName, employee.lastName)} className="w-24 h-24 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-24 h-24 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white flex items-center justify-center text-2xl font-bold">
+                        {initials(employee.firstName, employee.lastName)}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Main info */}
+                  <div className="md:col-span-7 min-w-0">
                     <div className="flex flex-wrap items-center gap-3">
                       {!isEditing ? (
                         <>
@@ -1066,13 +1071,14 @@ const EmployeeProfile: React.FC = () => {
                       )}
                     </div>
                     {!isEditing ? (
-                      <>
-                        <div className="mt-1 text-gray-600">{employee.jobTitle ?? '—'}</div>
-                        <div className="mt-1 inline-flex items-center gap-2 text-blue-800 bg-blue-100 px-3 py-1 rounded-full text-xs font-medium">
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <div className="text-gray-600">{employee.jobTitle ?? '—'}</div>
+                        <span className="hidden md:inline-block text-gray-300">•</span>
+                        <div className="inline-flex items-center gap-2 text-blue-800 bg-blue-100 px-3 py-1 rounded-full text-xs font-medium">
                           <Building2 className="w-4 h-4" />
                           {employee.departmentName ?? 'Unassigned'}
                         </div>
-                      </>
+                      </div>
                     ) : (
                       <div className="mt-3 flex flex-wrap gap-3">
                         <input
@@ -1089,119 +1095,119 @@ const EmployeeProfile: React.FC = () => {
                         />
                       </div>
                     )}
-                  </div>
-                </div>
 
-                <div className="mt-4">
-                  <input
-                    ref={fileInputRef}
-                    id="employee-image-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={async () => {
-                      const file = fileInputRef.current?.files?.[0] ?? null;
-                      if (file && id) {
-                        try {
-                          await uploadImage(file);
-                          toast.success('Profile image updated successfully', {
-                            title: 'Image Updated',
-                            duration: 4000,
-                          });
-                        } catch {
-                          toast.error('Failed to upload image. Please try again.', {
-                            title: 'Upload Failed',
-                            duration: 5000,
-                            actions: [
-                              {
-                                label: 'Try Again',
-                                onClick: () => fileInputRef.current?.click(),
-                                variant: 'primary',
-                              },
-                            ],
-                          });
+                    {/* Contact / meta */}
+                    {!isEditing ? (
+                      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {employee.email && (
+                          <div className="flex items-center gap-3 text-sm text-gray-700">
+                            <Mail className="w-4 h-4 text-gray-500" />
+                            <span className="truncate">{employee.email}</span>
+                          </div>
+                        )}
+                        {employee.phoneNumber && (
+                          <div className="flex items-center gap-3 text-sm text-gray-700">
+                            <Phone className="w-4 h-4 text-gray-500" />
+                            <span>{employee.phoneNumber}</span>
+                          </div>
+                        )}
+                        {employee.hireDate && (
+                          <div className="flex items-center gap-3 text-sm text-gray-700">
+                            <IdCard className="w-4 h-4 text-gray-500" />
+                            <span>Hired: {new Date(employee.hireDate).toLocaleDateString()}</span>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="flex items-center gap-3 text-sm text-gray-700">
+                          <Mail className="w-4 h-4 text-gray-500" />
+                          <span className="text-gray-500">{employee.email}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-gray-700">
+                          <Phone className="w-4 h-4 text-gray-500" />
+                          <input
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={form?.phoneNumber ?? ""}
+                            onChange={(e)=>setForm(s=>({...(s||{}), phoneNumber:e.target.value}))}
+                            placeholder="Phone number"
+                          />
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-gray-700">
+                          <IdCard className="w-4 h-4 text-gray-500" />
+                          <input
+                            type="date"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={form?.dateOfBirth ?? ""}
+                            onChange={(e)=>setForm(s=>({...(s||{}), dateOfBirth:e.target.value }))}
+                            placeholder="Date of Birth"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="md:col-span-3 w-full md:w-auto flex flex-wrap md:flex-col items-stretch md:items-end gap-2">
+                    {/* Hidden file input */}
+                    <input
+                      ref={fileInputRef}
+                      id="employee-image-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async () => {
+                        const file = fileInputRef.current?.files?.[0] ?? null;
+                        if (file && id) {
+                          try {
+                            await uploadImage(file);
+                            toast.success('Profile image updated successfully', {
+                              title: 'Image Updated',
+                              duration: 4000,
+                            });
+                          } catch {
+                            toast.error('Failed to upload image. Please try again.', {
+                              title: 'Upload Failed',
+                              duration: 5000,
+                              actions: [
+                                {
+                                  label: 'Try Again',
+                                  onClick: () => fileInputRef.current?.click(),
+                                  variant: 'primary',
+                                },
+                              ],
+                            });
+                          }
                         }
-                      }
-                      if (fileInputRef.current) {
-                        fileInputRef.current.value = "";
-                      }
-                    }}
-                  />
-                  <label htmlFor="employee-image-upload" className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 cursor-pointer text-sm">
-                    {isUploading ? 'Uploading…' : 'Upload Image'}
-                  </label>
-                </div>
+                        if (fileInputRef.current) {
+                          fileInputRef.current.value = "";
+                        }
+                      }}
+                    />
+                    <label htmlFor="employee-image-upload" className="inline-flex items-center justify-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 cursor-pointer text-sm">
+                      <Upload className="w-4 h-4" /> {isUploading ? 'Uploading…' : 'Upload Image'}
+                    </label>
 
-                {!isEditing ? (
-                  <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {employee.email && (
-                      <div className="flex items-center gap-3 text-sm text-gray-700">
-                        <Mail className="w-4 h-4 text-gray-500" />
-                        <span>{employee.email}</span>
-                      </div>
-                    )}
-                    {employee.phoneNumber && (
-                      <div className="flex items-center gap-3 text-sm text-gray-700">
-                        <Phone className="w-4 h-4 text-gray-500" />
-                        <span>{employee.phoneNumber}</span>
-                      </div>
-                    )}
-                    {employee.hireDate && (
-                      <div className="flex items-center gap-3 text-sm text-gray-700">
-                        <IdCard className="w-4 h-4 text-gray-500" />
-                        <span>Hired: {new Date(employee.hireDate).toLocaleDateString()}</span>
+                    {!isEditing ? (
+                      <button
+                        onClick={beginEdit}
+                        className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
+                      >Edit Profile</button>
+                    ) : (
+                      <div className="flex md:flex-col gap-2 w-full md:w-auto">
+                        <button
+                          onClick={saveEdit}
+                          disabled={isSaving}
+                          className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
+                        >{isSaving ? 'Saving…' : 'Save'}</button>
+                        <button
+                          onClick={cancelEdit}
+                          disabled={isSaving}
+                          className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 text-sm"
+                        >Cancel</button>
                       </div>
                     )}
                   </div>
-                ) : (
-                  <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center gap-3 text-sm text-gray-700">
-                      <Mail className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-500">{employee.email}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-gray-700">
-                      <Phone className="w-4 h-4 text-gray-500" />
-                      <input
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        value={form?.phoneNumber ?? ""}
-                        onChange={(e)=>setForm(s=>({...(s||{}), phoneNumber:e.target.value}))}
-                        placeholder="Phone number"
-                      />
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-gray-700">
-                      <IdCard className="w-4 h-4 text-gray-500" />
-                      <input
-                        type="date"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        value={form?.dateOfBirth ?? ""}
-                        onChange={(e)=>setForm(s=>({...(s||{}), dateOfBirth:e.target.value }))}
-                        placeholder="Date of Birth"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Edit actions */}
-                <div className="mt-6 flex items-center gap-3">
-                  {!isEditing ? (
-                    <button
-                      onClick={beginEdit}
-                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                    >Edit Profile</button>
-                  ) : (
-                    <>
-                      <button
-                        onClick={saveEdit}
-                        disabled={isSaving}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                      >{isSaving ? 'Saving…' : 'Save'}</button>
-                      <button
-                        onClick={cancelEdit}
-                        disabled={isSaving}
-                        className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-                      >Cancel</button>
-                    </>
-                  )}
                 </div>
               </div>
 
