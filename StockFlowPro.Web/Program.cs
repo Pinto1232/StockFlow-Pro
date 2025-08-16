@@ -259,6 +259,7 @@ builder.Services.AddScoped<StockFlowPro.Domain.Repositories.IInvoiceRepository, 
 builder.Services.AddScoped<StockFlowPro.Domain.Repositories.ISubscriptionPlanRepository, StockFlowPro.Infrastructure.Repositories.SubscriptionPlanRepository>();
 builder.Services.AddScoped<StockFlowPro.Domain.Repositories.ISubscriptionRepository, StockFlowPro.Infrastructure.Repositories.SubscriptionRepository>();
 // Landing content repositories
+builder.Services.AddScoped<StockFlowPro.Domain.Repositories.ILandingHeroRepository, StockFlowPro.Infrastructure.Repositories.LandingHeroRepository>();
 builder.Services.AddScoped<StockFlowPro.Domain.Repositories.ILandingFeatureRepository, StockFlowPro.Infrastructure.Repositories.LandingFeatureRepository>();
 builder.Services.AddScoped<StockFlowPro.Domain.Repositories.ILandingTestimonialRepository, StockFlowPro.Infrastructure.Repositories.LandingTestimonialRepository>();
 builder.Services.AddScoped<StockFlowPro.Domain.Repositories.ILandingStatRepository, StockFlowPro.Infrastructure.Repositories.LandingStatRepository>();

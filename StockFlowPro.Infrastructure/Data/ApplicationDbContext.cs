@@ -63,6 +63,7 @@ namespace StockFlowPro.Infrastructure.Data
         public DbSet<NotificationPreference> NotificationPreferences { get; set; }
         
         // Landing content entities
+        public DbSet<LandingHero> LandingHeroes { get; set; }
         public DbSet<LandingFeature> LandingFeatures { get; set; }
         public DbSet<LandingTestimonial> LandingTestimonials { get; set; }
         public DbSet<LandingStat> LandingStats { get; set; }
@@ -100,6 +101,7 @@ namespace StockFlowPro.Infrastructure.Data
             modelBuilder.ApplyConfiguration(new EmployeeConfiguration());
             
             // Landing content configurations
+            modelBuilder.ApplyConfiguration(new LandingHeroConfiguration());
             modelBuilder.ApplyConfiguration(new LandingFeatureConfiguration());
             modelBuilder.ApplyConfiguration(new LandingTestimonialConfiguration());
             modelBuilder.ApplyConfiguration(new LandingStatConfiguration());

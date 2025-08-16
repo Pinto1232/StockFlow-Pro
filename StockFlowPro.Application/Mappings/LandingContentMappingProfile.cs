@@ -8,6 +8,11 @@ public class LandingContentMappingProfile : Profile
 {
     public LandingContentMappingProfile()
     {
+        CreateMap<LandingHero, LandingHeroDto>();
+        CreateMap<LandingHeroDto, LandingHero>()
+            .ConstructUsing(dto => new LandingHero(dto.Title, dto.Subtitle, dto.Description, 
+                dto.PrimaryButtonText, dto.PrimaryButtonUrl, dto.SecondaryButtonText, dto.SecondaryButtonUrl));
+
         CreateMap<LandingFeature, LandingFeatureDto>();
         CreateMap<LandingFeatureDto, LandingFeature>()
             .ConstructUsing(dto => new LandingFeature(dto.Title, dto.Description, dto.IconName, dto.ColorClass, dto.SortOrder));

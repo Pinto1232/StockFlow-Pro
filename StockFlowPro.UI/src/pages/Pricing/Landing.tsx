@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { getPlansByInterval, type SubscriptionPlan } from '../../services/subscriptionService';
-import { landingService, type LandingFeature, type LandingTestimonial, type LandingStat } from '../../services/landingService';
+import { landingService, type LandingFeature, type LandingTestimonial, type LandingStat, type LandingHero } from '../../services/landingService';
 import { 
   Check, Zap, Crown, Star, ArrowRight, Shield, Clock, Users,
   UserCheck, Calendar, DollarSign, FileText, Award,
@@ -21,6 +21,7 @@ const Landing: React.FC = () => {
   const [features, setFeatures] = useState<LandingFeature[]>([]);
   const [testimonials, setTestimonials] = useState<LandingTestimonial[]>([]);
   const [stats, setStats] = useState<LandingStat[]>([]);
+  const [hero, setHero] = useState<LandingHero | null>(null);
   const [isLoadingContent, setIsLoadingContent] = useState(true);
   const navigate = useNavigate();
 
@@ -74,6 +75,8 @@ const Landing: React.FC = () => {
     setPlans(p.slice().sort((a,b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999) || a.name.localeCompare(b.name)));
   };
 
+ 
+
   const loadLandingContent = async () => {
     try {
       setIsLoadingContent(true);
@@ -81,92 +84,14 @@ const Landing: React.FC = () => {
       setFeatures(content.features);
       setTestimonials(content.testimonials);
       setStats(content.stats);
+      setHero(content.hero || null);
     } catch (error) {
       console.error('Failed to load landing content:', error);
-      // Fallback to hardcoded data if API fails
-      setFeatures([
-        {
-          id: '1',
-          title: "Employee Management",
-          description: "Comprehensive employee profiles, onboarding workflows, and organizational charts",
-          iconName: "UserCheck",
-          colorClass: "from-blue-500 to-cyan-500",
-          sortOrder: 1,
-          isActive: true,
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: '2',
-          title: "Leave & Attendance",
-          description: "Smart leave management, time tracking, and automated attendance monitoring",
-          iconName: "Calendar",
-          colorClass: "from-green-500 to-emerald-500",
-          sortOrder: 2,
-          isActive: true,
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: '3',
-          title: "Payroll Integration",
-          description: "Seamless payroll processing with tax calculations and compliance reporting",
-          iconName: "DollarSign",
-          colorClass: "from-purple-500 to-pink-500",
-          sortOrder: 3,
-          isActive: true,
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: '4',
-          title: "Compliance & Reporting",
-          description: "Automated compliance checks and comprehensive HR analytics dashboard",
-          iconName: "FileText",
-          colorClass: "from-orange-500 to-red-500",
-          sortOrder: 4,
-          isActive: true,
-          createdAt: new Date().toISOString()
-        }
-      ]);
-    setTestimonials([
-        {
-          id: '1',
-          name: "Sarah Johnson",
-          role: "HR Director",
-          company: "TechCorp Solutions",
-          imageUrl: undefined, // Use DiceBear fallback directly
-          quote: "StockFlow Pro HR transformed our people management. We reduced administrative time by 60% and improved employee satisfaction significantly.",
-          sortOrder: 1,
-          isActive: true,
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: '2',
-          name: "Michael Chen",
-          role: "Operations Manager",
-          company: "GrowthStart Inc",
-          imageUrl: undefined, // Use DiceBear fallback directly
-          quote: "The automated compliance features saved us from potential legal issues. The reporting dashboard gives us insights we never had before.",
-          sortOrder: 2,
-          isActive: true,
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: '3',
-          name: "Emily Rodriguez",
-          role: "CEO",
-          company: "InnovateLab",
-          imageUrl: undefined, // Use DiceBear fallback directly
-          quote: "As a growing company, we needed HR tools that could scale with us. StockFlow Pro delivered exactly that and more.",
-          sortOrder: 3,
-          isActive: true,
-          createdAt: new Date().toISOString()
-        }
-      ]);
-      setStats([
-        { id: '1', number: "10,000+", label: "Employees Managed", iconName: "Users", sortOrder: 1, isActive: true, createdAt: new Date().toISOString() },
-        { id: '2', number: "500+", label: "Companies Trust Us", iconName: "Building2", sortOrder: 2, isActive: true, createdAt: new Date().toISOString() },
-        { id: '3', number: "99.9%", label: "Uptime Guarantee", iconName: "Shield", sortOrder: 3, isActive: true, createdAt: new Date().toISOString() },
-        { id: '4', number: "24/7", label: "Expert Support", iconName: "HeadphonesIcon", sortOrder: 4, isActive: true, createdAt: new Date().toISOString() }
-      ]);
+      // Remove hardcoded fallback; rely on backend data only
+      setFeatures([]);
+      setTestimonials([]);
+      setStats([]);
+      setHero(null);
     } finally {
       setIsLoadingContent(false);
     }
@@ -243,34 +168,44 @@ const Landing: React.FC = () => {
         <div className="relative max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className={`transform transition-all duration-1000 ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'}`}>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 text-sm font-semibold mb-8 border border-blue-200">
-                <Zap className="w-4 h-4" />
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 text-[9px] font-medium mb-8 border border-blue-200">
+                <Zap className="w-3 h-3" />
                 Complete HR Management Solution
               </div>
               
               <h1 className="text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 mb-6 leading-tight">
-                Streamline Your
-                <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  HR Operations
+                {hero?.title || "Streamline Your"}
+                <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent text-[32px] md:text-[40px] lg:text-[44px] leading-tight mt-1">
+                  {hero?.subtitle || "HR Operations"}
                 </span>
               </h1>
               
               <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-2xl">
-                Empower your team with comprehensive HR tools designed for small to medium businesses. 
-                From employee management to payroll integration—everything you need in one platform.
+                {hero?.description || "Empower your team with comprehensive HR tools designed for small to medium businesses. From employee management to payroll integration—everything you need in one platform."}
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 mb-12">
                 <Link 
-                  to="/register" 
+                  to={hero?.primaryButtonUrl || "/register"}
                   className="px-8 py-4 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-2"
                 >
-                  Start Free Trial
+                  {hero?.primaryButtonText || "Start Free Trial"}
                   <ArrowRight className="w-5 h-5" />
                 </Link>
-                <button className="px-8 py-4 rounded-full border-2 border-gray-300 text-gray-700 font-semibold text-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-2 group">
+                <button 
+                  onClick={() => {
+                    if (hero?.secondaryButtonUrl?.startsWith('http')) {
+                      window.open(hero.secondaryButtonUrl, '_blank');
+                    } else if (hero?.secondaryButtonUrl) {
+                      navigate(hero.secondaryButtonUrl);
+                    } else {
+                      setIsDemoSchedulerOpen(true);
+                    }
+                  }}
+                  className="px-8 py-4 rounded-full border-2 border-gray-300 text-gray-700 font-semibold text-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-2 group"
+                >
                   <Play className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                  Watch Demo
+                  {hero?.secondaryButtonText || "Watch Demo"}
                 </button>
               </div>
               

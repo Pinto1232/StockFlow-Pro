@@ -1612,6 +1612,23 @@ public class DatabaseSeeder(ApplicationDbContext context, ILogger<DatabaseSeeder
         {
             _logger.LogInformation("Seeding landing content...");
 
+            // Seed Landing Hero
+            if (!await _context.LandingHeroes.AnyAsync())
+            {
+                var hero = new LandingHero(
+                    "Streamline Your HR Operations",
+                    "Complete HR Management Solution", 
+                    "Empower your team with comprehensive HR tools designed for small to medium businesses. From employee management to payroll integration—everything you need in one platform.",
+                    "Start Free Trial",
+                    "/register",
+                    "Watch Demo",
+                    "#demo"
+                );
+
+                await _context.LandingHeroes.AddAsync(hero);
+                _logger.LogInformation("Added landing hero content");
+            }
+
             // Seed Landing Features
             if (!await _context.LandingFeatures.AnyAsync())
             {

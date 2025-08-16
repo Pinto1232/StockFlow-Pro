@@ -1,3 +1,17 @@
+export interface LandingHero {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  primaryButtonText: string;
+  primaryButtonUrl: string;
+  secondaryButtonText: string;
+  secondaryButtonUrl: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface LandingFeature {
   id: string;
   title: string;
@@ -35,6 +49,7 @@ export interface LandingStat {
 }
 
 export interface LandingContent {
+  hero?: LandingHero;
   features: LandingFeature[];
   testimonials: LandingTestimonial[];
   stats: LandingStat[];
