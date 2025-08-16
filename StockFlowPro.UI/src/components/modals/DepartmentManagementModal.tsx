@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Edit3, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
 import { useDepartments, useCreateDepartment, useUpdateDepartment, useDeleteDepartment } from '../../hooks/departments';
+import { useToast } from '../../hooks/useToast';
 
 interface DepartmentManagementModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ const DepartmentManagementModal: React.FC<DepartmentManagementModalProps> = ({
   const createDepartmentMutation = useCreateDepartment();
   const updateDepartmentMutation = useUpdateDepartment();
   const deleteDepartmentMutation = useDeleteDepartment();
+  const { toast, hideAllToasts } = useToast();
   
   const [newDept, setNewDept] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -54,10 +56,37 @@ const DepartmentManagementModal: React.FC<DepartmentManagementModalProps> = ({
     updateDepartmentMutation.mutate({ id, dto: { name, isActive: !isActive } });
   };
 
-  const removeDepartment = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this department?")) {
-      deleteDepartmentMutation.mutate(id);
-    }
+  const removeDepartment = (id: string, departmentName: string) => {
+    toast.custom({
+      message: `Are you sure you want to delete "${departmentName}" department?`,
+      type: 'warning',
+      title: 'Confirm Delete',
+      persistent: true,
+      actions: [
+        {
+          label: '✓ Yes',
+          onClick: () => {
+            hideAllToasts(); // Hide the confirmation toast
+            deleteDepartmentMutation.mutate(id, {
+              onSuccess: () => {
+                toast.success(`Department "${departmentName}" deleted successfully!`);
+              },
+              onError: () => {
+                toast.error('Failed to delete department. Please try again.');
+              }
+            });
+          },
+          variant: 'danger'
+        },
+        {
+          label: '✕ No',
+          onClick: () => {
+            hideAllToasts(); // Hide the confirmation toast
+          },
+          variant: 'secondary'
+        }
+      ]
+    });
   };
 
   if (!isOpen) return null;
@@ -156,7 +185,7 @@ const DepartmentManagementModal: React.FC<DepartmentManagementModalProps> = ({
                               <Edit3 className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => removeDepartment(d.id)}
+                              onClick={() => removeDepartment(d.id, d.name)}
                               disabled={deleteDepartmentMutation.isPending}
                               className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
                               title="Delete department"
