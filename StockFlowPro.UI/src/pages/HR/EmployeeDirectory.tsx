@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { useCreateEmployee, useEmployees, useUploadEmployeeImage, type EmployeeDto } from "../../hooks/employees";
 import { useCreateDepartment, useDeleteDepartment, useDepartments, useUpdateDepartment } from "../../hooks/departments";
+import DepartmentManagementModal from "../../components/modals/DepartmentManagementModal";
 
 // Modern, accessible checkbox for selection
 interface ModernCheckboxProps {
@@ -297,6 +298,7 @@ const EmployeeDirectory: React.FC = () => {
     const [departmentFilter, setDepartmentFilter] = useState<string>("All");
     const [positionFilter, setPositionFilter] = useState<string>("All");
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showDepartmentModal, setShowDepartmentModal] = useState(false);
 
     // Field visibility settings (persisted)
     const [settings, setSettings] = useState<FieldSettings>(() => {
@@ -615,6 +617,13 @@ const EmployeeDirectory: React.FC = () => {
                             <button className="flex items-center gap-2 px-4 py-2 border-2 border-gray-400 text-gray-600 rounded-lg hover:bg-gray-400 hover:text-white transition-all duration-200 font-medium">
                                 <Filter className="w-4 h-4" />
                                 <span>Filter</span>
+                            </button>
+                            <button
+                                onClick={() => setShowDepartmentModal(true)}
+                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-medium shadow-lg"
+                            >
+                                <Building2 className="w-4 h-4" />
+                                <span>Manage Departments</span>
                             </button>
                             <button
                                 onClick={() => setShowCreateModal(true)}
@@ -988,6 +997,12 @@ const EmployeeDirectory: React.FC = () => {
                     onClose={() => setShowCreateModal(false)}
                 />
             )}
+
+            {/* Department Management Modal */}
+            <DepartmentManagementModal
+                isOpen={showDepartmentModal}
+                onClose={() => setShowDepartmentModal(false)}
+            />
         </div>
     );
 };

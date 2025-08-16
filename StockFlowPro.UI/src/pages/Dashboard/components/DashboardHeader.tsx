@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { ArrowUp, RefreshCw, Settings } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import OverviewPerformanceChart from "./OverviewPerformanceChart";
+import DepartmentManagementModal from "../../../components/modals/DepartmentManagementModal";
 
 interface User {
     fullName?: string;
@@ -33,7 +33,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     onSettings,
     entitlements,
 }) => {
-    const navigate = useNavigate();
+    const [isDepartmentModalOpen, setIsDepartmentModalOpen] = useState(false);
     
     // Destructure with default values to prevent undefined errors
     const {
@@ -127,11 +127,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-sm font-medium text-blue-700 uppercase tracking-wider">Current Plan</h3>
                                     <button
-                                        onClick={() => navigate('/pricing')}
+                                        onClick={() => setIsDepartmentModalOpen(true)}
                                         className="inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-blue-600 to-blue-700 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
                                     >
                                         <ArrowUp className="w-3.5 h-3.5" />
-                                        <span>Upgrade Plan</span>
+                                        <span>Upgrade</span>
                                     </button>
                                 </div>
                                 
@@ -187,6 +187,12 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                  
                 </div>
             </div>
+
+            {/* Department Management Modal */}
+            <DepartmentManagementModal 
+                isOpen={isDepartmentModalOpen}
+                onClose={() => setIsDepartmentModalOpen(false)}
+            />
         </div>
     );
 };

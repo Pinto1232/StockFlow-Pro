@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import DemoScheduler from '../../components/DemoScheduler';
-import { useDepartments, useCreateDepartment, useUpdateDepartment, useDeleteDepartment } from '../../hooks/departments';
 
 const formatPrice = (price: number, currency: string) => new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(price);
 
@@ -25,48 +24,6 @@ const Landing: React.FC = () => {
   const [hero, setHero] = useState<LandingHero | null>(null);
   const [isLoadingContent, setIsLoadingContent] = useState(true);
   const navigate = useNavigate();
-
-  // Departments CRUD state/hooks
-  const { data: departments = [], isLoading: isLoadingDepartments } = useDepartments(false);
-  const createDepartmentMutation = useCreateDepartment();
-  const updateDepartmentMutation = useUpdateDepartment();
-  const deleteDepartmentMutation = useDeleteDepartment();
-  const [newDept, setNewDept] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editName, setEditName] = useState("");
-
-  const handleCreateDepartment: React.FormEventHandler<HTMLFormElement> = (e) => {
-    e.preventDefault();
-    const name = newDept.trim();
-    if (!name) return;
-    createDepartmentMutation.mutate(
-      { name },
-      { onSuccess: () => setNewDept("") },
-    );
-  };
-
-  const startEdit = (id: string, currentName: string) => {
-    setEditingId(id);
-    setEditName(currentName);
-  };
-  const cancelEdit = () => {
-    setEditingId(null);
-    setEditName("");
-  };
-  const saveEdit = (id: string, currentIsActive: boolean) => {
-    const name = editName.trim();
-    if (!name) return;
-    updateDepartmentMutation.mutate(
-      { id, dto: { name, isActive: currentIsActive } },
-      { onSuccess: () => cancelEdit() },
-    );
-  };
-  const toggleActive = (id: string, name: string, isActive: boolean) => {
-    updateDepartmentMutation.mutate({ id, dto: { name, isActive: !isActive } });
-  };
-  const removeDepartment = (id: string) => {
-    deleteDepartmentMutation.mutate(id);
-  };
 
   // Resilient avatar component with fallback to DiceBear initials
   const AvatarImage: React.FC<{ name: string; src?: string; size?: number; className?: string }> = ({ name, src, size = 48, className }) => {
@@ -311,115 +268,6 @@ const Landing: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Department Overview - CRUD */}
-      <section id="departments" className="py-20 bg-white border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900">Department Overview</h2>
-              <p className="text-gray-600">Create, rename, activate/deactivate, and delete departments.</p>
-            </div>
-          </div>
-
-          <form onSubmit={handleCreateDepartment} className="mb-8 flex flex-col sm:flex-row gap-3">
-            <input
-              type="text"
-              value={newDept}
-              onChange={(e) => setNewDept(e.target.value)}
-              placeholder="New department name"
-              className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              type="submit"
-              disabled={createDepartmentMutation.isPending}
-              className="px-5 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50"
-            >
-              {createDepartmentMutation.isPending ? 'Adding…' : 'Add Department'}
-            </button>
-          </form>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {isLoadingDepartments ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="p-5 rounded-xl border border-gray-200 bg-gray-50 animate-pulse h-28" />
-              ))
-            ) : departments.length === 0 ? (
-              <div className="col-span-full text-gray-500">No departments yet.</div>
-            ) : (
-              departments.map((d) => (
-                <div key={d.id} className="p-5 rounded-xl border border-gray-200 bg-white shadow-sm">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1">
-                      {editingId === d.id ? (
-                        <input
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
-                          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      ) : (
-                        <h3 className="text-lg font-semibold text-gray-900">{d.name}</h3>
-                      )}
-                      <div className="mt-1">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${d.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                          {d.isActive ? 'Active' : 'Inactive'}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-2 w-36">
-                      {editingId === d.id ? (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => saveEdit(d.id, d.isActive)}
-                            disabled={updateDepartmentMutation.isPending}
-                            className="px-3 py-1.5 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:opacity-50"
-                          >
-                            {updateDepartmentMutation.isPending ? 'Saving…' : 'Save'}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={cancelEdit}
-                            className="px-3 py-1.5 rounded-md border border-gray-300 text-sm"
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => startEdit(d.id, d.name)}
-                            className="px-3 py-1.5 rounded-md border border-gray-300 text-sm hover:bg-gray-50"
-                          >
-                            Rename
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => toggleActive(d.id, d.name, d.isActive)}
-                            disabled={updateDepartmentMutation.isPending}
-                            className="px-3 py-1.5 rounded-md text-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
-                          >
-                            {d.isActive ? 'Deactivate' : 'Activate'}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => removeDepartment(d.id)}
-                            disabled={deleteDepartmentMutation.isPending}
-                            className="px-3 py-1.5 rounded-md text-sm bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-50"
-                          >
-                            Delete
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
           </div>
         </div>
       </section>
