@@ -1,7 +1,6 @@
 using StockFlowPro.Application.DTOs;
 
 namespace StockFlowPro.Application.Interfaces;
-
 /// <summary>
 /// Service interface for role management operations.
 /// </summary>
@@ -10,27 +9,27 @@ public interface IRoleService
     /// <summary>
     /// Gets all roles.
     /// </summary>
-    Task<IEnumerable<RoleDto>> GetAllRolesAsync(bool activeOnly = true);
+        System.Threading.Tasks.Task<IEnumerable<RoleDto>> GetAllRolesAsync(bool activeOnly = true);
 
     /// <summary>
     /// Gets role options for dropdowns.
     /// </summary>
-    Task<IEnumerable<RoleOptionDto>> GetRoleOptionsAsync();
+        System.Threading.Tasks.Task<IEnumerable<RoleOptionDto>> GetRoleOptionsAsync();
 
     /// <summary>
     /// Gets a role by its ID.
     /// </summary>
-    Task<RoleDto?> GetRoleByIdAsync(Guid id);
+        System.Threading.Tasks.Task<RoleDto?> GetRoleByIdAsync(Guid id);
 
     /// <summary>
     /// Creates a new role.
     /// </summary>
-    Task<RoleDto> CreateRoleAsync(CreateRoleDto createRoleDto);
+        System.Threading.Tasks.Task<RoleDto> CreateRoleAsync(CreateRoleDto createRoleDto);
 
     /// <summary>
     /// Updates an existing role.
     /// </summary>
-    Task<RoleDto> UpdateRoleAsync(Guid id, UpdateRoleDto updateRoleDto);
+        System.Threading.Tasks.Task<RoleDto> UpdateRoleAsync(Guid id, UpdateRoleDto updateRoleDto);
 
     /// <summary>
     /// Deletes a role.
@@ -40,7 +39,7 @@ public interface IRoleService
     /// <summary>
     /// Gets available permissions for role assignment.
     /// </summary>
-    Task<IEnumerable<object>> GetAvailablePermissionsAsync();
+        System.Threading.Tasks.Task<IEnumerable<object>> GetAvailablePermissionsAsync();
 
     /// <summary>
     /// Updates role permissions.

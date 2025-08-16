@@ -12,30 +12,30 @@ public interface INotificationPreferenceRepository : IRepository<NotificationPre
     /// <summary>
     /// Gets all notification preferences for a specific user.
     /// </summary>
-    Task<IEnumerable<NotificationPreference>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<IEnumerable<NotificationPreference>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets a specific notification preference for a user and notification type.
     /// </summary>
-    Task<NotificationPreference?> GetByUserAndTypeAsync(Guid userId, NotificationType type, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<NotificationPreference?> GetByUserAndTypeAsync(Guid userId, NotificationType type, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets users who have enabled a specific notification type and channel.
     /// </summary>
-    Task<IEnumerable<Guid>> GetUsersWithEnabledNotificationAsync(NotificationType type, NotificationChannel channel, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<IEnumerable<Guid>> GetUsersWithEnabledNotificationAsync(NotificationType type, NotificationChannel channel, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Creates default notification preferences for a new user.
     /// </summary>
-    Task CreateDefaultPreferencesAsync(Guid userId, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task CreateDefaultPreferencesAsync(Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Updates or creates a notification preference.
     /// </summary>
-    Task UpsertPreferenceAsync(NotificationPreference preference, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task UpsertPreferenceAsync(NotificationPreference preference, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Deletes all preferences for a user.
     /// </summary>
-    Task DeleteByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task DeleteByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
 }

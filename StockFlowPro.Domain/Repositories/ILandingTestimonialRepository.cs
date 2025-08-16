@@ -5,7 +5,7 @@ namespace StockFlowPro.Domain.Repositories;
 
 public interface ILandingTestimonialRepository : IRepository<LandingTestimonial>
 {
-    Task<IEnumerable<LandingTestimonial>> GetActiveTestimonialsByOrderAsync(CancellationToken cancellationToken = default);
-    Task<IEnumerable<LandingTestimonial>> GetAllByOrderAsync(CancellationToken cancellationToken = default);
-    Task<LandingTestimonial?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<IEnumerable<LandingTestimonial>> GetActiveTestimonialsByOrderAsync(CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<IEnumerable<LandingTestimonial>> GetAllByOrderAsync(CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<LandingTestimonial?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
 }

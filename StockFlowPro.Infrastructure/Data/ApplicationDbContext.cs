@@ -30,6 +30,7 @@ namespace StockFlowPro.Infrastructure.Data
 
             Employees = Set<Employee>();
             Departments = Set<Department>();
+            Tasks = Set<Domain.Entities.ProjectTask>();
             
             // Landing content entities
             LandingFeatures = Set<LandingFeature>();
@@ -38,8 +39,9 @@ namespace StockFlowPro.Infrastructure.Data
         }
         
         public DbSet<User> Users { get; set; }
-    public DbSet<Employee> Employees { get; set; }
-    public DbSet<Department> Departments { get; set; }
+        public DbSet<Employee> Employees { get; set; }
+        public DbSet<Department> Departments { get; set; }
+    public DbSet<Domain.Entities.ProjectTask> Tasks { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
         public DbSet<InvoiceItem> InvoiceItems { get; set; }
@@ -102,6 +104,7 @@ namespace StockFlowPro.Infrastructure.Data
             // Employee configurations
             modelBuilder.ApplyConfiguration(new EmployeeConfiguration());
             modelBuilder.ApplyConfiguration(new DepartmentConfiguration());
+            modelBuilder.ApplyConfiguration(new TaskConfiguration());
             
             // Landing content configurations
             modelBuilder.ApplyConfiguration(new LandingHeroConfiguration());

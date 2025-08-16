@@ -1,0 +1,24 @@
+MSBuild version 17.9.8+610b4d3b5 for .NET
+  Determining projects to restore...
+  Restored C:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Application\StockFlowPro.Application.csproj (in 953 ms).
+  Restored c:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Infrastructure\StockFlowPro.Infrastructure.csproj (in 1.02 sec).
+  Restored C:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Application.Tests\StockFlowPro.Application.Tests.csproj (in 849 ms).
+  Restored c:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Infrastructure.Tests\StockFlowPro.Infrastructure.Tests.csproj (in 1.03 sec).
+  Restored C:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Web\StockFlowPro.Web.csproj (in 1.3 sec).
+  Restored c:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Web.Tests\StockFlowPro.Web.Tests.csproj (in 1.3 sec).
+  3 of 9 projects are up-to-date for restore.
+  StockFlowPro.Shared -> c:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Shared\bin\Debug\net8.0\StockFlowPro.Shared.dll
+  StockFlowPro.Domain -> C:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Domain\bin\Debug\net8.0\StockFlowPro.Domain.dll
+  StockFlowPro.Domain.Tests -> c:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Domain.Tests\bin\Debug\net8.0\StockFlowPro.Domain.Tests.dll
+  StockFlowPro.Application -> c:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Application\bin\Debug\net8.0\StockFlowPro.Application.dll
+  StockFlowPro.Infrastructure -> c:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Infrastructure\bin\Debug\net8.0\StockFlowPro.Infrastructure.dll
+  StockFlowPro.Infrastructure.Tests -> C:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Infrastructure.Tests\bin\Debug\net8.0\StockFlowPro.Infrastructure.Tests.dll
+  StockFlowPro.Application.Tests -> c:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Application.Tests\bin\Debug\net8.0\StockFlowPro.Application.Tests.dll
+  StockFlowPro.Web -> C:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Web\bin\Debug\net8.0\StockFlowPro.Web.dll
+  StockFlowPro.Web.Tests -> c:\Users\pinto\Documents\Development\StockFlow-Pro\StockFlowPro.Web.Tests\bin\Debug\net8.0\StockFlowPro.Web.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:55.94

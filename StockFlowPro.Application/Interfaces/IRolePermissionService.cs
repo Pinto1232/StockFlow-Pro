@@ -10,27 +10,27 @@ public interface IRolePermissionService
     /// <summary>
     /// Gets all role permissions
     /// </summary>
-    Task<IEnumerable<RolePermission>> GetAllRolePermissionsAsync();
+        System.Threading.Tasks.Task<IEnumerable<RolePermission>> GetAllRolePermissionsAsync();
 
     /// <summary>
     /// Gets role permissions for a specific role
     /// </summary>
-    Task<IEnumerable<RolePermission>> GetRolePermissionsAsync(Guid roleId);
+        System.Threading.Tasks.Task<IEnumerable<RolePermission>> GetRolePermissionsAsync(Guid roleId);
 
     /// <summary>
     /// Gets permissions for a specific role
     /// </summary>
-    Task<IEnumerable<Permission>> GetPermissionsForRoleAsync(Guid roleId);
+        System.Threading.Tasks.Task<IEnumerable<Permission>> GetPermissionsForRoleAsync(Guid roleId);
 
     /// <summary>
     /// Gets user permissions based on their role
     /// </summary>
-    Task<IEnumerable<string>> GetUserPermissionsAsync(Guid userId);
+        System.Threading.Tasks.Task<IEnumerable<string>> GetUserPermissionsAsync(Guid userId);
 
     /// <summary>
     /// Grants a permission to a role
     /// </summary>
-    Task<RolePermission> GrantPermissionToRoleAsync(Guid roleId, Guid permissionId, Guid grantedBy);
+        System.Threading.Tasks.Task<RolePermission> GrantPermissionToRoleAsync(Guid roleId, Guid permissionId, Guid grantedBy);
 
     /// <summary>
     /// Revokes a permission from a role
@@ -45,10 +45,10 @@ public interface IRolePermissionService
     /// <summary>
     /// Checks if a user has a specific permission
     /// </summary>
-    Task<bool> UserHasPermissionAsync(Guid userId, string permissionName);
+        System.Threading.Tasks.Task<bool> UserHasPermissionAsync(Guid userId, string permissionName);
 
     /// <summary>
     /// Checks if a role has a specific permission
     /// </summary>
-    Task<bool> RoleHasPermissionAsync(Guid roleId, string permissionName);
+        System.Threading.Tasks.Task<bool> RoleHasPermissionAsync(Guid roleId, string permissionName);
 }

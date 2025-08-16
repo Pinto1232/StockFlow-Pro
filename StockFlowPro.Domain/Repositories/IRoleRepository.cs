@@ -10,50 +10,50 @@ public interface IRoleRepository
     /// <summary>
     /// Gets all roles from the database.
     /// </summary>
-    Task<IEnumerable<Role>> GetAllAsync();
+    System.Threading.Tasks.Task<IEnumerable<Role>> GetAllAsync();
 
     /// <summary>
     /// Gets active roles only.
     /// </summary>
-    Task<IEnumerable<Role>> GetActiveRolesAsync();
+    System.Threading.Tasks.Task<IEnumerable<Role>> GetActiveRolesAsync();
 
     /// <summary>
     /// Gets a role by its unique identifier.
     /// </summary>
-    Task<Role?> GetByIdAsync(Guid id);
+    System.Threading.Tasks.Task<Role?> GetByIdAsync(Guid id);
 
     /// <summary>
     /// Gets a role by its name.
     /// </summary>
-    Task<Role?> GetByNameAsync(string name);
+    System.Threading.Tasks.Task<Role?> GetByNameAsync(string name);
 
     /// <summary>
     /// Creates a new role in the database.
     /// </summary>
-    Task<Role> CreateAsync(Role role);
+    System.Threading.Tasks.Task<Role> CreateAsync(Role role);
 
     /// <summary>
     /// Updates an existing role in the database.
     /// </summary>
-    Task<Role> UpdateAsync(Role role);
+    System.Threading.Tasks.Task<Role> UpdateAsync(Role role);
 
     /// <summary>
     /// Deletes a role from the database.
     /// </summary>
-    Task DeleteAsync(Guid id);
+    System.Threading.Tasks.Task DeleteAsync(Guid id);
 
     /// <summary>
     /// Checks if a role with the given name already exists.
     /// </summary>
-    Task<bool> ExistsAsync(string name);
+    System.Threading.Tasks.Task<bool> ExistsAsync(string name);
 
     /// <summary>
     /// Gets roles ordered by priority (highest first).
     /// </summary>
-    Task<IEnumerable<Role>> GetOrderedByPriorityAsync();
+    System.Threading.Tasks.Task<IEnumerable<Role>> GetOrderedByPriorityAsync();
 
     /// <summary>
     /// Gets roles assigned to a specific user.
     /// </summary>
-    Task<IEnumerable<Role>> GetUserRolesAsync(Guid userId);
+    System.Threading.Tasks.Task<IEnumerable<Role>> GetUserRolesAsync(Guid userId);
 }

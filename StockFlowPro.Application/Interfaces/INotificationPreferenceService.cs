@@ -11,17 +11,17 @@ public interface INotificationPreferenceService
     /// <summary>
     /// Gets all notification preferences for a user.
     /// </summary>
-    Task<IEnumerable<NotificationPreference>> GetUserPreferencesAsync(Guid userId, CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<IEnumerable<NotificationPreference>> GetUserPreferencesAsync(Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets a specific notification preference for a user and type.
     /// </summary>
-    Task<NotificationPreference?> GetPreferenceAsync(Guid userId, NotificationType type, CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<NotificationPreference?> GetPreferenceAsync(Guid userId, NotificationType type, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Updates or creates a notification preference.
     /// </summary>
-    Task<NotificationPreference> UpdatePreferenceAsync(
+        System.Threading.Tasks.Task<NotificationPreference> UpdatePreferenceAsync(
         Guid userId,
         NotificationType type,
         NotificationChannel enabledChannels,
@@ -95,7 +95,7 @@ public interface INotificationPreferenceService
     /// <summary>
     /// Checks if a user should receive a notification based on their preferences.
     /// </summary>
-    Task<bool> ShouldReceiveNotificationAsync(
+        System.Threading.Tasks.Task<bool> ShouldReceiveNotificationAsync(
         Guid userId,
         NotificationType type,
         NotificationPriority priority,
@@ -105,7 +105,7 @@ public interface INotificationPreferenceService
     /// <summary>
     /// Gets the effective notification channels for a user and notification type.
     /// </summary>
-    Task<NotificationChannel> GetEffectiveChannelsAsync(
+        System.Threading.Tasks.Task<NotificationChannel> GetEffectiveChannelsAsync(
         Guid userId,
         NotificationType type,
         NotificationPriority priority,
@@ -114,7 +114,7 @@ public interface INotificationPreferenceService
     /// <summary>
     /// Exports user notification preferences.
     /// </summary>
-    Task<Dictionary<string, object>> ExportPreferencesAsync(Guid userId, CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<Dictionary<string, object>> ExportPreferencesAsync(Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Imports user notification preferences.

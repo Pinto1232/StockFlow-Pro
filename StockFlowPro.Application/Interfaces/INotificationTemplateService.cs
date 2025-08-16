@@ -11,7 +11,7 @@ public interface INotificationTemplateService
     /// <summary>
     /// Creates a new notification template.
     /// </summary>
-    Task<NotificationTemplate> CreateTemplateAsync(
+        System.Threading.Tasks.Task<NotificationTemplate> CreateTemplateAsync(
         string name,
         string description,
         string titleTemplate,
@@ -27,7 +27,7 @@ public interface INotificationTemplateService
     /// <summary>
     /// Updates an existing notification template.
     /// </summary>
-    Task<NotificationTemplate> UpdateTemplateAsync(
+        System.Threading.Tasks.Task<NotificationTemplate> UpdateTemplateAsync(
         Guid templateId,
         string name,
         string description,
@@ -43,22 +43,22 @@ public interface INotificationTemplateService
     /// <summary>
     /// Gets a notification template by ID.
     /// </summary>
-    Task<NotificationTemplate?> GetTemplateAsync(Guid templateId, CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<NotificationTemplate?> GetTemplateAsync(Guid templateId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets a notification template by name.
     /// </summary>
-    Task<NotificationTemplate?> GetTemplateByNameAsync(string name, CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<NotificationTemplate?> GetTemplateByNameAsync(string name, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets all active notification templates.
     /// </summary>
-    Task<IEnumerable<NotificationTemplate>> GetActiveTemplatesAsync(CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<IEnumerable<NotificationTemplate>> GetActiveTemplatesAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets notification templates by type.
     /// </summary>
-    Task<IEnumerable<NotificationTemplate>> GetTemplatesByTypeAsync(NotificationType type, CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<IEnumerable<NotificationTemplate>> GetTemplatesByTypeAsync(NotificationType type, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Activates a notification template.
@@ -73,12 +73,12 @@ public interface INotificationTemplateService
     /// <summary>
     /// Validates template syntax and parameters.
     /// </summary>
-    Task<bool> ValidateTemplateAsync(string titleTemplate, string messageTemplate, Dictionary<string, object> sampleParameters, CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<bool> ValidateTemplateAsync(string titleTemplate, string messageTemplate, Dictionary<string, object> sampleParameters, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Previews a template with sample parameters.
     /// </summary>
-    Task<(string title, string message)> PreviewTemplateAsync(string titleTemplate, string messageTemplate, Dictionary<string, object> parameters, CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<(string title, string message)> PreviewTemplateAsync(string titleTemplate, string messageTemplate, Dictionary<string, object> parameters, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Creates default system templates.

@@ -9,6 +9,7 @@ using StockFlowPro.Domain.Entities;
 using StockFlowPro.Domain.Exceptions;
 using StockFlowPro.Web.Authorization;
 using StockFlowPro.Web.Attributes;
+using StockFlowPro.Infrastructure.Services;
 
 namespace StockFlowPro.Web.Controllers.Api;
 
@@ -19,12 +20,14 @@ public class EmployeesController : ApiBaseController
     private readonly IMediator _mediator;
     private readonly IWebHostEnvironment _env;
     private readonly IRealTimeService _realTime;
+    private readonly TaskSeederService _taskSeeder;
 
-    public EmployeesController(IMediator mediator, IWebHostEnvironment env, IRealTimeService realTime)
+    public EmployeesController(IMediator mediator, IWebHostEnvironment env, IRealTimeService realTime, TaskSeederService taskSeeder)
     {
         _mediator = mediator;
         _env = env;
         _realTime = realTime;
+        _taskSeeder = taskSeeder;
     }
 
     [HttpGet]
@@ -227,6 +230,22 @@ public class EmployeesController : ApiBaseController
     {
         var item = await _mediator.Send(new CompleteOffboardingTaskCommand(id, request.Code));
         return Ok(item);
+    }
+
+    // Task Management
+    [HttpPost("seed-tasks")]
+    [Permission(Permissions.Users.Create)]
+    public async Task<IActionResult> SeedTasks()
+    {
+        try
+        {
+            await _taskSeeder.SeedTasksAsync();
+            return Ok(new { message = "Tasks seeded successfully" });
+        }
+        catch (Exception ex)
+        {
+            return Problem(title: "Error seeding tasks", detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+        }
     }
 }
 

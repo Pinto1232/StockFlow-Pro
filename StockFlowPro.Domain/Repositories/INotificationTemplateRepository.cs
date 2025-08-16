@@ -12,25 +12,25 @@ public interface INotificationTemplateRepository : IRepository<NotificationTempl
     /// <summary>
     /// Gets all active notification templates.
     /// </summary>
-    Task<IEnumerable<NotificationTemplate>> GetActiveAsync(CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<IEnumerable<NotificationTemplate>> GetActiveAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets notification templates by type.
     /// </summary>
-    Task<IEnumerable<NotificationTemplate>> GetByTypeAsync(NotificationType type, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<IEnumerable<NotificationTemplate>> GetByTypeAsync(NotificationType type, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets a notification template by name.
     /// </summary>
-    Task<NotificationTemplate?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<NotificationTemplate?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets notification templates created by a specific user.
     /// </summary>
-    Task<IEnumerable<NotificationTemplate>> GetByCreatorAsync(Guid creatorId, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<IEnumerable<NotificationTemplate>> GetByCreatorAsync(Guid creatorId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Checks if a template name already exists.
     /// </summary>
-    Task<bool> ExistsByNameAsync(string name, Guid? excludeId = null, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<bool> ExistsByNameAsync(string name, Guid? excludeId = null, CancellationToken cancellationToken = default);
 }

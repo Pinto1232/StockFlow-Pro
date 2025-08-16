@@ -2,6 +2,6 @@ namespace StockFlowPro.Application.Interfaces;
 
 public interface IPasswordService
 {
-    Task<string> HashPasswordAsync(string password);
-    Task<bool> VerifyPasswordAsync(string password, string hashedPassword);
+        System.Threading.Tasks.Task<string> HashPasswordAsync(string password);
+        System.Threading.Tasks.Task<bool> VerifyPasswordAsync(string password, string hashedPassword);
 }

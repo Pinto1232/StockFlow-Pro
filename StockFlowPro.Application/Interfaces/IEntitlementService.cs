@@ -4,6 +4,6 @@ namespace StockFlowPro.Application.Interfaces;
 
 public interface IEntitlementService
 {
-    Task<EntitlementsDto> GetEntitlementsForUserAsync(Guid userId, CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<EntitlementsDto> GetEntitlementsForUserAsync(Guid userId, CancellationToken cancellationToken = default);
     void InvalidateEntitlementsForUser(Guid userId);
 }

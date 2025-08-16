@@ -5,6 +5,6 @@ namespace StockFlowPro.Domain.Repositories;
 
 public interface ILandingHeroRepository : IRepository<LandingHero>
 {
-    Task<LandingHero?> GetActiveHeroAsync(CancellationToken cancellationToken = default);
-    Task<IEnumerable<LandingHero>> GetAllActiveAsync(CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<LandingHero?> GetActiveHeroAsync(CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<IEnumerable<LandingHero>> GetAllActiveAsync(CancellationToken cancellationToken = default);
 }

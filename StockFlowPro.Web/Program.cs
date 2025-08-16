@@ -278,6 +278,7 @@ builder.Services.AddScoped<IUserSecurityService, UserSecurityService>();
 builder.Services.AddScoped<StockFlowPro.Web.Services.IAuthorizationService, StockFlowPro.Web.Services.AuthorizationService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IPasswordService, PasswordService>();
 builder.Services.AddScoped<IInvoiceExportService, InvoiceExportService>();
+builder.Services.AddScoped<StockFlowPro.Infrastructure.Services.TaskSeederService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IReportService, StockFlowPro.Application.Services.ReportService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IEnhancedRoleService, StockFlowPro.Infrastructure.Services.EnhancedRoleService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.INotificationService, StockFlowPro.Web.Services.NotificationService>();

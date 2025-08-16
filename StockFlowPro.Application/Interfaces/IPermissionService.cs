@@ -11,32 +11,32 @@ public interface IPermissionService
     /// <summary>
     /// Gets all permissions in the system
     /// </summary>
-    Task<IEnumerable<PermissionDto>> GetAllPermissionsAsync();
+        System.Threading.Tasks.Task<IEnumerable<PermissionDto>> GetAllPermissionsAsync();
 
     /// <summary>
     /// Gets permissions grouped by category
     /// </summary>
-    Task<IEnumerable<PermissionCategory>> GetPermissionsByCategoryAsync();
+        System.Threading.Tasks.Task<IEnumerable<PermissionCategory>> GetPermissionsByCategoryAsync();
 
     /// <summary>
     /// Gets a permission by ID
     /// </summary>
-    Task<PermissionDto?> GetPermissionByIdAsync(Guid id);
+        System.Threading.Tasks.Task<PermissionDto?> GetPermissionByIdAsync(Guid id);
 
     /// <summary>
     /// Gets a permission by name
     /// </summary>
-    Task<PermissionDto?> GetPermissionByNameAsync(string name);
+        System.Threading.Tasks.Task<PermissionDto?> GetPermissionByNameAsync(string name);
 
     /// <summary>
     /// Creates a new permission
     /// </summary>
-    Task<PermissionDto> CreatePermissionAsync(CreatePermissionDto createPermissionDto);
+        System.Threading.Tasks.Task<PermissionDto> CreatePermissionAsync(CreatePermissionDto createPermissionDto);
 
     /// <summary>
     /// Updates an existing permission
     /// </summary>
-    Task<PermissionDto> UpdatePermissionAsync(Guid id, UpdatePermissionDto updatePermissionDto);
+        System.Threading.Tasks.Task<PermissionDto> UpdatePermissionAsync(Guid id, UpdatePermissionDto updatePermissionDto);
 
     /// <summary>
     /// Deletes a permission
@@ -56,17 +56,17 @@ public interface IPermissionService
     /// <summary>
     /// Gets user permissions
     /// </summary>
-    Task<UserPermissionsDto> GetUserPermissionsAsync(Guid userId);
+        System.Threading.Tasks.Task<UserPermissionsDto> GetUserPermissionsAsync(Guid userId);
 
     /// <summary>
     /// Gets role permissions
     /// </summary>
-    Task<IEnumerable<RolePermissionDto>> GetRolePermissionsAsync(Guid? roleId = null);
+        System.Threading.Tasks.Task<IEnumerable<RolePermissionDto>> GetRolePermissionsAsync(Guid? roleId = null);
 
     /// <summary>
     /// Grants permission to role
     /// </summary>
-    Task<RolePermissionDto> GrantPermissionToRoleAsync(CreateRolePermissionDto createRolePermissionDto);
+        System.Threading.Tasks.Task<RolePermissionDto> GrantPermissionToRoleAsync(CreateRolePermissionDto createRolePermissionDto);
 
     /// <summary>
     /// Revokes permission from role

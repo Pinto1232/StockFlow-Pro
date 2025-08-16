@@ -23,6 +23,7 @@ public class EmployeeDto
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public IEnumerable<EmployeeDocumentDto> Documents { get; set; } = Enumerable.Empty<EmployeeDocumentDto>();
+    public IEnumerable<TaskDto> Tasks { get; set; } = Enumerable.Empty<TaskDto>();
 }
 
 public class EmployeeDocumentDto

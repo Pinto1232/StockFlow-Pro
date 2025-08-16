@@ -13,7 +13,7 @@ public interface IEnhancedNotificationService
     /// <summary>
     /// Sends a notification using a template.
     /// </summary>
-    Task<Notification> SendFromTemplateAsync(
+        System.Threading.Tasks.Task<Notification> SendFromTemplateAsync(
         string templateName,
         Dictionary<string, object> parameters,
         Guid? recipientId = null,
@@ -25,7 +25,7 @@ public interface IEnhancedNotificationService
     /// <summary>
     /// Sends notifications to multiple recipients using a template.
     /// </summary>
-    Task<IEnumerable<Notification>> SendBulkFromTemplateAsync(
+        System.Threading.Tasks.Task<IEnumerable<Notification>> SendBulkFromTemplateAsync(
         string templateName,
         Dictionary<string, object> parameters,
         IEnumerable<Guid> recipientIds,
@@ -41,7 +41,7 @@ public interface IEnhancedNotificationService
     /// <summary>
     /// Sends a direct notification without using a template.
     /// </summary>
-    Task<Notification> SendDirectAsync(
+        System.Threading.Tasks.Task<Notification> SendDirectAsync(
         string title,
         string message,
         NotificationType type,
@@ -55,7 +55,7 @@ public interface IEnhancedNotificationService
     /// <summary>
     /// Sends notifications to multiple recipients.
     /// </summary>
-    Task<IEnumerable<Notification>> SendBulkDirectAsync(
+        System.Threading.Tasks.Task<IEnumerable<Notification>> SendBulkDirectAsync(
         string title,
         string message,
         NotificationType type,
@@ -73,7 +73,7 @@ public interface IEnhancedNotificationService
     /// <summary>
     /// Sends a notification to all users with specific roles.
     /// </summary>
-    Task<IEnumerable<Notification>> SendToRolesAsync(
+        System.Threading.Tasks.Task<IEnumerable<Notification>> SendToRolesAsync(
         string title,
         string message,
         NotificationType type,
@@ -86,7 +86,7 @@ public interface IEnhancedNotificationService
     /// <summary>
     /// Sends a template-based notification to all users with specific roles.
     /// </summary>
-    Task<IEnumerable<Notification>> SendTemplateToRolesAsync(
+        System.Threading.Tasks.Task<IEnumerable<Notification>> SendTemplateToRolesAsync(
         string templateName,
         Dictionary<string, object> parameters,
         IEnumerable<UserRole> roles,
@@ -102,7 +102,7 @@ public interface IEnhancedNotificationService
     /// <summary>
     /// Sends a system-wide notification to all users.
     /// </summary>
-    Task<IEnumerable<Notification>> SendSystemNotificationAsync(
+        System.Threading.Tasks.Task<IEnumerable<Notification>> SendSystemNotificationAsync(
         string title,
         string message,
         NotificationPriority priority = NotificationPriority.Normal,
@@ -112,7 +112,7 @@ public interface IEnhancedNotificationService
     /// <summary>
     /// Sends an emergency notification that bypasses user preferences.
     /// </summary>
-    Task<IEnumerable<Notification>> SendEmergencyNotificationAsync(
+        System.Threading.Tasks.Task<IEnumerable<Notification>> SendEmergencyNotificationAsync(
         string title,
         string message,
         IEnumerable<Guid>? specificUsers = null,
@@ -154,7 +154,7 @@ public interface IEnhancedNotificationService
     /// <summary>
     /// Gets notifications for a specific user.
     /// </summary>
-    Task<IEnumerable<Notification>> GetUserNotificationsAsync(
+        System.Threading.Tasks.Task<IEnumerable<Notification>> GetUserNotificationsAsync(
         Guid userId,
         int page = 1,
         int pageSize = 20,
@@ -165,12 +165,12 @@ public interface IEnhancedNotificationService
     /// <summary>
     /// Gets unread notification count for a user.
     /// </summary>
-    Task<int> GetUnreadCountAsync(Guid userId, CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<int> GetUnreadCountAsync(Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets notification statistics for a user.
     /// </summary>
-    Task<Dictionary<NotificationType, int>> GetNotificationStatsAsync(
+        System.Threading.Tasks.Task<Dictionary<NotificationType, int>> GetNotificationStatsAsync(
         Guid userId,
         DateTime? fromDate = null,
         CancellationToken cancellationToken = default);

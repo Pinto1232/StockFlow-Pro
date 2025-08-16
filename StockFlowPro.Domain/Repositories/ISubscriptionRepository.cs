@@ -9,25 +9,25 @@ namespace StockFlowPro.Domain.Repositories;
 public interface ISubscriptionRepository
 {
     // Subscription CRUD operations
-    Task<Subscription?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<Subscription?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
-    Task<IEnumerable<Subscription>> GetByUserIdAllAsync(Guid userId, CancellationToken cancellationToken = default);
-    Task<IEnumerable<Subscription>> GetActiveSubscriptionsAsync(CancellationToken cancellationToken = default);
-    Task<IEnumerable<Subscription>> GetExpiringSubscriptionsAsync(DateTime beforeDate, CancellationToken cancellationToken = default);
-    Task<IEnumerable<Subscription>> GetByStatusAsync(SubscriptionStatus status, CancellationToken cancellationToken = default);
-    Task<IEnumerable<Subscription>> GetByPlanIdAsync(Guid planId, CancellationToken cancellationToken = default);
-    Task<Subscription> AddAsync(Subscription subscription, CancellationToken cancellationToken = default);
-    Task UpdateAsync(Subscription subscription, CancellationToken cancellationToken = default);
-    Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<Subscription?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<Subscription?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<IEnumerable<Subscription>> GetByUserIdAllAsync(Guid userId, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<IEnumerable<Subscription>> GetActiveSubscriptionsAsync(CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<IEnumerable<Subscription>> GetExpiringSubscriptionsAsync(DateTime beforeDate, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<IEnumerable<Subscription>> GetByStatusAsync(SubscriptionStatus status, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<IEnumerable<Subscription>> GetByPlanIdAsync(Guid planId, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<Subscription> AddAsync(Subscription subscription, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task UpdateAsync(Subscription subscription, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 
     // Subscription queries
-    Task<bool> HasActiveSubscriptionAsync(Guid userId, CancellationToken cancellationToken = default);
-    Task<int> GetActiveSubscriptionCountAsync(CancellationToken cancellationToken = default);
-    Task<decimal> GetMonthlyRecurringRevenueAsync(CancellationToken cancellationToken = default);
-    Task<IEnumerable<Subscription>> GetSubscriptionsDueForBillingAsync(DateTime date, CancellationToken cancellationToken = default);
-    Task<IEnumerable<Subscription>> GetFailedPaymentSubscriptionsAsync(CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<bool> HasActiveSubscriptionAsync(Guid userId, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<int> GetActiveSubscriptionCountAsync(CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<decimal> GetMonthlyRecurringRevenueAsync(CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<IEnumerable<Subscription>> GetSubscriptionsDueForBillingAsync(DateTime date, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<IEnumerable<Subscription>> GetFailedPaymentSubscriptionsAsync(CancellationToken cancellationToken = default);
 
     // External provider queries
-    Task<Subscription?> GetByStripeSubscriptionIdAsync(string stripeSubscriptionId, CancellationToken cancellationToken = default);
-    Task<Subscription?> GetByPayPalSubscriptionIdAsync(string payPalSubscriptionId, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<Subscription?> GetByStripeSubscriptionIdAsync(string stripeSubscriptionId, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<Subscription?> GetByPayPalSubscriptionIdAsync(string payPalSubscriptionId, CancellationToken cancellationToken = default);
 }

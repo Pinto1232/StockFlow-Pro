@@ -45,6 +45,9 @@ public class Employee : IEntity
     private readonly List<EmployeeDocument> _documents = new();
     public IReadOnlyCollection<EmployeeDocument> Documents => _documents.AsReadOnly();
 
+    private readonly List<ProjectTask> _tasks = new();
+    public IReadOnlyCollection<ProjectTask> Tasks => _tasks.AsReadOnly();
+
     private readonly List<ChecklistItem> _onboardingChecklist = new();
     public IReadOnlyCollection<ChecklistItem> OnboardingChecklist => _onboardingChecklist.AsReadOnly();
 
@@ -340,6 +343,48 @@ public class Employee : IEntity
             ChecklistItem.Create("KNOWLEDGE_TRANSFER", "Complete knowledge transfer"),
             ChecklistItem.Create("EXIT_INTERVIEW", "Conduct exit interview"),
         });
+    }
+
+    // Task management methods
+    public void AddTask(ProjectTask task)
+    {
+        if (task.EmployeeId != Id)
+        {
+            throw new ArgumentException("Task must belong to this employee", nameof(task));
+        }
+        
+        _tasks.Add(task);
+        Touch();
+    }
+
+    public void RemoveTask(Guid taskId)
+    {
+    var task = _tasks.FirstOrDefault(t => t.Id == taskId);
+        if (task != null)
+        {
+            _tasks.Remove(task);
+            Touch();
+        }
+    }
+
+    public void UpdateTaskProgress(Guid taskId, int progress)
+    {
+    var task = _tasks.FirstOrDefault(t => t.Id == taskId);
+        if (task != null)
+        {
+            task.UpdateProgress(progress);
+            Touch();
+        }
+    }
+
+    public void AssignUsersToTask(Guid taskId, string assigneeJson)
+    {
+    var task = _tasks.FirstOrDefault(t => t.Id == taskId);
+        if (task != null)
+        {
+            task.SetAssignees(assigneeJson);
+            Touch();
+        }
     }
 
     public void UpdateImage(string? imageUrl)

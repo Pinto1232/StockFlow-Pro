@@ -5,5 +5,5 @@ namespace StockFlowPro.Domain.Repositories;
 
 public interface IDepartmentRepository : IRepository<Department>
 {
-    Task<Department?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
+    System.Threading.Tasks.Task<Department?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
 }
