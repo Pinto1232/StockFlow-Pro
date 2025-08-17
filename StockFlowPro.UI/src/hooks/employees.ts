@@ -19,6 +19,23 @@ export interface EmployeeDocumentDto {
   expiresAt?: string | null;
 }
 
+// TaskDto interface for tasks included in EmployeeDto
+export interface TaskDto {
+  id: number;
+  guidId: string;
+  type?: string;
+  task: string;
+  description: string;
+  assignee: Array<{ initials: string; color: string }>;
+  dueDate: string;
+  priority: string;
+  progress: number;
+  subtaskCount?: number;
+  completed: boolean;
+  commentCount?: number;
+  children?: TaskDto[];
+}
+
 export interface EmployeeDto {
   id: string;
   firstName: string;
@@ -39,6 +56,7 @@ export interface EmployeeDto {
   createdAt?: string;
   updatedAt?: string | null;
   documents: EmployeeDocumentDto[];
+  tasks?: TaskDto[]; // Include tasks from backend
 }
 
 export function useEmployees(filters?: { activeOnly?: boolean; departmentId?: string; search?: string; page?: number; pageSize?: number }) {

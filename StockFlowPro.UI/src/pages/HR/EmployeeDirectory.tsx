@@ -26,6 +26,7 @@ import {
 import { useCreateEmployee, useEmployees, useUploadEmployeeImage, type EmployeeDto } from "../../hooks/employees";
 import { useCreateDepartment, useDeleteDepartment, useDepartments, useUpdateDepartment } from "../../hooks/departments";
 import DepartmentManagementModal from "../../components/modals/DepartmentManagementModal";
+import Projects from '../../components/Projects';
 
 // Modern, accessible checkbox for selection
 interface ModernCheckboxProps {
@@ -634,6 +635,11 @@ const EmployeeDirectory: React.FC = () => {
                             </button>
                         </div>
                     </div>
+                </div>
+
+                {/* Render Projects component for debugging (receives employees) */}
+                <div className="mb-6">
+                    <Projects externalEmployees={employees} />
                 </div>
 
                 {/* Views and Settings Bar */}

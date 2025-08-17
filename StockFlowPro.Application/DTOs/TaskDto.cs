@@ -5,6 +5,7 @@ namespace StockFlowPro.Application.DTOs;
 public class TaskDto
 {
     public int Id { get; set; }
+    public Guid GuidId { get; set; } // The actual GUID primary key for backend operations
     public string? Type { get; set; } // "parent" or null for child tasks
     public string Task { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;

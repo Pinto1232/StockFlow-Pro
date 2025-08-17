@@ -18,6 +18,7 @@ public class EmployeeMappingProfile : Profile
 
     CreateMap<Domain.Entities.ProjectTask, TaskDto>()
             .ForMember(d => d.Id, opt => opt.MapFrom(s => s.TaskId)) // Map TaskId to Id for frontend compatibility
+            .ForMember(d => d.GuidId, opt => opt.MapFrom(s => s.Id)) // Map the actual GUID Id for backend operations
             .ForMember(d => d.Task, opt => opt.MapFrom(s => s.TaskName))
             .ForMember(d => d.Priority, opt => opt.MapFrom(s => s.Priority.ToString()))
             .ForMember(d => d.Completed, opt => opt.MapFrom(s => s.IsCompleted))

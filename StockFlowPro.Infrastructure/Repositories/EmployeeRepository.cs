@@ -17,12 +17,15 @@ public class EmployeeRepository : IEmployeeRepository
     public async Task<Employee?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.Set<Employee>()
+            .Include(e => e.Tasks)
             .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
     public async Task<IEnumerable<Employee>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await _context.Set<Employee>().ToListAsync(cancellationToken);
+        return await _context.Set<Employee>()
+            .Include(e => e.Tasks)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task AddAsync(Employee entity, CancellationToken cancellationToken = default)
@@ -52,6 +55,7 @@ public class EmployeeRepository : IEmployeeRepository
     public async Task<IEnumerable<Employee>> GetByDepartmentAsync(Guid departmentId, CancellationToken cancellationToken = default)
     {
         return await _context.Set<Employee>()
+            .Include(e => e.Tasks)
             .Where(e => e.DepartmentId == departmentId)
             .ToListAsync(cancellationToken);
     }
@@ -65,6 +69,7 @@ public class EmployeeRepository : IEmployeeRepository
         }
 
         return await _context.Set<Employee>()
+            .Include(e => e.Tasks)
             .Where(e => (e.FirstName ?? string.Empty).ToLower().Contains(search) ||
                         (e.LastName ?? string.Empty).ToLower().Contains(search) ||
                         (e.Email ?? string.Empty).ToLower().Contains(search) ||
