@@ -213,6 +213,7 @@ const Login: React.FC = () => {
 
     return (
         <div className="auth-container">
+            <Link to="/" className="auth-back-link text-gray-700 hover:text-gray-900 font-medium">back home</Link>
             <div className="auth-card">
                 <div className="auth-tabs">
                     <button

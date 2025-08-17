@@ -56,6 +56,19 @@ body {
     background: linear-gradient(90deg, #3b82f6, #8b5cf6);
 }
 
+/* Back link positioned top-left of the auth container (matches checkout header) */
+.auth-back-link {
+    position: absolute;
+    top: 18px;
+    left: 20px;
+    color: #374151; /* gray-700 */
+    text-decoration: none;
+    font-weight: 500;
+}
+.auth-back-link:hover {
+    color: #1f2937; /* gray-900 */
+}
+
 .auth-tabs {
     display: flex;
     border-bottom: 1px solid #e2e8f0;
