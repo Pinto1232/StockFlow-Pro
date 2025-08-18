@@ -486,24 +486,84 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
     if (!apiTasks || !Array.isArray(apiTasks)) {
       return [];
     }
+    // Build sets of child ids/guidIds so we can remove top-level duplicates
+    const childGuidSet = new Set<string>();
+    const childIdSet = new Set<number>();
+    for (const t of apiTasks) {
+      if (Array.isArray(t.children)) {
+        for (const c of t.children) {
+          if (c.guidId) childGuidSet.add(c.guidId);
+          if (typeof c.id === 'number') childIdSet.add(c.id);
+        }
+      }
+    }
 
-    return apiTasks.map(task => ({
-      ...task,
-      // Ensure assignee array has proper structure with colors
-      assignee: task.assignee?.map(assignee => ({
-        ...assignee,
-        color: assignee.color || getRandomColor(),
-        initials: assignee.initials || 'NA'
-      })) || [],
-      // Set default values for missing properties
-      type: task.type || undefined,
-      subtaskCount: task.children?.length || undefined,
-      commentCount: task.commentCount || undefined
-    }));
+    // Map and filter: remove any top-level task that also appears as a child elsewhere
+    return apiTasks
+      .map(task => ({
+        ...task,
+        // Ensure assignee array has proper structure with colors
+        assignee: task.assignee?.map(assignee => ({
+          ...assignee,
+          color: assignee.color || getRandomColor(),
+          initials: assignee.initials || 'NA'
+        })) || [],
+        // Set default values for missing properties
+        type: task.type || undefined,
+        subtaskCount: task.children?.length || undefined,
+        commentCount: task.commentCount || undefined
+      }))
+      .filter(t => {
+        // If this task appears as a child elsewhere, don't show it as a top-level row
+        if (t.guidId && childGuidSet.has(t.guidId)) return false;
+        if (typeof t.id === 'number' && childIdSet.has(t.id)) return false;
+        return true;
+      });
   };
 
   // Use API data if available, otherwise fall back to empty array
   const tasks = processApiTasks(tasksFromApi || []);
+
+  // Keep track of subtasks we created locally so we can dedupe after refetch
+  const [pendingSubtasks, setPendingSubtasks] = useState<Record<string, { child: Task; parentId: number }>>({});
+
+  // After tasks list updates (for example after refetch), ensure any pending subtasks
+  // are not duplicated at top-level. If a pending subtask appears at top-level, move
+  // it under its recorded parent and clear it from pendingSubtasks.
+  useEffect(() => {
+    if (!tasksFromApi || Object.keys(pendingSubtasks).length === 0) return;
+
+    // Use the fresh tasksFromApi as the authoritative source returned by the backend
+    setTasksFromApi(() => {
+      const source = Array.isArray(tasksFromApi) ? [...tasksFromApi] : [];
+      let updated = [...source];
+
+      Object.keys(pendingSubtasks).forEach(key => {
+        const { child, parentId } = pendingSubtasks[key];
+
+        // Remove any top-level entry matching the child (by guidId or numeric id)
+        updated = updated.filter(t => !((child.guidId && t.guidId === child.guidId) || t.id === child.id));
+
+        // Find the parent entry in the updated list by numeric id or guid
+        const parentIndex = updated.findIndex(t => t.id === parentId || (t.guidId && t.guidId === (updated.find(p => p.id === parentId)?.guidId)));
+
+        if (parentIndex !== -1) {
+          const parent = updated[parentIndex];
+          // If parent already contains this child, skip attaching
+          const alreadyHas = Array.isArray(parent.children) && parent.children.some(c => (child.guidId && c.guidId === child.guidId) || c.id === child.id);
+          if (!alreadyHas) {
+            const children = Array.isArray(parent.children) ? [...parent.children, child] : [child];
+            updated[parentIndex] = { ...parent, children, subtaskCount: (parent.subtaskCount || 0) + 1 };
+          }
+        }
+      });
+
+      return updated;
+    });
+
+    // Clear pending entries we've processed
+    setPendingSubtasks({});
+  }, [tasksFromApi, pendingSubtasks, setPendingSubtasks]);
 
   // API function to create a new task
   const createTaskAPI = async (taskData: Omit<Task, 'id'>) => {
@@ -565,7 +625,7 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
         
         console.log('📥 Received task creation response:', created);
         
-        const createdTask: Task = {
+  const createdTask: Task = {
           id: created.id || Date.now(),
           guidId: created.guidId, // Store the GUID ID from backend response
           task: created.task || taskData.task,
@@ -585,17 +645,39 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
           children: created.children || []
         };
 
-        console.log('✅ Task created via API:', createdTask);
-        return createdTask;
+  // Update local task list immediately so the UI shows the new task
+  setTasksFromApi(prev => [createdTask, ...(prev || [])]);
+
+  console.log('✅ Task created via API:', createdTask);
+  return createdTask;
       } catch (apiErr) {
         // If backend API fails, fall back to simulation
         console.warn('Task API failed, falling back to simulated creation', apiErr);
-        
+        // Log server error body/status to help debugging
+        try {
+          const ae = apiErr as unknown;
+          if (typeof ae === 'object' && ae !== null) {
+            const resp = (ae as Record<string, unknown>)['response'];
+            if (typeof resp === 'object' && resp !== null) {
+              const status = (resp as Record<string, unknown>)['status'];
+              const data = (resp as Record<string, unknown>)['data'];
+              console.error('📡 Task API error status:', status);
+              console.error('📡 Task API error response:', data ?? apiErr);
+            } else {
+              console.error('📡 Task API error:', apiErr);
+            }
+          } else {
+            console.error('📡 Task API error:', apiErr);
+          }
+        } catch (logErr) {
+          console.error('📡 Failed to read Task API error details', logErr);
+        }
+
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Create a mock response that matches our Task interface
-        const mockCreatedTask: Task = {
+  // Create a mock response that matches our Task interface
+  const mockCreatedTask: Task = {
           id: Date.now(), // Use timestamp as mock ID until backend provides real ID
           task: taskData.task,
           description: taskData.description || '',
@@ -610,8 +692,11 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
           children: []
         };
 
-        console.log('✅ Mock task created:', mockCreatedTask);
-        return mockCreatedTask;
+  // Insert mock into local state so the user sees it immediately
+  setTasksFromApi(prev => [mockCreatedTask, ...(prev || [])]);
+
+  console.log('✅ Mock task created:', mockCreatedTask);
+  return mockCreatedTask;
       }
     } catch (error) {
       console.error('❌ Task creation error:', error);
@@ -637,41 +722,79 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
     setIsAddingTask(true);
 
     try {
-      // Prepare task data for API
-      const taskData: Omit<Task, 'id'> = {
-        task: newTask.task,
-        description: newTask.description || '',
-        priority: newTask.priority,
-        progress: newTask.progress,
-        dueDate: newTask.dueDate,
-        assignee: newTask.assignee,
-        completed: false,
-        type: undefined,
-        subtaskCount: undefined,
-        commentCount: undefined,
-        children: []
-      };
+      if (editingTaskId !== null) {
+        // Editing existing task
+        const original = (tasksFromApi || []).find(t => t.id === editingTaskId);
+        const guid = original?.guidId;
 
-      // Call API to create the task
-      const createdTask = await createTaskAPI(taskData);
+        const payload = {
+          task: newTask.task,
+          description: newTask.description || '',
+          dueDate: newTask.dueDate || '',
+          priority: newTask.priority || 'Normal',
+          progress: newTask.progress || 0,
+          assigneeIds: (newTask.assignee || []).map(a => String(a.id)).filter(id => id && id !== 'undefined')
+        };
 
-      // Invalidate and refetch employee data to get the updated tasks from backend
-      await queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
-      
-      console.log('✅ Task created successfully:', createdTask);
-      console.log('🔄 Refreshing employee data to show new task...');
-      
-  // Reset form and close modal on success
-      setNewTask({
-        task: '',
-        description: '',
-        priority: 'Normal',
-        progress: 0,
-        dueDate: '',
-        assignee: []
-      });
-  setShowAddTaskForm(false);
-  setEditingTaskId(null);
+        console.log('📤 Sending task update payload:', { id: guid ?? editingTaskId, payload });
+
+        try {
+          if (guid) {
+            const updated = await http.put<TaskDto>(`/api/tasks/${guid}`, payload);
+            console.log('📥 Received task update response:', updated);
+            await queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+          } else {
+            // local mock update
+            setTasksFromApi(prev => (prev || []).map(t => t.id === editingTaskId ? ({ ...t, task: newTask.task, description: newTask.description || '', dueDate: newTask.dueDate || '', priority: newTask.priority, progress: newTask.progress }) : t));
+          }
+
+          setNewTask({ task: '', description: '', priority: 'Normal', progress: 0, dueDate: '', assignee: [] });
+          setShowAddTaskForm(false);
+          setEditingTaskId(null);
+        } catch (updateErr) {
+          console.error('❌ Failed to update task via API, applying local update fallback:', updateErr);
+          setTasksFromApi(prev => (prev || []).map(t => t.id === editingTaskId ? ({ ...t, task: newTask.task, description: newTask.description || '', dueDate: newTask.dueDate || '', priority: newTask.priority, progress: newTask.progress }) : t));
+          setNewTask({ task: '', description: '', priority: 'Normal', progress: 0, dueDate: '', assignee: [] });
+          setShowAddTaskForm(false);
+          setEditingTaskId(null);
+        }
+      } else {
+        // Prepare task data for API (create)
+        const taskData: Omit<Task, 'id'> = {
+          task: newTask.task,
+          description: newTask.description || '',
+          priority: newTask.priority,
+          progress: newTask.progress,
+          dueDate: newTask.dueDate,
+          assignee: newTask.assignee,
+          completed: false,
+          type: undefined,
+          subtaskCount: undefined,
+          commentCount: undefined,
+          children: []
+        };
+
+        // Call API to create the task
+        const createdTask = await createTaskAPI(taskData);
+
+        // Invalidate and refetch employee data to get the updated tasks from backend
+        await queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+        
+        console.log('✅ Task created successfully:', createdTask);
+        console.log('🔄 Refreshing employee data to show new task...');
+        
+        // Reset form and close modal on success
+        setNewTask({
+          task: '',
+          description: '',
+          priority: 'Normal',
+          progress: 0,
+          dueDate: '',
+          assignee: []
+        });
+        setShowAddTaskForm(false);
+        setEditingTaskId(null);
+      }
 
     } catch (error) {
       console.error('❌ Failed to create task:', error);
@@ -825,20 +948,34 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
       }
 
       // Try backend endpoint first. Expecting POST /api/tasks/{parentGuidId}/subtasks
+      // Ensure required fields (Description, DueDate) are non-empty and DueDate is YYYY-MM-DD
+      const formatToIsoDate = (d?: string) => {
+        if (!d) return new Date().toISOString().split('T')[0];
+        if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
+        const parsed = new Date(d);
+        if (!isNaN(parsed.getTime())) return parsed.toISOString().split('T')[0];
+        return new Date().toISOString().split('T')[0];
+      };
+
+      const descriptionValue = (parentTask?.description && parentTask.description.trim()) ? parentTask.description : subtaskName.trim();
+      const dueDateValue = parentTask?.dueDate ? formatToIsoDate(parentTask.dueDate) : formatToIsoDate();
+
       const payload = {
         task: subtaskName.trim(), // Backend expects 'task' field, not 'name'
-        description: '',
+        description: descriptionValue || '-',
         priority: 'Normal',
         progress: 0,
-        dueDate: '',
+        dueDate: dueDateValue,
         assigneeIds: subtaskAssignees.map(a => String(a.id)).filter(id => id && id !== 'undefined'),
       };
 
       let newChild: Task | null = null;
 
       try {
+        // Log payload so backend validation errors can be diagnosed when requests fail
+        console.log('📤 Sending subtask creation payload:', payload);
         const created = await http.post<TaskDto>(`/api/tasks/${parentTask.guidId}/subtasks`, payload);
-        
+
         console.log('📥 Received subtask creation response:', created);
         
         newChild = {
@@ -863,6 +1000,23 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
       } catch (apiErr) {
         // If backend not available or returns error, fallback to simulated creation
         console.warn('Subtask API failed, falling back to simulated creation', apiErr);
+        // Print any server validation/body response (axios-like shape) to help debugging
+        try {
+          const ae = apiErr as unknown;
+          if (typeof ae === 'object' && ae !== null) {
+            const resp = (ae as Record<string, unknown>)['response'];
+            if (typeof resp === 'object' && resp !== null) {
+              const data = (resp as Record<string, unknown>)['data'];
+              console.error('📡 Subtask API error response:', data ?? apiErr);
+            } else {
+              console.error('📡 Subtask API error:', apiErr);
+            }
+          } else {
+            console.error('📡 Subtask API error:', apiErr);
+          }
+        } catch (logErr) {
+          console.error('📡 Failed to read API error details', logErr);
+        }
         await new Promise(resolve => setTimeout(resolve, 700));
         newChild = {
           id: Date.now() + Math.floor(Math.random() * 1000),
@@ -883,8 +1037,33 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
       // Invalidate and refetch employee data to get the updated tasks from backend
       await queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
       
-      console.log('✅ Subtask created successfully:', newChild);
-      console.log('🔄 Refreshing employee data to show new subtask...');
+        console.log('✅ Subtask created successfully:', newChild);
+        console.log('🔄 Refreshing employee data to show new subtask...');
+
+        // Attach newChild to the parent task locally so UI shows the subtask immediately
+        if (newChild) {
+            // Immediate local attach (for instant UX)
+            setTasksFromApi(prev => {
+              if (!prev) return prev;
+
+              // Remove any top-level duplicate for the new child (match by id or guidId)
+              const withoutDuplicate = prev.filter(t => !((newChild!.guidId && t.guidId === newChild!.guidId) || t.id === newChild!.id));
+
+              // Attach child to the parent entry
+              return withoutDuplicate.map(t => {
+                if (t.guidId === parentTask.guidId || t.id === parentId) {
+                  const children = Array.isArray(t.children) ? [...t.children, newChild!] : [newChild!];
+                  return { ...t, children, subtaskCount: (t.subtaskCount || 0) + 1 };
+                }
+                return t;
+              });
+            });
+
+            // Record pending subtask so we can dedupe top-level entries after any refetch
+            if (newChild.guidId) {
+              setPendingSubtasks(prev => ({ ...prev, [String(newChild.guidId)]: { child: newChild!, parentId } }));
+            }
+        }
 
       // reset local state
       setSubtaskParentId(null);
@@ -1057,7 +1236,7 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
           </button>
 
           {/* Dropdown menu opened from the More (...) button */}
-          {openMenuForTaskId === task.id && !isChild && (
+          {openMenuForTaskId === task.id && (
             <div
               onClick={(e) => e.stopPropagation()} // prevent immediate close when interacting with menu
               className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-md shadow-lg"
