@@ -888,27 +888,223 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
     setDeletingTaskId(taskId);
     setOpenMenuForTaskId(null);
 
-    // Call backend delete endpoint using the correct TaskId-based endpoint
+    // Resolve the task to get its GUID if available
+    const resolveTaskById = () => {
+      const top = (tasksFromApi || []).find(t => t.id === taskId);
+      if (top) return { task: top, isChild: false, parentId: null as number | null };
+      // try to find as child
+      for (const p of (tasksFromApi || [])) {
+        if (Array.isArray(p.children)) {
+          const c = p.children.find(ch => ch.id === taskId);
+          if (c) return { task: c, isChild: true, parentId: p.id };
+        }
+      }
+      return { task: undefined, isChild: false, parentId: null as number | null };
+    };
+
+    const resolved = resolveTaskById();
+
+    // Call backend delete endpoint using GUID when possible, fallback to TaskId endpoint
     (async () => {
       try {
-        console.log(`🗑️ Attempting to delete task with TaskId: ${taskId}`);
-        await http.delete<void>(`/api/tasks/by-task-id/${taskId}`);
-        console.log(`✅ Task ${taskId} deleted successfully from backend`);
+        console.log(`🗑️ Attempting to delete task`, {
+          taskId,
+          guidId: resolved.task?.guidId,
+          isChild: resolved.isChild,
+          parentId: resolved.parentId
+        });
+
+        const response = resolved.task?.guidId
+          ? await http.delete<void>(`/api/tasks/${resolved.task.guidId}`)
+          : await http.delete<void>(`/api/tasks/by-task-id/${taskId}`);
+        console.log(`✅ Task ${taskId} deleted successfully from backend`, response);
         
         // If backend deletion succeeded, remove locally
-        setTasksFromApi(prev => (prev || []).filter(t => t.id !== taskId));
-        console.log(`✅ Task ${taskId} removed from local state`);
+        setTasksFromApi(prev => {
+          if (!prev) return prev;
+          console.log(`🔍 Removing task ${taskId} from local state...`);
+          console.log('📋 Current tasks before removal:', prev.map(t => ({ id: t.id, task: t.task, children: t.children?.length || 0 })));
+          
+          // Remove from top-level tasks
+          let updatedTasks = prev.filter(t => t.id !== taskId);
+          
+          // Also check and remove from any parent's children array
+          updatedTasks = updatedTasks.map(task => {
+            if (task.children && task.children.length > 0) {
+              const originalChildCount = task.children.length;
+              const updatedChildren = task.children.filter(child => child.id !== taskId);
+              const removedChildCount = originalChildCount - updatedChildren.length;
+              
+              if (removedChildCount > 0) {
+                console.log(`🔄 Removed ${removedChildCount} child(ren) from parent task ${task.id}`);
+                return { 
+                  ...task, 
+                  children: updatedChildren, 
+                  subtaskCount: Math.max(0, (task.subtaskCount || 0) - removedChildCount)
+                };
+              }
+            }
+            return task;
+          });
+          
+          console.log('📋 Tasks after removal:', updatedTasks.map(t => ({ id: t.id, task: t.task, children: t.children?.length || 0 })));
+          return updatedTasks;
+        });
+        
+        // Also invalidate queries to refresh from server
+        await queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+        console.log(`✅ Task ${taskId} removed from local state and queries invalidated`);
       } catch (err) {
         console.error('❌ Failed to delete task from backend:', err);
+        console.error('Error details:', {
+          message: err?.message,
+          status: err?.response?.status,
+          statusText: err?.response?.statusText,
+          data: err?.response?.data
+        });
         
-        // Show error to user but still remove locally as fallback
+        // Show detailed error to user
         if (typeof window !== 'undefined') {
-          window.alert('Failed to delete task from server. The task has been removed locally but may reappear on page refresh.');
+          const errorMsg = err?.response?.data?.message || err?.message || 'Unknown error occurred';
+          window.alert(`Failed to delete task: ${errorMsg}\n\nThe task will be removed locally but may reappear on page refresh.`);
+        }
+        
+        // Still remove locally as fallback
+        setTasksFromApi(prev => {
+          if (!prev) return prev;
+          
+          console.log(`⚠️ Fallback removal of task ${taskId}`);
+          let updatedTasks = prev.filter(t => t.id !== taskId);
+          
+          updatedTasks = updatedTasks.map(task => {
+            if (task.children && task.children.length > 0) {
+              const originalChildCount = task.children.length;
+              const updatedChildren = task.children.filter(child => child.id !== taskId);
+              const removedChildCount = originalChildCount - updatedChildren.length;
+              
+              if (removedChildCount > 0) {
+                return { 
+                  ...task, 
+                  children: updatedChildren, 
+                  subtaskCount: Math.max(0, (task.subtaskCount || 0) - removedChildCount)
+                };
+              }
+            }
+            return task;
+          });
+          
+          return updatedTasks;
+        });
+        console.log(`⚠️ Task ${taskId} removed locally as fallback`);
+      } finally {
+        setDeletingTaskId(null);
+      }
+    })();
+  };
+
+  const handleDeleteSubtask = (subtaskId: number, parentId: number) => {
+    // Confirm permanent deletion
+    const ok = typeof window !== 'undefined' ? window.confirm('Delete this subtask permanently? This cannot be undone.') : true;
+    if (!ok) {
+      setOpenMenuForTaskId(null);
+      return;
+    }
+
+    // Set loading state
+    setDeletingTaskId(subtaskId);
+    setOpenMenuForTaskId(null);
+
+    // Resolve the subtask to get its GUID if available
+    const parent = (tasksFromApi || []).find(t => t.id === parentId);
+    const child = parent?.children?.find(c => c.id === subtaskId);
+
+    // Call backend delete endpoint using GUID when possible, fallback to TaskId endpoint
+    (async () => {
+      try {
+        console.log(`🗑️ Attempting to delete subtask`, {
+          subtaskId,
+          parentId,
+          subtaskGuidId: child?.guidId
+        });
+
+        const response = child?.guidId
+          ? await http.delete<void>(`/api/tasks/${child.guidId}`)
+          : await http.delete<void>(`/api/tasks/by-task-id/${subtaskId}`);
+        console.log(`✅ Subtask ${subtaskId} deleted successfully from backend`, response);
+        
+        // If backend deletion succeeded, remove locally from parent's children
+        setTasksFromApi(prev => {
+          if (!prev) return prev;
+          console.log(`🔍 Removing subtask ${subtaskId} from parent ${parentId}...`);
+          
+          let updatedTasks = prev.map(task => {
+            if (task.id === parentId && task.children) {
+              const originalChildCount = task.children.length;
+              const updatedChildren = task.children.filter(child => child.id !== subtaskId);
+              const newChildCount = updatedChildren.length;
+              
+              console.log(`🔄 Parent task ${parentId}: ${originalChildCount} → ${newChildCount} children`);
+              
+              return { 
+                ...task, 
+                children: updatedChildren, 
+                subtaskCount: Math.max(0, newChildCount)
+              };
+            }
+            return task;
+          });
+
+          // As extra safety, remove the subtask if it exists as top-level entry
+          updatedTasks = updatedTasks.filter(t => t.id !== subtaskId);
+          
+          console.log('📋 Tasks after subtask removal:', updatedTasks.map(t => ({ 
+            id: t.id, 
+            task: t.task, 
+            children: t.children?.length || 0 
+          })));
+          
+          return updatedTasks;
+        });
+        
+        // Also invalidate queries to refresh from server
+        await queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+        console.log(`✅ Subtask ${subtaskId} removed from local state and queries invalidated`);
+      } catch (err) {
+        console.error('❌ Failed to delete subtask from backend:', err);
+        console.error('Error details:', {
+          message: err?.message,
+          status: err?.response?.status,
+          statusText: err?.response?.statusText,
+          data: err?.response?.data
+        });
+        
+        // Show detailed error to user
+        if (typeof window !== 'undefined') {
+          const errorMsg = err?.response?.data?.message || err?.message || 'Unknown error occurred';
+          window.alert(`Failed to delete subtask: ${errorMsg}\n\nThe subtask will be removed locally but may reappear on page refresh.`);
         }
         
         // Local removal as fallback
-        setTasksFromApi(prev => (prev || []).filter(t => t.id !== taskId));
-        console.log(`⚠️ Task ${taskId} removed locally as fallback`);
+        setTasksFromApi(prev => {
+          if (!prev) return prev;
+          console.log(`⚠️ Fallback removal of subtask ${subtaskId} from parent ${parentId}`);
+          
+          let updated = prev.map(task => {
+            if (task.id === parentId && task.children) {
+              const updatedChildren = task.children.filter(child => child.id !== subtaskId);
+              return { 
+                ...task, 
+                children: updatedChildren, 
+                subtaskCount: Math.max(0, updatedChildren.length)
+              };
+            }
+            return task;
+          });
+          // And remove any accidental top-level duplicate
+          updated = updated.filter(t => t.id !== subtaskId);
+          return updated;
+        });
+        console.log(`⚠️ Subtask ${subtaskId} removed locally as fallback`);
       } finally {
         setDeletingTaskId(null);
       }
@@ -1107,7 +1303,7 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
     return 'bg-blue-400';
   };
 
-  const renderTaskRow = (task, isChild = false, isLast = false) => (
+  const renderTaskRow = (task, isChild = false, isLast = false, parentId = null) => (
     <tr key={task.id} className={`group hover:bg-blue-50/30 transition-colors transform-gpu hover:shadow-sm hover:scale-[1.001] ${isChild ? 'bg-gray-50/30' : ''}`}>
       <td className="px-6 py-3 whitespace-nowrap">
         <div className="flex items-center gap-3 transition-transform duration-200 ease-out group-hover:translate-x-2">
@@ -1243,15 +1439,17 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
               style={{ zIndex: 200000 }}
             >
               <ul className="py-1">
-                <li>
-                  <button
-                    onClick={() => { setOpenMenuForTaskId(null); handleStartAddSubtask(task.id); }}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                  >
-                    + Add subtask
-                  </button>
-                </li>
-                {/* Placeholder for future menu items */}
+                {/* Only show "Add subtask" for main tasks (non-children) */}
+                {!isChild && (
+                  <li>
+                    <button
+                      onClick={() => { setOpenMenuForTaskId(null); handleStartAddSubtask(task.id); }}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      + Add subtask
+                    </button>
+                  </li>
+                )}
                 <li>
                   <button
                     onClick={() => handleEditTask(task.id)}
@@ -1262,7 +1460,23 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
                 </li>
                 <li>
                   <button
-                    onClick={() => handleDeleteTask(task.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log(`🖱️ Delete button clicked for task ${task.id}`, {
+                        taskId: task.id,
+                        isChild,
+                        parentId,
+                        task: task.task
+                      });
+                      
+                      if (isChild && parentId !== null) {
+                        console.log(`🏗️ Calling handleDeleteSubtask(${task.id}, ${parentId})`);
+                        handleDeleteSubtask(task.id, parentId);
+                      } else {
+                        console.log(`🏗️ Calling handleDeleteTask(${task.id})`);
+                        handleDeleteTask(task.id);
+                      }
+                    }}
                     disabled={deletingTaskId === task.id}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   >
@@ -1285,7 +1499,7 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
   );
 
   // Render portal menu outside main stacking contexts
-  const portalMenu = (taskId: number) => {
+  const portalMenu = (taskId: number, isChild = false, parentId = null) => {
     if (openMenuForTaskId !== taskId || !menuPosition) return null;
 
     return createPortal(
@@ -1295,14 +1509,17 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
       >
         <div className="w-44 bg-white border border-gray-200 rounded-md shadow-lg">
           <ul className="py-1">
-            <li>
-              <button
-                onClick={() => { setOpenMenuForTaskId(null); handleStartAddSubtask(taskId); }}
-                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-              >
-                + Add subtask
-              </button>
-            </li>
+            {/* Only show "Add subtask" for main tasks (non-children) */}
+            {!isChild && (
+              <li>
+                <button
+                  onClick={() => { setOpenMenuForTaskId(null); handleStartAddSubtask(taskId); }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  + Add subtask
+                </button>
+              </li>
+            )}
             <li>
               <button
                 onClick={() => handleEditTask(taskId)}
@@ -1313,7 +1530,22 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
             </li>
             <li>
               <button
-                onClick={() => handleDeleteTask(taskId)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log(`🖱️ Portal delete button clicked for task ${taskId}`, {
+                    taskId,
+                    isChild,
+                    parentId
+                  });
+                  
+                  if (isChild && parentId !== null) {
+                    console.log(`🏗️ Portal calling handleDeleteSubtask(${taskId}, ${parentId})`);
+                    handleDeleteSubtask(taskId, parentId);
+                  } else {
+                    console.log(`🏗️ Portal calling handleDeleteTask(${taskId})`);
+                    handleDeleteTask(taskId);
+                  }
+                }}
                 disabled={deletingTaskId === taskId}
                 className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
@@ -1505,9 +1737,12 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
                 <React.Fragment key={task.id}>
                   {renderTaskRow(task)}
                   {portalMenu(task.id)}
-                      {task.children && expandedTasks[task.id] && task.children.map((child, index) => 
-                        renderTaskRow(child, true, index === task.children.length - 1)
-                      )}
+                      {task.children && expandedTasks[task.id] && task.children.map((child, index) => (
+                        <React.Fragment key={child.id}>
+                          {renderTaskRow(child, true, index === task.children.length - 1, task.id)}
+                          {portalMenu(child.id, true, task.id)}
+                        </React.Fragment>
+                      ))}
 
                       {/* Inline subtask form for this parent */}
                       {subtaskParentId === task.id && (
