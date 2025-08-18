@@ -128,7 +128,10 @@ public class EnhancedApiSecurityMiddleware
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in API security middleware for {RequestId}", requestId);
-            await RejectRequest(context, "Security validation failed", HttpStatusCode.InternalServerError);
+            // Surface the exception message in the response for debugging purposes.
+            // This is safe for local dev; do not expose full exceptions in production.
+            var message = string.IsNullOrEmpty(ex.Message) ? "Security validation failed" : $"Security validation failed: {ex.Message}";
+            await RejectRequest(context, message, HttpStatusCode.InternalServerError);
         }
     }
 

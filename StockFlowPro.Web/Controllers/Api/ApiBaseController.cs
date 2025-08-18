@@ -46,12 +46,13 @@ public abstract class ApiBaseController : ControllerBase
     /// <returns>A successful API response</returns>
     protected ActionResult<ApiResponse<T>> SuccessResponse<T>(T data, string message = "Operation completed successfully")
     {
+        // Wrap successful responses in ApiResponse<T> to provide a consistent API envelope.
         return Ok(new ApiResponse<T>
         {
             Success = true,
-            Data = data,
             Message = message,
-            Timestamp = DateTime.UtcNow
+            Timestamp = DateTime.UtcNow,
+            Data = data
         });
     }
 
@@ -128,16 +129,13 @@ public abstract class ApiBaseController : ControllerBase
     /// <returns>An error API response</returns>
     protected ActionResult<ApiResponse<T>> HandleException<T>(Exception ex, string message = "An error occurred")
     {
-        // Log the exception (you might want to inject ILogger here)
-        // For now, we'll just return a generic error response
-        
+        // Log the exception (consider injecting ILogger<T> in the future)
         return StatusCode(500, new ApiResponse<T>
         {
             Success = false,
             Message = message,
             Timestamp = DateTime.UtcNow,
-            // In development, you might want to include the exception details
-            // Error = ex.Message // Only include in development
+            Errors = new List<string> { ex?.Message ?? "An exception occurred" }
         });
     }
 

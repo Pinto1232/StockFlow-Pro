@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ArrowUp, RefreshCw, Settings } from "lucide-react";
 import OverviewPerformanceChart from "./OverviewPerformanceChart";
 import DepartmentManagementModal from "../../../components/modals/DepartmentManagementModal";
@@ -33,6 +34,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     onSettings,
     entitlements,
 }) => {
+    const navigate = useNavigate();
     const [isDepartmentModalOpen, setIsDepartmentModalOpen] = useState(false);
     
     // Destructure with default values to prevent undefined errors
@@ -69,6 +71,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         }
         
         return "User";
+    };
+
+    // Handle upgrade button click - navigate to checkout
+    const handleUpgrade = () => {
+        // Navigate to checkout page - the checkout page will automatically fill in the user's email
+        // if they are logged in (handled by the Checkout component's useEffect)
+        navigate('/checkout');
     };
 
     return (
@@ -127,7 +136,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-sm font-medium text-blue-700 uppercase tracking-wider">Current Plan</h3>
                                     <button
-                                        onClick={() => setIsDepartmentModalOpen(true)}
+                                        onClick={handleUpgrade}
                                         className="inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-blue-600 to-blue-700 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
                                     >
                                         <ArrowUp className="w-3.5 h-3.5" />

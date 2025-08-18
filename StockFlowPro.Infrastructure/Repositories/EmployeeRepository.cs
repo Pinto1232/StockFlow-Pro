@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using StockFlowPro.Domain.Entities;
+using Microsoft.Extensions.Logging;
 using StockFlowPro.Domain.Repositories;
 using StockFlowPro.Infrastructure.Data;
 
@@ -8,10 +9,12 @@ namespace StockFlowPro.Infrastructure.Repositories;
 public class EmployeeRepository : IEmployeeRepository
 {
     private readonly ApplicationDbContext _context;
+    private readonly ILogger<EmployeeRepository> _logger;
 
-    public EmployeeRepository(ApplicationDbContext context)
+    public EmployeeRepository(ApplicationDbContext context, ILogger<EmployeeRepository> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public async Task<Employee?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -88,5 +91,42 @@ public class EmployeeRepository : IEmployeeRepository
         }
 
         return await query.AnyAsync(cancellationToken);
+    }
+
+    // Adds a ProjectTask directly to the Tasks DbSet and saves changes. This avoids calling Update on the Employee aggregate
+    // which can produce full-aggregate UPDATE statements that sometimes lead to optimistic concurrency exceptions.
+    public async Task AddTaskAsync(ProjectTask task, CancellationToken cancellationToken = default)
+    {
+        // Use the Tasks DbSet if available on the context; otherwise fall back to adding to the set for ProjectTask
+        var set = _context.Set<ProjectTask>();
+        await set.AddAsync(task, cancellationToken);
+        try
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                // Log the full exception and EF change tracker state to help diagnose concurrency issues
+                _logger?.LogError(ex, "AddTaskAsync failed for ProjectTask Id={TaskIdGuid} TaskId={TaskId} ParentTaskId={ParentTaskId} EmployeeId={EmployeeId}. ChangeTracker entries: {EntriesCount}",
+                    task.Id, task.TaskId, task.ParentTaskId, task.EmployeeId, _context.ChangeTracker.Entries().Count());
+
+                foreach (var entry in _context.ChangeTracker.Entries())
+                {
+                    try
+                    {
+                        var pk = entry.Metadata?.FindPrimaryKey();
+                        var pkCount = pk?.Properties?.Count ?? 0;
+                        _logger?.LogError("Entry Entity={EntityType} State={State} PrimaryKeyPropCount={PkCount}", entry.Entity?.GetType().FullName, entry.State, pkCount);
+                    }
+                    catch { /* swallow per-entry logging errors */ }
+                }
+            }
+            catch { /* swallow logging errors to avoid masking original exception */ }
+
+            // rethrow to preserve original behavior and allow upper layers to wrap/return proper API errors
+            throw;
+        }
     }
 }

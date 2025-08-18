@@ -26,6 +26,14 @@ EnvironmentConfig.ValidateConfiguration();
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Enable EF Core SQL logging and sensitive data logging for diagnostics in development
+builder.Logging.AddConsole();
+builder.Services.Configure<Microsoft.Extensions.Logging.LoggerFilterOptions>(options =>
+{
+    options.MinLevel = Microsoft.Extensions.Logging.LogLevel.Information;
+});
+// No additional logging configuration type is required here; console logger added above.
+
 // CSRF protection removed as it's primarily used for Razor Pages
 
 // Add SignalR with detailed logging and configuration
@@ -244,8 +252,14 @@ builder.Services.AddCors(options =>
 
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), 
-        b => b.MigrationsAssembly("StockFlowPro.Infrastructure")));
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("StockFlowPro.Infrastructure"));
+        if (builder.Environment.IsDevelopment())
+        {
+            options.EnableSensitiveDataLogging();
+            options.EnableDetailedErrors();
+        }
+    });
 
 builder.Services.AddMediatR(typeof(StockFlowPro.Application.Commands.Users.CreateUserCommand).Assembly);
 builder.Services.AddAutoMapper(typeof(UserMappingProfile), typeof(StockFlowPro.Application.Mappings.ProductMappingProfile), typeof(StockFlowPro.Application.Mappings.SubscriptionPlanMappingProfile), typeof(StockFlowPro.Application.Mappings.PermissionMappingProfile), typeof(StockFlowPro.Application.Mappings.EmployeeMappingProfile), typeof(StockFlowPro.Application.Mappings.LandingContentMappingProfile));
