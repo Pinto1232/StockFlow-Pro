@@ -1,0 +1,11 @@
+import { renderHook } from '@testing-library/react';
+import { {{pascalCase name}}Provider, use{{pascalCase name}} } from './{{pascalCase name}}Context';
+import React from 'react';
+
+describe('{{pascalCase name}}Context', () => {
+  it('provides context', () => {
+    const wrapper: React.FC<{children: React.ReactNode}> = ({ children }) => <{{pascalCase name}}Provider>{children}</{{pascalCase name}}Provider>;
+    const { result } = renderHook(() => use{{pascalCase name}}(), { wrapper });
+    expect(result.current.ready).toBe(true);
+  });
+});

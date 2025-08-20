@@ -1,0 +1,27 @@
+import React, { createContext, useContext, useState, useCallback } from 'react';
+
+export interface {{pascalCase name}}ContextValue {
+  // TODO: add fields
+  ready: boolean;
+}
+
+const {{pascalCase name}}Context = createContext<{{pascalCase name}}ContextValue | undefined>(undefined);
+{{pascalCase name}}Context.displayName = '{{pascalCase name}}Context';
+
+export interface {{pascalCase name}}ProviderProps { children: React.ReactNode; }
+
+export const {{pascalCase name}}Provider: React.FC<{{pascalCase name}}ProviderProps> = ({ children }) => {
+  const [ready] = useState(true);
+
+  const value: {{pascalCase name}}ContextValue = {
+    ready
+  };
+
+  return <{{pascalCase name}}Context.Provider value={value}>{children}</{{pascalCase name}}Context.Provider>;
+};
+
+export const use{{pascalCase name}} = () => {
+  const ctx = useContext({{pascalCase name}}Context);
+  if (!ctx) throw new Error('use{{pascalCase name}} must be used within {{pascalCase name}}Provider');
+  return ctx;
+};

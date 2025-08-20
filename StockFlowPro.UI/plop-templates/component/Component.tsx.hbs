@@ -1,0 +1,59 @@
+import React{{#if withLoading}}, { useState, useEffect }{{/if}} from 'react';
+{{#if withStyle}}
+import styles from './{{pascalCase name}}.module.css';
+{{/if}}
+{{#if withLoading}}
+{{#if withError}}
+import { LoadingState, ErrorState } from 'src/components/ui';
+{{else}}
+import { LoadingState } from 'src/components/ui';
+{{/if}}
+{{else}}
+{{#if withError}}
+import { ErrorState } from 'src/components/ui';
+{{/if}}
+{{/if}}
+
+export interface {{pascalCase name}}Props {
+  children?: React.ReactNode;
+  loading?: boolean;{{#if withError}}
+  error?: unknown;
+  onRetry?: () => void;{{/if}}
+}
+
+export const {{pascalCase name}}: React.FC<{{pascalCase name}}Props> = ({ children, loading{{#if withError}}, error, onRetry{{/if}} }) => {
+  {{#if withError}}
+  if (error) {
+    return (
+      <div className={{{#if withStyle}}styles.root{{else}}'{{kebabCase name}}-root'{{/if}} data-testid="{{kebabCase name}}-error">
+        <ErrorState error={error} onRetry={onRetry} small />
+      </div>
+    );
+  }
+  {{/if}}
+  {{#if withLoading}}
+  const [isLoading, setIsLoading] = useState<boolean>(!!loading);
+  useEffect(() => {
+    if (loading === undefined) {
+      const t = setTimeout(() => setIsLoading(false), 600);
+      return () => clearTimeout(t);
+    } else {
+      setIsLoading(!!loading);
+    }
+  }, [loading]);
+  if (isLoading) {
+    return (
+      <div className={{{#if withStyle}}styles.root{{else}}'{{kebabCase name}}-root'{{/if}} data-testid="{{kebabCase name}}-loading">
+        <LoadingState size="sm" inline message="Loading {{pascalCase name}}..." />
+      </div>
+    );
+  }
+  {{/if}}
+  return (
+    <div className={{{#if withStyle}}styles.root{{else}}'{{kebabCase name}}-root'{{/if}} data-testid="{{kebabCase name}}">
+      {children || '{{pascalCase name}} component'}
+    </div>
+  );
+};
+
+export default {{pascalCase name}};

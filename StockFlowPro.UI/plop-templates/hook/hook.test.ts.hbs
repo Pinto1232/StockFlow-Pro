@@ -1,0 +1,9 @@
+import { renderHook } from '@testing-library/react';
+import { use{{pascalCase name}} } from './use{{pascalCase name}}';
+
+describe('use{{pascalCase name}}', () => {
+  it('initializes state', () => {
+    const { result } = renderHook(() => use{{pascalCase name}}());
+    expect(result.current.state).toBeGreaterThanOrEqual(0);
+  });
+});

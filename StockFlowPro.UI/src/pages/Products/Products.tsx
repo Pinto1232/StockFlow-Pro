@@ -31,6 +31,7 @@ import DeleteProductModal from "../../components/Products/DeleteProductModal";
 import ProductDetail from "../../components/Products/ProductDetail";
 import Snackbar from "../../components/ui/Snackbar";
 import AnimatedStatsCard from "../../components/ui/AnimatedStatsCard";
+import { DataBoundary, LoadingState } from "../../components/ui";
 
 const Products: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -564,7 +565,22 @@ const Products: React.FC = () => {
                 </div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {isLoadingStats && !dashboardStats && (
+                    <div className="mb-8">
+                        <LoadingState
+                            variant="skeleton"
+                            skeletonLines={4}
+                            message="Loading product statistics..."
+                            className="w-full bg-gray-100/70 rounded-2xl p-6 border border-gray-200"
+                        />
+                    </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 relative">
+                    {isLoadingStats && dashboardStats && (
+                        <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center z-10">
+                            <LoadingState inline message="Updating stats..." size="sm" />
+                        </div>
+                    )}
                     <AnimatedStatsCard
                         title="Total Products"
                         value={totalProducts}
@@ -777,24 +793,15 @@ const Products: React.FC = () => {
                 <div className="bg-white border-0 rounded-2xl shadow-[0_8px_25px_rgba(0,0,0,0.08)] mx-6 overflow-hidden">
                     <div className="p-0">
                         <div className="rounded-2xl overflow-hidden">
-                            {isLoading ? (
-                                <div className="flex flex-col items-center justify-center py-12">
-                                    <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-4" />
-                                    <p className="text-gray-500 font-medium">
-                                        Loading products...
-                                    </p>
-                                </div>
-                            ) : error ? (
-                                <div className="flex flex-col items-center justify-center py-12">
-                                    <XCircle className="h-12 w-12 text-red-400 mb-4" />
-                                    <h5 className="text-lg font-semibold text-gray-600 mb-2">
-                                        Error loading products
-                                    </h5>
-                                    <p className="text-gray-500 text-center">
-                                        {error.message || "Failed to load products from the server"}
-                                    </p>
-                                </div>
-                            ) : products.length === 0 ? (
+                            <DataBoundary
+                                isLoading={isLoading}
+                                isError={!!error}
+                                error={error}
+                                loadingProps={{ message: 'Loading products...', variant: 'spinner' }}
+                                errorProps={{ title: 'Error loading products' }}
+                                retry={() => window.location.reload()}
+                            >
+                            {products.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12">
                                     <Package className="h-12 w-12 text-gray-300 mb-4" />
                                     <h5 className="text-lg font-semibold text-gray-600 mb-2">
@@ -805,175 +812,183 @@ const Products: React.FC = () => {
                                     </p>
                                 </div>
                             ) : (
-                                <table className="w-full m-0 border-separate border-spacing-0">
-                                    <thead>
-                                        <tr>
-                                            <th className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] font-semibold text-xs uppercase tracking-[0.5px] text-[#475569] p-4 sticky top-0 z-10 text-left">
-                                                Name
-                                            </th>
-                                            <th className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] font-semibold text-xs uppercase tracking-[0.5px] text-[#475569] p-4 sticky top-0 z-10 text-left">
-                                                Cost per Item
-                                            </th>
-                                            <th className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] font-semibold text-xs uppercase tracking-[0.5px] text-[#475569] p-4 sticky top-0 z-10 text-left">
-                                                Stock
-                                            </th>
-                                            <th className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] font-semibold text-xs uppercase tracking-[0.5px] text-[#475569] p-4 sticky top-0 z-10 text-left">
-                                                Total Value
-                                            </th>
-                                            <th className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] font-semibold text-xs uppercase tracking-[0.5px] text-[#475569] p-4 sticky top-0 z-10 text-left">
-                                                Status
-                                            </th>
-                                            <th className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] font-semibold text-xs uppercase tracking-[0.5px] text-[#475569] p-4 sticky top-0 z-10 text-left">
-                                                Created
-                                            </th>
-                                            <th className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] font-semibold text-xs uppercase tracking-[0.5px] text-[#475569] p-4 sticky top-0 z-10 text-right">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {products.map(
-                                            (product, index) => (
-                                                <tr
-                                                    key={product.id}
-                                                    className="hover:bg-[#f8fafc] transition-colors duration-200"
-                                                >
-                                                    <td
-                                                        className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""} font-medium text-gray-900`}
+                                <>
+                                    <table className="w-full m-0 border-separate border-spacing-0">
+                                        <thead>
+                                            <tr>
+                                                <th className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] font-semibold text-xs uppercase tracking-[0.5px] text-[#475569] p-4 sticky top-0 z-10 text-left">
+                                                    Name
+                                                </th>
+                                                <th className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] font-semibold text-xs uppercase tracking-[0.5px] text-[#475569] p-4 sticky top-0 z-10 text-left">
+                                                    Cost per Item
+                                                </th>
+                                                <th className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] font-semibold text-xs uppercase tracking-[0.5px] text-[#475569] p-4 sticky top-0 z-10 text-left">
+                                                    Stock
+                                                </th>
+                                                <th className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] font-semibold text-xs uppercase tracking-[0.5px] text-[#475569] p-4 sticky top-0 z-10 text-left">
+                                                    Total Value
+                                                </th>
+                                                <th className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] font-semibold text-xs uppercase tracking-[0.5px] text-[#475569] p-4 sticky top-0 z-10 text-left">
+                                                    Status
+                                                </th>
+                                                <th className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] font-semibold text-xs uppercase tracking-[0.5px] text-[#475569] p-4 sticky top-0 z-10 text-left">
+                                                    Created
+                                                </th>
+                                                <th className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border-b border-[#e2e8f0] font-semibold text-xs uppercase tracking-[0.5px] text-[#475569] p-4 sticky top-0 z-10 text-right">
+                                                    Actions
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {products.map(
+                                                (product, index) => (
+                                                    <tr
+                                                        key={product.id}
+                                                        className="hover:bg-[#f8fafc] transition-colors duration-200"
                                                     >
-                                                        {product.name}
-                                                    </td>
-                                                    <td
-                                                        className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
-                                                    >
-                                                        {formatCurrency(product.cost)}
-                                                    </td>
-                                                    <td
-                                                        className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""}`}
-                                                    >
-                                                        <span
-                                                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium ${getStockBadgeClasses(product.quantity)}`}
+                                                        <td
+                                                            className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""} font-medium text-gray-900`}
                                                         >
-                                                            {product.quantity}
-                                                        </span>
-                                                    </td>
-                                                    <td
-                                                        className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
-                                                    >
-                                                        {formatCurrency(product.totalValue || product.calculatedTotalValue)}
-                                                    </td>
-                                                    <td
-                                                        className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""}`}
-                                                    >
-                                                        <span
-                                                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium ${getStatusBadgeClasses(product.isActive)}`}
+                                                            {product.name}
+                                                        </td>
+                                                        <td
+                                                            className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
                                                         >
-                                                            {product.isActive ? "Active" : "Inactive"}
-                                                        </span>
-                                                    </td>
-                                                    <td
-                                                        className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
-                                                    >
-                                                        {formatDate(product.createdAt)}
-                                                    </td>
-                                                    <td
-                                                        className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-right`}
-                                                    >
-                                                        <div className="flex justify-end gap-2">
-                                                            <button
-                                                                onClick={() => handleEditProduct(product)}
-                                                                className="inline-flex items-center gap-1 px-3 py-2 text-xs bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(59,130,246,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(59,130,246,0.4)] border-0 min-w-[70px]"
-                                                                title="Edit Product"
-                                                                disabled={productManagement.isUpdatingProduct}
+                                                            {formatCurrency(product.cost)}
+                                                        </td>
+                                                        <td
+                                                            className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""}`}
+                                                        >
+                                                            <span
+                                                                className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium ${getStockBadgeClasses(product.quantity)}`}
                                                             >
-                                                                {productManagement.isUpdatingProduct ? (
-                                                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                                                ) : (
-                                                                    <Edit className="h-3 w-3" />
-                                                                )}
-                                                                <span>Edit</span>
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleViewProduct(product)}
-                                                                className="inline-flex items-center gap-1 px-3 py-2 text-xs bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-lg hover:from-cyan-600 hover:to-cyan-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(6,182,212,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(6,182,212,0.4)] border-0 min-w-[70px]"
-                                                                title="View Product"
+                                                                {product.quantity}
+                                                            </span>
+                                                        </td>
+                                                        <td
+                                                            className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
+                                                        >
+                                                            {formatCurrency(product.totalValue || product.calculatedTotalValue)}
+                                                        </td>
+                                                        <td
+                                                            className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""}`}
+                                                        >
+                                                            <span
+                                                                className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium ${getStatusBadgeClasses(product.isActive)}`}
                                                             >
-                                                                <Eye className="h-3 w-3" />
-                                                                <span>View</span>
-                                                            </button>
-                                                            <div className="relative group">
+                                                                {product.isActive ? "Active" : "Inactive"}
+                                                            </span>
+                                                        </td>
+                                                        <td
+                                                            className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-gray-700`}
+                                                        >
+                                                            {formatDate(product.createdAt)}
+                                                        </td>
+                                                        <td
+                                                            className={`align-middle text-sm p-4 ${index !== products.length - 1 ? "border-b border-[#f1f5f9]" : ""} text-right`}
+                                                        >
+                                                            <div className="flex justify-end gap-2">
                                                                 <button
-                                                                    className="inline-flex items-center gap-1 px-3 py-2 text-xs bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(16,185,129,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(16,185,129,0.4)] border-0 min-w-[70px]"
-                                                                    title="Download"
+                                                                    onClick={() => handleEditProduct(product)}
+                                                                    className="inline-flex items-center gap-1 px-3 py-2 text-xs bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(59,130,246,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(59,130,246,0.4)] border-0 min-w-[70px]"
+                                                                    title="Edit Product"
+                                                                    disabled={productManagement.isUpdatingProduct}
                                                                 >
-                                                                    <Download className="h-3 w-3" />
-                                                                    <span>Download</span>
+                                                                    {productManagement.isUpdatingProduct ? (
+                                                                        <Loader2 className="h-3 w-3 animate-spin" />
+                                                                    ) : (
+                                                                        <Edit className="h-3 w-3" />
+                                                                    )}
+                                                                    <span>Edit</span>
                                                                 </button>
-                                                                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[120px] z-[60] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                                                <button
+                                                                    onClick={() => handleViewProduct(product)}
+                                                                    className="inline-flex items-center gap-1 px-3 py-2 text-xs bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-lg hover:from-cyan-600 hover:to-cyan-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(6,182,212,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(6,182,212,0.4)] border-0 min-w-[70px]"
+                                                                    title="View Product"
+                                                                >
+                                                                    <Eye className="h-3 w-3" />
+                                                                    <span>View</span>
+                                                                </button>
+                                                                <div className="relative group">
                                                                     <button
-                                                                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
-                                                                        onClick={() => handleDownloadProduct(product, "pdf")}
+                                                                        className="inline-flex items-center gap-1 px-3 py-2 text-xs bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(16,185,129,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(16,185,129,0.4)] border-0 min-w-[70px]"
+                                                                        title="Download"
                                                                     >
-                                                                        <FileText className="h-4 w-4 text-red-600" />
-                                                                        PDF
+                                                                        <Download className="h-3 w-3" />
+                                                                        <span>Download</span>
                                                                     </button>
-                                                                    <button
-                                                                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
-                                                                        onClick={() => handleDownloadProduct(product, "excel")}
-                                                                    >
-                                                                        <FileText className="h-4 w-4 text-green-600" />
-                                                                        Excel
-                                                                    </button>
-                                                                    <button
-                                                                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
-                                                                        onClick={() => handleDownloadProduct(product, "csv")}
-                                                                    >
-                                                                        <FileText className="h-4 w-4 text-blue-600" />
-                                                                        CSV
-                                                                    </button>
-                                                                    <button
-                                                                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
-                                                                        onClick={() => handleDownloadProduct(product, "json")}
-                                                                    >
-                                                                        <FileText className="h-4 w-4 text-yellow-600" />
-                                                                        JSON
-                                                                    </button>
+                                                                    <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[120px] z-[60] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                                                        <button
+                                                                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                                                                            onClick={() => handleDownloadProduct(product, "pdf")}
+                                                                        >
+                                                                            <FileText className="h-4 w-4 text-red-600" />
+                                                                            PDF
+                                                                        </button>
+                                                                        <button
+                                                                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                                                                            onClick={() => handleDownloadProduct(product, "excel")}
+                                                                        >
+                                                                            <FileText className="h-4 w-4 text-green-600" />
+                                                                            Excel
+                                                                        </button>
+                                                                        <button
+                                                                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                                                                            onClick={() => handleDownloadProduct(product, "csv")}
+                                                                        >
+                                                                            <FileText className="h-4 w-4 text-blue-600" />
+                                                                            CSV
+                                                                        </button>
+                                                                        <button
+                                                                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                                                                            onClick={() => handleDownloadProduct(product, "json")}
+                                                                        >
+                                                                            <FileText className="h-4 w-4 text-yellow-600" />
+                                                                            JSON
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
+                                                                <button
+                                                                    onClick={() => handleStockAdjustment(product)}
+                                                                    className="inline-flex items-center gap-1 px-3 py-2 text-xs bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(245,158,11,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(245,158,11,0.4)] border-0 min-w-[70px]"
+                                                                    title="Update Stock"
+                                                                    disabled={productManagement.isAdjustingStock}
+                                                                >
+                                                                    {productManagement.isAdjustingStock ? (
+                                                                        <Loader2 className="h-3 w-3 animate-spin" />
+                                                                    ) : (
+                                                                        <Package className="h-3 w-3" />
+                                                                    )}
+                                                                    <span>Stock</span>
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleDeleteProduct(product)}
+                                                                    className="inline-flex items-center gap-1 px-3 py-2 text-xs bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(239,68,68,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(239,68,68,0.4)] border-0 min-w-[70px]"
+                                                                    title="Delete Product"
+                                                                    disabled={productManagement.isDeletingProduct}
+                                                                >
+                                                                    {productManagement.isDeletingProduct ? (
+                                                                        <Loader2 className="h-3 w-3 animate-spin" />
+                                                                    ) : (
+                                                                        <Trash2 className="h-3 w-3" />
+                                                                    )}
+                                                                    <span>Delete</span>
+                                                                </button>
                                                             </div>
-                                                            <button
-                                                                onClick={() => handleStockAdjustment(product)}
-                                                                className="inline-flex items-center gap-1 px-3 py-2 text-xs bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(245,158,11,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(245,158,11,0.4)] border-0 min-w-[70px]"
-                                                                title="Update Stock"
-                                                                disabled={productManagement.isAdjustingStock}
-                                                            >
-                                                                {productManagement.isAdjustingStock ? (
-                                                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                                                ) : (
-                                                                    <Package className="h-3 w-3" />
-                                                                )}
-                                                                <span>Stock</span>
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleDeleteProduct(product)}
-                                                                className="inline-flex items-center gap-1 px-3 py-2 text-xs bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(239,68,68,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(239,68,68,0.4)] border-0 min-w-[70px]"
-                                                                title="Delete Product"
-                                                                disabled={productManagement.isDeletingProduct}
-                                                            >
-                                                                {productManagement.isDeletingProduct ? (
-                                                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                                                ) : (
-                                                                    <Trash2 className="h-3 w-3" />
-                                                                )}
-                                                                <span>Delete</span>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ),
-                                        )}
-                                    </tbody>
-                                </table>
+                                                        </td>
+                                                    </tr>
+                                                ),
+                                            )}
+                                        </tbody>
+                                    </table>
+                                    {productManagement.isLoadingProducts && !isLoading && (
+                                        <div className="p-4 border-t border-[#f1f5f9] flex items-center gap-3 text-sm text-gray-600">
+                                            <LoadingState inline size="sm" variant="bar" message="Refreshing products..." />
+                                        </div>
+                                    )}
+                                </>
                             )}
+                            </DataBoundary>
                         </div>
                     </div>
 
@@ -986,20 +1001,27 @@ const Products: React.FC = () => {
                             </span>
                             {totalCount > 0 && (
                                 <div className="relative group z-[70]">
-                                    <button
-                                        className="flex items-center gap-2 px-3 py-2 text-xs bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(147,51,234,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(147,51,234,0.4)] border-0"
-                                        title="Download All Products"
-                                        disabled={downloadAllProductsMutation.isPending}
-                                    >
-                                        {downloadAllProductsMutation.isPending ? (
-                                            <Loader2 className="h-3 w-3 animate-spin" />
-                                        ) : (
-                                            <Download className="h-3 w-3" />
+                                    <div className="relative">
+                                        <button
+                                            className="flex items-center gap-2 px-3 py-2 text-xs bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-medium shadow-[0_2px_8px_rgba(147,51,234,0.3)] hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(147,51,234,0.4)] border-0 disabled:opacity-70 disabled:cursor-not-allowed"
+                                            title="Download All Products"
+                                            disabled={downloadAllProductsMutation.isPending}
+                                        >
+                                            {downloadAllProductsMutation.isPending ? (
+                                                <Loader2 className="h-3 w-3 animate-spin" />
+                                            ) : (
+                                                <Download className="h-3 w-3" />
+                                            )}
+                                            <span>
+                                                {downloadAllProductsMutation.isPending ? "Generating..." : "Download All"}
+                                            </span>
+                                        </button>
+                                        {downloadAllProductsMutation.isPending && (
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <LoadingState inline size="sm" message="" />
+                                            </div>
                                         )}
-                                        <span>
-                                            {downloadAllProductsMutation.isPending ? "Generating..." : "Download All"}
-                                        </span>
-                                    </button>
+                                    </div>
                                     <div className="absolute left-0 bottom-full mb-1 bg-white border border-gray-200 rounded-lg shadow-xl p-2 min-w-[120px] z-[80] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                                         <button
                                             className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"

@@ -1,0 +1,23 @@
+import { useEffect, useState } from 'react';
+{{#if withQuery}}import { useQuery } from '@tanstack/react-query';
+{{/if}}
+
+// Basic custom hook
+export const use{{pascalCase name}} = () => {
+  const [state, setState] = useState<number>(0);
+  useEffect(() => { setState((s) => s + 1); }, []);
+  return { state };
+};
+
+{{#if withQuery}}// React Query example (replace with real fetch)
+export const use{{pascalCase name}}Query = () => {
+  return useQuery({
+    queryKey: ['{{camelCase name}}'],
+    queryFn: async () => {
+      // TODO: replace with actual service call
+      return Promise.resolve({ sample: true });
+    },
+    staleTime: 60_000
+  });
+};
+{{/if}}
