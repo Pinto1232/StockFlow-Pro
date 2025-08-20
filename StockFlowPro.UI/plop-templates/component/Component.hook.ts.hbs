@@ -1,0 +1,8 @@
+import { useState, useCallback } from 'react';
+
+// Local hook scaffold for {{pascalCase name}} component
+export const use{{pascalCase name}} = () => {
+  const [state, setState] = useState(null);
+  const reset = useCallback(() => setState(null), []);
+  return { state, setState, reset };
+};

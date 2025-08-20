@@ -28,6 +28,7 @@ export const AddTaskForm = ({
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const prevIsAddingRef = useRef(isAddingTask);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -39,6 +40,8 @@ export const AddTaskForm = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => { prevIsAddingRef.current = isAddingTask; }, [isAddingTask]);
 
 
   return createPortal(
@@ -266,7 +269,7 @@ export const AddTaskForm = ({
               Creating...
             </>
           ) : (
-            'Add Task'
+            isEditing ? 'Save' : 'Add Task'
           )}
         </button>
         <button

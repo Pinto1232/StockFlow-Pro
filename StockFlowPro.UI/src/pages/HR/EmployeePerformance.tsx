@@ -11,8 +11,9 @@ import {
     BarChart3,
     Plus,
 } from "lucide-react";
-import Projects from "../../components/projects/Projects";
+import { Projects } from "../../components/projects/Projects";
 import { LoadingState } from "../../components/ui";
+import { CountUp } from "../../components/ui";
 
 const EmployeePerformance: React.FC = () => {
     // Temporary local loading simulation so LoadingState is visible; replace with real query state
@@ -84,55 +85,63 @@ const EmployeePerformance: React.FC = () => {
                     </div>
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-7">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
-                                <TrendingUp className="w-6 h-6 text-white" />
+                            <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-inner">
+                                <TrendingUp className="w-8 h-8 text-white" />
                             </div>
                             <span className="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full">
                                 AVERAGE
                             </span>
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-1">8.4</h3>
+                        <h3 className="text-4xl font-extrabold text-gray-900 mb-1 tracking-tight">
+                            <CountUp end={8.4} decimals={1} />
+                        </h3>
                         <p className="text-gray-600 text-sm">Performance Score</p>
                     </div>
 
-                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-7">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                                <Award className="w-6 h-6 text-white" />
+                            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-inner">
+                                <Award className="w-8 h-8 text-white" />
                             </div>
                             <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
                                 TOP PERFORMERS
                             </span>
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-1">18</h3>
+                        <h3 className="text-4xl font-extrabold text-gray-900 mb-1 tracking-tight">
+                            <CountUp end={18} />
+                        </h3>
                         <p className="text-gray-600 text-sm">High Achievers</p>
                     </div>
 
-                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-7">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
-                                <Target className="w-6 h-6 text-white" />
+                            <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-inner">
+                                <Target className="w-8 h-8 text-white" />
                             </div>
                             <span className="bg-purple-100 text-purple-800 text-xs font-semibold px-3 py-1 rounded-full">
                                 GOALS
                             </span>
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-1">87%</h3>
+                        <h3 className="text-4xl font-extrabold text-gray-900 mb-1 tracking-tight">
+                            <CountUp end={87} suffix="%" />
+                        </h3>
                         <p className="text-gray-600 text-sm">Goals Achieved</p>
                     </div>
 
-                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-7">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                                <Calendar className="w-6 h-6 text-white" />
+                            <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-inner">
+                                <Calendar className="w-8 h-8 text-white" />
                             </div>
                             <span className="bg-orange-100 text-orange-800 text-xs font-semibold px-3 py-1 rounded-full">
                                 REVIEWS
                             </span>
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-1">24</h3>
+                        <h3 className="text-4xl font-extrabold text-gray-900 mb-1 tracking-tight">
+                            <CountUp end={24} />
+                        </h3>
                         <p className="text-gray-600 text-sm">Pending Reviews</p>
                     </div>
                 </div>

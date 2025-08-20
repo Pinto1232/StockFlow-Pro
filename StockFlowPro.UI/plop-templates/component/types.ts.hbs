@@ -1,0 +1,7 @@
+// Types for {{pascalCase name}} component
+export interface {{pascalCase name}}Props {
+  children?: React.ReactNode;
+  loading?: boolean;{{#if withError}}
+  error?: unknown;
+  onRetry?: () => void;{{/if}}
+}

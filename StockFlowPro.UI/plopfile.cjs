@@ -22,7 +22,7 @@ module.exports = function (plop) {
   };
 
   plop.setGenerator('component', {
-    description: 'Create a new UI component (with optional style, test, story)',
+    description: 'Create a new UI component (scoped folder only, no extra barrels)',
     prompts: [
       { type: 'input', name: 'name', message: 'Component name (e.g. UserCard):', validate: v => !!v || 'Name required' },
       { type: 'list', name: 'segment', message: 'Parent segment/folder under components?', choices: () => {
@@ -32,78 +32,34 @@ module.exports = function (plop) {
           return ['ui', ...dirs.filter(d => d !== 'ui')];
         }
       },
-  { type: 'confirm', name: 'withLoading', message: 'Include loading state scaffold?', default: true },
-  { type: 'confirm', name: 'withError', message: 'Include error state scaffold?', default: true },
+      { type: 'confirm', name: 'withLoading', message: 'Include loading state scaffold?', default: true },
+      { type: 'confirm', name: 'withError', message: 'Include error state scaffold?', default: true },
       { type: 'confirm', name: 'withTest', message: 'Add test file?', default: true },
-      { type: 'confirm', name: 'withStory', message: 'Add story file?', default: false },
       { type: 'confirm', name: 'withStyle', message: 'Add module.css file?', default: true },
-      { type: 'confirm', name: 'exportIndex', message: 'Export from segment index.ts?', default: true }
+      { type: 'confirm', name: 'withLocalHook', message: 'Add local hook file (use<CompName>.ts)?', default: false }
     ],
     actions: data => {
       const actions = [];
       const basePath = path.posix.join(componentsRoot.replace(/\\/g,'/'), data.segment, '{{pascalCase name}}');
 
-      actions.push({
-        type: 'add',
-        path: basePath + '/{{pascalCase name}}.tsx',
-        templateFile: 'plop-templates/component/Component.tsx.hbs'
-      });
+      // Core component
+      actions.push({ type: 'add', path: basePath + '/{{pascalCase name}}.tsx', templateFile: 'plop-templates/component/Component.tsx.hbs' });
 
       if (data.withStyle) {
-        actions.push({
-          type: 'add',
-          path: basePath + '/{{pascalCase name}}.module.css',
-          templateFile: 'plop-templates/component/Component.module.css.hbs'
-        });
+        actions.push({ type: 'add', path: basePath + '/styles.module.css', templateFile: 'plop-templates/component/Component.module.css.hbs' });
       }
+
+      actions.push({ type: 'add', path: basePath + '/types.ts', templateFile: 'plop-templates/component/types.ts.hbs' });
 
       if (data.withTest) {
-        actions.push({
-          type: 'add',
-          path: basePath + '/{{pascalCase name}}.test.tsx',
-          templateFile: 'plop-templates/component/Component.test.tsx.hbs'
-        });
+        actions.push({ type: 'add', path: basePath + '/{{pascalCase name}}.test.tsx', templateFile: 'plop-templates/component/Component.test.tsx.hbs' });
       }
 
-      if (data.withStory) {
-        actions.push({
-          type: 'add',
-          path: basePath + '/{{pascalCase name}}.stories.tsx',
-          templateFile: 'plop-templates/component/Component.stories.tsx.hbs'
-        });
+      if (data.withLocalHook) {
+        actions.push({ type: 'add', path: basePath + '/use{{pascalCase name}}.ts', templateFile: 'plop-templates/component/Component.hook.ts.hbs' });
       }
 
-      actions.push({
-        type: 'add',
-        path: basePath + '/index.ts',
-        template: "export * from './{{pascalCase name}}';\n"
-      });
-
-      if (data.exportIndex) {
-        actions.push(function customExportIndex() {
-          const segmentIndex = path.join(componentsRoot, data.segment, 'index.ts');
-          const exportLine = `export * from './${pascalCase(data.name)}';`;
-          ensureIndexExport(segmentIndex, exportLine);
-          return `Updated ${segmentIndex}`;
-        });
-      }
-
-      // Always add/update root components barrel so consumers can import from 'components'
-      actions.push(function rootComponentsBarrel() {
-        const rootIndex = path.join('src', 'components', 'index.ts');
-        const exportLine = `export * from './${data.segment}/${pascalCase(data.name)}';`;
-        if (!fs.existsSync(rootIndex)) {
-          fs.writeFileSync(rootIndex, `// Auto-generated barrel exports for components\n${exportLine}\n`);
-          return `Created root barrel: ${rootIndex}`;
-        }
-        const content = fs.readFileSync(rootIndex, 'utf8');
-        if (!content.includes(exportLine)) {
-          fs.appendFileSync(rootIndex, exportLine + '\n');
-          return `Updated root barrel: ${rootIndex}`;
-        }
-        return 'Root barrel already contains export';
-      });
-
+      // No index.ts or barrel modifications per new requirement
       return actions;
     }
   });
