@@ -11,7 +11,7 @@ import {
     BarChart3,
     Plus,
 } from "lucide-react";
-import Projects from "../../components/Projects";
+import Projects from "../../components/projects/Projects";
 
 const EmployeePerformance: React.FC = () => {
     return (
