@@ -69,8 +69,10 @@ const InlineSubtaskForm: React.FC<InlineSubtaskFormProps> = ({
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 >
                   <option value="">Assign employee to subtask...</option>
-                  {employees.filter(emp => emp.isActive).map(emp => (
-                    <option key={String(emp.id)} value={String(emp.id)}>{emp.fullName} - {emp.jobTitle || 'No Title'}</option>
+                  {employees.map(emp => (
+                    <option key={String(emp.id)} value={String(emp.id)}>
+                      {emp.fullName}
+                    </option>
                   ))}
                 </select>
               </div>

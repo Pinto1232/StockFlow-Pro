@@ -21,6 +21,8 @@ public class TaskDto
 
 public class TaskAssigneeDto
 {
+    public string Id { get; set; } = string.Empty;
+    public string FullName { get; set; } = string.Empty;
     public string Initials { get; set; } = string.Empty;
     public string Color { get; set; } = string.Empty; // CSS class like "bg-purple-500"
 }

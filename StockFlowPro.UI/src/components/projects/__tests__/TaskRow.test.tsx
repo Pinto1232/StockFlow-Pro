@@ -60,18 +60,19 @@ describe('TaskRow actions', () => {
     expect(props.onDeleteTask).toHaveBeenCalledWith(1);
   });
 
-  it('parent row shows + Add subtask and triggers handler', () => {
+  it('parent row shows + Add subtask and triggers handler with parentId', () => {
     const onStartAddSubtask = vi.fn();
     renderTaskRow({ openMenuForTaskId: 1, onStartAddSubtask });
     fireEvent.click(screen.getByText('+ Add subtask'));
-    expect(onStartAddSubtask).toHaveBeenCalledWith(1);
+    expect(onStartAddSubtask.mock.calls[0][0]).toBe(1);
   });
 
   it('child row Delete calls onDeleteSubtask with parentId', () => {
     const onDeleteSubtask = vi.fn();
     const child: Task = { ...baseTask, id: 2, type: undefined };
-    renderTaskRow({ task: child, isChild: true, parentId: 1, openMenuForTaskId: 2, onDeleteSubtask });
-    fireEvent.click(screen.getByText('Delete'));
+  // Component is controlled via openMenuForTaskId; provide it so menu is rendered
+  renderTaskRow({ task: child, isChild: true, parentId: 1, onDeleteSubtask, openMenuForTaskId: 2 });
+  fireEvent.click(screen.getByText('Delete'));
     expect(onDeleteSubtask).toHaveBeenCalledWith(2, 1);
   });
 });

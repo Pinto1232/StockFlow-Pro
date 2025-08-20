@@ -12,11 +12,8 @@ import TaskRow from './components/TaskRow';
 import ProjectsHeader from './components/ProjectsHeader';
 import ProjectsTabs from './components/ProjectsTabs';
 import InlineSubtaskForm from './components/InlineSubtaskForm';
+import SubtaskPopoverForm from './components/SubtaskPopoverForm';
 
-// Minimal Task type to match the mocked tasks used in this component and the
-// shape expected from the backend. Extend as needed when the API contract is
-// finalized.
-// AddTaskForm moved to ./projects/components/AddTaskForm
 
 const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
   const [activeView, setActiveView] = useState('Spreadsheet');
@@ -220,19 +217,16 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
       let formattedDueDate = '';
       if (taskData.dueDate) {
         try {
-          // If it's already in YYYY-MM-DD format, keep it
           if (/^\d{4}-\d{2}-\d{2}$/.test(taskData.dueDate)) {
             formattedDueDate = taskData.dueDate;
           } else {
-            // Try to parse and format
             const date = new Date(taskData.dueDate);
             if (!isNaN(date.getTime())) {
-              formattedDueDate = date.toISOString().split('T')[0]; // YYYY-MM-DD
+              formattedDueDate = date.toISOString().split('T')[0];
             }
           }
-        } catch {
-          // Ignore parse errors — fall back to empty due date
-          console.warn('Invalid date format, using empty string:', taskData.dueDate);
+        } catch (err) {
+          console.warn('Invalid date format, using empty string:', taskData.dueDate, err);
           formattedDueDate = '';
         }
       }
@@ -375,16 +369,35 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
             console.log('📥 Received task update response:', updated);
             await queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
           } else {
-            // local mock update
-            setTasksFromApi(prev => (prev || []).map(t => t.id === editingTaskId ? ({ ...t, task: newTask.task, description: newTask.description || '', dueDate: newTask.dueDate || '', priority: newTask.priority, progress: newTask.progress }) : t));
+            setTasksFromApi(prev => {
+              if (!prev) return prev;
+              return prev.map(t => {
+                if (t.id === editingTaskId) {
+                  return { ...t, task: newTask.task, description: newTask.description || '', dueDate: newTask.dueDate || '', priority: newTask.priority, progress: newTask.progress };
+                }
+                if (t.children && t.children.length) {
+                  const updatedChildren = t.children.map(c => c.id === editingTaskId ? ({ ...c, task: newTask.task, description: newTask.description || '', dueDate: newTask.dueDate || '', priority: newTask.priority, progress: newTask.progress }) : c);
+                  return { ...t, children: updatedChildren };
+                }
+                return t;
+              });
+            });
           }
-
-          setNewTask({ task: '', description: '', priority: 'Normal', progress: 0, dueDate: '', assignee: [] });
-          setShowAddTaskForm(false);
-          setEditingTaskId(null);
         } catch (updateErr) {
           console.error('❌ Failed to update task via API, applying local update fallback:', updateErr);
-          setTasksFromApi(prev => (prev || []).map(t => t.id === editingTaskId ? ({ ...t, task: newTask.task, description: newTask.description || '', dueDate: newTask.dueDate || '', priority: newTask.priority, progress: newTask.progress }) : t));
+          setTasksFromApi(prev => {
+            if (!prev) return prev;
+            return prev.map(t => {
+              if (t.id === editingTaskId) {
+                return { ...t, task: newTask.task, description: newTask.description || '', dueDate: newTask.dueDate || '', priority: newTask.priority, progress: newTask.progress };
+              }
+              if (t.children && t.children.length) {
+                const updatedChildren = t.children.map(c => c.id === editingTaskId ? ({ ...c, task: newTask.task, description: newTask.description || '', dueDate: newTask.dueDate || '', priority: newTask.priority, progress: newTask.progress }) : c);
+                return { ...t, children: updatedChildren };
+              }
+              return t;
+            });
+          });
           setNewTask({ task: '', description: '', priority: 'Normal', progress: 0, dueDate: '', assignee: [] });
           setShowAddTaskForm(false);
           setEditingTaskId(null);
@@ -463,6 +476,7 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
   const [subtaskAssignees, setSubtaskAssignees] = useState<{ id?: string | number; initials: string; color: string }[]>([]);
   // Menu state for per-task dropdown (opened by the MoreHorizontal button)
   const [openMenuForTaskId, setOpenMenuForTaskId] = useState<number | null>(null);
+  const [subtaskAnchorEl, setSubtaskAnchorEl] = useState<HTMLElement | null>(null);
 
   // Close menu on outside click
   useEffect(() => {
@@ -486,21 +500,28 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
     // Menu closes when openMenuForTaskId changes to null
   }, [openMenuForTaskId]);
 
-  // Editing state for tasks
+  // Editing state for tasks (supports parent or child by locating in data set)
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
 
   const handleEditTask = (taskId: number) => {
-    const t = tasks.find(x => x.id === taskId);
-    if (!t) return;
+    let found: Task | undefined = (tasksFromApi || []).find(t => t.id === taskId);
+    if (!found) {
+      for (const parent of (tasksFromApi || [])) {
+        const child = parent.children?.find(c => c.id === taskId);
+        if (child) { found = child; break; }
+      }
+    }
+    if (!found) return;
     setNewTask({
-      task: t.task || '',
-      description: t.description || '',
-      priority: t.priority || 'Normal',
-      progress: t.progress || 0,
-      dueDate: t.dueDate || '',
-      assignee: t.assignee || []
+      task: found.task || '',
+      description: found.description || '',
+      priority: found.priority || 'Normal',
+      progress: found.progress || 0,
+      dueDate: found.dueDate || '',
+      assignee: found.assignee || []
     });
     setEditingTaskId(taskId);
+  // parentId captured if needed later for specialized subtask editing UI
     setShowAddTaskForm(true);
     setOpenMenuForTaskId(null);
   };
@@ -621,10 +642,9 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
             }
             return task;
           });
-          
+          console.log(`⚠️ Task ${taskId} removed locally as fallback`);
           return updatedTasks;
         });
-        console.log(`⚠️ Task ${taskId} removed locally as fallback`);
       } finally {
         setDeletingTaskId(null);
       }
@@ -740,20 +760,21 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
     })();
   };
 
-  const handleStartAddSubtask = (parentId: number) => {
+  const handleStartAddSubtask = (parentId: number, anchorEl?: HTMLElement | null) => {
     setSubtaskParentId(parentId);
     setSubtaskName('');
     setSubtaskError(null);
-  setSubtaskAssignees([]);
-    // expand parent so new subtask is visible
+    setSubtaskAssignees([]);
     setExpandedTasks(prev => ({ ...prev, [parentId]: true }));
+    setSubtaskAnchorEl(anchorEl || null);
   };
 
   const handleCancelAddSubtask = () => {
     setSubtaskParentId(null);
     setSubtaskName('');
     setSubtaskError(null);
-  setSubtaskAssignees([]);
+    setSubtaskAssignees([]);
+    setSubtaskAnchorEl(null);
   };
 
   const handleAddSubtask = async (parentId: number) => {
@@ -1070,7 +1091,7 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
                     />
                   ))}
 
-                  {subtaskParentId === task.id && (
+                  {subtaskParentId === task.id && !subtaskAnchorEl && (
                     <InlineSubtaskForm
                       parentId={task.id}
                       subtaskName={subtaskName}
@@ -1131,6 +1152,21 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
           handleCancelAdd={handleCancelAdd}
           employees={employees}
           isEditing={!!editingTaskId}
+        />
+      )}
+    {subtaskParentId !== null && (
+        <SubtaskPopoverForm
+          parentId={subtaskParentId}
+          subtaskName={subtaskName}
+          setSubtaskName={setSubtaskName}
+          isAddingSubtask={isAddingSubtask}
+          subtaskError={subtaskError}
+          employees={employees}
+          subtaskAssignees={subtaskAssignees}
+          setSubtaskAssignees={setSubtaskAssignees}
+      onAdd={(pid) => { handleAddSubtask(pid); setSubtaskAnchorEl(null); }}
+          onCancel={handleCancelAddSubtask}
+          onRequestClose={handleCancelAddSubtask}
         />
       )}
     </div>

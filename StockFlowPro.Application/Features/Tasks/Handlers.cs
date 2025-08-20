@@ -62,6 +62,8 @@ public class CreateTaskHandler : IRequestHandler<CreateTaskCommand, TaskDto>
             if (emp != null)
             {
                 assigneeObjs.Add(new {
+                    Id = emp.Id.ToString(),
+                    FullName = emp.GetFullName(),
                     Initials = GetInitials(emp.GetFullName()),
                     Color = GetColorForGuid(emp.Id)
                 });
@@ -162,6 +164,8 @@ public class CreateSubtaskHandler : IRequestHandler<CreateSubtaskCommand, TaskDt
             if (emp != null)
             {
                 assigneeObjs.Add(new {
+                    Id = emp.Id.ToString(),
+                    FullName = emp.GetFullName(),
                     Initials = GetInitials(emp.GetFullName()),
                     Color = GetColorForGuid(emp.Id)
                 });
@@ -357,6 +361,8 @@ public class UpdateTaskHandler : IRequestHandler<UpdateTaskCommand, TaskDto?>
             if (emp != null)
             {
                 assigneeObjs.Add(new {
+                    Id = emp.Id.ToString(),
+                    FullName = emp.GetFullName(),
                     Initials = GetInitials(emp.GetFullName()),
                     Color = GetColorForGuid(emp.Id)
                 });

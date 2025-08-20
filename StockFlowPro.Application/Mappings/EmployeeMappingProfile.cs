@@ -36,10 +36,30 @@ public class EmployeeMappingProfile : Profile
         {
             return new List<TaskAssigneeDto>();
         }
-        
         try
         {
-            return JsonSerializer.Deserialize<List<TaskAssigneeDto>>(assigneeData) ?? new List<TaskAssigneeDto>();
+            var assignees = JsonSerializer.Deserialize<List<TaskAssigneeDto>>(assigneeData) ?? new List<TaskAssigneeDto>();
+            // TODO: Replace with actual employee lookup (e.g., from DB or injected service)
+            foreach (var a in assignees)
+            {
+                // Example: Lookup employee by initials or id
+                // var employee = EmployeeRepository.FindByInitialsOrId(a.Initials, a.Id);
+                // if (employee != null)
+                // {
+                //     a.Id = employee.Id.ToString();
+                //     a.FullName = employee.FirstName + " " + employee.LastName;
+                // }
+                // For now, set placeholder values
+                if (string.IsNullOrEmpty(a.FullName))
+                {
+                    a.FullName = "Unknown";
+                }
+                if (string.IsNullOrEmpty(a.Id))
+                {
+                    a.Id = "";
+                }
+            }
+            return assignees;
         }
         catch
         {

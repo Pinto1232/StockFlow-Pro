@@ -14,7 +14,7 @@ export type TaskRowProps = {
   getPriorityColor: (p?: string) => string;
   getProgressColor: (n?: number) => string;
   deletingTaskId: number | null;
-  onStartAddSubtask: (parentId: number) => void;
+  onStartAddSubtask: (parentId: number, anchorEl?: HTMLElement | null) => void;
   onEditTask: (id: number) => void;
   onDeleteTask: (id: number) => void;
   onDeleteSubtask: (id: number, parentId: number) => void;
@@ -40,6 +40,24 @@ const TaskRow: React.FC<TaskRowProps> = ({
   setOpenMenuForTaskId,
 }) => {
   const [localMenuPos, setLocalMenuPos] = React.useState<{ top: number; left: number } | null>(null);
+  const menuRef = React.useRef<HTMLDivElement | null>(null);
+  const ESTIMATED_MENU_HEIGHT = 160; // rough height for overflow detection
+  const menuBtnRef = React.useRef<HTMLButtonElement | null>(null);
+  // If parent forces menu open (e.g. in tests) compute a position lazily
+  React.useEffect(() => {
+    if (openMenuForTaskId === task.id && !localMenuPos && menuBtnRef.current) {
+      const rect = menuBtnRef.current.getBoundingClientRect();
+      const position = {
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.right + window.scrollX - 176,
+      };
+      setLocalMenuPos(position);
+    }
+    if (openMenuForTaskId !== task.id && localMenuPos) {
+      // cleanup when another menu opens
+      setLocalMenuPos(null);
+    }
+  }, [openMenuForTaskId, task.id, localMenuPos]);
   return (
     <>
       <tr key={task.id} className={`group hover:bg-blue-50/30 transition-colors transform-gpu hover:shadow-sm hover:scale-[1.001] ${isChild ? 'bg-gray-50/30' : ''}`}>
@@ -150,6 +168,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
         <td className="px-6 py-3 whitespace-nowrap text-right relative">
           <div className="inline-block">
             <button
+              ref={menuBtnRef}
               onClick={(e) => {
                 e.stopPropagation();
                 if (openMenuForTaskId === task.id) {
@@ -158,14 +177,24 @@ const TaskRow: React.FC<TaskRowProps> = ({
                 } else {
                   const btn = e.currentTarget as HTMLElement;
                   const rect = btn.getBoundingClientRect();
-                  const position = { 
-                    top: rect.bottom + window.scrollY + 8, 
-                    left: rect.right + window.scrollX - 176 
-                  };
+                  const MENU_WIDTH = 176;
+                  // Viewport relative (fixed) coordinates
+                  let top = rect.bottom + 8;
+                  let left = rect.right - MENU_WIDTH;
+                  // Flip vertically if needed
+                  if (top + ESTIMATED_MENU_HEIGHT > window.innerHeight - 8) {
+                    top = rect.top - ESTIMATED_MENU_HEIGHT - 8;
+                  }
+                  if (top < 8) top = 8;
+                  // Clamp horizontally
+                  if (left + MENU_WIDTH > window.innerWidth - 8) left = window.innerWidth - MENU_WIDTH - 8;
+                  if (left < 8) left = 8;
+                  const position = { top, left };
                   setLocalMenuPos(position);
                   setOpenMenuForTaskId(task.id);
                 }
               }}
+              aria-label="Task actions"
               className="text-gray-300 hover:text-gray-500 transition-all opacity-0 group-hover:opacity-100 translate-y-0 group-hover:translate-y-0 p-1"
             >
               <MoreHorizontal className="w-4 h-4" />
@@ -175,20 +204,23 @@ const TaskRow: React.FC<TaskRowProps> = ({
       </tr>
 
       {openMenuForTaskId === task.id && localMenuPos && createPortal(
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className="fixed bg-white border border-gray-200 rounded-md shadow-xl w-44"
-          style={{ 
-            zIndex: 9998,
-            top: `${localMenuPos.top}px`,
-            left: `${localMenuPos.left}px`
-          }}
-        >
+        <div className="fixed inset-0 z-[11000]" onClick={() => { setOpenMenuForTaskId(null); setLocalMenuPos(null); }}>
+          {/* Click-capture overlay */}
+          <div className="absolute inset-0" />
+          <div
+            ref={menuRef}
+            onClick={(e) => e.stopPropagation()}
+            className="fixed bg-white border border-gray-200 rounded-md shadow-xl w-44 animate-fadeIn"
+            style={{ 
+              top: `${localMenuPos.top}px`,
+              left: `${localMenuPos.left}px`
+            }}
+          >
           <ul className="py-1">
             {!isChild && (
               <li>
                 <button
-                  onClick={() => { setOpenMenuForTaskId(null); onStartAddSubtask(task.id); }}
+                  onClick={() => { setOpenMenuForTaskId(null); onStartAddSubtask(task.id, menuBtnRef.current); }}
                   className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                 >
                   + Add subtask
@@ -227,7 +259,8 @@ const TaskRow: React.FC<TaskRowProps> = ({
               </button>
             </li>
           </ul>
-        </div>,
+          </div>
+  </div>,
         document.body
       )}
     </>
