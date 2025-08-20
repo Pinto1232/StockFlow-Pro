@@ -1,4 +1,23 @@
 {
+  // PowerShell Integrated Console stability settings
+  "powershell.powerShellDefaultVersion": "PowerShell 7-x64",
+  "powershell.enableProfileLoading": false, // Temporarily disable profile loading while diagnosing crashes
+  "powershell.developer.editorServicesLogLevel": "Diagnostic", // Capture detailed logs
+  "powershell.startAutomatically": true,
+
+  // Prefer Git Bash for generic terminals while keeping PowerShell extension on pwsh
+  "terminal.integrated.defaultProfile.windows": "Git Bash",
+
+  // Reduce file watcher overhead that can contribute to PSES timeouts
+  "files.watcherExclude": {
+    "**/bin": true,
+    "**/obj": true,
+    "**/node_modules": true,
+    "**/.git": true,
+    "**/packages": true
+  },
+
+  // YAML / linting & misc workspace settings
   "yaml.schemas": {},
   "yaml.schemaStore.enable": false,
   "yaml.validate": false,
