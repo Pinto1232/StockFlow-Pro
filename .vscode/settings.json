@@ -2,7 +2,7 @@
   // PowerShell Integrated Console stability settings
   "powershell.powerShellDefaultVersion": "PowerShell 7-x64",
   "powershell.enableProfileLoading": false, // Temporarily disable profile loading while diagnosing crashes
-  "powershell.developer.editorServicesLogLevel": "Diagnostic", // Capture detailed logs
+  "powershell.developer.editorServicesLogLevel": "Trace", // Capture detailed logs
   "powershell.startAutomatically": true,
 
   // Prefer Git Bash for generic terminals while keeping PowerShell extension on pwsh
