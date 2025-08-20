@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { LoadingState } from "../../components/ui";
 import { Link } from "react-router-dom";
 import { createPortal } from "react-dom";
 import {
@@ -599,6 +600,21 @@ const EmployeeDirectory: React.FC = () => {
             </nav>
 
             <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+                {isLoading && (
+                    <div className="mb-8">
+                        <LoadingState
+                            variant="skeleton"
+                            skeletonLines={6}
+                            message="Loading employee directory..."
+                            className="w-full bg-gray-100/70 rounded-2xl p-6 border border-gray-200"
+                        />
+                    </div>
+                )}
+                {isError && !isLoading && (
+                    <div className="mb-8 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-medium">
+                        Failed to load employees. Please refresh the page.
+                    </div>
+                )}
                 {/* Header */}
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">

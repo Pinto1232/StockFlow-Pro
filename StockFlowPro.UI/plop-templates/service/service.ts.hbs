@@ -1,0 +1,21 @@
+import { apiService } from './api';
+
+// Auto-generated service for {{camelCase name}}
+// Adjust types below or import from ../types
+export interface {{pascalCase name}}Dto { id: string; }
+export interface Create{{pascalCase name}}Dto { }
+export interface Update{{pascalCase name}}Dto { id: string; }
+
+{{#if withCrud}}
+export const {{camelCase name}}Service = {
+  list: async (): Promise<{{pascalCase name}}Dto[]> => apiService.get<{{pascalCase name}}Dto[]>('/{{kebabCase name}}'),
+  get: async (id: string): Promise<{{pascalCase name}}Dto> => apiService.get<{{pascalCase name}}Dto>(`/{{kebabCase name}}/${id}`),
+  create: async (payload: Create{{pascalCase name}}Dto): Promise<{{pascalCase name}}Dto> => apiService.post<{{pascalCase name}}Dto>('/{{kebabCase name}}', payload),
+  update: async (payload: Update{{pascalCase name}}Dto): Promise<{{pascalCase name}}Dto> => apiService.put<{{pascalCase name}}Dto>(`/{{kebabCase name}}/${payload.id}`, payload),
+  remove: async (id: string): Promise<void> => apiService.delete(`/{{kebabCase name}}/${id}`)
+};
+{{else}}
+export const {{camelCase name}}Service = {
+  // Add custom methods here
+};
+{{/if}}

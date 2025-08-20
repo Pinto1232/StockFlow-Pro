@@ -10,8 +10,6 @@ import {
     ChevronDown,
     Home,
     ArrowLeft,
-    Loader2,
-    XCircle,
 } from "lucide-react";
 import { formatCurrency } from "../../utils/currency";
 import { useInvoices, useDeleteInvoice, useInvoice, useDownloadInvoice, useDownloadAllInvoices } from "../../hooks/useInvoices";
@@ -20,11 +18,12 @@ import InvoiceForm from "../../components/Invoices/InvoiceForm";
 import InvoiceDetail from "../../components/Invoices/InvoiceDetail";
 import Snackbar from "../../components/ui/Snackbar";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
+import { LoadingState, ErrorState } from '../../components/ui';
 import type { PaginationParams, InvoiceDto } from "../../types/index";
 import type { InvoiceFilters } from "../../services/invoiceService";
 import "./Invoices.css";
 
-const Invoices: React.FC = () => {
+function Invoices(): React.ReactElement {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
     const [startDate, setStartDate] = useState("");
@@ -441,42 +440,14 @@ const Invoices: React.FC = () => {
                     <div className="p-0">
                         <div className="rounded-2xl overflow-hidden">
                             {isLoading ? (
-                                <div className="flex flex-col items-center justify-center py-12">
-                                    <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-4" />
-                                    <p className="text-gray-500 font-medium">
-                                        Loading invoices...
-                                    </p>
-                                </div>
+                                <LoadingState message="Loading invoices..." />
                             ) : error ? (
-                                <div className="flex flex-col items-center justify-center py-12">
-                                    <XCircle className="h-12 w-12 text-red-400 mb-4" />
-                                    <h5 className="text-lg font-semibold text-gray-600 mb-2">
-                                        Error loading invoices
-                                    </h5>
-                                    <p className="text-gray-500 text-center mb-4">
-                                        {error.message || "Failed to load invoices from the server"}
-                                    </p>
-                                    {error.message?.includes('401') || error.message?.includes('Unauthorized') ? (
-                                        <div className="text-center">
-                                            <p className="text-sm text-gray-600 mb-3">
-                                                You may need to log in again to access this data.
-                                            </p>
-                                            <Link
-                                                to="/login"
-                                                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
-                                            >
-                                                Go to Login
-                                            </Link>
-                                        </div>
-                                    ) : (
-                                        <button
-                                            onClick={() => window.location.reload()}
-                                            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"
-                                        >
-                                            Try Again
-                                        </button>
-                                    )}
-                                </div>
+                                <ErrorState
+                                  error={error}
+                                  title="Error loading invoices"
+                                  onRetry={() => window.location.reload()}
+                                  message={error.message || 'Failed to load invoices from the server'}
+                                />
                             ) : invoices.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12">
                                     <FileText className="h-12 w-12 text-gray-300 mb-4" />

@@ -18,7 +18,14 @@ const USE_DYNAMIC_PERMISSIONS = import.meta.env.VITE_USE_DYNAMIC_PERMISSIONS ===
  * Supports both static (hardcoded) and dynamic (backend-driven) permissions
  */
 export const usePermissions = () => {
-    const { data: currentUser } = useCurrentUser();
+    // Access full query to leverage loading/error states for initial page load.
+    const currentUserQuery = useCurrentUser();
+    interface CurrentUserQueryShape<T> {
+        data: T | undefined;
+        isLoading: boolean;
+        error: unknown;
+    }
+    const { data: currentUser, isLoading: currentUserLoading, error: currentUserError } = currentUserQuery as unknown as CurrentUserQueryShape<typeof currentUser>;
     const dynamicPermissions = useDynamicPermissions();
 
     // Use dynamic permissions if enabled, otherwise fall back to static
@@ -108,8 +115,9 @@ export const usePermissions = () => {
         isUser,
         canManageUsers,
         canAccessAdminPanel,
-        loading: false,
-        error: null,
+        // Expose real loading/error so PermissionRoute can defer redirect until resolved
+        loading: !!currentUserLoading,
+        error: currentUserError ?? null,
         refreshPermissions: () => Promise.resolve(),
     };
 };

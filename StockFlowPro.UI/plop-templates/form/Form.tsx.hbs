@@ -1,0 +1,33 @@
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { {{camelCase name}}Schema, type {{pascalCase name}}FormValues } from './schema';
+
+export interface {{pascalCase name}}FormProps {
+  defaultValues?: Partial<{{pascalCase name}}FormValues>;
+  onSubmit: (values: {{pascalCase name}}FormValues) => void | Promise<void>;
+}
+
+export const {{pascalCase name}}Form: React.FC<{{pascalCase name}}FormProps> = ({ defaultValues, onSubmit }) => {
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<{{pascalCase name}}FormValues>({
+    resolver: zodResolver({{camelCase name}}Schema),
+    defaultValues: defaultValues as any
+  });
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" data-testid="{{kebabCase name}}-form">
+      {/* Example field */}
+      <div>
+        <label className="block text-sm font-medium mb-1">Name</label>
+        <input
+          className="input"
+          {...register('name')}
+          placeholder="Enter name"
+        />
+        {errors.name && <p className="text-red-600 text-sm">{errors.name.message}</p>}
+      </div>
+
+      <button type="submit" disabled={isSubmitting} className="btn btn-primary">Submit</button>
+    </form>
+  );
+};

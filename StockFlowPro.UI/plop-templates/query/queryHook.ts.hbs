@@ -1,0 +1,54 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { {{camelCase name}}Service } from '../services/{{camelCase name}}Service';
+
+// Query Keys
+export const {{camelCase name}}Keys = {
+  all: ['{{camelCase name}}'] as const,
+  lists: () => [...{{camelCase name}}Keys.all, 'list'] as const,
+  list: (filters?: unknown) => [...{{camelCase name}}Keys.lists(), { filters }] as const,
+  detail: (id: string) => [...{{camelCase name}}Keys.all, 'detail', id] as const
+};
+
+export const use{{pascalCase name}}List = (filters?: unknown) => {
+  return useQuery({
+    queryKey: {{camelCase name}}Keys.list(filters),
+    queryFn: () => {{camelCase name}}Service.list(),
+    staleTime: 60_000
+  });
+};
+
+export const use{{pascalCase name}} = (id: string) => {
+  return useQuery({
+    queryKey: {{camelCase name}}Keys.detail(id),
+    queryFn: () => {{camelCase name}}Service.get(id),
+    enabled: !!id
+  });
+};
+
+{{#if withMutations}}
+export const useCreate{{pascalCase name}} = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: {{camelCase name}}Service.create,
+    onSuccess: () => qc.invalidateQueries({ queryKey: {{camelCase name}}Keys.lists() })
+  });
+};
+
+export const useUpdate{{pascalCase name}} = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: {{camelCase name}}Service.update,
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: {{camelCase name}}Keys.detail(data.id) });
+    }
+  });
+};
+
+export const useDelete{{pascalCase name}} = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: {{camelCase name}}Service.remove,
+    onSuccess: () => qc.invalidateQueries({ queryKey: {{camelCase name}}Keys.lists() })
+  });
+};
+{{/if}}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
     Home,
@@ -12,8 +12,16 @@ import {
     Plus,
 } from "lucide-react";
 import Projects from "../../components/projects/Projects";
+import { LoadingState } from "../../components/ui";
 
 const EmployeePerformance: React.FC = () => {
+    // Temporary local loading simulation so LoadingState is visible; replace with real query state
+    const [isLoading, setIsLoading] = useState(true);
+    useEffect(() => {
+        const timer = setTimeout(() => setIsLoading(false), 1200); // simulate fetch
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
         <div className="min-h-screen bg-gray-50 w-full">
             {/* Navigation Breadcrumb */}
@@ -65,6 +73,16 @@ const EmployeePerformance: React.FC = () => {
                 </div>
 
                 {/* Performance Overview */}
+                {isLoading && (
+                    <div className="mb-8">
+                        <LoadingState
+                            variant="skeleton"
+                            skeletonLines={4}
+                            message="Loading performance metrics..."
+                            className="w-full bg-gray-100/70 rounded-2xl p-6 border border-gray-200"
+                        />
+                    </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
                         <div className="flex items-center justify-between mb-4">

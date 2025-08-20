@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import {
@@ -38,6 +38,7 @@ import { QuickAddRoleModal, CreateRoleModal } from "./modals";
 // Import custom hooks
 import { useDashboardData } from "./hooks/useDashboardData";
 import { useSnackbar } from "./hooks/useSnackbar";
+import { usePersistentView } from '../../hooks/usePersistentView';
 
 const Dashboard: React.FC = () => {
     const navigate = useNavigate();
@@ -51,6 +52,30 @@ const Dashboard: React.FC = () => {
     // Custom hooks for data and UI state
     const { userStats, refreshUserStats } = useDashboardData();
     const { snackbar, showSnackbar, hideSnackbar } = useSnackbar();
+
+    // Persist which dashboard section user was viewing (by last hovered/activated card group)
+    const [activeSection, setActiveSection] = usePersistentView('dashboardSection', 'top');
+    const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+
+    // On mount, scroll to persisted section (after first paint)
+    useEffect(() => {
+        if (activeSection && activeSection !== 'top') {
+            requestAnimationFrame(() => {
+                const el = sectionRefs.current[activeSection];
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Brief highlight effect
+                    el.classList.add('ring-2','ring-blue-400','ring-offset-2');
+                    setTimeout(() => el.classList.remove('ring-2','ring-blue-400','ring-offset-2'), 1600);
+                }
+            });
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const registerSection = (key: string) => (el: HTMLElement | null) => {
+        sectionRefs.current[key] = el;
+    };
 
     // Entitlements and plan metadata
     const { data: entitlements } = useFeatures();
@@ -173,6 +198,7 @@ const Dashboard: React.FC = () => {
                     </h3>
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                         {/* Admin Panel Card */}
+                        <div ref={registerSection('admin')} onMouseEnter={() => setActiveSection('admin')}>
                         <DashboardCard
                             title="Admin Panel"
                             description="Access system settings, advanced configuration, and administrative tools for managing your StockFlow Pro instance."
@@ -197,8 +223,10 @@ const Dashboard: React.FC = () => {
                                 variant: "secondary",
                             }}
                         />
+                        </div>
 
                         {/* Products Management Card */}
+                        <div ref={registerSection('inventory')} onMouseEnter={() => setActiveSection('inventory')}>
                         <DashboardCard
                             title="Product Management"
                             description="Manage your product inventory, track stock levels, and monitor product performance across your business."
@@ -221,8 +249,10 @@ const Dashboard: React.FC = () => {
                                 variant: "secondary",
                             }}
                         />
+                        </div>
 
                         {/* Users Management Card */}
+                        <div ref={registerSection('users')} onMouseEnter={() => setActiveSection('users')}>
                         <DashboardCard
                             title="User Management"
                             description="Monitor user activity, manage permissions, and track user engagement across your platform."
@@ -252,6 +282,7 @@ const Dashboard: React.FC = () => {
                                 variant: "secondary",
                             }}
                         />
+                        </div>
 
                         {userLimitReached && (
                             <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-amber-800">
@@ -260,6 +291,7 @@ const Dashboard: React.FC = () => {
                         )}
 
                         {/* Invoices & Revenue Card */}
+                        <div ref={registerSection('finance')} onMouseEnter={() => setActiveSection('finance')}>
                         <DashboardCard
                             title="Invoices & Revenue"
                             description="Track invoices, monitor revenue streams, and analyze financial performance metrics."
@@ -282,8 +314,10 @@ const Dashboard: React.FC = () => {
                                 variant: "secondary",
                             }}
                         />
+                        </div>
 
                         {/* Advanced Analytics (Feature-gated) */}
+                        <div ref={registerSection('reports')} onMouseEnter={() => setActiveSection('reports')}>
                         <FeatureGate
                             feature="AdvancedReporting"
                             fallback={
@@ -318,8 +352,10 @@ const Dashboard: React.FC = () => {
                                 }}
                             />
                         </FeatureGate>
+                        </div>
 
                         {/* API & Integrations (Feature-gated) */}
+                        <div ref={registerSection('developer')} onMouseEnter={() => setActiveSection('developer')}>
                         <FeatureGate
                             feature="ApiAccess"
                             fallback={
@@ -354,8 +390,10 @@ const Dashboard: React.FC = () => {
                                 }}
                             />
                         </FeatureGate>
+                        </div>
 
                         {/* Low Stock Alerts Card */}
+                        <div ref={registerSection('alerts')} onMouseEnter={() => setActiveSection('alerts')}>
                         <LowStockAlertsCard
                             lowStockProducts={lowStockProducts}
                             isLoading={isLoadingLowStock}
@@ -363,13 +401,16 @@ const Dashboard: React.FC = () => {
                             onViewAll={() => navigate("/products?filter=lowStock")}
                             onManage={() => navigate("/products")}
                         />
+                        </div>
 
                         {/* Recent Activity Card */}
+                        <div ref={registerSection('activity')} onMouseEnter={() => setActiveSection('activity')}>
                         <RecentActivityCard
                             activities={recentActivity}
                             onViewAll={() => {/* TODO: Implement view all activity */}}
                             onRefresh={() => {/* TODO: Implement refresh activity */}}
                         />
+                        </div>
                     </div>
                 </div>
             </div>

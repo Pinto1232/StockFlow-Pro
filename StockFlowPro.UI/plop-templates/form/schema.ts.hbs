@@ -1,0 +1,7 @@
+import { z } from 'zod';
+
+export const {{camelCase name}}Schema = z.object({
+  name: z.string().min(2, 'Name too short')
+});
+
+export type {{pascalCase name}}FormValues = typeof {{camelCase name}}Schema._type;

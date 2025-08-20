@@ -1,0 +1,10 @@
+import { useCallback } from 'react';
+import type { {{pascalCase name}}FormValues } from './schema';
+
+export const useSubmit{{pascalCase name}}Form = (onComplete?: () => void) => {
+  return useCallback(async (values: {{pascalCase name}}FormValues) => {
+    // TODO: replace with service/mutation call
+    console.log('Submitting {{camelCase name}} form', values);
+    onComplete?.();
+  }, [onComplete]);
+};

@@ -35,6 +35,9 @@ obj/
 *.bak
 cookies.txt
 
+# Do not commit AI assistant guidance file
+.github/copilot-instructions.md
+
 # Environment files (hold secrets locally)
 .env
 .env.*
