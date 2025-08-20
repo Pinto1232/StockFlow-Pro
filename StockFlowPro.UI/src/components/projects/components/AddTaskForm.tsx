@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
+import { X, ChevronDown } from 'lucide-react';
 import { EmployeeData, NewTaskForm } from '../types/task';
 import { generateInitials, getRandomAssigneeColor } from '../utils/assignees';
+
 
 export const AddTaskForm = ({ 
   newTask, 
@@ -25,28 +26,20 @@ export const AddTaskForm = ({
   employees: EmployeeData[] | null;
   isEditing?: boolean;
 }) => {
-  const handleAssigneeToggle = (employee: EmployeeData) => {
-    const employeeInitials = generateInitials(employee.fullName);
-    const isAlreadyAssigned = newTask.assignee.some(
-      assignee => String(assignee.id) === String(employee.id) || assignee.initials === employeeInitials
-    );
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-    if (isAlreadyAssigned) {
-      setNewTask(prev => ({
-        ...prev,
-        assignee: prev.assignee.filter(assignee => String(assignee.id) !== String(employee.id))
-      }));
-    } else {
-      setNewTask(prev => ({
-        ...prev,
-        assignee: [...prev.assignee, {
-          id: employee.id,
-          initials: employeeInitials,
-          color: getRandomAssigneeColor()
-        }]
-      }));
-    }
-  };
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
 
   return createPortal(
   <div 
@@ -89,9 +82,7 @@ export const AddTaskForm = ({
       
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Task Name *
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Task Name</label>
           <input
             type="text"
             value={newTask.task}
@@ -164,73 +155,103 @@ export const AddTaskForm = ({
         </div>
         
         
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Assignee
-          </label>
-          {employees && employees.length > 0 ? (
-            <div className="space-y-2">
-              {newTask.assignee.length > 0 && (
-                <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-md">
-                  {newTask.assignee.map((assignee, index) => (
-                    <div
-                      key={index}
-                      className={`flex items-center gap-1 px-2 py-1 rounded-full text-white text-xs ${assignee.color}`}
-                    >
-                      <span>{assignee.initials}</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setNewTask(prev => ({
-                            ...prev,
-                            assignee: prev.assignee.filter((_, i) => i !== index)
-                          }));
-                        }}
-                        disabled={isAddingTask}
-                        className="ml-1 text-white hover:text-gray-200 disabled:opacity-50"
+        {/* Assignee selection is only enabled for editing or subtask creation, not for main task creation */}
+        {isEditing ? (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Assignee
+            </label>
+            {employees && employees.length > 0 ? (
+              <div className="space-y-2">
+                {newTask.assignee.length > 0 && (
+                  <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-md">
+                    {newTask.assignee.map((assignee, index) => (
+                      <div
+                        key={index}
+                        className={`flex items-center gap-1 px-2 py-1 rounded-full text-white text-xs ${assignee.color}`}
                       >
-                        ×
-                      </button>
+                        <span>{assignee.initials}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNewTask(prev => ({
+                              ...prev,
+                              assignee: prev.assignee.filter((_, i) => i !== index)
+                            }));
+                          }}
+                          disabled={isAddingTask}
+                          className="ml-1 text-white hover:text-gray-200 disabled:opacity-50"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    disabled={isAddingTask}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white shadow-sm hover:border-blue-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ease-in-out disabled:bg-gray-100 disabled:cursor-not-allowed text-left flex items-center justify-between"
+                  >
+                    <span className="text-gray-500">Assign employee...</span>
+                    <ChevronDown 
+                      className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${
+                        isDropdownOpen ? 'rotate-180' : ''
+                      }`} 
+                    />
+                  </button>
+                  
+                  <div
+                    className={`absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 transition-all duration-200 ease-in-out origin-top ${
+                      isDropdownOpen 
+                        ? 'opacity-100 scale-y-100 translate-y-0' 
+                        : 'opacity-0 scale-y-95 -translate-y-2 pointer-events-none'
+                    }`}
+                  >
+                    <div className="max-h-48 overflow-y-auto">
+                      {employees.map(emp => (
+                        <button
+                          key={String(emp.id)}
+                          type="button"
+                          onClick={() => {
+                            const employeeInitials = generateInitials(emp.fullName);
+                            if (!newTask.assignee.some(a => String(a.id) === String(emp.id))) {
+                              setNewTask(prev => ({
+                                ...prev,
+                                assignee: [...prev.assignee, {
+                                  id: emp.id,
+                                  initials: employeeInitials,
+                                  color: getRandomAssigneeColor()
+                                }]
+                              }));
+                            }
+                            setIsDropdownOpen(false);
+                          }}
+                          disabled={isAddingTask || newTask.assignee.some(a => String(a.id) === String(emp.id))}
+                          className="w-full px-4 py-3 text-left hover:bg-blue-50 focus:bg-blue-50 focus:outline-none transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed first:rounded-t-lg last:rounded-b-lg"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-900">{emp.fullName}</span>
+                            <span className="text-sm text-gray-500">({emp.departmentName})</span>
+                          </div>
+                        </button>
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
-              )}
-              
-              <div className="relative">
-                <select
-                  value=""
-                  onChange={(e) => {
-                    const employee = employees.find(emp => String(emp.id) === e.target.value);
-                    if (employee) {
-                      handleAssigneeToggle(employee);
-                    }
-                  }}
-                  disabled={isAddingTask}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                >
-                  <option value="">Select an employee to assign...</option>
-                  {employees
-                    .filter(emp => emp.isActive && !newTask.assignee.some(
-                      assignee => String(assignee.id) === String(emp.id) || assignee.initials === generateInitials(emp.fullName)
-                    ))
-                    .map(employee => (
-                      <option key={employee.id} value={String(employee.id)}>
-                        {employee.fullName} - {employee.jobTitle || 'No Title'}
-                      </option>
-                    ))
-                  }
-                </select>
               </div>
-            </div>
-          ) : (
-            <div className="text-sm text-gray-500 bg-gray-50 px-3 py-2 border border-gray-300 rounded-md">
-              No employees available for assignment
-            </div>
-          )}
-          <p className="text-xs text-gray-400 mt-1">
-            Select one or more employees to assign to this task
-          </p>
-        </div>
+            ) : (
+              <div className="text-sm text-gray-500 bg-gray-50 px-3 py-2 border border-gray-300 rounded-md">
+                No employees available for assignment
+              </div>
+            )}
+            <p className="text-xs text-gray-400 mt-1">
+              Select one or more employees to assign to this task
+            </p>
+          </div>
+        ) : null}
       </div>
       
       <div className="flex items-center gap-3 mt-6">
