@@ -1,6 +1,6 @@
 import React{{#if withLoading}}, { useState, useEffect }{{/if}} from 'react';
 {{#if withStyle}}
-import styles from './{{pascalCase name}}.module.css';
+import styles from './styles.module.css';
 {{/if}}
 {{#if withLoading}}
 {{#if withError}}
@@ -14,12 +14,8 @@ import { ErrorState } from 'src/components/ui';
 {{/if}}
 {{/if}}
 
-export interface {{pascalCase name}}Props {
-  children?: React.ReactNode;
-  loading?: boolean;{{#if withError}}
-  error?: unknown;
-  onRetry?: () => void;{{/if}}
-}
+export * from './types';
+import type { {{pascalCase name}}Props } from './types';
 
 export const {{pascalCase name}}: React.FC<{{pascalCase name}}Props> = ({ children, loading{{#if withError}}, error, onRetry{{/if}} }) => {
   {{#if withError}}

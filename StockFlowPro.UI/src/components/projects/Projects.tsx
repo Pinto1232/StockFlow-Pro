@@ -13,9 +13,14 @@ import ProjectsHeader from './components/ProjectsHeader';
 import ProjectsTabs from './components/ProjectsTabs';
 import InlineSubtaskForm from './components/InlineSubtaskForm';
 import SubtaskPopoverForm from './components/SubtaskPopoverForm';
+import LoadingState from '../ui/LoadingState';
+import { useToast } from '../../hooks/useToast';
+
+interface ProjectsProps { externalEmployees?: unknown[] }
+import styles from './styles.module.css';
 
 
-const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
+export const Projects: React.FC<ProjectsProps> = ({ externalEmployees }) => {
   const [activeView, setActiveView] = useState('Spreadsheet');
   const [expandedTasks, setExpandedTasks] = useState({ 1: true, 5: true });
   const [showAddTaskForm, setShowAddTaskForm] = useState(false);
@@ -33,6 +38,7 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
 
   // Fetch employee data from backend API
   const { data: employees, isLoading, error, isError } = useEmployees();
+  const { toast } = useToast();
 
   // Log any employees passed in from a parent component
   useEffect(() => {
@@ -346,7 +352,26 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
     setAddTaskError(null);
     setIsAddingTask(true);
 
-    try {
+    let updatedSuccessfully = false;
+  const wasEdit = editingTaskId !== null;
+    let originalAssigneeIds: string[] = [];
+    if (wasEdit && editingTaskId !== null) {
+      // Capture original assignees (for parent or child)
+      const findInTree = () => {
+        const top = (tasksFromApi || []).find(t => t.id === editingTaskId);
+        if (top) return top;
+        for (const p of (tasksFromApi || [])) {
+          const c = p.children?.find(ch => ch.id === editingTaskId);
+          if (c) return c;
+        }
+        return undefined;
+      };
+      const originalTask = findInTree();
+      if (originalTask?.assignee) {
+        originalAssigneeIds = originalTask.assignee.map(a => String(a.id));
+      }
+    }
+  try {
       if (editingTaskId !== null) {
         // Editing existing task
         const original = (tasksFromApi || []).find(t => t.id === editingTaskId);
@@ -383,6 +408,7 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
               });
             });
           }
+          updatedSuccessfully = true;
         } catch (updateErr) {
           console.error('❌ Failed to update task via API, applying local update fallback:', updateErr);
           setTasksFromApi(prev => {
@@ -401,6 +427,7 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
           setNewTask({ task: '', description: '', priority: 'Normal', progress: 0, dueDate: '', assignee: [] });
           setShowAddTaskForm(false);
           setEditingTaskId(null);
+          updatedSuccessfully = true; // treat fallback as success for closing
         }
       } else {
         // Prepare task data for API (create)
@@ -451,6 +478,31 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
       }
     } finally {
       setIsAddingTask(false);
+      if (updatedSuccessfully) {
+        // Provide toast feedback
+        if (wasEdit) {
+          const newIds = (newTask.assignee || []).map(a => String(a.id));
+            const origSet = new Set(originalAssigneeIds);
+            const newSet = new Set(newIds);
+            let changed = false;
+            if (origSet.size !== newSet.size) changed = true; else for (const id of newSet) { if (!origSet.has(id)) { changed = true; break; } }
+            if (changed && newSet.size > 0) {
+              toast.success(`Task updated. Assigned to ${newSet.size} ${newSet.size === 1 ? 'person' : 'people'}.`);
+            } else if (changed && newSet.size === 0) {
+              toast.warning('Task updated. All assignees removed.');
+            } else {
+              toast.info('Task updated.');
+            }
+        } else {
+          toast.success('Task created.');
+        }
+        // Reset and close modal after successful update/create
+        setNewTask({ task: '', description: '', priority: 'Normal', progress: 0, dueDate: '', assignee: [] });
+        setShowAddTaskForm(false);
+        setEditingTaskId(null);
+      } else if (addTaskError) {
+        toast.error(addTaskError);
+      }
     }
   };
 
@@ -958,7 +1010,7 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
   // Portal menu moved inside TaskRow dropdown
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div className={`${styles.root} bg-white rounded-lg shadow-sm border border-gray-200`}>
       {/* Loading indicator for API call */}
       {isLoading && (
         <div className="px-6 py-2 bg-blue-50 border-b border-blue-200">
@@ -1052,7 +1104,15 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
-            {tasks.length > 0 ? (
+            {tasksLoading ? (
+              <tr>
+                <td colSpan={8} className="p-0">
+                  <div className="flex items-center justify-center w-full h-64 min-h-[16rem]">
+                    <LoadingState variant="spinner" size="lg" message="Loading tasks..." />
+                  </div>
+                </td>
+              </tr>
+            ) : tasks.length > 0 ? (
               tasks.map((task) => (
                 <React.Fragment key={task.id}>
                   <TaskRow
@@ -1172,5 +1232,3 @@ const Projects = ({ externalEmployees }: { externalEmployees?: unknown[] }) => {
     </div>
   );
 };
-
-export default Projects;

@@ -15,3 +15,7 @@ export { useToast } from '../../hooks/useToast';
 export { default as LoadingState } from './LoadingState';
 export { default as ErrorState } from './ErrorState';
 export { default as DataBoundary } from './DataBoundary';
+
+
+export { CountUp } from './CountUp/CountUp';
+

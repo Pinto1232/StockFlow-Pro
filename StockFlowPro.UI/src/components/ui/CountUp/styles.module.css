@@ -1,0 +1,6 @@
+.root {
+  display: inline-block;
+}
+
+/* Reserved for a finished state style if needed later */
+.finished {}
