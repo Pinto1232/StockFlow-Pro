@@ -9,6 +9,9 @@ import App from "./App.tsx";
 import signalr from "./services/signalrService";
 import { ToastProvider } from "./components/ui/ToastProvider";
 
+// Import environment configuration to trigger startup logging
+import "./config/environment";
+
 // Ensure SignalR starts on app boot
 signalr.start().catch((e) => console.warn("SignalR start failed:", e));
 

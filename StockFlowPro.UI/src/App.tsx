@@ -16,6 +16,7 @@ import {
     AuthProvider,
 } from "./components/Auth";
 import { Permissions } from "./utils/permissions.ts";
+import { EnvironmentInfo } from "./components/Debug/EnvironmentInfo";
 
 // Pages
 import Login from "./pages/Auth/Login.tsx";
@@ -64,6 +65,9 @@ function App() {
             <AuthProvider>
                 <Router>
                     <div className="min-h-screen bg-gray-50">
+                        {/* Environment indicator - only shows in development/staging */}
+                        <EnvironmentInfo className="fixed top-2 left-2 z-50" />
+                        
                         <Routes>
                             {/* Public routes */}
                             <Route path="/" element={<Landing />} />

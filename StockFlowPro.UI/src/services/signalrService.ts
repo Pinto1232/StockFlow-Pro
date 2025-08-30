@@ -1,5 +1,6 @@
 import * as signalR from '@microsoft/signalr';
 import notificationSoundService from '../utils/notificationSound';
+import { config, debugLog, isDevelopment } from '../config/environment';
 
 export const ConnectionState = {
     Disconnected: 'Disconnected',
@@ -54,16 +55,19 @@ class SignalRServiceImpl implements SignalRService {
     }
 
     private initializeConnection(): void {
-        // Get the base URL from environment or default to localhost
+        // Get the base URL from environment configuration
         // Remove /api suffix if present since SignalR hub is at root level
-        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5131/api';
-        const baseUrl = apiBaseUrl.replace('/api', '');
+        const baseUrl = config.API_BASE_URL.replace('/api', '');
         // SignalR uses HTTP/HTTPS for negotiation, not WebSocket URLs directly
         const hubUrl = `${baseUrl}/stockflowhub`;
 
-        console.log('Initializing SignalR connection to:', hubUrl);
-        console.log('Base URL:', baseUrl);
-        console.log('API Base URL:', apiBaseUrl);
+        debugLog('Initializing SignalR connection', {
+            hubUrl,
+            baseUrl,
+            apiBaseUrl: config.API_BASE_URL,
+            wsUrl: config.WS_URL,
+            environment: config.APP_ENV,
+        });
 
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl(hubUrl, {
@@ -84,7 +88,7 @@ class SignalRServiceImpl implements SignalRService {
                     return delay + jitter;
                 }
             })
-            .configureLogging(signalR.LogLevel.Debug) // Increase logging level for debugging
+            .configureLogging(isDevelopment ? signalR.LogLevel.Debug : signalR.LogLevel.Warning)
             .build();
 
         this.setupEventHandlers();

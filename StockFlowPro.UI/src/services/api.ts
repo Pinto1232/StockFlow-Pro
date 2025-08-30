@@ -1,25 +1,42 @@
 import axios from "axios";
 import type { AxiosInstance, AxiosResponse } from "axios";
 import type { ApiResponse, PaginatedResponse } from "../types/index";
+import { config, apiLog, debugLog, isDevelopment } from "../config/environment";
 
 // Create axios instance with base configuration
 const api: AxiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5131/api",
-    timeout: 10000,
+    baseURL: config.API_BASE_URL,
+    timeout: config.API_TIMEOUT,
     headers: {
         "Content-Type": "application/json",
     },
     withCredentials: true, // Include cookies for authentication
 });
 
+debugLog("API instance created", {
+    baseURL: config.API_BASE_URL,
+    timeout: config.API_TIMEOUT,
+    environment: config.APP_ENV,
+});
+
 // Request interceptor (cookies are automatically included with withCredentials: true)
 api.interceptors.request.use(
-    (config) => {
+    (requestConfig) => {
+        // Log API requests if enabled
+        if (config.ENABLE_API_LOGGING) {
+            apiLog(`📤 ${requestConfig.method?.toUpperCase()} ${requestConfig.url}`, {
+                baseURL: requestConfig.baseURL,
+                params: requestConfig.params,
+                data: requestConfig.data,
+            });
+        }
+        
         // No need to add Authorization header since backend uses cookie auth
         // Cookies are automatically included with withCredentials: true
-        return config;
+        return requestConfig;
     },
     (error) => {
+        apiLog("❌ Request interceptor error:", error);
         return Promise.reject(error);
     },
 );
@@ -27,9 +44,29 @@ api.interceptors.request.use(
 // Response interceptor to handle common errors
 api.interceptors.response.use(
     (response: AxiosResponse) => {
+        // Log successful API responses if enabled
+        if (config.ENABLE_API_LOGGING) {
+            apiLog(`📥 ${response.status} ${response.config.method?.toUpperCase()} ${response.config.url}`, {
+                status: response.status,
+                statusText: response.statusText,
+                data: isDevelopment ? response.data : '[Response data hidden in production]',
+            });
+        }
         return response;
     },
     (error) => {
+        // Log API errors
+        if (config.ENABLE_API_LOGGING) {
+            apiLog(`❌ API Error: ${error.response?.status || 'Network Error'}`, {
+                url: error.config?.url,
+                method: error.config?.method?.toUpperCase(),
+                status: error.response?.status,
+                statusText: error.response?.statusText,
+                message: error.message,
+                data: isDevelopment ? error.response?.data : '[Error data hidden in production]',
+            });
+        }
+
         if (error.response?.status === 401) {
             // Clear any client-side auth remnants
             localStorage.removeItem("authToken");
@@ -46,7 +83,7 @@ api.interceptors.response.use(
                 path.startsWith("/register");
 
             if (!isPublicRoute) {
-                console.warn("Authentication failed on a protected route, redirecting to login");
+                debugLog("Authentication failed on a protected route, redirecting to login");
                 window.location.href = "/login";
             }
         }

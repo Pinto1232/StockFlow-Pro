@@ -23,8 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment files — do not commit any .env files or variants
-.env
-.env.*
-*.env
-**/.env
+# Environment files
+# Allow environment template files but protect local overrides
+.env.local
+.env.*.local
+
+# Temporary environment files
+.env.temp
+.env.backup
