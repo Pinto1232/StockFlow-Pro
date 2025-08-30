@@ -113,7 +113,9 @@ public class NotificationPreference : IEntity
     public bool IsInQuietHours()
     {
         if (!RespectQuietHours || !QuietHoursStart.HasValue || !QuietHoursEnd.HasValue)
+        {
             return false;
+        }
 
         var now = DateTime.Now.TimeOfDay;
         var start = QuietHoursStart.Value;
@@ -131,20 +133,30 @@ public class NotificationPreference : IEntity
     public bool ShouldReceiveNotification(NotificationPriority priority, NotificationChannel channel)
     {
         if (!IsEnabled)
+        {
             return false;
+        }
 
         if (priority < MinimumPriority)
+        {
             return false;
+        }
 
         if (!HasChannel(channel))
+        {
             return false;
+        }
 
         // Emergency notifications bypass quiet hours
         if (priority == NotificationPriority.Emergency)
+        {
             return true;
+        }
 
         if (IsInQuietHours() && priority < NotificationPriority.Critical)
+        {
             return false;
+        }
 
         return true;
     }

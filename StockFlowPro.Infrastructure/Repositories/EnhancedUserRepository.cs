@@ -101,7 +101,9 @@ public class EnhancedUserRepository : IUserRepository
     private static string NormalizeEmail(string email)
     {
         if (string.IsNullOrWhiteSpace(email))
+        {
             return string.Empty;
+        }
             
         return email.Trim().ToLowerInvariant();
     }

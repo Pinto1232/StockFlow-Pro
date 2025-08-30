@@ -19,7 +19,9 @@ public static class EmailNormalizer
     public static string Normalize(string email)
     {
         if (string.IsNullOrWhiteSpace(email))
+        {
             return string.Empty;
+        }
             
         return email.Trim().ToLowerInvariant();
     }
@@ -32,7 +34,9 @@ public static class EmailNormalizer
     public static bool IsValidFormat(string email)
     {
         if (string.IsNullOrWhiteSpace(email))
+        {
             return false;
+        }
             
         return EmailRegex.IsMatch(email);
     }
@@ -46,11 +50,15 @@ public static class EmailNormalizer
     public static bool IsBlockedDomain(string email, IEnumerable<string> blockedDomains)
     {
         if (string.IsNullOrWhiteSpace(email) || blockedDomains == null)
+        {
             return false;
+        }
             
         var domain = ExtractDomain(email);
         if (string.IsNullOrEmpty(domain))
+        {
             return false;
+        }
             
         return blockedDomains.Any(blocked => 
             string.Equals(domain, blocked, StringComparison.OrdinalIgnoreCase));
@@ -64,11 +72,15 @@ public static class EmailNormalizer
     public static string ExtractDomain(string email)
     {
         if (string.IsNullOrWhiteSpace(email))
+        {
             return string.Empty;
+        }
             
         var atIndex = email.LastIndexOf('@');
         if (atIndex < 0 || atIndex == email.Length - 1)
+        {
             return string.Empty;
+        }
             
         return email.Substring(atIndex + 1).ToLowerInvariant();
     }

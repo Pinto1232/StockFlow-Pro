@@ -131,12 +131,18 @@ public class GetTrendAnalysisHandler : IRequestHandler<GetTrendAnalysisQuery, Tr
 
     private decimal CalculateGrowthRate(List<TrendDataPointDto> trendData)
     {
-        if (trendData.Count < 2) return 0;
+        if (trendData.Count < 2)
+        {
+            return 0;
+        }
 
         var firstValue = trendData.First().Value;
         var lastValue = trendData.Last().Value;
 
-        if (firstValue == 0) return lastValue > 0 ? 1 : 0;
+        if (firstValue == 0)
+        {
+            return lastValue > 0 ? 1 : 0;
+        }
 
         return (lastValue - firstValue) / firstValue;
     }

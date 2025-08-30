@@ -32,11 +32,14 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseAppHost>false</UseAppHost>
+    <WarningsAsErrors />
+    <WarningsNotAsErrors>IDE0011</WarningsNotAsErrors>
   </PropertyGroup>
 
 </Project>

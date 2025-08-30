@@ -92,7 +92,10 @@ public class GetKpiMetricsHandler : IRequestHandler<GetKpiMetricsQuery, KpiMetri
 
     private decimal CalculateGrowthRate(decimal previousValue, decimal currentValue)
     {
-        if (previousValue == 0) return currentValue > 0 ? 1 : 0;
+        if (previousValue == 0)
+        {
+            return currentValue > 0 ? 1 : 0;
+        }
         return (currentValue - previousValue) / previousValue;
     }
 
