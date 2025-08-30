@@ -41,3 +41,20 @@ cookies.txt
 # Environment files (hold secrets locally)
 .env
 .env.*
+
+# Uploaded files and user content
+StockFlowPro.Web/wwwroot/uploads/
+*.jpg
+*.jpeg
+*.png
+*.pdf
+*.doc
+*.docx
+
+# Windows installer files
+*.msixbundle
+*.msi
+*.exe
+
+# AI conversation summaries (local development only)
+.zencoder/conversation-summaries/
