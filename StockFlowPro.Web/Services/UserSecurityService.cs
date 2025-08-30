@@ -11,7 +11,7 @@ namespace StockFlowPro.Web.Services;
 /// </summary>
 public class UserSecurityService : IUserSecurityService
 {
-    private readonly IDualDataService _dualDataService;
+    private readonly IDataSourceService _dataSourceService;
     private readonly ILogger<UserSecurityService> _logger;
     private readonly IHttpContextAccessor _httpContextAccessor;
     
@@ -24,11 +24,11 @@ public class UserSecurityService : IUserSecurityService
     private const int MaxCreationAttemptsPerIpPerHour = 10;
     
     public UserSecurityService(
-        IDualDataService dualDataService,
+        IDataSourceService dataSourceService,
         ILogger<UserSecurityService> logger,
         IHttpContextAccessor httpContextAccessor)
     {
-        _dualDataService = dualDataService;
+        _dataSourceService = dataSourceService;
         _logger = logger;
         _httpContextAccessor = httpContextAccessor;
     }
@@ -41,7 +41,7 @@ public class UserSecurityService : IUserSecurityService
         try
         {
             // 1. Validate requesting user permissions
-            var requestingUser = await _dualDataService.GetUserByIdAsync(requestingUserId);
+            var requestingUser = await _dataSourceService.GetUserByIdAsync(requestingUserId);
             if (requestingUser == null)
             {
                 result.SecurityIssues.Add("Requesting user not found");
@@ -83,7 +83,7 @@ public class UserSecurityService : IUserSecurityService
             }
 
             // 5. Check for duplicate users
-            var existingUser = await _dualDataService.GetUserByEmailAsync(createUserDto.Email);
+            var existingUser = await _dataSourceService.GetUserByEmailAsync(createUserDto.Email);
             if (existingUser != null)
             {
                 result.SecurityIssues.Add("User with this email already exists");
@@ -127,7 +127,7 @@ public class UserSecurityService : IUserSecurityService
             }
 
             // Check if requesting user has admin/manager privileges
-            var requestingUser = await _dualDataService.GetUserByIdAsync(requestingUserId);
+            var requestingUser = await _dataSourceService.GetUserByIdAsync(requestingUserId);
             if (requestingUser == null)
             {
                 await LogSecurityEventAsync(SecurityEventType.UnauthorizedUserSyncAttempt, requestingUserId, 
@@ -163,7 +163,7 @@ public class UserSecurityService : IUserSecurityService
             }
 
             // Check if requesting user has admin/manager privileges
-            var requestingUser = await _dualDataService.GetUserByIdAsync(requestingUserId);
+            var requestingUser = await _dataSourceService.GetUserByIdAsync(requestingUserId);
             if (requestingUser == null)
             {
                 await LogSecurityEventAsync(SecurityEventType.UnauthorizedUserModificationAttempt, requestingUserId, 

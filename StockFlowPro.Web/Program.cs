@@ -40,8 +40,9 @@ builder.Services.Configure<Microsoft.Extensions.Logging.LoggerFilterOptions>(opt
 builder.Services.AddSignalR(options => 
 {
     options.EnableDetailedErrors = true;
-    options.HandshakeTimeout = TimeSpan.FromSeconds(15);
-    options.KeepAliveInterval = TimeSpan.FromSeconds(10);
+    options.HandshakeTimeout = TimeSpan.FromSeconds(30);
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    options.ClientTimeoutInterval = TimeSpan.FromMinutes(5);
 });
 
 // Configure JSON options for API responses
@@ -132,30 +133,6 @@ builder.Services.AddMemoryCache();
 // Configure SignalR options
 builder.Services.Configure<StockFlowPro.Web.Configuration.SignalROptions>(
     builder.Configuration.GetSection(StockFlowPro.Web.Configuration.SignalROptions.SectionName));
-
-builder.Services.AddSignalR(options =>
-{
-    var signalRConfig = builder.Configuration
-        .GetSection(StockFlowPro.Web.Configuration.SignalROptions.SectionName)
-        .Get<StockFlowPro.Web.Configuration.SignalROptions>() ?? new StockFlowPro.Web.Configuration.SignalROptions();
-
-    // Validate configuration
-    signalRConfig.Validate();
-
-    // Configure timeout settings to prevent premature disconnections
-    options.ClientTimeoutInterval = signalRConfig.ClientTimeoutInterval;
-    options.KeepAliveInterval = signalRConfig.KeepAliveInterval;
-    options.HandshakeTimeout = signalRConfig.HandshakeTimeout;
-    
-    // Enable detailed errors in development or if configured
-    options.EnableDetailedErrors = builder.Environment.IsDevelopment() || signalRConfig.EnableDetailedErrors;
-    
-    // Configure maximum message size
-    options.MaximumReceiveMessageSize = signalRConfig.MaximumReceiveMessageSize;
-    
-    // Configure streaming settings
-    options.StreamBufferCapacity = signalRConfig.StreamBufferCapacity;
-});
 
 // Configure API Key options
 builder.Services.Configure<ApiKeyOptions>(builder.Configuration.GetSection(ApiKeyOptions.SectionName));
@@ -282,10 +259,8 @@ builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.ISubscriptionPlanService, StockFlowPro.Application.Services.SubscriptionPlanService>();
-builder.Services.AddScoped<IMockDataStorageService, JsonMockDataStorageService>();
-// Use database-first approach - prioritizes database over mock data
-builder.Services.AddScoped<IDataSourceService, DatabaseFirstDataService>();
-builder.Services.AddScoped<IDualDataService, DualDataService>();
+// Use database-only approach for security
+builder.Services.AddScoped<IDataSourceService, DatabaseOnlyDataService>();
 builder.Services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
 builder.Services.AddScoped<IUserSynchronizationService, UserSynchronizationService>();
 builder.Services.AddScoped<IUserSecurityService, UserSecurityService>();

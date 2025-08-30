@@ -10,7 +10,7 @@ namespace StockFlowPro.Web.Services;
 /// </summary>
 public class UserSynchronizationService : IUserSynchronizationService
 {
-    private readonly IDualDataService _dualDataService;
+    private readonly IDataSourceService _dataSourceService;
     private readonly IUserSecurityService _userSecurityService;
     private readonly ILogger<UserSynchronizationService> _logger;
     private readonly IHttpContextAccessor _httpContextAccessor;
@@ -23,12 +23,12 @@ public class UserSynchronizationService : IUserSynchronizationService
     private const int MaxSyncAttemptsPerHour = 5;
     
     public UserSynchronizationService(
-        IDualDataService dualDataService,
+        IDataSourceService dataSourceService,
         IUserSecurityService userSecurityService,
         ILogger<UserSynchronizationService> logger,
         IHttpContextAccessor httpContextAccessor)
     {
-        _dualDataService = dualDataService;
+        _dataSourceService = dataSourceService;
         _userSecurityService = userSecurityService;
         _logger = logger;
         _httpContextAccessor = httpContextAccessor;
@@ -131,7 +131,7 @@ public class UserSynchronizationService : IUserSynchronizationService
             }
             
             // Get requesting user info for audit
-            var requestingUser = await _dualDataService.GetUserByIdAsync(requestingUserId);
+            var requestingUser = await _dataSourceService.GetUserByIdAsync(requestingUserId);
             auditEntry.RequestingUserEmail = requestingUser?.Email ?? "Unknown";
             
             // Record sync attempt for rate limiting
@@ -149,7 +149,7 @@ public class UserSynchronizationService : IUserSynchronizationService
                 PasswordHash = validation.UserData.PasswordHash
             };
             
-            var syncedUser = await _dualDataService.CreateUserAsync(createUserDto);
+            var syncedUser = await _dataSourceService.CreateUserAsync(createUserDto);
             
             auditEntry.Success = true;
             _auditLog.Add(auditEntry);
@@ -178,7 +178,7 @@ public class UserSynchronizationService : IUserSynchronizationService
         try
         {
             // Check mock data
-            var mockUser = await _dualDataService.GetUserByIdAsync(userId);
+            var mockUser = await _dataSourceService.GetUserByIdAsync(userId);
             status.ExistsInMockData = mockUser != null;
             status.MockDataUser = mockUser;
             
@@ -188,7 +188,7 @@ public class UserSynchronizationService : IUserSynchronizationService
             {
                 // Try to create a user with the same ID to see if it already exists
                 // This is a workaround since we don't have direct database access here
-                var existingUser = await _dualDataService.GetUserByIdAsync(userId);
+                var existingUser = await _dataSourceService.GetUserByIdAsync(userId);
                 
                 // If we can get the user and it has database-specific properties, it exists in DB
                 // This is a simplified approach - in production, you'd have better separation
@@ -276,7 +276,7 @@ public class UserSynchronizationService : IUserSynchronizationService
     {
         try
         {
-            var user = await _dualDataService.GetUserByIdAsync(requestingUserId);
+            var user = await _dataSourceService.GetUserByIdAsync(requestingUserId);
             return user != null; // Basic check - user exists
         }
         catch

@@ -26,10 +26,7 @@ public class DatabaseInitializationService : IHostedService
             _logger.LogInformation("Starting database initialization...");
             await seeder.SeedAsync();
             
-            var mockDataService = scope.ServiceProvider.GetRequiredService<IMockDataStorageService>();
-            await mockDataService.InitializeDefaultDataAsync();
-            
-            _logger.LogInformation("Database and mock data initialization completed successfully");
+            _logger.LogInformation("Database initialization completed successfully");
         }
         catch (Exception ex)
         {
