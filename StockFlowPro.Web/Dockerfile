@@ -1,5 +1,5 @@
-# Use the latest .NET 8 runtime as base image with security updates
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-bookworm-slim AS base
+# Use the latest .NET 9 runtime as base image with security updates
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-bookworm-slim AS base
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
@@ -13,8 +13,8 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/apt/archives/*
 
-# Use the latest .NET 8 SDK for building
-FROM mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim AS build
+# Use the latest .NET 9 SDK for building
+FROM mcr.microsoft.com/dotnet/sdk:9.0-bookworm-slim AS build
 WORKDIR /src
 
 # Copy project files in dependency order for better layer caching

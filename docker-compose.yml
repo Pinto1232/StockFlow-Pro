@@ -2,7 +2,7 @@ services:
   stockflow-db:
     build:
       context: .
-      dockerfile: Dockerfile.mssql
+      dockerfile: Dockerfile.mssql.simple
     container_name: stockflow-db
     hostname: stockflow-db
     environment:
@@ -27,10 +27,10 @@ services:
         reservations:
           memory: 1G
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '${DB_PASSWORD:-StockFlow123!}' -Q 'SELECT 1' -C -b || exit 1"]
+      test: ["CMD-SHELL", "timeout 10s bash -c '</dev/tcp/localhost/1433' || exit 1"]
       interval: 20s
       retries: 15
-      start_period: 360s
+      start_period: 60s
       timeout: 10s
 
   redis:
@@ -170,19 +170,21 @@ services:
             - obj/
         # Rebuild when project files change
         - action: rebuild
-          path: ./*.sln
+          path: ./StockFlowPro.sln
         - action: rebuild
-          path: ./StockFlowPro.Web/*.csproj
+          path: ./StockFlowPro.Web/StockFlowPro.Web.csproj
         - action: rebuild
-          path: ./StockFlowPro.Application/*.csproj
+          path: ./StockFlowPro.Application/StockFlowPro.Application.csproj
         - action: rebuild
-          path: ./StockFlowPro.Domain/*.csproj
+          path: ./StockFlowPro.Domain/StockFlowPro.Domain.csproj
         - action: rebuild
-          path: ./StockFlowPro.Infrastructure/*.csproj
+          path: ./StockFlowPro.Infrastructure/StockFlowPro.Infrastructure.csproj
         - action: rebuild
-          path: ./StockFlowPro.Shared/*.csproj
+          path: ./StockFlowPro.Shared/StockFlowPro.Shared.csproj
         - action: rebuild
-          path: ./Directory.*.props
+          path: ./Directory.Build.props
+        - action: rebuild
+          path: ./Directory.Packages.props
         - action: rebuild
           path: ./global.json
         - action: rebuild
@@ -192,7 +194,7 @@ services:
         - action: rebuild
           path: ./StockFlowPro.Web/Vite.config.ts
         - action: rebuild
-          path: ./StockFlowPro.Web/tsconfig*.json
+          path: ./StockFlowPro.Web/tsconfig.json
         - action: rebuild
           path: ./StockFlowPro.Web/tailwind.config.js
         - action: rebuild
@@ -216,6 +218,8 @@ services:
     ports:
       - "5173:5173"
     volumes:
+      - ./StockFlowPro.UI/src:/app/src
+      - ./StockFlowPro.UI/public:/app/public
       - ./StockFlowPro.UI/package.json:/app/package.json
       - ./StockFlowPro.UI/package-lock.json:/app/package-lock.json
       - ./StockFlowPro.UI/vite.config.ts:/app/vite.config.ts
@@ -265,7 +269,11 @@ services:
         - action: rebuild
           path: ./StockFlowPro.UI/vite.config.ts
         - action: rebuild
-          path: ./StockFlowPro.UI/tsconfig*.json
+          path: ./StockFlowPro.UI/tsconfig.json
+        - action: rebuild
+          path: ./StockFlowPro.UI/tsconfig.app.json
+        - action: rebuild
+          path: ./StockFlowPro.UI/tsconfig.node.json
         - action: rebuild
           path: ./StockFlowPro.UI/tailwind.config.js
         - action: rebuild
@@ -303,7 +311,7 @@ services:
         reservations:
           memory: 64M
     healthcheck:
-      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8080 || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
       interval: 30s
       retries: 3
       start_period: 30s

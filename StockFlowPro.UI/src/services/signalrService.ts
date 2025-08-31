@@ -30,7 +30,6 @@ class SignalRServiceImpl implements SignalRService {
     private reconnectDelay = 5000; // 5 seconds
 
     constructor() {
-        // Add a small delay to avoid conflicts with browser extensions
         setTimeout(() => {
             this.initializeConnection();
         }, 100);

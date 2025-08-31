@@ -382,7 +382,7 @@ const Landing: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Trusted by Growing Companies
+              Trusted by Growing Companies 
             </h2>
             <p className="text-xl text-gray-600">
               See what our customers say about transforming their HR operations
