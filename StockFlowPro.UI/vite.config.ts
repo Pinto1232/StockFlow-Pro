@@ -74,10 +74,24 @@ console.log('')
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  optimizeDeps: {
+    exclude: []
+  },
   server: {
-  port: 5173,
-  strictPort: true,
-  host: true, // Expose to network and show all URLs
+    port: 5173,
+    strictPort: true,
+    host: '0.0.0.0', // Critical for Docker - expose to all interfaces
+    allowedHosts: ['localhost', 'stockflow-frontend', '127.0.0.1', '0.0.0.0'], // Allow Docker container names
+    watch: {
+      usePolling: true, // For file watching in Docker
+      interval: 1000
+    },
+    hmr: {
+      port: 5173,
+      host: 'localhost',
+      clientPort: 8080,
+      protocol: 'ws'
+    },
     proxy: {
       '/api': {
         target: backendConfig.apiTarget,
@@ -132,6 +146,7 @@ export default defineConfig({
       ]
     }
   },
+  assetsInclude: ['**/*.html'],
   resolve: {
     alias: {
       '@': '/src'
