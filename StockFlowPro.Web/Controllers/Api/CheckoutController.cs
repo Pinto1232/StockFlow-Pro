@@ -22,6 +22,7 @@ public class CheckoutController : ControllerBase
     private readonly IEmailService _emailService;
     private readonly IEmailVerificationService _emailVerificationService;
     private readonly IWebHostEnvironment _environment;
+    private readonly IConfiguration _configuration;
 
     public CheckoutController(
         ILogger<CheckoutController> logger,
@@ -32,7 +33,8 @@ public class CheckoutController : ControllerBase
         IUserRepository userRepository,
         IEmailService emailService,
         IEmailVerificationService emailVerificationService,
-        IWebHostEnvironment environment)
+        IWebHostEnvironment environment,
+        IConfiguration configuration)
     {
         _logger = logger;
         _pendingStore = pendingStore;
@@ -43,6 +45,7 @@ public class CheckoutController : ControllerBase
         _emailService = emailService;
         _emailVerificationService = emailVerificationService;
         _environment = environment;
+        _configuration = configuration;
     }
 
     public record CheckoutRequest([Required] string PlanId, [Required] string Cadence); // cadence: "monthly" | "annual"
@@ -353,7 +356,8 @@ public class CheckoutController : ControllerBase
 
     private string GetBaseUrl()
     {
-        var request = HttpContext.Request;
-        return $"{request.Scheme}://{request.Host}";
+        // Use the configured BaseUrl for consistent external URLs
+        var baseUrl = _configuration["BaseUrl"] ?? "http://localhost:8080";
+        return baseUrl.TrimEnd('/');
     }
 }
