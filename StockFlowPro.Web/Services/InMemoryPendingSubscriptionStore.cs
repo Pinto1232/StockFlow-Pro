@@ -39,7 +39,7 @@ public class InMemoryPendingSubscriptionStore : IPendingSubscriptionStore
         lock (_lock)
         {
             var row = _items.FirstOrDefault(x => x.SessionId == sessionId);
-            if (row == null) return null;
+            if (row == null) {return null;}
             return (row.SessionId, row.PlanId, row.Email, row.CreatedAt);
         }
     }
@@ -52,7 +52,7 @@ public class InMemoryPendingSubscriptionStore : IPendingSubscriptionStore
             var found = _items.Where(x => x.Email == normalized)
                                .OrderByDescending(x => x.CreatedAt)
                                .FirstOrDefault();
-            if (found == null) return null;
+            if (found == null) {return null;}
             return (found.SessionId, found.PlanId, found.Email!, found.CreatedAt);
         }
     }

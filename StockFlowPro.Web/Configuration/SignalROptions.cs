@@ -133,47 +133,46 @@ public class SignalROptions
     public void Validate()
     {
         if (ClientTimeoutIntervalMinutes <= 0)
-            throw new ArgumentException("ClientTimeoutIntervalMinutes must be greater than 0");
+            {throw new ArgumentException("ClientTimeoutIntervalMinutes must be greater than 0");}
 
         if (KeepAliveIntervalSeconds <= 0)
-            throw new ArgumentException("KeepAliveIntervalSeconds must be greater than 0");
+           { throw new ArgumentException("KeepAliveIntervalSeconds must be greater than 0");}
 
         if (HandshakeTimeoutSeconds <= 0)
-            throw new ArgumentException("HandshakeTimeoutSeconds must be greater than 0");
+           { throw new ArgumentException("HandshakeTimeoutSeconds must be greater than 0");}
 
         if (MaximumReceiveMessageSize <= 0)
-            throw new ArgumentException("MaximumReceiveMessageSize must be greater than 0");
+           { throw new ArgumentException("MaximumReceiveMessageSize must be greater than 0");}
 
         if (StreamBufferCapacity <= 0)
-            throw new ArgumentException("StreamBufferCapacity must be greater than 0");
+            {throw new ArgumentException("StreamBufferCapacity must be greater than 0");}
 
         if (HeartbeatIntervalSeconds <= 0)
-            throw new ArgumentException("HeartbeatIntervalSeconds must be greater than 0");
+           { throw new ArgumentException("HeartbeatIntervalSeconds must be greater than 0");}
 
         if (MaxReconnectAttempts < 0)
-            throw new ArgumentException("MaxReconnectAttempts must be greater than or equal to 0");
+           { throw new ArgumentException("MaxReconnectAttempts must be greater than or equal to 0");}
 
         if (ReconnectDelayMs <= 0)
-            throw new ArgumentException("ReconnectDelayMs must be greater than 0");
+           { throw new ArgumentException("ReconnectDelayMs must be greater than 0");}
 
         if (ConnectionTimeoutSeconds <= 0)
-            throw new ArgumentException("ConnectionTimeoutSeconds must be greater than 0");
-
+           { throw new ArgumentException("ConnectionTimeoutSeconds must be greater than 0");         }
         if (GroupCleanupIntervalMinutes <= 0)
-            throw new ArgumentException("GroupCleanupIntervalMinutes must be greater than 0");
+            {throw new ArgumentException("GroupCleanupIntervalMinutes must be greater than 0");}
 
         if (MaxConcurrentConnectionsPerUser <= 0)
-            throw new ArgumentException("MaxConcurrentConnectionsPerUser must be greater than 0");
+            {throw new ArgumentException("MaxConcurrentConnectionsPerUser must be greater than 0");}
 
         if (MaxRequestsPerMinute <= 0)
-            throw new ArgumentException("MaxRequestsPerMinute must be greater than 0");
+            {throw new ArgumentException("MaxRequestsPerMinute must be greater than 0");}
 
         // Ensure KeepAlive is less than ClientTimeout
         if (KeepAliveInterval >= ClientTimeoutInterval)
-            throw new ArgumentException("KeepAliveInterval must be less than ClientTimeoutInterval");
+           { throw new ArgumentException("KeepAliveInterval must be less than ClientTimeoutInterval");}
 
         // Ensure Heartbeat is less than KeepAlive
         if (HeartbeatInterval >= KeepAliveInterval)
-            throw new ArgumentException("HeartbeatInterval should be less than KeepAliveInterval");
+            {throw new ArgumentException("HeartbeatInterval should be less than KeepAliveInterval");}
     }
 }

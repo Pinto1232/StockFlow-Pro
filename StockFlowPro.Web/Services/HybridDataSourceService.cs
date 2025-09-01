@@ -105,7 +105,7 @@ public class HybridDataSourceService : IDataSourceService
         if (UseMockData)
         {
             var existingUser = await _mockDataService.GetUserByIdAsync(id);
-            if (existingUser == null) return null;
+            if (existingUser == null) {return null;}
 
             existingUser.FirstName = updateUserDto.FirstName;
             existingUser.LastName = updateUserDto.LastName;
@@ -149,7 +149,7 @@ public class HybridDataSourceService : IDataSourceService
         {
             var users = await _mockDataService.GetUsersAsync();
             if (string.IsNullOrWhiteSpace(searchTerm))
-                return users;
+                {return users;}
 
             var lowerSearchTerm = searchTerm.ToLower();
             return users.Where(u => 

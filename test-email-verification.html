@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 3px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Email Verification System Test</h1>
+    
+    <div class="test-section">
+        <h3>1. Check Email Status</h3>
+        <input type="email" id="checkEmail" placeholder="Enter email to check" value="test@example.com">
+        <button onclick="checkEmail()">Check Email</button>
+        <div id="checkResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Send Verification Email</h3>
+        <input type="email" id="sendEmail" placeholder="Enter email" value="test@example.com">
+        <input type="text" id="sessionId" placeholder="Session ID" value="test_session_123">
+        <select id="planId">
+            <option value="6431ecb2-6ca7-4430-be40-8bf7cc600b22">Basic Plan ($29.99)</option>
+            <option value="6436b0fc-335e-44fa-8cc3-622b40b152be">Professional Plan ($79.99)</option>
+            <option value="7d2e55b3-c253-427d-9b6a-393d46d3def5">Enterprise Plan ($199.99)</option>
+        </select>
+        <button onclick="sendVerification()">Send Verification</button>
+        <div id="sendResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Verify Email Token</h3>
+        <input type="text" id="token" placeholder="Enter verification token" value="">
+        <input type="text" id="verifySessionId" placeholder="Session ID" value="test_session_123">
+        <button onclick="verifyEmail()">Verify Email</button>
+        <div id="verifyResult" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5131/api/checkout';
+
+        async function checkEmail() {
+            const email = document.getElementById('checkEmail').value;
+            const resultDiv = document.getElementById('checkResult');
+            
+            try {
+                const response = await fetch(`${API_BASE}/check-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <strong>Response:</strong><br>
+                    Status: ${data.status}<br>
+                    Account Exists: ${data.accountExists}<br>
+                    Message: ${data.message || 'N/A'}
+                `;
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        async function sendVerification() {
+            const email = document.getElementById('sendEmail').value;
+            const sessionId = document.getElementById('sessionId').value;
+            const planId = document.getElementById('planId').value;
+            const resultDiv = document.getElementById('sendResult');
+            
+            try {
+                const response = await fetch(`${API_BASE}/send-verification`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, sessionId, planId })
+                });
+
+                const data = await response.json();
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <strong>Response:</strong><br>
+                    Status: ${data.status}<br>
+                    Sent: ${data.sent}<br>
+                    Token: ${data.token || 'N/A'}<br>
+                    Message: ${data.message || 'N/A'}
+                `;
+                resultDiv.style.display = 'block';
+
+                // Auto-fill the token in the verify section
+                if (data.token) {
+                    document.getElementById('token').value = data.token;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        async function verifyEmail() {
+            const token = document.getElementById('token').value;
+            const sessionId = document.getElementById('verifySessionId').value;
+            const resultDiv = document.getElementById('verifyResult');
+            
+            try {
+                const response = await fetch(`${API_BASE}/verify-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token, sessionId })
+                });
+
+                const data = await response.json();
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <strong>Response:</strong><br>
+                    Status: ${data.status}<br>
+                    Verified: ${data.verified}<br>
+                    Email: ${data.email || 'N/A'}<br>
+                    Message: ${data.message || 'N/A'}
+                `;
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

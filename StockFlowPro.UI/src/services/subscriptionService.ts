@@ -286,3 +286,44 @@ export async function startHostedCheckout(planId: string, yearly: boolean): Prom
     return {};
   }
 }
+
+// Email verification functions
+export type EmailCheckResponse = { accountExists: boolean; status: string; message?: string };
+export async function checkEmail(email: string): Promise<EmailCheckResponse | null>
+{
+  try {
+    const res = await http.post<EmailCheckResponse>('/api/checkout/check-email', { email });
+    return res;
+  } catch {
+    return null;
+  }
+}
+
+export type SendVerificationResponse = { sent: boolean; status: string; message?: string };
+export async function sendVerificationEmail(email: string, sessionId: string, planId: string): Promise<SendVerificationResponse | null>
+{
+  try {
+    const res = await http.post<SendVerificationResponse>('/api/checkout/send-verification', {
+      email,
+      sessionId,
+      planId
+    });
+    return res;
+  } catch {
+    return null;
+  }
+}
+
+export type VerifyEmailResponse = { verified: boolean; status: string; message?: string; redirectUrl?: string };
+export async function verifyEmail(token: string, sessionId: string): Promise<VerifyEmailResponse | null>
+{
+  try {
+    const res = await http.post<VerifyEmailResponse>('/api/checkout/verify-email', {
+      token,
+      sessionId
+    });
+    return res;
+  } catch {
+    return null;
+  }
+}

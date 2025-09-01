@@ -116,7 +116,19 @@ const Landing: React.FC = () => {
   }, []);
 
   const openCheckoutPage = (plan: SubscriptionPlan) => {
-    navigate(`/checkout?plan=${plan.id}&cadence=${yearly ? 'annual' : 'monthly'}`);
+    try {
+      localStorage.setItem(
+        'selectedPlan',
+        JSON.stringify({
+          id: plan.id,
+          cadence: yearly ? 'annual' : 'monthly',
+          name: plan.name,
+          price: plan.price,
+          currency: plan.currency,
+        })
+      );
+    } catch {}
+    navigate(`/checkout?plan=${encodeURIComponent(plan.id)}&cadence=${yearly ? 'annual' : 'monthly'}`);
   };
 
   const getIconComponent = (iconName: string) => {

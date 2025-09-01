@@ -50,9 +50,9 @@ public class AuthorizationService : IAuthorizationService
     public bool CanAccessUser(ClaimsPrincipal currentUser, Guid targetUserId)
     {
         var userRole = GetUserRole(currentUser);
-        if (!userRole.HasValue) return false;
+        if (!userRole.HasValue) {return false;}
 
-        if (userRole.Value == UserRole.Admin) return true;
+        if (userRole.Value == UserRole.Admin) {return true;}
 
         var currentUserId = currentUser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (Guid.TryParse(currentUserId, out var currentUserGuid))

@@ -25,6 +25,7 @@
     <PackageReference Include="iTextSharp.LGPLv2.Core" />
     <PackageReference Include="EPPlus" />
     <PackageReference Include="CsvHelper" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
   </ItemGroup>
 
   <ItemGroup>

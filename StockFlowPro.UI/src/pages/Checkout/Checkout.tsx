@@ -7,6 +7,10 @@ import {
   createCheckoutSession,
   confirmCheckout,
   startHostedCheckout,
+  checkEmail,
+  sendVerificationEmail,
+  type EmailCheckResponse,
+  type SendVerificationResponse,
 } from '../../services/subscriptionService';
 import { Check, CreditCard, Globe, Smartphone, Banknote, AlertCircle, Shield } from 'lucide-react';
 
@@ -19,11 +23,34 @@ const Checkout: React.FC = () => {
 
   const initialCadence = (searchParams.get('cadence') ?? 'monthly').toLowerCase() === 'annual' ? 'annual' : 'monthly';
   const [cadence, setCadence] = useState<'monthly' | 'annual'>(initialCadence);
+
+  useEffect(() => {
+    // If URL is missing plan, try restore from localStorage for resilience
+    const planIdInUrl = searchParams.get('plan');
+    if (planIdInUrl) return;
+    try {
+      const persisted = JSON.parse(localStorage.getItem('selectedPlan') || 'null') as { id?: string; cadence?: 'monthly'|'annual' } | null;
+      if (persisted?.id) {
+        const params = new URLSearchParams(window.location.search);
+        params.set('plan', persisted.id);
+        if (persisted.cadence) params.set('cadence', persisted.cadence);
+        navigate({ pathname: '/checkout', search: params.toString() }, { replace: true });
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [selectedMethod, setSelectedMethod] = useState<'card' | 'applepay' | 'paypal' | 'eft'>('card');
   const [email, setEmail] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Email verification states
+  const [emailStatus, setEmailStatus] = useState<'unchecked' | 'checking' | 'new_account' | 'existing_account' | 'verification_sent' | 'error'>('unchecked');
+  const [emailMessage, setEmailMessage] = useState<string>('');
+  const [sessionId, setSessionId] = useState<string>('');
+  const [checkingEmail, setCheckingEmail] = useState<boolean>(false);
+  const [sendingVerification, setSendingVerification] = useState<boolean>(false);
 
   const planId = searchParams.get('plan') ?? '';
 
@@ -138,7 +165,99 @@ const Checkout: React.FC = () => {
     // noop: selection handled by initialPlanKey effect
   }, []);
 
-  const canProceed = !!chosenPlan && (selectedMethod === 'card' || selectedMethod === 'applepay');
+  // Email verification functions
+  const handleEmailCheck = async (emailToCheck: string) => {
+    if (!emailToCheck || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailToCheck)) {
+      setEmailStatus('unchecked');
+      setEmailMessage('');
+      return;
+    }
+
+    setCheckingEmail(true);
+    setEmailStatus('checking');
+    setEmailMessage('Checking email...');
+
+    try {
+      const result = await checkEmail(emailToCheck);
+      if (result) {
+        if (result.accountExists) {
+          setEmailStatus('existing_account');
+          setEmailMessage(result.message || 'Please sign in to continue with your purchase');
+        } else {
+          setEmailStatus('new_account');
+          setEmailMessage(result.message || "We'll create an account for you");
+        }
+      } else {
+        setEmailStatus('error');
+        setEmailMessage('Unable to verify email. Please try again.');
+      }
+    } catch (error) {
+      setEmailStatus('error');
+      setEmailMessage('Unable to verify email. Please try again.');
+    } finally {
+      setCheckingEmail(false);
+    }
+  };
+
+  const handleSendVerification = async () => {
+    if (!chosenPlan || !email || !sessionId) {
+      setError('Missing required information for verification');
+      return;
+    }
+
+    setSendingVerification(true);
+    setError(null);
+
+    try {
+      const result = await sendVerificationEmail(email, sessionId, chosenPlan.id);
+      if (result?.sent) {
+        setEmailStatus('verification_sent');
+        setEmailMessage(result.message || 'Please check your email and click the verification link to complete your purchase.');
+      } else {
+        setEmailStatus('error');
+        setEmailMessage(result?.message || 'Failed to send verification email. Please try again.');
+      }
+    } catch (error) {
+      setEmailStatus('error');
+      setEmailMessage('Failed to send verification email. Please try again.');
+    } finally {
+      setSendingVerification(false);
+    }
+  };
+
+  // Create session when plan is selected (for email verification flow)
+  useEffect(() => {
+    if (chosenPlan && !currentUser?.email && !sessionId) {
+      createCheckoutSession(chosenPlan.id, cadence === 'annual')
+        .then(sess => {
+          if (sess.sessionId) {
+            setSessionId(sess.sessionId);
+          }
+        })
+        .catch(() => {
+          // Ignore errors, session will be created during payment if needed
+        });
+    }
+  }, [chosenPlan, cadence, currentUser?.email, sessionId]);
+
+  // Check email when it changes (debounced)
+  useEffect(() => {
+    if (currentUser?.email) {
+      // Skip email check for authenticated users
+      setEmailStatus('unchecked');
+      setEmailMessage('');
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      handleEmailCheck(email);
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [email, currentUser?.email]);
+
+  const canProceed = !!chosenPlan && (selectedMethod === 'card' || selectedMethod === 'applepay') && 
+    (currentUser?.email || (emailStatus === 'new_account' || emailStatus === 'verification_sent'));
 
   const onPayNow = async () => {
     if (!chosenPlan) {
@@ -149,6 +268,28 @@ const Checkout: React.FC = () => {
     if (!currentUser?.email) {
       if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
         setError('Please enter a valid email address.');
+        return;
+      }
+
+      // Handle different email verification states
+      if (emailStatus === 'existing_account') {
+        setError('Please sign in to your existing account to continue with your purchase.');
+        return;
+      }
+
+      if (emailStatus === 'new_account') {
+        // Send verification email for new accounts
+        await handleSendVerification();
+        return;
+      }
+
+      if (emailStatus === 'verification_sent') {
+        setError('Please check your email and click the verification link to complete your purchase.');
+        return;
+      }
+
+      if (emailStatus === 'checking') {
+        setError('Please wait while we verify your email address.');
         return;
       }
     }
@@ -291,21 +432,84 @@ const Checkout: React.FC = () => {
                   Logged in as <span className="font-medium">{currentUser.email}</span>
                 </div>
               ) : (
-                <div className="space-y-2 mb-2">
+                <div className="space-y-3 mb-2">
                   <label className="block text-sm font-medium text-gray-700">Email address</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    className="w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <p className="text-xs text-gray-500">We'll use this to link your subscription when you sign in.</p>
-                  <div className="flex items-center gap-3 text-sm">
-                    <Link to="/login" className="text-blue-600 hover:underline">Have an account? Sign in</Link>
-                    <span className="text-gray-400">•</span>
-                    <Link to="/register" className="text-blue-600 hover:underline">Create account</Link>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      className={`w-full rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                        emailStatus === 'error' ? 'border-red-300' : 
+                        emailStatus === 'existing_account' ? 'border-orange-300' :
+                        emailStatus === 'new_account' ? 'border-green-300' :
+                        emailStatus === 'verification_sent' ? 'border-blue-300' :
+                        'border-gray-300'
+                      }`}
+                      disabled={checkingEmail || sendingVerification}
+                    />
+                    {checkingEmail && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    )}
                   </div>
+                  
+                  {/* Email status message */}
+                  {emailMessage && (
+                    <div className={`p-3 rounded-lg text-sm ${
+                      emailStatus === 'error' ? 'bg-red-50 text-red-700 border border-red-200' :
+                      emailStatus === 'existing_account' ? 'bg-orange-50 text-orange-700 border border-orange-200' :
+                      emailStatus === 'new_account' ? 'bg-green-50 text-green-700 border border-green-200' :
+                      emailStatus === 'verification_sent' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                      emailStatus === 'checking' ? 'bg-gray-50 text-gray-700 border border-gray-200' :
+                      'bg-gray-50 text-gray-700'
+                    }`}>
+                      <div className="flex items-start gap-2">
+                        {emailStatus === 'checking' && (
+                          <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin mt-0.5"></div>
+                        )}
+                        {emailStatus === 'error' && <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />}
+                        {emailStatus === 'existing_account' && <AlertCircle className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />}
+                        {emailStatus === 'new_account' && <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />}
+                        {emailStatus === 'verification_sent' && <Check className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />}
+                        <span>{emailMessage}</span>
+                      </div>
+                      
+                      {emailStatus === 'existing_account' && (
+                        <div className="mt-2 flex items-center gap-3 text-sm">
+                          <Link to={`/login?returnUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`} 
+                                className="text-orange-600 hover:text-orange-700 font-medium underline">
+                            Sign in to continue
+                          </Link>
+                        </div>
+                      )}
+                      
+                      {emailStatus === 'verification_sent' && (
+                        <div className="mt-2">
+                          <button
+                            onClick={handleSendVerification}
+                            disabled={sendingVerification}
+                            className="text-blue-600 hover:text-blue-700 font-medium underline disabled:opacity-50"
+                          >
+                            {sendingVerification ? 'Sending...' : 'Resend verification email'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {!emailMessage && (
+                    <>
+                      <p className="text-xs text-gray-500">We'll use this to link your subscription when you sign in.</p>
+                      <div className="flex items-center gap-3 text-sm">
+                        <Link to="/login" className="text-blue-600 hover:underline">Have an account? Sign in</Link>
+                        <span className="text-gray-400">•</span>
+                        <Link to="/register" className="text-blue-600 hover:underline">Create account</Link>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -339,10 +543,14 @@ const Checkout: React.FC = () => {
 
               <button
                 onClick={onPayNow}
-                disabled={!canProceed || submitting}
+                disabled={!canProceed || submitting || sendingVerification}
                 className="mt-6 w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50"
               >
-                {submitting ? 'Processing…' : `Pay Now ${formatPrice(chosenPlan.price, chosenPlan.currency)}`}
+                {submitting ? 'Processing…' : 
+                 sendingVerification ? 'Sending verification email...' :
+                 emailStatus === 'new_account' && !currentUser?.email ? 'Send Verification Email' :
+                 emailStatus === 'verification_sent' ? 'Check Your Email' :
+                 `Pay Now ${formatPrice(chosenPlan.price, chosenPlan.currency)}`}
               </button>
             </div>
           </div>

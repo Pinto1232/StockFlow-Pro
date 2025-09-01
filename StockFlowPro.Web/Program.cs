@@ -17,6 +17,8 @@ using StockFlowPro.Web.Configuration;
 using Microsoft.OpenApi.Models;
 using System.Text.Json;
 using StockFlowPro.Web.Hubs;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+
 
 // Load environment variables from .env file
 Env.Load();
@@ -129,6 +131,15 @@ builder.Services.AddHttpContextAccessor();
 
 // Add Memory Cache for API Documentation
 builder.Services.AddMemoryCache();
+
+// Add Redis Distributed Cache for email verification tokens
+var redisConfiguration = builder.Configuration["Redis:Configuration"] ?? builder.Configuration.GetConnectionString("Redis") ?? "redis:6379";
+var redisInstanceName = builder.Configuration["Redis:InstanceName"] ?? "StockFlowPro";
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = redisConfiguration;
+    options.InstanceName = redisInstanceName;
+});
 
 // Configure SignalR options
 builder.Services.Configure<StockFlowPro.Web.Configuration.SignalROptions>(
@@ -277,6 +288,10 @@ builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IUserService, Sto
 builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IRoleUpgradeRequestService, StockFlowPro.Application.Services.RoleUpgradeRequestService>();
 builder.Services.AddScoped<StockFlowPro.Application.Services.ProductNotificationService>();
 builder.Services.AddScoped<ISecurityAuditService, SecurityAuditService>();
+
+// Email services
+builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IEmailService, StockFlowPro.Infrastructure.Services.EmailService>();
+builder.Services.AddScoped<StockFlowPro.Application.Interfaces.IEmailVerificationService, StockFlowPro.Infrastructure.Services.EmailVerificationService>();
 
 // API Documentation services
 builder.Services.AddScoped<IApiDocumentationService, ApiDocumentationService>();
