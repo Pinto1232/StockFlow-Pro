@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Shield, ArrowLeft, CreditCard, AlertCircle, User, Building, MapPin, Phone, Mail } from 'lucide-react';
 import { useCurrentUser } from '../../hooks/useAuth';
 import { getPlansByInterval, type SubscriptionPlan } from '../../services/subscriptionService';
+import { getPricingDisplayInfo } from '../../utils/pricingUtils';
 
 interface PersonalInfoForm {
   firstName: string;
@@ -201,8 +202,7 @@ const PersonalInfo: React.FC = () => {
     );
   }
 
-  const formatPrice = (price: number, currency: string) => 
-    new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(price);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -459,50 +459,72 @@ const PersonalInfo: React.FC = () => {
             <div className="bg-white rounded-2xl shadow-xl p-6 sticky top-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
               
-              {selectedPlan && (
-                <div className="space-y-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{selectedPlan.name}</h3>
-                      <p className="text-sm text-gray-600">{selectedPlan.description}</p>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Billed {cadence === 'annual' ? 'annually' : 'monthly'}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-gray-900">
-                        {formatPrice(selectedPlan.price, selectedPlan.currency)}
+              {selectedPlan && (() => {
+                const interval = cadence === 'annual' ? 'Annual' : 'Monthly';
+                const pricingInfo = getPricingDisplayInfo(
+                  selectedPlan.price,
+                  selectedPlan.currency,
+                  interval,
+                  selectedPlan.monthlyEquivalentPrice
+                );
+                
+                return (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{selectedPlan.name}</h3>
+                        <p className="text-sm text-gray-600">{selectedPlan.description}</p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Billed {cadence === 'annual' ? 'annually' : 'monthly'}
+                        </p>
                       </div>
-                      {cadence === 'annual' && selectedPlan.monthlyEquivalentPrice && (
-                        <div className="text-sm text-gray-500">
-                          ${selectedPlan.monthlyEquivalentPrice.toFixed(2)}/month
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-gray-900">
+                          {pricingInfo.mainPrice}
                         </div>
-                      )}
+                        {pricingInfo.monthlyEquivalent && (
+                          <div className="space-y-1">
+                            <div className="text-sm text-green-600 font-medium">
+                              {pricingInfo.monthlyEquivalent}/month equivalent
+                            </div>
+                            {pricingInfo.calculationNote && (
+                              <div className="text-xs text-gray-500">
+                                ({pricingInfo.calculationNote})
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {pricingInfo.annualEquivalent && (
+                          <div className="text-xs text-gray-500">
+                            Annual: {pricingInfo.annualEquivalent}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  
-                  <hr className="border-gray-200" />
-                  
-                  <div className="flex justify-between items-center font-bold text-lg">
-                    <span>Total</span>
-                    <span>{formatPrice(selectedPlan.price, selectedPlan.currency)}</span>
-                  </div>
-                  
-                  {selectedPlan.features && (
-                    <div className="mt-6">
-                      <h4 className="font-semibold text-gray-900 mb-2">Included features:</h4>
-                      <ul className="space-y-1">
-                        {selectedPlan.features.map((feature, index) => (
-                          <li key={index} className="text-sm text-gray-600 flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
+                    
+                    <hr className="border-gray-200" />
+                    
+                    <div className="flex justify-between items-center font-bold text-lg">
+                      <span>Total</span>
+                      <span>{pricingInfo.mainPrice}</span>
                     </div>
-                  )}
-                </div>
-              )}
+                    
+                    {selectedPlan.features && (
+                      <div className="mt-6">
+                        <h4 className="font-semibold text-gray-900 mb-2">Included features:</h4>
+                        <ul className="space-y-1">
+                          {selectedPlan.features.map((feature, index) => (
+                            <li key={index} className="text-sm text-gray-600 flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                              {feature}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>

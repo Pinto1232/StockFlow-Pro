@@ -81,6 +81,71 @@ const mockPlans: SubscriptionPlan[] = [
   },
 ];
 
+// Helper function to calculate annual price from monthly price (12 months)
+export function calculateAnnualPrice(monthlyPrice: number): number {
+  return monthlyPrice * 12;
+}
+
+// Helper function to calculate monthly equivalent from annual price
+export function calculateMonthlyEquivalent(annualPrice: number): number {
+  return annualPrice / 12;
+}
+
+// Helper function to ensure price consistency between monthly and annual plans
+export function ensurePriceConsistency(plans: SubscriptionPlan[]): SubscriptionPlan[] {
+  const planGroups: { [key: string]: { monthly?: SubscriptionPlan; annual?: SubscriptionPlan } } = {};
+  
+  // Group plans by name (normalized)
+  plans.forEach(plan => {
+    const normalizedName = plan.name.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+    if (!planGroups[normalizedName]) {
+      planGroups[normalizedName] = {};
+    }
+    
+    if (plan.interval === 'Monthly') {
+      planGroups[normalizedName].monthly = plan;
+    } else {
+      planGroups[normalizedName].annual = plan;
+    }
+  });
+  
+  // Ensure consistency within each group
+  const consistentPlans: SubscriptionPlan[] = [];
+  
+  Object.values(planGroups).forEach(group => {
+    if (group.monthly && group.annual) {
+      // Calculate what the annual price should be based on monthly
+      const expectedAnnualPrice = calculateAnnualPrice(group.monthly.price);
+      const actualMonthlyEquivalent = calculateMonthlyEquivalent(group.annual.price);
+      
+      // Update the annual plan's monthly equivalent price
+      const updatedAnnualPlan = {
+        ...group.annual,
+        monthlyEquivalentPrice: actualMonthlyEquivalent
+      };
+      
+      console.log(`🔧 Price consistency check for ${group.monthly.name}:`);
+      console.log(`   Monthly: ${group.monthly.price}`);
+      console.log(`   Annual: ${group.annual.price}`);
+      console.log(`   Expected Annual (12x monthly): ${expectedAnnualPrice}`);
+      console.log(`   Actual Monthly Equivalent: ${actualMonthlyEquivalent}`);
+      
+      consistentPlans.push(group.monthly, updatedAnnualPlan);
+    } else if (group.monthly) {
+      consistentPlans.push(group.monthly);
+    } else if (group.annual) {
+      // Calculate monthly equivalent for standalone annual plan
+      const updatedAnnualPlan = {
+        ...group.annual,
+        monthlyEquivalentPrice: calculateMonthlyEquivalent(group.annual.price)
+      };
+      consistentPlans.push(updatedAnnualPlan);
+    }
+  });
+  
+  return consistentPlans;
+}
+
 // Helper function to convert backend plan to frontend format
 function mapBackendPlanToFrontend(backendPlan: BackendSubscriptionPlan): SubscriptionPlan {
   console.log('🔄 Mapping backend plan:', backendPlan);
@@ -127,17 +192,27 @@ function mapBackendPlanToFrontend(backendPlan: BackendSubscriptionPlan): Subscri
   const isPopular = backendPlan.name.toLowerCase().includes('professional') || 
                    backendPlan.name.toLowerCase().includes('pro');
   
+  const isAnnual = backendPlan.billingInterval === 4;
+  
+  // Calculate monthly equivalent price for annual plans
+  // If it's an annual plan, the monthlyEquivalentPrice should be the annual price divided by 12
+  let monthlyEquivalentPrice = backendPlan.monthlyEquivalentPrice;
+  if (isAnnual && backendPlan.price) {
+    monthlyEquivalentPrice = backendPlan.price / 12;
+    console.log(`📊 Calculated monthly equivalent for annual plan: ${monthlyEquivalentPrice} (${backendPlan.price} / 12)`);
+  }
+  
   const mappedPlan = {
     id: backendPlan.id,
     name: backendPlan.name,
     description: backendPlan.description,
     price: backendPlan.price,
-    interval: backendPlan.billingInterval === 4 ? 'Annual' : 'Monthly' as 'Monthly' | 'Annual',
+    interval: isAnnual ? 'Annual' : 'Monthly' as 'Monthly' | 'Annual',
     currency: backendPlan.currency || 'USD',
     sortOrder: backendPlan.sortOrder || 999,
     features,
     isPopular,
-    monthlyEquivalentPrice: backendPlan.monthlyEquivalentPrice,
+    monthlyEquivalentPrice,
   };
   
   console.log('✅ Mapped plan:', mappedPlan);
@@ -210,7 +285,11 @@ export async function getPlansByInterval(interval: 'Monthly' | 'Annual'): Promis
             
           if (mapped.length) {
             console.log(`🎯 Found ${mapped.length} ${interval} plans:`, mapped);
-            return mapped;
+            // Ensure price consistency before returning
+            const consistentPlans = ensurePriceConsistency([...backendPlans.map(mapBackendPlanToFrontend)])
+              .filter(p => p.interval === interval);
+            console.log(`✅ Price-consistent ${interval} plans:`, consistentPlans);
+            return consistentPlans;
           } else {
             console.warn(`⚠️ No ${interval} plans found in response from ${ep}`);
           }

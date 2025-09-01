@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { getPlansByInterval, type SubscriptionPlan } from '../../services/subscriptionService';
 import { landingService, type LandingFeature, type LandingTestimonial, type LandingStat, type LandingHero } from '../../services/landingService';
+import { getPricingDisplayInfo, calculateSavingsPercentage } from '../../utils/pricingUtils';
 import { 
   Check, Zap, Crown, Star, ArrowRight, Shield, Clock, Users,
   UserCheck, Calendar, DollarSign, FileText, Award,
@@ -9,8 +10,6 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import DemoScheduler from '../../components/DemoScheduler';
-
-const formatPrice = (price: number, currency: string) => new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(price);
 
 const Landing: React.FC = () => {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -484,6 +483,7 @@ const Landing: React.FC = () => {
             {plans.map((plan) => {
               const isAnnual = plan.interval === 'Annual';
               const price = plan.price;
+              const pricingInfo = getPricingDisplayInfo(price, plan.currency, plan.interval, plan.monthlyEquivalentPrice);
               return (
                 <div 
                   key={plan.id} 
@@ -509,12 +509,24 @@ const Landing: React.FC = () => {
                   
                   <div className="text-center mb-8">
                     <div className="flex items-baseline justify-center gap-2 mb-2">
-                      <span className="text-4xl font-extrabold text-gray-900">{formatPrice(price, plan.currency)}</span>
-                      <span className="text-gray-500 font-medium">/{isAnnual ? 'year' : 'month'}</span>
+                      <span className="text-4xl font-extrabold text-gray-900">{pricingInfo.mainPrice}</span>
+                      <span className="text-gray-500 font-medium">/{pricingInfo.interval}</span>
                     </div>
-                    {plan.monthlyEquivalentPrice && isAnnual && (
-                      <p className="text-sm text-green-600 font-medium">
-                        ~{formatPrice(plan.monthlyEquivalentPrice, plan.currency)} per month equivalent
+                    {pricingInfo.monthlyEquivalent && (
+                      <div className="space-y-1">
+                        <p className="text-sm text-green-600 font-medium">
+                          {pricingInfo.monthlyEquivalent} per month equivalent
+                        </p>
+                        {pricingInfo.calculationNote && (
+                          <p className="text-xs text-gray-500">
+                            Billed annually ({pricingInfo.calculationNote})
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {pricingInfo.annualEquivalent && (
+                      <p className="text-xs text-gray-500">
+                        Annual: {pricingInfo.annualEquivalent} (save 20% with yearly billing)
                       </p>
                     )}
                   </div>

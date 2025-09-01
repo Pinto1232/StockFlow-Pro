@@ -12,9 +12,8 @@ import {
   type EmailCheckResponse,
   type SendVerificationResponse,
 } from '../../services/subscriptionService';
+import { getPricingDisplayInfo } from '../../utils/pricingUtils';
 import { Check, CreditCard, Globe, Smartphone, Banknote, AlertCircle, Shield } from 'lucide-react';
-
-const formatPrice = (price: number, currency: string) => new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(price);
 
 const Checkout: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -23,6 +22,12 @@ const Checkout: React.FC = () => {
 
   const initialCadence = (searchParams.get('cadence') ?? 'monthly').toLowerCase() === 'annual' ? 'annual' : 'monthly';
   const [cadence, setCadence] = useState<'monthly' | 'annual'>(initialCadence);
+
+  // Sync cadence state with URL parameter changes
+  useEffect(() => {
+    const urlCadence = (searchParams.get('cadence') ?? 'monthly').toLowerCase() === 'annual' ? 'annual' : 'monthly';
+    setCadence(urlCadence);
+  }, [searchParams]);
 
   useEffect(() => {
     // If URL is missing plan, try restore from localStorage for resilience
@@ -396,11 +401,37 @@ const Checkout: React.FC = () => {
                   <p className="text-gray-600">{chosenPlan.description}</p>
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-extrabold text-gray-900">{formatPrice(chosenPlan.price, chosenPlan.currency)}</div>
-                  <div className="text-gray-500">/{cadence === 'annual' ? 'year' : 'month'}</div>
-                  {cadence === 'annual' && chosenPlan.monthlyEquivalentPrice && (
-                    <div className="text-sm text-green-600 font-medium mt-1">~{formatPrice(chosenPlan.monthlyEquivalentPrice, chosenPlan.currency)} per month equivalent</div>
-                  )}
+                  {(() => {
+                    const pricingInfo = getPricingDisplayInfo(
+                      chosenPlan.price, 
+                      chosenPlan.currency, 
+                      chosenPlan.interval, 
+                      chosenPlan.monthlyEquivalentPrice
+                    );
+                    return (
+                      <>
+                        <div className="text-3xl font-extrabold text-gray-900">{pricingInfo.mainPrice}</div>
+                        <div className="text-gray-500">/{pricingInfo.interval}</div>
+                        {pricingInfo.monthlyEquivalent && (
+                          <div className="mt-1 space-y-1">
+                            <div className="text-sm text-green-600 font-medium">
+                              {pricingInfo.monthlyEquivalent} per month equivalent
+                            </div>
+                            {pricingInfo.calculationNote && (
+                              <div className="text-xs text-gray-500">
+                                ({pricingInfo.calculationNote})
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {pricingInfo.annualEquivalent && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            Annual: {pricingInfo.annualEquivalent}
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
 
@@ -559,7 +590,7 @@ const Checkout: React.FC = () => {
                  sendingVerification ? 'Sending verification email...' :
                  emailStatus === 'new_account' && !currentUser?.email ? 'Send Verification Email' :
                  emailStatus === 'verification_sent' ? 'Check Your Email' :
-                 `Pay Now ${formatPrice(chosenPlan.price, chosenPlan.currency)}`}
+                 `Pay Now ${getPricingDisplayInfo(chosenPlan.price, chosenPlan.currency, chosenPlan.interval).mainPrice}`}
               </button>
             </div>
           </div>
