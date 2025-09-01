@@ -109,6 +109,15 @@ services:
       Jwt__Issuer: "StockFlowPro"
       Jwt__Audience: "StockFlowPro-Client"
       Jwt__ExpiryInMinutes: "60"
+      # SMTP Configuration for MailHog
+      SMTP_HOST: "mailhog"
+      SMTP_PORT: "1025"
+      SMTP_USERNAME: ""
+      SMTP_PASSWORD: ""
+      SMTP_USE_SSL: "false"
+      SMTP_FROM_EMAIL: "noreply@stockflowpro.local"
+      SMTP_FROM_NAME: "StockFlow Pro Dev"
+      BaseUrl: "http://localhost:8080"
       Logging__LogLevel__Default: "Information"
       Logging__LogLevel__Microsoft: "Warning"
       Logging__LogLevel__Microsoft.Hosting.Lifetime: "Information"
@@ -122,6 +131,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      mailhog:
+        condition: service_started
     networks:
       - stockflow-network
     restart: unless-stopped
