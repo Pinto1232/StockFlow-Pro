@@ -228,10 +228,16 @@ export async function getPlansByInterval(interval: 'Monthly' | 'Annual'): Promis
   }
 }
 
-export async function createCheckoutSession(planId: string, yearly: boolean): Promise<{ redirectUrl?: string; sessionId?: string }>
+export async function createCheckoutSession(planId: string, yearly: boolean, personalInfo?: any): Promise<{ redirectUrl?: string; sessionId?: string }>
 {
   try {
-    const body = { planId, cadence: yearly ? 'annual' : 'monthly' };
+    const body: any = { planId, cadence: yearly ? 'annual' : 'monthly' };
+    
+    // Include personal information if provided
+    if (personalInfo) {
+      body.personalInfo = personalInfo;
+    }
+    
     const endpoints = ['/api/checkout/session', '/api/checkout/initialize'];
     for (const ep of endpoints) {
       try {
@@ -273,13 +279,20 @@ export async function attachPendingSubscription(sessionId?: string): Promise<Att
 }
 
 // Start hosted Stripe checkout for authenticated user
-export async function startHostedCheckout(planId: string, yearly: boolean): Promise<{ url?: string }>
+export async function startHostedCheckout(planId: string, yearly: boolean, personalInfo?: any): Promise<{ url?: string }>
 {
   try {
     const cadence = yearly ? 'annual' : 'monthly';
+    const payload: any = { planId, cadence };
+    
+    // Include personal information if provided
+    if (personalInfo) {
+      payload.personalInfo = personalInfo;
+    }
+    
     const res = await http.post<{ url?: string }>(
       '/api/billing/checkout',
-      { planId, cadence }
+      payload
     );
     return res ?? {};
   } catch {
@@ -300,13 +313,14 @@ export async function checkEmail(email: string): Promise<EmailCheckResponse | nu
 }
 
 export type SendVerificationResponse = { sent: boolean; status: string; message?: string };
-export async function sendVerificationEmail(email: string, sessionId: string, planId: string): Promise<SendVerificationResponse | null>
+export async function sendVerificationEmail(email: string, sessionId: string, planId: string, cadence?: string): Promise<SendVerificationResponse | null>
 {
   try {
     const res = await http.post<SendVerificationResponse>('/api/checkout/send-verification', {
       email,
       sessionId,
-      planId
+      planId,
+      cadence
     });
     return res;
   } catch {

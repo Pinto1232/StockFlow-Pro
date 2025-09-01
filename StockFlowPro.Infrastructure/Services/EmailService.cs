@@ -115,10 +115,20 @@ public class EmailService : IEmailService
         return await SendEmailAsync(email, subject, body, true);
     }
 
-    public async Task<bool> SendCheckoutVerificationEmailAsync(string email, string verificationToken, string sessionId, string planName)
+    public async Task<bool> SendCheckoutVerificationEmailAsync(string email, string verificationToken, string sessionId, string planName, string? planId = null, string? cadence = null)
     {
         var subject = "Complete Your StockFlow Pro Subscription";
         var verificationUrl = $"{GetBaseUrl()}/verify-checkout?token={verificationToken}&session={sessionId}";
+        
+        // Add plan and cadence parameters to the verification URL
+        if (!string.IsNullOrEmpty(planId))
+        {
+            verificationUrl += $"&plan={Uri.EscapeDataString(planId)}";
+        }
+        if (!string.IsNullOrEmpty(cadence))
+        {
+            verificationUrl += $"&cadence={Uri.EscapeDataString(cadence)}";
+        }
         
         var body = $@"
 <!DOCTYPE html>

@@ -37,7 +37,7 @@ public class BillingController : ControllerBase
 
         // Create a pending session and optionally link to authenticated user email later on success page
         var sessionId = Guid.NewGuid().ToString("N");
-        _pendingStore.CreateSession(sessionId, request.PlanId);
+        _pendingStore.CreateSession(sessionId, request.PlanId, request.Cadence);
         _logger.LogInformation("[BILLING] Hosted checkout session {SessionId} created for plan {PlanId} ({Cadence})", sessionId, request.PlanId, request.Cadence);
 
         // For this implementation, redirect to success page with the session id

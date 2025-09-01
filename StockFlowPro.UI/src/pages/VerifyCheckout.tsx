@@ -21,18 +21,68 @@ const VerifyCheckout: React.FC = () => {
 
     const performVerification = async () => {
       try {
+        console.log('VerifyCheckout: Starting verification with:', { token, sessionId });
         const result = await verifyEmail(token, sessionId);
+        console.log('VerifyCheckout: Verification result:', result);
         
         if (result?.verified) {
           setStatus('success');
           setMessage(result.message || 'Email verified successfully!');
           
-          // Redirect to success page after a short delay
+          // Redirect to personal information page after a short delay
           setTimeout(() => {
             if (result.redirectUrl) {
-              window.location.href = result.redirectUrl;
+              // Extract the path and query params from the full URL
+              try {
+                const url = new URL(result.redirectUrl);
+                const path = url.pathname + url.search;
+                console.log('VerifyCheckout: Redirecting to:', path);
+                navigate(path);
+              } catch (error) {
+                console.error('VerifyCheckout: Invalid redirect URL, using fallback:', error);
+                window.location.href = result.redirectUrl;
+              }
             } else {
-              navigate(`/checkout/success?session_id=${sessionId}`);
+              // Get plan and cadence from URL params if available
+              const urlParams = new URLSearchParams(window.location.search);
+              let plan = urlParams.get('plan') || '';
+              let cadence = urlParams.get('cadence') || 'monthly';
+              
+              // If we don't have plan info from URL, try to get it from localStorage
+              if (!plan) {
+                try {
+                  const storedInfo = localStorage.getItem('verificationInfo');
+                  if (storedInfo) {
+                    const info = JSON.parse(storedInfo);
+                    // Check if the stored info matches current session and is not too old (1 hour)
+                    const oneHour = 60 * 60 * 1000;
+                    if (info.sessionId === sessionId && Date.now() - info.timestamp < oneHour) {
+                      plan = info.planId;
+                      cadence = info.cadence;
+                      // Clean up the stored info
+                      localStorage.removeItem('verificationInfo');
+                    }
+                  }
+                } catch (error) {
+                  console.warn('Failed to parse stored verification info:', error);
+                }
+              }
+              
+              // If we don't have plan info, try to get it from the verification result
+              if (!plan && result.redirectUrl) {
+                window.location.href = result.redirectUrl;
+                return;
+              }
+              
+              // If still no plan, redirect back to checkout to select plan
+              if (!plan) {
+                console.warn('No plan information available, redirecting to checkout');
+                navigate('/checkout');
+                return;
+              }
+              
+              // Redirect to personal info collection
+              navigate(`/checkout/personal-info?session_id=${sessionId}&plan=${plan}&cadence=${cadence}`);
             }
           }, 2000);
         } else {
@@ -64,7 +114,7 @@ const VerifyCheckout: React.FC = () => {
             <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Email Verified!</h2>
             <p className="text-gray-600 mb-4">{message}</p>
-            <p className="text-sm text-gray-500">Redirecting you to complete your purchase...</p>
+            <p className="text-sm text-gray-500">Redirecting you to provide your billing information...</p>
           </div>
         )}
 

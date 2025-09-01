@@ -209,8 +209,17 @@ const Checkout: React.FC = () => {
     setError(null);
 
     try {
-      const result = await sendVerificationEmail(email, sessionId, chosenPlan.id);
+      const result = await sendVerificationEmail(email, sessionId, chosenPlan.id, cadence);
       if (result?.sent) {
+        // Store plan and cadence info for verification flow
+        const verificationInfo = {
+          sessionId,
+          planId: chosenPlan.id,
+          cadence,
+          timestamp: Date.now()
+        };
+        localStorage.setItem('verificationInfo', JSON.stringify(verificationInfo));
+        
         setEmailStatus('verification_sent');
         setEmailMessage(result.message || 'Please check your email and click the verification link to complete your purchase.');
       } else {

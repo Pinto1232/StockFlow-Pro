@@ -58,7 +58,10 @@ import Landing from "./pages/Pricing/Landing.tsx";
 import Checkout from "./pages/Checkout/Checkout.tsx";
 import Success from "./pages/Checkout/Success.tsx";
 import PaymentFailed from "./pages/Checkout/PaymentFailed.tsx";
+import PersonalInfo from "./pages/Checkout/PersonalInfo.tsx";
+import Payment from "./pages/Checkout/Payment.tsx";
 import VerifyCheckout from "./pages/VerifyCheckout.tsx";
+import PlanDebug from "./pages/Debug/PlanDebug.tsx";
 
 function App() {
     return (
@@ -76,9 +79,12 @@ function App() {
                             <Route path="/login" element={<Login />} />
                             <Route path="/register" element={<Register />} />
                             <Route path="/checkout" element={<Checkout />} />
+                            <Route path="/checkout/personal-info" element={<PersonalInfo />} />
+                            <Route path="/checkout/payment" element={<Payment />} />
                             <Route path="/checkout/success" element={<Success />} />
                             <Route path="/checkout/failed" element={<PaymentFailed />} />
                             <Route path="/verify-checkout" element={<VerifyCheckout />} />
+                            <Route path="/debug/plans" element={<PlanDebug />} />
 
                             {/* Protected routes */}
                             <Route
