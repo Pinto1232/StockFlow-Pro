@@ -63,11 +63,12 @@ public class TestWebApplicationFactory<TStartup> : WebApplicationFactory<TStartu
                 options.EnableBotDetection = false;
                 options.EnableThreatDetection = false;
                 options.EnableInputValidation = false;
-                options.AllowedIps = new List<string> { "127.0.0.1", "::1", "localhost" };
+                options.AllowedIps = new List<string> { "127.0.0.1", "::1", "localhost", "testhost" };
                 options.DefaultRateLimit = 10000; // Very high limit for tests
                 options.RateLimitWindowMinutes = 60;
                 options.BlockBots = false;
                 options.AutoBlockSuspiciousIps = false;
+                options.MaxRequestBodySize = 1024 * 1024; // 1MB for tests
             });
         });
 

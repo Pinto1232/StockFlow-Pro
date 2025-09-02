@@ -128,6 +128,13 @@ public class EnhancedApiSecurityMiddleware
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in API security middleware for {RequestId}", requestId);
+            
+            // Don't interfere with the response if it has already been started
+            if (context.Response.HasStarted)
+            {
+                throw; // Re-throw to let ASP.NET Core handle it
+            }
+            
             // Surface the exception message in the response for debugging purposes.
             // This is safe for local dev; do not expose full exceptions in production.
             var message = string.IsNullOrEmpty(ex.Message) ? "Security validation failed" : $"Security validation failed: {ex.Message}";
@@ -502,6 +509,12 @@ public class EnhancedApiSecurityMiddleware
 
     private async Task RejectRequest(HttpContext context, string message, HttpStatusCode statusCode)
     {
+        // Don't write response if it has already been started
+        if (context.Response.HasStarted)
+        {
+            return;
+        }
+
         context.Response.StatusCode = (int)statusCode;
         context.Response.ContentType = "application/json";
 
@@ -513,12 +526,21 @@ public class EnhancedApiSecurityMiddleware
             requestId = Guid.NewGuid().ToString("N")[..8]
         };
 
-        var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
+        try
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
+            var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
 
-        await context.Response.WriteAsync(json);
+            await context.Response.WriteAsync(json);
+        }
+        catch (InvalidOperationException)
+        {
+            // If we can't write to the response stream, just set the status code
+            // This can happen when the response has already been started by another component
+            context.Response.StatusCode = (int)statusCode;
+        }
     }
 }
 

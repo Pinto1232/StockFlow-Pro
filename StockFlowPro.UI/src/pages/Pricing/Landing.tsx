@@ -400,10 +400,10 @@ const Landing: React.FC = () => {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 gap-8">
             {isLoadingContent ? (
               // Loading skeleton for testimonials
-              Array.from({ length: 3 }).map((_, index) => (
+              Array.from({ length: 2 }).map((_, index) => (
                 <div key={index} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100">
                   <div className="w-8 h-8 bg-gray-200 rounded mb-4 animate-pulse"></div>
                   <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
@@ -419,7 +419,7 @@ const Landing: React.FC = () => {
                 </div>
               ))
             ) : (
-              testimonials.map((testimonial) => (
+              testimonials.slice(0, 2).map((testimonial) => (
                 <div key={testimonial.id} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 hover:shadow-lg transition-all duration-300">
                   <Quote className="w-8 h-8 text-blue-600 mb-4" />
                   <p className="text-gray-700 mb-6 leading-relaxed italic">"{testimonial.quote}"</p>

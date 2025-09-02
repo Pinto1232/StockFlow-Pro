@@ -225,6 +225,11 @@ public class CheckoutController : ControllerBase
     [ProducesResponseType(typeof(SendVerificationResponse), 200)]
     public async Task<ActionResult<SendVerificationResponse>> SendVerificationEmail([FromBody] SendVerificationRequest request)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new SendVerificationResponse(false, "error", "Invalid request data"));
+        }
+
         try
         {
             // Check if email already has an account
