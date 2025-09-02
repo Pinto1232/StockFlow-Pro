@@ -180,6 +180,20 @@ export const SUPPORTED_CURRENCIES: { [key: string]: CurrencyInfo } = {
     decimals: 2,
     locale: 'ru-RU',
   },
+  'MZN': {
+    code: 'MZN',
+    symbol: 'MT',
+    name: 'Mozambican Metical',
+    decimals: 2,
+    locale: 'pt-MZ',
+  },
+  'AOA': {
+    code: 'AOA',
+    symbol: 'Kz',
+    name: 'Angolan Kwanza',
+    decimals: 2,
+    locale: 'pt-AO',
+  },
 };
 
 /**
@@ -204,7 +218,7 @@ export const COUNTRY_TO_CURRENCY: { [key: string]: string } = {
   'HK': 'HKD', 'AU': 'AUD', 'NZ': 'NZD',
   
   // Africa
-  'ZA': 'ZAR',
+  'ZA': 'ZAR', 'MZ': 'MZN', 'AO': 'AOA',
   
   // South America
   'BR': 'BRL',

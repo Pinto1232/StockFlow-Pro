@@ -158,6 +158,7 @@ export function isValidCurrency(currency: string): boolean {
     'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF', 'CNY', 'INR', 'BRL',
     'MXN', 'SGD', 'HKD', 'NZD', 'SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'HUF',
     'RUB', 'TRY', 'ZAR', 'KRW', 'THB', 'MYR', 'IDR', 'PHP', 'VND', 'AED',
+    'MZN', 'AOA', // Added Mozambique and Angola currencies
   ];
   return validCurrencies.includes(currency.toUpperCase());
 }

@@ -142,6 +142,66 @@ describe('Geolocation Pricing System', () => {
       });
     });
 
+    it('should detect Mozambique location correctly', async () => {
+      const mockResponse = {
+        country: 'Mozambique',
+        country_code: 'MZ',
+        currency: 'MZN',
+        timezone: 'Africa/Maputo',
+        ip: '196.28.64.1',
+        city: 'Maputo',
+        region: 'Maputo',
+      };
+
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const location = await detectUserLocation();
+
+      expect(location).toEqual({
+        country: 'Mozambique',
+        countryCode: 'MZ',
+        currency: 'MZN',
+        currencySymbol: 'MT',
+        timezone: 'Africa/Maputo',
+        ip: '196.28.64.1',
+        city: 'Maputo',
+        region: 'Maputo',
+      });
+    });
+
+    it('should detect Angola location correctly', async () => {
+      const mockResponse = {
+        country: 'Angola',
+        country_code: 'AO',
+        currency: 'AOA',
+        timezone: 'Africa/Luanda',
+        ip: '154.73.220.1',
+        city: 'Luanda',
+        region: 'Luanda',
+      };
+
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const location = await detectUserLocation();
+
+      expect(location).toEqual({
+        country: 'Angola',
+        countryCode: 'AO',
+        currency: 'AOA',
+        currencySymbol: 'Kz',
+        timezone: 'Africa/Luanda',
+        ip: '154.73.220.1',
+        city: 'Luanda',
+        region: 'Luanda',
+      });
+    });
+
     it('should use cached location data when available', async () => {
       const cachedData = {
         data: {
@@ -219,7 +279,8 @@ describe('Geolocation Pricing System', () => {
         code: 'USD',
         name: 'US Dollar',
         symbol: '$',
-        countries: expect.arrayContaining(['US']),
+        decimals: 2,
+        locale: 'en-US',
       });
 
       const eurInfo = getCurrencyInfo('EUR');
@@ -227,7 +288,27 @@ describe('Geolocation Pricing System', () => {
         code: 'EUR',
         name: 'Euro',
         symbol: '€',
-        countries: expect.arrayContaining(['DE', 'FR', 'IT']),
+        decimals: 2,
+        locale: 'de-DE',
+      });
+
+      // Test new African currencies
+      const mznInfo = getCurrencyInfo('MZN');
+      expect(mznInfo).toEqual({
+        code: 'MZN',
+        name: 'Mozambican Metical',
+        symbol: 'MT',
+        decimals: 2,
+        locale: 'pt-MZ',
+      });
+
+      const aoaInfo = getCurrencyInfo('AOA');
+      expect(aoaInfo).toEqual({
+        code: 'AOA',
+        name: 'Angolan Kwanza',
+        symbol: 'Kz',
+        decimals: 2,
+        locale: 'pt-AO',
       });
     });
   });

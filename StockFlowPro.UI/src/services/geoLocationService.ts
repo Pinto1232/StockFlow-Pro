@@ -315,6 +315,8 @@ function getCurrencySymbol(currencyCode: string): string {
     'RUB': '₽',
     'KRW': '₩',
     'TRY': '₺',
+    'MZN': 'MT',
+    'AOA': 'Kz',
   };
   
   return symbols[currencyCode.toUpperCase()] || currencyCode;
@@ -328,7 +330,7 @@ function getCurrencyFromCountryCode(countryCode: string): string {
     'US': 'USD', 'CA': 'CAD', 'GB': 'GBP', 'AU': 'AUD', 'NZ': 'NZD',
     'JP': 'JPY', 'CN': 'CNY', 'KR': 'KRW', 'IN': 'INR', 'SG': 'SGD',
     'HK': 'HKD', 'CH': 'CHF', 'SE': 'SEK', 'NO': 'NOK', 'DK': 'DKK',
-    'ZA': 'ZAR', 'BR': 'BRL', 'MX': 'MXN', 'RU': 'RUB', 'TR': 'TRY',
+    'ZA': 'ZAR', 'MZ': 'MZN', 'AO': 'AOA', 'BR': 'BRL', 'MX': 'MXN', 'RU': 'RUB', 'TR': 'TRY',
     // European Union countries
     'DE': 'EUR', 'FR': 'EUR', 'IT': 'EUR', 'ES': 'EUR', 'NL': 'EUR',
     'BE': 'EUR', 'AT': 'EUR', 'PT': 'EUR', 'IE': 'EUR', 'FI': 'EUR',
@@ -348,7 +350,7 @@ function getCountryName(countryCode: string): string {
     'AU': 'Australia', 'NZ': 'New Zealand', 'JP': 'Japan', 'CN': 'China',
     'KR': 'South Korea', 'IN': 'India', 'SG': 'Singapore', 'HK': 'Hong Kong',
     'CH': 'Switzerland', 'SE': 'Sweden', 'NO': 'Norway', 'DK': 'Denmark',
-    'ZA': 'South Africa', 'BR': 'Brazil', 'MX': 'Mexico', 'RU': 'Russia',
+    'ZA': 'South Africa', 'MZ': 'Mozambique', 'AO': 'Angola', 'BR': 'Brazil', 'MX': 'Mexico', 'RU': 'Russia',
     'TR': 'Turkey', 'DE': 'Germany', 'FR': 'France', 'IT': 'Italy',
     'ES': 'Spain', 'NL': 'Netherlands', 'BE': 'Belgium', 'AT': 'Austria',
     'PT': 'Portugal', 'IE': 'Ireland', 'FI': 'Finland', 'GR': 'Greece',

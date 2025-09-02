@@ -2,14 +2,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { getPlansByInterval, type SubscriptionPlan } from '../../services/subscriptionService';
 import { landingService, type LandingFeature, type LandingTestimonial, type LandingStat, type LandingHero } from '../../services/landingService';
 import { getPricingDisplayInfo, calculateSavingsPercentage } from '../../utils/pricingUtils';
-import { useGeolocationPricing, useCurrencyMismatch } from '../../hooks/useGeolocationPricing';
+import { useGeolocationPricing } from '../../hooks/useGeolocationPricing';
 import { formatCurrencyAmount } from '../../utils/currencyMapping';
-import CurrencySelector from '../../components/CurrencySelector';
 import { 
   Check, Zap, Crown, Star, ArrowRight, Shield, Clock, Users,
   UserCheck, Calendar, DollarSign, FileText, Award,
   Play, Quote, Building2,
-  CheckCircle, Globe, Smartphone, HeadphonesIcon, MapPin, AlertCircle
+  CheckCircle, Globe, Smartphone, HeadphonesIcon, MapPin
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import DemoScheduler from '../../components/DemoScheduler';
@@ -35,8 +34,7 @@ const Landing: React.FC = () => {
     compactFormat: false,
   });
 
-  // Currency mismatch detection
-  const currencyMismatch = useCurrencyMismatch();
+
 
   // Resilient avatar component with fallback to DiceBear initials
   const AvatarImage: React.FC<{ name: string; src?: string; size?: number; className?: string }> = ({ name, src, size = 48, className }) => {
@@ -137,12 +135,7 @@ const Landing: React.FC = () => {
     })();
   }, [yearly, pricingState.currentCurrency]);
 
-  // Handle currency changes
-  const handleCurrencyChange = async (newCurrency: string) => {
-    console.log(`💰 Currency changed to: ${newCurrency}`);
-    pricingActions.setCurrency(newCurrency);
-    // Plans will be reloaded automatically due to the useEffect dependency
-  };
+
 
   useEffect(() => {
     loadLandingContent();
@@ -511,39 +504,11 @@ const Landing: React.FC = () => {
               </div>
             )}
             
-            {/* Currency Mismatch Warning */}
-            {currencyMismatch.hasMismatch && (
-              <div className="mt-4 max-w-md mx-auto">
-                <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <span>
-                    We detected you're in {currencyMismatch.detectedCurrencyInfo?.name}. 
-                    <button
-                      onClick={pricingActions.useDetectedCurrency}
-                      className="ml-1 underline hover:no-underline font-medium"
-                    >
-                      Switch to {currencyMismatch.detectedCurrency}?
-                    </button>
-                  </span>
-                </div>
-              </div>
-            )}
+
           </div>
 
-          {/* Currency Selector and Billing Toggle */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12">
-            {/* Currency Selector */}
-            <div className="flex items-center gap-3">
-              <CurrencySelector
-                selectedCurrency={pricingState.currentCurrency}
-                onCurrencyChange={handleCurrencyChange}
-                compact={true}
-                showLabel={false}
-                className="min-w-[200px]"
-              />
-            </div>
-            
-            {/* Billing Toggle */}
+          {/* Billing Toggle */}
+          <div className="flex items-center justify-center gap-4 mb-12">
             <div className="flex items-center gap-4">
               <span className={`text-lg font-medium transition-colors ${!yearly ? 'text-gray-900' : 'text-gray-500'}`}>
                 Monthly
@@ -682,37 +647,7 @@ const Landing: React.FC = () => {
             )}
           </div>
           
-          {/* Pricing Footer with Currency Info */}
-          <div className="mt-12 text-center">
-            <div className="max-w-2xl mx-auto">
-              {pricingState.location && (
-                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-gray-200">
-                  <div className="flex items-center justify-center gap-2 mb-3">
-                    <Globe className="w-5 h-5 text-blue-600" />
-                    <h3 className="text-lg font-semibold text-gray-900">Localized Pricing</h3>
-                  </div>
-                  <p className="text-gray-600 mb-4">
-                    Prices are automatically converted to your local currency ({pricingState.currentCurrency}) 
-                    based on your location ({pricingState.location.country}).
-                  </p>
-                  <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                      <span>Real-time exchange rates</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                      <span>No hidden fees</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                      <span>Local payment methods</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+
 
           {/* Trust Indicators */}
           <div className="mt-16 text-center">

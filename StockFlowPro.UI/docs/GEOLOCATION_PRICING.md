@@ -208,10 +208,11 @@ REACT_APP_ENABLE_GEOLOCATION=true
 
 ### Supported Currencies
 
-The system supports 30+ major currencies:
+The system supports 32+ major currencies:
 - USD, EUR, GBP, CAD, AUD, JPY, CHF, CNY, INR, BRL
 - MXN, SGD, HKD, NZD, SEK, NOK, DKK, PLN, CZK, HUF
 - RUB, TRY, ZAR, KRW, THB, MYR, IDR, PHP, VND, AED
+- MZN (Mozambican Metical), AOA (Angolan Kwanza)
 
 ## Caching Strategy
 
