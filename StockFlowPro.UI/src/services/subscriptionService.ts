@@ -1,5 +1,7 @@
 import { http } from './api/client';
 import type { Entitlements } from '../hooks/useFeatures';
+import { getUserPreferredCurrency } from './geoLocationService';
+import { convertSubscriptionPlans } from '../utils/priceConverter';
 
 export type SubscriptionPlan = {
   id: string;
@@ -219,7 +221,7 @@ function mapBackendPlanToFrontend(backendPlan: BackendSubscriptionPlan): Subscri
   return mappedPlan;
 }
 
-export async function getPublicPlans(): Promise<SubscriptionPlan[]> {
+export async function getPublicPlans(targetCurrency?: string): Promise<SubscriptionPlan[]> {
   try {
     // Try primary endpoint first
     const endpoints = ['/api/subscription-plans', '/api/plans', '/api/subscriptions/plans'];
@@ -239,6 +241,15 @@ export async function getPublicPlans(): Promise<SubscriptionPlan[]> {
           // Map backend plans to frontend format
           const mappedPlans = backendPlans.map(mapBackendPlanToFrontend);
           console.log('🎯 Mapped plans for frontend:', mappedPlans);
+          
+          // Apply currency conversion if needed
+          const userCurrency = targetCurrency || await getUserPreferredCurrency();
+          if (userCurrency && mappedPlans.length > 0 && mappedPlans[0].currency !== userCurrency) {
+            console.log(`💱 Converting plans from ${mappedPlans[0].currency} to ${userCurrency}`);
+            const convertedPlans = await convertSubscriptionPlans(mappedPlans, userCurrency);
+            return convertedPlans;
+          }
+          
           return mappedPlans;
         } else {
           console.warn(`⚠️ Endpoint ${ep} returned empty data:`, data);
@@ -249,6 +260,15 @@ export async function getPublicPlans(): Promise<SubscriptionPlan[]> {
     }
     
     console.warn('🚨 All endpoints failed, falling back to mock data');
+    
+    // Apply currency conversion to mock plans if needed
+    const userCurrency = targetCurrency || await getUserPreferredCurrency();
+    if (userCurrency && mockPlans.length > 0 && mockPlans[0].currency !== userCurrency) {
+      console.log(`💱 Converting mock plans from ${mockPlans[0].currency} to ${userCurrency}`);
+      const convertedMockPlans = await convertSubscriptionPlans(mockPlans, userCurrency);
+      return convertedMockPlans;
+    }
+    
     return mockPlans;
   } catch (error) {
     console.error('🚨 Critical error in getPublicPlans:', error);
@@ -256,8 +276,8 @@ export async function getPublicPlans(): Promise<SubscriptionPlan[]> {
   }
 }
 
-// Fetch plans by billing interval (Monthly or Annual)
-export async function getPlansByInterval(interval: 'Monthly' | 'Annual'): Promise<SubscriptionPlan[]> {
+// Fetch plans by billing interval (Monthly or Annual) with geolocation-aware pricing
+export async function getPlansByInterval(interval: 'Monthly' | 'Annual', targetCurrency?: string): Promise<SubscriptionPlan[]> {
   try {
     console.log(`🔍 Fetching plans for interval: ${interval}`);
     
@@ -289,6 +309,15 @@ export async function getPlansByInterval(interval: 'Monthly' | 'Annual'): Promis
             const consistentPlans = ensurePriceConsistency([...backendPlans.map(mapBackendPlanToFrontend)])
               .filter(p => p.interval === interval);
             console.log(`✅ Price-consistent ${interval} plans:`, consistentPlans);
+            
+            // Apply currency conversion if needed
+            const userCurrency = targetCurrency || await getUserPreferredCurrency();
+            if (userCurrency && consistentPlans.length > 0 && consistentPlans[0].currency !== userCurrency) {
+              console.log(`💱 Converting plans from ${consistentPlans[0].currency} to ${userCurrency}`);
+              const convertedPlans = await convertSubscriptionPlans(consistentPlans, userCurrency);
+              return convertedPlans;
+            }
+            
             return consistentPlans;
           } else {
             console.warn(`⚠️ No ${interval} plans found in response from ${ep}`);
@@ -300,7 +329,17 @@ export async function getPlansByInterval(interval: 'Monthly' | 'Annual'): Promis
     }
     
     console.warn(`🚨 All endpoints failed, using mock ${interval} plans`);
-    return mockPlans.filter(p => p.interval === interval);
+    const mockPlansForInterval = mockPlans.filter(p => p.interval === interval);
+    
+    // Apply currency conversion to mock plans if needed
+    const userCurrency = targetCurrency || await getUserPreferredCurrency();
+    if (userCurrency && mockPlansForInterval.length > 0 && mockPlansForInterval[0].currency !== userCurrency) {
+      console.log(`💱 Converting mock plans from ${mockPlansForInterval[0].currency} to ${userCurrency}`);
+      const convertedMockPlans = await convertSubscriptionPlans(mockPlansForInterval, userCurrency);
+      return convertedMockPlans;
+    }
+    
+    return mockPlansForInterval;
   } catch (error) {
     console.error(`🚨 Critical error in getPlansByInterval for ${interval}:`, error);
     return mockPlans.filter(p => p.interval === interval);
